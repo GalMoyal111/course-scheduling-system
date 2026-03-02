@@ -1,0 +1,15 @@
+# Node
+node_modules/
+client/node_modules/
+
+# Build outputs
+server/target/
+dist/
+
+# Eclipse
+server/.classpath
+server/.project
+server/.settings/
+
+# Logs
+*.log
