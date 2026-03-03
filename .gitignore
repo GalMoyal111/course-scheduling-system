@@ -13,3 +13,5 @@ server/.settings/
 
 # Logs
 *.log
+
+**/firebase/*.json
