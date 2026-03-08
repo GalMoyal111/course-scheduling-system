@@ -11,13 +11,13 @@ public class Lesson {
 
     private int groupId;
 
-    private String type;
+    private LessonType type;
 
     private int duration;
 
     private int splitGroupId;
 
-    private int semester;
+    private Semester semester;
 
     private int credits;
 
@@ -61,12 +61,12 @@ public class Lesson {
 		this.groupId = groupId;
 	}
 
-	public String getType() {
-		return type;
+	public LessonType getType() {
+	    return type;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public void setType(LessonType type) {
+	    this.type = type;
 	}
 
 	public int getDuration() {
@@ -85,12 +85,12 @@ public class Lesson {
 		this.splitGroupId = splitGroupId;
 	}
 
-	public int getSemester() {
-		return semester;
+	public Semester getSemester() {
+	    return semester;
 	}
 
-	public void setSemester(int semester) {
-		this.semester = semester;
+	public void setSemester(Semester semester) {
+	    this.semester = semester;
 	}
 
 	public int getCredits() {
