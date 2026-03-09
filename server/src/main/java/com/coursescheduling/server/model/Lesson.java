@@ -1,25 +1,26 @@
 package com.coursescheduling.server.model;
 
+// Represents a single lesson (e.g., lecture, lab, seminar) of a course, with all relevant properties.
 public class Lesson {
-	private String courseId;
+	private String courseId; // e.g., "11101"
 
-    private String courseName;
+    private String courseName; // e.g., "Introduction to Computer Science"
 
-    private int index;
+    private int index; // Sequential index for lessons of the same course+semester, assigned after sorting.
 
-    private String lecturer;
+    private String lecturer; // e.g., "Dr. Smith"
 
-    private int groupId;
+    private int groupId; // the first semester is group 1, the second semester is group 2, etc.
 
-    private LessonType type;
+    private LessonType type; // e.g., LECTURE, LAB, SEMINAR
 
-    private int duration;
+    private int duration;  // duration in hours
 
-    private int splitGroupId;
+    private int splitGroupId;  // for splitting lessons of 4 hours into two 2-hour lessons. 0 means no split.
 
-    private Semester semester;
+    private Semester semester; // 1 for first semester, 2 for second semester, summer for summer semester
 
-    private int credits;
+    private int credits; // number of credits for this lesson
 
 	public String getCourseId() {
 		return courseId;

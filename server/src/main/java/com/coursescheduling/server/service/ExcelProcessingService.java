@@ -20,6 +20,10 @@ import com.coursescheduling.server.model.Semester;
 
 
 @Service 
+/**
+ * Service responsible for reading an uploaded Excel file and converting rows
+ * into Lesson objects. Provides small helpers to parse and normalize values.
+ */
 public class ExcelProcessingService {
 	private final Firestore firestore;
 	
@@ -170,6 +174,7 @@ public class ExcelProcessingService {
 	    }
 	}
 	
+	// Parse the lesson type text (in Hebrew/English) to the LessonType enum.
 	private LessonType parseType(String typeText) {
 	    if (typeText.contains("הרצאה")) 
 	        return LessonType.LECTURE;
@@ -186,6 +191,7 @@ public class ExcelProcessingService {
 	}
 	
 	
+	// Parse the semester text into the Semester enum.
 	private Semester parseSemester(String semesterText) {
 	    if (semesterText.contains("א")) 
 	        return Semester.A;
@@ -196,6 +202,7 @@ public class ExcelProcessingService {
 	    throw new IllegalArgumentException("Unknown semester: " + semesterText);
 	}
 	
+	// Return an ordering priority for types so sorting groups similar items.
 	private int getTypePriority(LessonType type) {
 	    switch (type) {
 	        case LECTURE:
@@ -213,6 +220,7 @@ public class ExcelProcessingService {
 	    }
 	}
 	
+	// Convert a single sheet row into one or more Lesson objects.
 	private void addLessonFromRow(Row row, List<Lesson> lessons) {
 
 		if (row.getCell(0) == null)
@@ -235,9 +243,9 @@ public class ExcelProcessingService {
 
 	    if (duration == 4) {
 	    	
-	    	int splitId = splitGroupCounter++;
-	        Lesson lesson1 = createLesson(courseId, courseName, type, lecturer, semester, 2, splitId);
-	        Lesson lesson2 = createLesson(courseId, courseName, type, lecturer, semester, 2, splitId);
+	    	int splitGroupId = splitGroupCounter++;
+	        Lesson lesson1 = createLesson(courseId, courseName, type, lecturer, semester, 2, splitGroupId);
+	        Lesson lesson2 = createLesson(courseId, courseName, type, lecturer, semester, 2, splitGroupId);
 
 	        lessons.add(lesson1);
 	        lessons.add(lesson2);
@@ -249,8 +257,9 @@ public class ExcelProcessingService {
 	    }
 	}
 	
-	
+	// Helper method to create a Lesson object with the given properties.
 	private Lesson createLesson(String courseId, String courseName, LessonType type, String lecturer, Semester semester, int duration, int splitGroupId) {
+		// Create and populate the Lesson object
 		Lesson lesson = new Lesson();
 		
 		lesson.setCourseId(courseId);
@@ -272,6 +281,7 @@ public class ExcelProcessingService {
 		return lesson;
 		}
 	
+	// Sort lessons by courseId, semester and type priority.
 	private void sortLessons(List<Lesson> lessons) {
 	    lessons.sort((l1, l2) -> {
 
@@ -291,6 +301,7 @@ public class ExcelProcessingService {
 	}
 	
 	
+	// Assign a sequential index per course+semester group.
 	private void assignIndexes(List<Lesson> lessons) {
 
 	    Map<String, Integer> courseIndexMap = new HashMap<>();
@@ -304,6 +315,7 @@ public class ExcelProcessingService {
 	}
 	
 	
+	// Debug: print brief info for each lesson to stdout.
 	private void printLessons(List<Lesson> lessons) {
 	    for (Lesson lesson : lessons) {
 	        System.out.println(
@@ -322,6 +334,10 @@ public class ExcelProcessingService {
 	
 	
 	
+	/**
+	 * Minimal test helper that writes a sample course document to Firestore.
+	 * Kept for manual testing / demos.
+	 */
 	public void process() {
 		try { 
 			Map<String, Object> course = new HashMap<>();

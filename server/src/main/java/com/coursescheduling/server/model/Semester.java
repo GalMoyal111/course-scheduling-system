@@ -2,7 +2,7 @@ package com.coursescheduling.server.model;
 
 public enum Semester {
 
-    A,
-    B,
+    A,// 1st semester
+    B,// 2nd semester
     SUMMER
 }
