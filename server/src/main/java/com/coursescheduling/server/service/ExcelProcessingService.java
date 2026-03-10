@@ -301,6 +301,7 @@ public class ExcelProcessingService {
 	}
 	
 	
+	
 	// Assign a sequential index per course+semester group.
 	private void assignIndexes(List<Lesson> lessons) {
 
