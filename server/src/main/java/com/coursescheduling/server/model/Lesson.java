@@ -20,7 +20,7 @@ public class Lesson {
 
     private Semester semester; // 1 for first semester, 2 for second semester, summer for summer semester
 
-    private int credits; // number of credits for this lesson
+    private double credits; // number of credits for this lesson
 
 	public String getCourseId() {
 		return courseId;
@@ -94,12 +94,12 @@ public class Lesson {
 	    this.semester = semester;
 	}
 
-	public int getCredits() {
+	public double getCredits() {
 		return credits;
 	}
 
-	public void setCredits(int credits) {
-		this.credits = credits;
+	public void setCredits(double credits2) {
+		this.credits = credits2;
 	}
 	
     

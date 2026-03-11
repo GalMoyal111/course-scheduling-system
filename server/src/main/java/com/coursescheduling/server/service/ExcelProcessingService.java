@@ -167,6 +167,7 @@ public class ExcelProcessingService {
 	        }
 	        sortLessons(lessons);
 	        assignIndexes(lessons);
+	        calculateCredits(lessons);
 	        printLessons(lessons);
 
 	    } catch (Exception e) {
@@ -326,12 +327,67 @@ public class ExcelProcessingService {
 	            lesson.getLecturer() + " index=" +
 	            lesson.getIndex()+ " " +
 	            lesson.getDuration()+ " " +
-	            lesson.getSplitGroupId()
+	            lesson.getSplitGroupId()+ " credits " +
+	            lesson.getCredits()
 	        );
 	    }
 
 	    System.out.println("Total lessons loaded: " + lessons.size());
 	}
+	
+	
+	private static class CourseCreditData {
+	    boolean lectureAdded = false;
+	    boolean tutorialAdded = false;
+	    boolean labAdded = false;
+	    double credits = 0;
+	}
+	
+	private void calculateCredits(List<Lesson> lessons) {
+	    Map<String, CourseCreditData> courseMap = new HashMap<>();
+
+	    for (Lesson lesson : lessons) {
+
+	        String courseId = lesson.getCourseId();
+	        LessonType type = lesson.getType();
+	        int duration = lesson.getDuration();
+
+	        CourseCreditData data = courseMap.get(courseId);
+
+	        if (data == null) {
+	            data = new CourseCreditData();
+	            courseMap.put(courseId, data);
+	        }
+
+	        if (type == LessonType.LECTURE && !data.lectureAdded) {
+
+	            if (lesson.getSplitGroupId() != 0)
+	                duration = duration * 2;
+
+	            data.credits += duration * 1.0;
+	            data.lectureAdded = true;
+	        }
+
+	        else if (type == LessonType.TUTORIAL && !data.tutorialAdded) {
+
+	            data.credits += duration * 0.5;
+	            data.tutorialAdded = true;
+	        }
+
+	        else if (type == LessonType.LAB && !data.labAdded) {
+
+	            data.credits += duration * 0.5;
+	            data.labAdded = true;
+	        }
+	    }
+
+	    for (Lesson lesson : lessons) {
+	        CourseCreditData data = courseMap.get(lesson.getCourseId());
+	        if (data != null)
+	            lesson.setCredits(data.credits);
+	    }
+	}
+	
 	
 	
 	
