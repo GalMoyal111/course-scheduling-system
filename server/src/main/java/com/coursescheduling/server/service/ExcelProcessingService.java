@@ -173,6 +173,7 @@ public class ExcelProcessingService {
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
+	  process();
 	}
 	
 	// Parse the lesson type text (in Hebrew/English) to the LessonType enum.
@@ -398,13 +399,13 @@ public class ExcelProcessingService {
 	public void process() {
 		try { 
 			Map<String, Object> course = new HashMap<>();
-			course.put("name", "Algorithms"); 
-			course.put("lecturer", "Dr. Cohen"); 
+			course.put("name", "Algebra"); 
+			course.put("lecturer", "Dr. Valeria"); 
 			course.put("hours", 16);
 			
 			DocumentReference docRef = firestore
 				.collection("courses")
-				.document("course1");
+				.document("course2");
 			
 			docRef.set(course);
 			
