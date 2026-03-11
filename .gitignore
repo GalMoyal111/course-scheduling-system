@@ -15,3 +15,6 @@ server/.settings/
 *.log
 
 **/firebase/*.json
+
+# ignore the settings.json file
+.vscode/settings.json
