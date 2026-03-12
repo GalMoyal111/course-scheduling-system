@@ -33,123 +33,6 @@ public class ExcelProcessingService {
 		this.firestore = firestore; 
 	}
 	
-	/*
-	 
-	 
-	public void process(MultipartFile file) { 		
-		List<Lesson> lessons = new ArrayList<>();
-	    Map<String, Integer> courseIndexMap = new HashMap<>();
-		try {
-			
-		    Workbook workbook = new XSSFWorkbook(file.getInputStream());
-		    Sheet sheet = workbook.getSheetAt(0);
-		     
-		    
-		    for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-
-		        Row row = sheet.getRow(i);
-
-		        if (row == null) 
-		            continue;
-
-		        if (row.getCell(0) == null) 
-		            continue;
-
-		        String courseId = row.getCell(0).toString().trim();
-		        if (courseId.isEmpty()) 
-		            continue;
-		       
-
-		        String courseName = row.getCell(1).toString();
-		        String typeText = row.getCell(2).toString();
-		        LessonType type = parseType(typeText);
-		        String lecturer = row.getCell(3).toString();
-
-		        String semesterText = row.getCell(5).toString();
-		        Semester semester = parseSemester(semesterText);
-
-
-		        int duration = (int) row.getCell(7).getNumericCellValue();
-		        if (duration > 3) {
-		        	
-		        }
-
-		        Lesson lesson = new Lesson();
-
-		        
-		        lesson.setCourseId(courseId);	     
-		        lesson.setCourseName(courseName);
-		        lesson.setType(type);
-		        lesson.setLecturer(lecturer);
-		        lesson.setSemester(semester);
-		        lesson.setDuration(duration);
-
-		        lesson.setGroupId(0);
-		        lesson.setCredits(0);
-		        lesson.setSplitGroupId(0);
-
-		        lessons.add(lesson);
-		    }
-		    
-		    
-		    for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-
-		        Row row = sheet.getRow(i);
-
-		        if (row == null || row.getCell(0) == null)
-		            continue;
-
-		        addLessonFromRow(row, lessons);
-		    }
-		    
-		    
-		    lessons.sort((l1, l2) -> {
-		    	int courseCompare = l1.getCourseId().compareTo(l2.getCourseId());
-		        if (courseCompare != 0)
-		            return courseCompare;
-
-		        int semesterCompare = l1.getSemester().compareTo(l2.getSemester());
-		        if (semesterCompare != 0)
-		            return semesterCompare;
-
-		        int typeCompare = Integer.compare(
-		            getTypePriority(l1.getType()),
-		            getTypePriority(l2.getType())
-		        );
-
-		        return typeCompare;
-		    });
-		    
-		    
-		    for (Lesson lesson : lessons) {
-		        String key = lesson.getCourseId() + "-" + lesson.getSemester();
-		        int index = courseIndexMap.getOrDefault(key, 0) + 1;
-		        lesson.setIndex(index);
-		        courseIndexMap.put(key, index);
-		    }
-		    
-		    for (Lesson lesson : lessons) {
-		    	System.out.println(
-		    		    lesson.getCourseId() + " " +
-		    		    lesson.getSemester() + " " +
-		    		    lesson.getType() + " " +
-		    		    lesson.getLecturer() + " index=" +
-		    		    lesson.getIndex()
-		    		);
-		    }
-		    System.out.println("Total lessons loaded: " + lessons.size());
-		    
-
-		} catch (Exception e) {
-		    e.printStackTrace();
-		}
-		
-		
-		//process();
-	}
-	*/
-
-	
 	public void process(MultipartFile file) {
 
 	    List<Lesson> lessons = new ArrayList<>();
@@ -271,7 +154,7 @@ public class ExcelProcessingService {
 		lesson.setSemester(semester);
 		lesson.setDuration(duration);
 		
-		lesson.setGroupId(0);
+		lesson.setCluster(0);
 		lesson.setCredits(0);
 		
 		if(splitGroupId != 0)

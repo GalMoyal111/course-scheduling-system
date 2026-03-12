@@ -10,7 +10,7 @@ public class Lesson {
 
     private String lecturer; // e.g., "Dr. Smith"
 
-    private int groupId; // the first semester is group 1, the second semester is group 2, etc.
+    private int cluster; // the first semester is group 1, the second semester is group 2, etc.
 
     private LessonType type; // e.g., LECTURE, LAB, SEMINAR
 
@@ -54,12 +54,12 @@ public class Lesson {
 		this.lecturer = lecturer;
 	}
 
-	public int getGroupId() {
-		return groupId;
+	public int getCluster() {
+		return cluster;
 	}
 
-	public void setGroupId(int groupId) {
-		this.groupId = groupId;
+	public void setCluster(int groupId) {
+		this.cluster = groupId;
 	}
 
 	public LessonType getType() {
