@@ -1,11 +1,13 @@
 package com.coursescheduling.server;
 
+import com.coursescheduling.server.model.Classroom;
 import com.coursescheduling.server.service.ClassroomExcelService;
 import com.coursescheduling.server.service.ExcelProcessingService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.ResponseEntity;
 
 // Controller to handle file uploads from the frontend. It receives the uploaded Excel file and delegates processing to the ExcelProcessingService.
 @RestController
@@ -51,4 +53,35 @@ public class FileUploadController {
 
         return "Rooms uploaded successfully";
     }
+    
+    
+    
+    @GetMapping("/rooms/export")
+    public ResponseEntity<byte[]> exportRooms() {
+
+        try {
+
+            byte[] excelData = classroomExcelService.exportClassroomsToExcel();
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=classrooms.xlsx")
+                    .header("Content-Type",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    .body(excelData);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export classrooms", e);
+        }
+    }
+    
+    
+    @PostMapping("/rooms")
+    public String addRoom(@RequestBody Classroom classroom) {
+
+        classroomExcelService.saveSingleClassroom(classroom);
+
+        return "Classroom added successfully";
+    }
+    
+    
 }

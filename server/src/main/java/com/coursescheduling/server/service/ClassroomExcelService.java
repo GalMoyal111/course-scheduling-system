@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.web.multipart.MultipartFile;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import java.io.ByteArrayOutputStream;
 
 @Service
 public class ClassroomExcelService {
@@ -92,17 +94,67 @@ public class ClassroomExcelService {
 	}
 	
 	
-	// temp method for testing the service, will be removed later
-	public void testLocalFile() throws Exception {
+	public byte[] exportClassroomsToExcel() throws Exception {
 
-		InputStream inputStream = new FileInputStream("C:\\Users\\galmo\\Desktop\\Classroom List.xlsx");
+	    Firestore db = FirestoreClient.getFirestore();
 
-	    List<Classroom> classrooms = readClassroomsFromExcel(inputStream);
+	    List<QueryDocumentSnapshot> documents =
+	            db.collection("classrooms").get().get().getDocuments();
 
-	    saveClassroomsToFirebase(classrooms);
+	    Workbook workbook = new XSSFWorkbook();
+	    Sheet sheet = workbook.createSheet("Classrooms");
 
-	    System.out.println("Finished uploading classrooms to Firebase");
+	    Row header = sheet.createRow(0);
+	    header.createCell(0).setCellValue("Building");
+	    header.createCell(1).setCellValue("Classroom");
+	    header.createCell(2).setCellValue("Capacity");
+	    header.createCell(3).setCellValue("Type");
+
+	    int rowIndex = 1;
+
+	    for (QueryDocumentSnapshot doc : documents) {
+
+	        String building = doc.getId();
+	        Map<String, Object> classrooms = doc.getData();
+
+	        for (String classroomName : classrooms.keySet()) {
+
+	            Map<String, Object> data =
+	                    (Map<String, Object>) classrooms.get(classroomName);
+
+	            Row row = sheet.createRow(rowIndex++);
+
+	            row.createCell(0).setCellValue(building);
+	            row.createCell(1).setCellValue(classroomName);
+	            row.createCell(2).setCellValue((Long) data.get("capacity"));
+	            row.createCell(3).setCellValue((String) data.get("type"));
+	        }
+	    }
+
+	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+	    workbook.write(out);
+	    workbook.close();
+
+	    return out.toByteArray();
 	}
+	
+	
+	
+	public void saveSingleClassroom(Classroom classroom) {
+
+	    Firestore db = FirestoreClient.getFirestore();
+
+	    Map<String, Object> data = new HashMap<>();
+	    data.put("capacity", classroom.getCapacity());
+	    data.put("type", classroom.getType());
+
+	    db.collection("classrooms")
+	      .document(classroom.getBuilding())
+	      .set(Map.of(classroom.getClassroomName(), data), SetOptions.merge());
+	}
+	
+	
+	
 	
 	
 	
