@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
 import { ping } from "./services/api";
 import UploadPage from "./pages/UploadPage";
+import UploadRoomsPage from "./pages/UploadRoomsPage";
+import UploadCoursesPage from "./pages/UploadCoursesPage";
+
+import Layout from "./components/ui/Layout";
+import Header from "./components/ui/Header";
+import Footer from "./components/ui/Footer";
 
 function App() {
   const [msg, setMsg] = useState("loading...");
+  const [page, setPage] = useState("lessons");
 
   useEffect(() => {
     ping()
@@ -12,12 +19,17 @@ function App() {
   }, []);
 
   return (
-    <div style={{ padding: 40 }}>
-      <h1>Course Scheduling Client</h1>
-      <p>Server says: {msg}</p>
+    <Layout>
+      <Header page={page} onNavigate={setPage} serverMsg={msg} />
 
-      <UploadPage />
-    </div>
+      <div style={{ marginTop: 12 }}>
+        {page === "lessons" && <UploadPage />}
+        {page === "courses" && <UploadCoursesPage />}
+        {page === "rooms" && <UploadRoomsPage />}
+      </div>
+
+      <Footer />
+    </Layout>
   );
 }
 

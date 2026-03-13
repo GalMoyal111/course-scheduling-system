@@ -1,0 +1,46 @@
+:root{
+  /* Bright theme tokens */
+  --bg: #f5f8ff; /* light blue-ish page background */
+  --card: #ffffff; /* card surface */
+  --muted: #6b7280; /* muted text */
+  --accent-start: #4f46e5;
+  --accent-end: #7c3aed;
+  --accent: linear-gradient(90deg,var(--accent-start),var(--accent-end));
+  --text: #0f1724; /* main text */
+}
+
+/* Shell and container */
+.app-shell{min-height:100vh;background:var(--bg);color:var(--text);padding:2rem 1rem}
+.app-container{max-width:1100px;margin:0 auto}
+
+/* Header */
+.ui-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.25rem}
+.ui-header__brand{display:flex;gap:.75rem;align-items:center}
+.ui-logo{font-size:1.6rem}
+.ui-title{font-weight:700;font-size:1.125rem}
+.ui-sub{font-size:.78rem;color:var(--muted)}
+
+.ui-nav{display:flex;gap:.5rem}
+
+.ui-server{font-size:.85rem;color:var(--muted)}
+.ui-server__msg{color:var(--text);font-weight:600;margin-left:.35rem}
+
+/* Footer */
+.ui-footer{text-align:center;color:var(--muted);margin-top:2rem}
+
+/* Buttons */
+.ui-btn{border-radius:10px;padding:.5rem .9rem;border:0;font-weight:700;cursor:pointer;background:transparent;color:var(--text);transition:transform .12s ease,box-shadow .12s ease}
+.ui-btn--primary{background:var(--accent);color:white;box-shadow:0 8px 20px rgba(124,58,237,0.12)}
+.ui-btn--accent{background:var(--accent);color:white;box-shadow:0 8px 24px rgba(79,70,229,0.12)}
+.ui-btn--ghost{background:transparent;border:1px solid rgba(15,23,36,0.06);color:var(--muted)}
+.ui-btn:active{transform:translateY(1px)}
+.ui-btn:disabled{opacity:.6;cursor:not-allowed}
+
+/* Card helper */
+.ui-card{background:var(--card);border-radius:12px;padding:1.25rem;box-shadow:0 6px 24px rgba(16,24,40,0.06)}
+
+/* Small responsive tweaks */
+@media (max-width:700px){
+  .ui-header{flex-direction:column;align-items:flex-start}
+  .ui-nav{width:100%;justify-content:flex-start}
+}

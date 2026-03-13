@@ -1,6 +1,9 @@
 package com.coursescheduling.server;
 
+import com.coursescheduling.server.service.ClassroomExcelService;
 import com.coursescheduling.server.service.ExcelProcessingService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -8,8 +11,14 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api")
 public class FileUploadController {
-    // Inject the ExcelProcessingService to handle the logic of processing the uploaded Excel file.
-    private final ExcelProcessingService excelProcessingService;
+    
+	@Autowired
+    private ExcelProcessingService excelProcessingService;
+
+    @Autowired
+    private ClassroomExcelService classroomExcelService;
+    
+    
 
     // Constructor-based dependency injection of the ExcelProcessingService.
     public FileUploadController(ExcelProcessingService excelProcessingService) {
@@ -26,5 +35,20 @@ public class FileUploadController {
         excelProcessingService.process(file);
 
         return "File uploaded successfully!";
+    }
+    
+    
+    @PostMapping("/rooms/upload")
+    public String uploadRooms(@RequestParam("file") MultipartFile file) {
+
+        if (file.isEmpty()) {
+            return "File is empty!";
+        }
+
+        System.out.println("Received rooms file: " + file.getOriginalFilename());
+
+        classroomExcelService.process(file);
+
+        return "Rooms uploaded successfully";
     }
 }

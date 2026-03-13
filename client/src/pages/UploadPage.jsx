@@ -1,11 +1,11 @@
 import UploadForm from "../components/UploadForm";
-import { uploadFile } from "../services/api";
+import { uploadLessons } from "../services/api";
 import "./UploadPage.css";
 
 function UploadPage() {
   const handleUpload = async (file) => {
     try {
-      const result = await uploadFile(file);
+      const result = await uploadLessons(file);
       // If API returns a message, show it; otherwise show success
       alert(result || "Upload successful");
     } catch (err) {
@@ -22,7 +22,7 @@ function UploadPage() {
       </header>
 
       <main className="upload-content">
-        <section className="upload-card">
+  <section className="upload-card ui-card">
           <h2 className="card-title">Upload Excel File</h2>
           <p className="card-sub">Supported formats: .xlsx, .xls — max 10MB</p>
           <UploadForm onUpload={handleUpload} />

@@ -17,9 +17,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ClassroomExcelService {
+	
+	public void process(MultipartFile file) {
+
+	    try {
+
+	        InputStream inputStream = file.getInputStream();
+
+	        List<Classroom> classrooms = readClassroomsFromExcel(inputStream);
+
+	        saveClassroomsToFirebase(classrooms);
+
+	        System.out.println("Finished uploading classrooms to Firebase");
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        throw new RuntimeException("Failed to process classrooms file");
+	    }
+	}
+	
 
 	public List<Classroom> readClassroomsFromExcel(InputStream inputStream) throws Exception {
 
