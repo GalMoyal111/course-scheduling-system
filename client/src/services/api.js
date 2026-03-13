@@ -50,16 +50,19 @@ export async function exportRooms() {
 }
 
 
-
-export async function addRoom(room) {
-
+export async function addRoom(classroom) {
   const res = await fetch(`${BASE_URL}/rooms`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(room)
+    body: JSON.stringify(classroom),
   });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Add room failed: ${res.status} ${text}`);
+  }
 
   return res.text();
 }

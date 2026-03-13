@@ -1,5 +1,7 @@
 import UploadForm from "../components/UploadForm";
-import { uploadRooms, exportRooms } from "../services/api";
+import AddRoomModal from "../components/AddRoomModal";
+import Button from "../components/ui/Button";
+import { uploadRooms, exportRooms, addRoom } from "../services/api";
 import { useState } from "react";
 
 function UploadRoomsPage() {
@@ -37,13 +39,34 @@ function UploadRoomsPage() {
     }
   };
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleAddRoom = async (classroom) => {
+    try {
+      await addRoom(classroom);
+      alert("Classroom added successfully");
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add classroom");
+    }
+  };
+
   return (
     <div>
       <h2>Upload Rooms Excel</h2>
-      <button onClick={handleExport} disabled={exporting} style={{ marginBottom: 12 }}>
-        {exporting ? "Exporting..." : "Export to Excel"}
-      </button>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}>
+        <Button onClick={() => setIsModalOpen(true)} variant="secondary">
+          Add Room
+        </Button>
+        <Button onClick={handleExport} disabled={exporting}>
+          {exporting ? "Exporting..." : "Export to Excel"}
+        </Button>
+      </div>
+
       <UploadForm onUpload={handleUpload} />
+
+      <AddRoomModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleAddRoom} />
     </div>
   );
 }
