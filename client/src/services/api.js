@@ -17,6 +17,16 @@ export async function uploadLessons(file) {
   return res.text();
 }
 
+export async function uploadCourses(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`${BASE_URL}/courses/upload`, {
+    method: "POST",
+    body: formData,
+  });
+  return res.text();
+}
+
 export async function uploadRooms(file) {
   const formData = new FormData();
   formData.append("file", file);

@@ -1,5 +1,5 @@
 import UploadForm from "../components/UploadForm";
-import { uploadLessons } from "../services/api";
+import { uploadCourses } from "../services/api";
 
 import "./UploadPage.css"; // reuse the Upload page styles
 
@@ -9,7 +9,7 @@ import "./UploadPage.css"; // reuse the Upload page styles
 export default function UploadCoursesPage() {
   const handleUpload = async (file) => {
     try {
-  const result = await uploadLessons(file);
+  const result = await uploadCourses(file);
       alert(result || "Upload successful");
     } catch (err) {
       console.error(err);

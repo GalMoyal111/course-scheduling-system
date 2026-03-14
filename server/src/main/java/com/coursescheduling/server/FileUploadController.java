@@ -3,6 +3,7 @@ package com.coursescheduling.server;
 import com.coursescheduling.server.model.Classroom;
 import com.coursescheduling.server.service.ClassroomExcelService;
 import com.coursescheduling.server.service.ExcelProcessingService;
+import com.coursescheduling.server.service.CoursesExcelService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,9 @@ public class FileUploadController {
 
     @Autowired
     private ClassroomExcelService classroomExcelService;
+
+    @Autowired
+    private CoursesExcelService coursesExcelService;
     
     
 
@@ -39,6 +43,19 @@ public class FileUploadController {
         return "File uploaded successfully!";
     }
     
+    @PostMapping("/courses/upload")
+    public String uploadCourses(@RequestParam("file") MultipartFile file) {
+
+        if (file.isEmpty()) {
+            return "File is empty!";
+        }
+
+        System.out.println("Received courses file: " + file.getOriginalFilename());
+
+        coursesExcelService.process(file);
+
+        return "Courses uploaded successfully";
+    }
     
     @PostMapping("/rooms/upload")
     public String uploadRooms(@RequestParam("file") MultipartFile file) {
