@@ -1,5 +1,6 @@
 package com.coursescheduling.server;
 
+import com.coursescheduling.server.model.Course;
 import com.coursescheduling.server.model.Classroom;
 import com.coursescheduling.server.service.ClassroomExcelService;
 import com.coursescheduling.server.service.ExcelProcessingService;
@@ -98,6 +99,32 @@ public class FileUploadController {
         classroomExcelService.saveSingleClassroom(classroom);
 
         return "Classroom added successfully";
+    }
+
+    @GetMapping("/courses/export")
+    public ResponseEntity<byte[]> exportCourses() {
+
+        try {
+
+            byte[] excelData = coursesExcelService.exportCoursesToExcel();
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=courses.xlsx")
+                    .header("Content-Type",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    .body(excelData);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export courses", e);
+        }
+    }
+
+    @PostMapping("/courses")
+    public String addCourse(@RequestBody Course course) {
+
+        coursesExcelService.saveSingleCourseToDatabase(course);
+
+        return "Course added successfully";
     }
     
     

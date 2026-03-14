@@ -27,6 +27,41 @@ export async function uploadCourses(file) {
   return res.text();
 }
 
+// Download courses data as an Excel file (returns the Blob).
+export async function exportCourses() {
+  const res = await fetch(`${BASE_URL}/courses/export`, {
+    method: "GET",
+    headers: {
+      Accept:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/octet-stream",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Export failed: ${res.status} ${text}`);
+  }
+
+  return res.blob();
+}
+
+export async function addCourse(course) {
+  const res = await fetch(`${BASE_URL}/courses`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(course),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Add course failed: ${res.status} ${text}`);
+  }
+
+  return res.text();
+}
+
 export async function uploadRooms(file) {
   const formData = new FormData();
   formData.append("file", file);
