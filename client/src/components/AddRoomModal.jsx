@@ -3,23 +3,32 @@ import Button from "./ui/Button";
 import "./ui/ui.css";
 
 // Simple modal for adding a single classroom (uses app UI styles).
-export default function AddRoomModal({ isOpen, onClose, onSave }) {
+export default function AddRoomModal({ isOpen, onClose, onSave, initialClassroom = null }) {
   const [building, setBuilding] = useState("");
   const [classroomName, setClassroomName] = useState("");
   const [capacity, setCapacity] = useState("");
   const [type, setType] = useState("Normal");
 
-  // Reset fields when modal opens
+  // Initialize fields when modal opens. If initialClassroom provided, pre-fill for edit.
   useEffect(() => {
     if (isOpen) {
-      setBuilding("");
-      setClassroomName("");
-      setCapacity("");
-      setType("Normal");
+      if (initialClassroom) {
+        setBuilding(initialClassroom.building || "");
+        setClassroomName(initialClassroom.classroomName || "");
+        setCapacity(initialClassroom.capacity != null ? String(initialClassroom.capacity) : "");
+        setType(initialClassroom.type || "Normal");
+      } else {
+        setBuilding("");
+        setClassroomName("");
+        setCapacity("");
+        setType("Normal");
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialClassroom]);
 
   if (!isOpen) return null;
+
+  const isEditing = Boolean(initialClassroom);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -44,7 +53,7 @@ export default function AddRoomModal({ isOpen, onClose, onSave }) {
     <div className="modal-overlay">
       <div className="modal-card" role="dialog" aria-modal="true">
         <div className="modal-header">
-          <h3>Add Classroom</h3>
+          <h3>{isEditing ? "Edit Classroom" : "Add Classroom"}</h3>
         </div>
 
         <div className="modal-body">

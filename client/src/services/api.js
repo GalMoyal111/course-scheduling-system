@@ -111,3 +111,34 @@ export async function addRoom(classroom) {
 
   return res.text();
 }
+
+export async function getAllClassrooms() {
+  const res = await fetch(`${BASE_URL}/getAllClassrooms`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Fetch classrooms failed: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}
+
+export async function deleteClassrooms(classrooms) {
+  const res = await fetch(`${BASE_URL}/classrooms/delete`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(classrooms),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Delete classrooms failed: ${res.status} ${text}`);
+  }
+
+  return res.text();
+}

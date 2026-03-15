@@ -9,8 +9,7 @@
   --text: #0f1724; /* main text */
   
   /* Danger / warning tokens */
-  --danger-start: #ff6b6b;
-  --danger-end: #dc2626;
+  --danger-color: #dc2626;
   --danger-text: #7f1d1d;
 }
 
@@ -71,10 +70,26 @@
 
 /* Warning modal variants */
 .modal-card--warning{border:1px solid rgba(220,38,38,0.08);box-shadow:0 28px 68px rgba(220,38,38,0.12)}
-.modal-card--warning .modal-header--warning{background:linear-gradient(90deg,var(--danger-start),var(--danger-end));padding:16px 20px;color:white}
-.modal-card--warning .modal-body--warning{padding:22px 20px;text-align:center;color:var(--danger-text);font-weight:700}
+.modal-card--warning .modal-header--warning{background:var(--danger-color);padding:18px 20px;color:white;display:flex;align-items:center;justify-content:center;position:relative}
+.modal-card--warning .modal-body--warning{padding:22px 20px;text-align:center;color:var(--danger-text);font-weight:600;display:flex;flex-direction:column;align-items:center;gap:8px}
 .modal-card--warning .modal-body--warning strong{color:var(--danger-end)}
-.modal-card--warning .ui-btn--primary{background:linear-gradient(90deg,var(--danger-start),var(--danger-end));box-shadow:0 12px 30px rgba(220,38,38,0.12)}
+.modal-card--warning .ui-btn--primary{background:var(--danger-color);box-shadow:0 12px 30px rgba(220,38,38,0.12)}
+
+.modal-close{position:absolute;top:10px;right:10px;background:transparent;border:0;padding:6px;border-radius:8px;cursor:pointer}
+.modal-close svg{display:block}
+
+.modal-icon__circle{width:64px;height:64px;border-radius:999px;background:var(--danger-color);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(220,38,38,0.12)}
+.modal-message{color:rgba(127,29,29,0.95);font-size:1rem}
+.confirm-file-badge{margin-top:6px;padding:8px 12px;border-radius:999px;border:1px solid rgba(220,38,38,0.14);background:rgba(255,240,240,0.6);color:var(--danger-end);font-weight:700}
+.modal-footer--spacious{padding:14px 20px;border-top:1px solid rgba(15,23,36,0.04);display:flex;justify-content:flex-end;gap:8px}
+
+/* Modal animations and icon */
+.modal-overlay{animation:overlay-fade .18s ease both}
+.modal-card{transform-origin:center center;animation:card-pop .2s cubic-bezier(.2,.9,.22,1) both}
+.modal-icon{display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+
+@keyframes overlay-fade{from{opacity:0}to{opacity:1}}
+@keyframes card-pop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 
 /* Courses modal uses a wider two-column layout for faster full-form visibility */
 .modal-card--wide{width:min(920px, 96vw)}
@@ -83,3 +98,45 @@
 @media (max-width:760px){
   .add-course-grid{grid-template-columns:1fr}
 }
+
+/* Simple table styling for lists */
+.data-table{width:100%;font-size:0.95rem;border-spacing:0}
+.data-table th,.data-table td{padding:10px 12px;border-bottom:1px solid rgba(15,23,36,0.06);text-align:left}
+.data-table thead th{font-weight:700;color:var(--muted);background:transparent}
+.data-table tbody tr:hover{background:rgba(79,70,229,0.03)}
+
+/* Toolbar */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.toolbar .left{display:flex;align-items:center;gap:8px}
+.toolbar .right{display:flex;align-items:center;gap:8px}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;border:0;background:transparent;cursor:pointer;color:var(--text)}
+.icon-btn:hover{background:rgba(15,23,36,0.04)}
+.icon-btn svg{display:block;color:inherit;width:16px;height:16px}
+/* Ensure SVG strokes/fills inherit the button color so icons are visible
+  even if the SVG markup doesn't explicitly use currentColor. Also
+  prevent strokes from scaling oddly on transforms. */
+
+.icon-btn svg{
+  display:block;
+  width:16px;
+  height:16px;
+  fill:currentColor;
+}
+
+
+.icon-btn--edit{color:var(--muted)}
+.icon-btn--edit:hover{color:var(--text);background:rgba(79,70,229,0.06)}
+.icon-btn--delete{color:#ef4444}
+.icon-btn--delete:hover{background:rgba(239,68,68,0.08);color:var(--danger-color)}
+.search-input{padding:8px 12px;border-radius:10px;border:1px solid rgba(15,23,36,0.08);min-width:220px}
+
+/* Type badge */
+.type-badge{display:inline-block;padding:6px 8px;border-radius:999px;font-size:0.8rem;font-weight:700}
+.type-normal{background:rgba(34,197,94,0.12);color:#166534}
+.type-lab{background:rgba(59,130,246,0.08);color:#1e3a8a}
+.type-network{background:rgba(168,85,247,0.08);color:#5b21b6}
+.type-physics{background:rgba(250,204,21,0.08);color:#92400e}
+
+/* Empty illustration */
+.empty-illustration{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;color:var(--muted)}
+.empty-illustration svg{width:160px;height:120px;opacity:0.95}
