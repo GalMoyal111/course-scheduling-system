@@ -1,5 +1,6 @@
 import UploadForm from "../components/UploadForm";
 import AddRoomModal from "../components/AddRoomModal";
+import ConfirmModal from "../components/ConfirmModal";
 import Button from "../components/ui/Button";
 import { uploadRooms, exportRooms, addRoom } from "../services/api";
 import { useState } from "react";
@@ -7,13 +8,9 @@ import { useState } from "react";
 function UploadRoomsPage() {
 
   const handleUpload = async (file) => {
-    try {
-      await uploadRooms(file);
-      alert("Rooms file uploaded successfully");
-    } catch (err) {
-      console.error(err);
-      alert("Upload failed");
-    }
+    // show confirmation before performing destructive upload
+    setPendingFile(file);
+    setConfirmOpen(true);
   };
 
   const [exporting, setExporting] = useState(false);
@@ -41,6 +38,29 @@ function UploadRoomsPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // confirmation state for uploads
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingFile, setPendingFile] = useState(null);
+
+  const performUpload = async () => {
+    if (!pendingFile) return;
+    setConfirmOpen(false);
+    setPendingFile(null);
+
+    try {
+      await uploadRooms(pendingFile);
+      alert("Rooms file uploaded successfully");
+    } catch (err) {
+      console.error(err);
+      alert("Upload failed");
+    }
+  };
+
+  const cancelUpload = () => {
+    setConfirmOpen(false);
+    setPendingFile(null);
+  };
+
   const handleAddRoom = async (classroom) => {
     try {
       await addRoom(classroom);
@@ -67,6 +87,17 @@ function UploadRoomsPage() {
       <UploadForm onUpload={handleUpload} />
 
       <AddRoomModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleAddRoom} />
+      <ConfirmModal
+        isOpen={confirmOpen}
+        title="Upload will overwrite existing data"
+        message={<>
+          Note: uploading a new file will completely delete everything that existed in the system. <strong>Are you sure you want to do this?</strong>
+        </>}
+        onConfirm={performUpload}
+        onCancel={cancelUpload}
+        confirmLabel="Yes, upload"
+        cancelLabel="No, cancel"
+      />
     </div>
   );
 }

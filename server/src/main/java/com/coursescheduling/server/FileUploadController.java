@@ -3,9 +3,12 @@ package com.coursescheduling.server;
 import com.coursescheduling.server.model.Course;
 import com.coursescheduling.server.model.Classroom;
 import com.coursescheduling.server.service.ClassroomExcelService;
-import com.coursescheduling.server.service.ExcelProcessingService;
 import com.coursescheduling.server.service.CoursesExcelService;
-
+import com.coursescheduling.server.service.ExcelProcessingService;
+import com.coursescheduling.server.model.ClassroomDeleteRequest;
+import com.coursescheduling.server.model.ClassroomDeleteRequest;
+import com.coursescheduling.server.service.ClassroomService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +28,8 @@ public class FileUploadController {
     @Autowired
     private CoursesExcelService coursesExcelService;
     
+    @Autowired
+    private ClassroomService classroomService;
     
 
     // Constructor-based dependency injection of the ExcelProcessingService.
@@ -96,7 +101,7 @@ public class FileUploadController {
     @PostMapping("/rooms")
     public String addRoom(@RequestBody Classroom classroom) {
 
-        classroomExcelService.saveSingleClassroom(classroom);
+    	classroomService.saveSingleClassroom(classroom);
 
         return "Classroom added successfully";
     }
@@ -126,6 +131,14 @@ public class FileUploadController {
 
         return "Course added successfully";
     }
+    
+    
+    @PostMapping("/classrooms/delete")
+    public void deleteClassrooms(@RequestBody List<ClassroomDeleteRequest> classrooms) throws Exception {
+
+        classroomService.deleteClassrooms(classrooms);
+    }
+    
     
     
 }

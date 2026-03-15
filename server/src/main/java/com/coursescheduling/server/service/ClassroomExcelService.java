@@ -1,46 +1,49 @@
 package com.coursescheduling.server.service;
 
 import com.coursescheduling.server.model.Classroom;
+import com.coursescheduling.server.model.ClassroomDeleteRequest;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.SetOptions;
+import com.google.cloud.firestore.WriteBatch;
 import com.google.firebase.cloud.FirestoreClient;
-import com.google.firebase.database.DatabaseReference;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.google.firebase.database.FirebaseDatabase;
-
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import org.springframework.web.multipart.MultipartFile;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.QuerySnapshot;
+
 import java.io.ByteArrayOutputStream;
 
 @Service
 public class ClassroomExcelService {
 	
-	public void process(MultipartFile file) {
+	@Autowired
+    private ClassroomService classroomService;
 
-	    try {
+    public void process(MultipartFile file) {
 
-	        InputStream inputStream = file.getInputStream();
+    	try {
 
-	        List<Classroom> classrooms = readClassroomsFromExcel(inputStream);
+            List<Classroom> classrooms =
+                    readClassroomsFromExcel(file.getInputStream());
 
-	        saveClassroomsToFirebase(classrooms);
+            classroomService.saveClassroomsToFirebase(classrooms);
 
-	        System.out.println("Finished uploading classrooms to Firebase");
-
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        throw new RuntimeException("Failed to process classrooms file");
-	    }
-	}
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to process classrooms file", e);
+        }
+    }
 	
 
 	public List<Classroom> readClassroomsFromExcel(InputStream inputStream) throws Exception {
@@ -77,21 +80,6 @@ public class ClassroomExcelService {
 	
 	
 	
-	public void saveClassroomsToFirebase(List<Classroom> classrooms) {
-
-		Firestore db = FirestoreClient.getFirestore();
-
-	    for (Classroom classroom : classrooms) {
-
-	        Map<String, Object> data = new HashMap<>();
-	        data.put("capacity", classroom.getCapacity());
-	        data.put("type", classroom.getType());
-
-	        db.collection("classrooms")
-	        .document(classroom.getBuilding())
-	        .set(Map.of(classroom.getClassroomName(), data), SetOptions.merge());
-	    }
-	}
 	
 	
 	public byte[] exportClassroomsToExcel() throws Exception {
@@ -137,24 +125,7 @@ public class ClassroomExcelService {
 
 	    return out.toByteArray();
 	}
-	
-	
-	
-	public void saveSingleClassroom(Classroom classroom) {
 
-	    Firestore db = FirestoreClient.getFirestore();
-
-	    Map<String, Object> data = new HashMap<>();
-	    data.put("capacity", classroom.getCapacity());
-	    data.put("type", classroom.getType());
-
-	    db.collection("classrooms")
-	      .document(classroom.getBuilding())
-	      .set(Map.of(classroom.getClassroomName(), data), SetOptions.merge());
-	}
-	
-	
-	
 	
 	
 	
