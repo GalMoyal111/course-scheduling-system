@@ -3,7 +3,7 @@ import AddRoomModal from "../components/AddRoomModal";
 import ConfirmModal from "../components/ConfirmModal";
 import ClassroomList from "../components/ClassroomList";
 import Button from "../components/ui/Button";
-import { uploadRooms, exportRooms, addRoom, getAllClassrooms, deleteClassrooms } from "../services/api";
+import { uploadRooms, exportRooms, addRoom, getAllClassrooms, deleteClassrooms, updateClassroom } from "../services/api";
 import { useState } from "react";
 import { useEffect } from "react";
 
@@ -94,14 +94,25 @@ function UploadRoomsPage() {
 
   const handleAddRoom = async (classroom) => {
     try {
-      await addRoom(classroom);
-      alert("Classroom added successfully");
+      if (editingClassroom) {
+        // edit flow: send old and new classroom to server
+        const req = {
+          oldClassroom: editingClassroom,
+          newClassroom: classroom,
+        };
+        await updateClassroom(req);
+        alert("Classroom updated successfully");
+      } else {
+        await addRoom(classroom);
+        alert("Classroom added successfully");
+      }
+
       setIsModalOpen(false);
       setEditingClassroom(null);
       await loadClassrooms();
     } catch (err) {
       console.error(err);
-      alert("Failed to add classroom");
+      alert(editingClassroom ? "Failed to update classroom" : "Failed to add classroom");
     }
   };
 

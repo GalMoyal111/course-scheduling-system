@@ -142,3 +142,20 @@ export async function deleteClassrooms(classrooms) {
 
   return res.text();
 }
+
+export async function updateClassroom(request) {
+  const res = await fetch(`${BASE_URL}/classrooms/update`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Update classroom failed: ${res.status} ${text}`);
+  }
+
+  return res.text();
+}

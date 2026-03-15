@@ -123,4 +123,40 @@ public class ClassroomService {
 
         return classrooms;
     }
+    
+    
+    public void updateClassroom(Classroom oldClassroom, Classroom newClassroom) throws Exception {
+
+        Firestore db = FirestoreClient.getFirestore();
+        WriteBatch batch = db.batch();
+
+        DocumentReference oldDoc =
+                db.collection("classrooms")
+                  .document(oldClassroom.getBuilding());
+
+        Map<String, Object> deleteMap = new HashMap<>();
+        deleteMap.put(oldClassroom.getClassroomName(), FieldValue.delete());
+
+        batch.update(oldDoc, deleteMap);
+
+
+        DocumentReference newDoc =
+                db.collection("classrooms")
+                  .document(newClassroom.getBuilding());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("capacity", newClassroom.getCapacity());
+        data.put("type", newClassroom.getType());
+
+        batch.set(
+                newDoc,
+                Map.of(newClassroom.getClassroomName(), data),
+                SetOptions.merge()
+        );
+
+        batch.commit().get();
+    }
+    
+    
+    
 }

@@ -6,6 +6,7 @@ import com.coursescheduling.server.service.ClassroomExcelService;
 import com.coursescheduling.server.service.CoursesExcelService;
 import com.coursescheduling.server.service.ExcelProcessingService;
 import com.coursescheduling.server.model.ClassroomDeleteRequest;
+import com.coursescheduling.server.model.ClassroomUpdateRequest;
 import com.coursescheduling.server.model.ClassroomDeleteRequest;
 import com.coursescheduling.server.service.ClassroomService;
 import java.util.List;
@@ -145,6 +146,16 @@ public class FileUploadController {
     public List<Classroom> getAllClassrooms() throws Exception {
 
         return classroomService.getAllClassrooms();
+    }
+    
+    
+    @PostMapping("/classrooms/update")
+    public void updateClassroom(@RequestBody ClassroomUpdateRequest request) throws Exception {
+    	System.out.print("yasss!!!");
+        classroomService.updateClassroom(
+                request.getOldClassroom(),
+                request.getNewClassroom()
+        );
     }
     
     
