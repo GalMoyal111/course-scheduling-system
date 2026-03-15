@@ -40,6 +40,7 @@ function UploadRoomsPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClassroom, setEditingClassroom] = useState(null);
+  const [selectedClassrooms, setSelectedClassrooms] = useState([]);
 
   // confirmation state for uploads
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -79,16 +80,29 @@ function UploadRoomsPage() {
     setDeleteConfirmOpen(true);
   };
 
+  const handleBulkDelete = (classrooms) => {
+    if (!classrooms || classrooms.length === 0) return;
+    setPendingDelete(classrooms);
+    setDeleteConfirmOpen(true);
+  };
+
   const performDelete = async () => {
     if (!pendingDelete) return;
     try {
-      await deleteClassrooms([{ building: pendingDelete.building, classroomName: pendingDelete.classroomName }]);
+      if (Array.isArray(pendingDelete)) {
+        const payload = pendingDelete.map((c) => ({ building: c.building, classroomName: c.classroomName }));
+        await deleteClassrooms(payload);
+      } else {
+        await deleteClassrooms([{ building: pendingDelete.building, classroomName: pendingDelete.classroomName }]);
+      }
+
       setDeleteConfirmOpen(false);
       setPendingDelete(null);
+      setSelectedClassrooms([]);
       await loadClassrooms();
     } catch (err) {
       console.error(err);
-      alert("Failed to delete classroom");
+      alert("Failed to delete classroom(s)");
     }
   };
 
@@ -183,7 +197,23 @@ function UploadRoomsPage() {
       <UploadForm onUpload={handleUpload} />
 
       <div style={{ marginTop: 12 }}>
-        <ClassroomList classrooms={filteredClassrooms} onEdit={handleEditRoom} onDelete={handleDeleteRoom} />
+        <ClassroomList
+          classrooms={filteredClassrooms}
+          onEdit={handleEditRoom}
+          onDelete={handleDeleteRoom}
+          onSelectionChange={(arr) => setSelectedClassrooms(arr)}
+        />
+        <div style={{ marginTop: 8, display: "flex", justifyContent: "flex-start", gap: 8 }}>
+          <Button
+            variant="ghost"
+            onClick={() => handleBulkDelete(selectedClassrooms)}
+            disabled={!selectedClassrooms || selectedClassrooms.length === 0}
+            style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+          >
+            <span className="material-icons">delete</span>
+            Delete selected ({selectedClassrooms.length})
+          </Button>
+        </div>
       </div>
 
   <AddRoomModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingClassroom(null); }} onSave={handleAddRoom} initialClassroom={editingClassroom} />
@@ -202,9 +232,13 @@ function UploadRoomsPage() {
 
       <ConfirmModal
         isOpen={deleteConfirmOpen}
-        title="Delete classroom"
-        message={"Are you sure you want to delete this classroom?"}
-        fileName={pendingDelete ? `${pendingDelete.building} — ${pendingDelete.classroomName}` : ""}
+        title={Array.isArray(pendingDelete) ? "Delete selected classrooms" : "Delete classroom"}
+        message={Array.isArray(pendingDelete)
+          ? `Are you sure you want to delete ${pendingDelete.length} selected classroom(s)? This action cannot be undone.`
+          : "Are you sure you want to delete this classroom?"}
+        fileName={Array.isArray(pendingDelete)
+          ? (pendingDelete.length <= 5 ? pendingDelete.map((c) => `${c.building} — ${c.classroomName}`).join("; ") : `${pendingDelete.length} classrooms`)
+          : (pendingDelete ? `${pendingDelete.building} — ${pendingDelete.classroomName}` : "")}
         onConfirm={performDelete}
         onCancel={() => { setDeleteConfirmOpen(false); setPendingDelete(null); }}
         confirmLabel="Yes, delete"
