@@ -141,4 +141,12 @@ public class FileUploadController {
     
     
     
+    @GetMapping("/getAllClassrooms")
+    public List<Classroom> getAllClassrooms() throws Exception {
+
+        return classroomService.getAllClassrooms();
+    }
+    
+    
+    
 }

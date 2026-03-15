@@ -7,6 +7,7 @@ import com.google.firebase.cloud.FirestoreClient;
 import com.google.api.core.ApiFuture;
 import org.springframework.stereotype.Service;
 import java.util.*;
+import com.google.api.core.ApiFuture;
 
 @Service
 public class ClassroomService {
@@ -82,5 +83,44 @@ public class ClassroomService {
         }
 
         batch.commit().get();
+    }
+    
+    
+    
+    
+    public List<Classroom> getAllClassrooms() throws Exception {
+
+        Firestore db = FirestoreClient.getFirestore();
+
+        List<Classroom> classrooms = new ArrayList<>();
+
+        ApiFuture<QuerySnapshot> future = db.collection("classrooms").get();
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+        for (QueryDocumentSnapshot doc : documents) {
+
+            String building = doc.getId();
+            Map<String, Object> data = doc.getData();
+
+            for (String classroomName : data.keySet()) {
+
+                Map<String, Object> classroomData =
+                        (Map<String, Object>) data.get(classroomName);
+
+                int capacity = ((Number) classroomData.get("capacity")).intValue();
+                String type = (String) classroomData.get("type");
+
+                Classroom classroom = new Classroom();
+
+                classroom.setBuilding(building);
+                classroom.setClassroomName(classroomName);
+                classroom.setCapacity(capacity);
+                classroom.setType(type);
+
+                classrooms.add(classroom);
+            }
+        }
+
+        return classrooms;
     }
 }
