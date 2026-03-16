@@ -11,7 +11,7 @@ function typeBadge(type) {
   return <span className="type-badge type-normal">Normal</span>;
 }
 
-export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSelectionChange }) {
+export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSelectionChange, title = "Classrooms" }) {
   if (!classrooms || classrooms.length === 0) {
     return (
       <div className="ui-card">
@@ -32,7 +32,7 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
   return (
     <div className="ui-card">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-        <div style={{ fontWeight: 700 }}>Classrooms ({classrooms.length})</div>
+        <div style={{ fontWeight: 700 }}>{title} ({classrooms.length})</div>
       </div>
 
       <div style={{ overflowX: "auto" }}>

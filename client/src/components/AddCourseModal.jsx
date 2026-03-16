@@ -3,7 +3,7 @@ import Button from "./ui/Button";
 import "./ui/ui.css";
 
 // Simple modal for adding a single course (uses app UI styles).
-export default function AddCourseModal({ isOpen, onClose, onSave }) {
+export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse = null }) {
   const [semesterNumber, setSemesterNumber] = useState("");
   const [courseCode, setCourseCode] = useState("");
   const [courseName, setCourseName] = useState("");
@@ -16,7 +16,29 @@ export default function AddCourseModal({ isOpen, onClose, onSave }) {
   const [notes, setNotes] = useState("");
   const [clusterName, setClusterName] = useState("");
 
+  // Initialize fields when modal opens or when initialCourse changes
+  React.useEffect(() => {
+    if (!isOpen) return;
+    if (initialCourse) {
+      setSemesterNumber(initialCourse.semesterNumber || "");
+      setCourseCode(initialCourse.courseCode || initialCourse.courseId || "");
+      setCourseName(initialCourse.courseName || "");
+      setPrerequisiteCourseNumberOrConditions(initialCourse.prerequisiteCourseNumberOrConditions || "");
+      setLectureHours(initialCourse.lectureHours != null ? String(initialCourse.lectureHours) : "");
+      setTutorialHours(initialCourse.tutorialHours != null ? String(initialCourse.tutorialHours) : "");
+      setLabHours(initialCourse.labHours != null ? String(initialCourse.labHours) : "");
+      setProjectHours(initialCourse.projectHours != null ? String(initialCourse.projectHours) : "");
+      setCredits(initialCourse.credits != null ? String(initialCourse.credits) : "");
+      setNotes(initialCourse.notes || "");
+      setClusterName(initialCourse.clusterName || "");
+    } else {
+      resetForm();
+    }
+  }, [isOpen, initialCourse]);
+
   if (!isOpen) return null;
+
+  const isEditing = Boolean(initialCourse);
 
   const resetForm = () => {
     setSemesterNumber("");
@@ -74,7 +96,7 @@ export default function AddCourseModal({ isOpen, onClose, onSave }) {
     <div className="modal-overlay">
       <div className="modal-card modal-card--wide" role="dialog" aria-modal="true">
         <div className="modal-header">
-          <h3>Add Course</h3>
+          <h3>{isEditing ? "Edit Course" : "Add Course"}</h3>
         </div>
 
         <div className="modal-body">

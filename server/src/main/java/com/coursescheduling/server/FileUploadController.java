@@ -1,10 +1,12 @@
 package com.coursescheduling.server;
 
 import com.coursescheduling.server.model.Course;
+import com.coursescheduling.server.model.Lesson;
 import com.coursescheduling.server.model.Classroom;
 import com.coursescheduling.server.service.ClassroomExcelService;
 import com.coursescheduling.server.service.CoursesExcelService;
 import com.coursescheduling.server.service.ExcelProcessingService;
+import com.coursescheduling.server.service.LessonService;
 import com.coursescheduling.server.model.ClassroomDeleteRequest;
 import com.coursescheduling.server.model.ClassroomUpdateRequest;
 import com.coursescheduling.server.model.ClassroomDeleteRequest;
@@ -31,6 +33,9 @@ public class FileUploadController {
     
     @Autowired
     private ClassroomService classroomService;
+    
+    @Autowired
+    private LessonService lessonService;
     
 
     // Constructor-based dependency injection of the ExcelProcessingService.
@@ -156,6 +161,11 @@ public class FileUploadController {
                 request.getOldClassroom(),
                 request.getNewClassroom()
         );
+    }
+    
+    @GetMapping("/getAlllessons")
+    public List<Lesson> getAllLessons() {
+        return lessonService.getAllLessons();
     }
     
     
