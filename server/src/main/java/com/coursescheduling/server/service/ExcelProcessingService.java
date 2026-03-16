@@ -27,14 +27,19 @@ import com.coursescheduling.server.model.Semester;
 public class ExcelProcessingService {
 	private final Firestore firestore;
 	
+	private final LessonService lessonService;
+	
 	private int splitGroupCounter = 1;
 	
-	public ExcelProcessingService(Firestore firestore) { 
+	public ExcelProcessingService(Firestore firestore, LessonService lessonService) { 
 		this.firestore = firestore; 
+		this.lessonService = lessonService;
 	}
 	
+	
+	
 	public void process(MultipartFile file) {
-
+		
 	    List<Lesson> lessons = new ArrayList<>();
 
 	    try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
@@ -51,12 +56,14 @@ public class ExcelProcessingService {
 	        sortLessons(lessons);
 	        assignIndexes(lessons);
 	        calculateCredits(lessons);
-	        printLessons(lessons);
+	        //printLessons(lessons);
+	        lessonService.saveLessons(lessons);
+	        
 
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
-	  process();
+	  
 	}
 	
 	// Parse the lesson type text (in Hebrew/English) to the LessonType enum.
