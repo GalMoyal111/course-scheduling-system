@@ -1,7 +1,7 @@
 import UploadForm from "../components/UploadForm";
-import { uploadLessons } from "../services/api";
+import { uploadLessons, getAllLessons } from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
-import ClassroomList from "../components/ClassroomList";
+import LessonList from "../components/LessonList";
 import AddCourseModal from "../components/AddCourseModal";
 import Button from "../components/ui/Button";
 import { useState, useEffect } from "react";
@@ -11,7 +11,7 @@ function UploadPage() {
   // confirmation state for uploads
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState(null);
-  // lessons list (local state for now). Will be shown using ClassroomList by mapping fields.
+  // lessons list (local state for now). Will be shown using LessonList component.
   const [lessons, setLessons] = useState([]);
   const [query, setQuery] = useState("");
 
@@ -25,13 +25,24 @@ function UploadPage() {
 
   // Attempt to load lessons from a hypothetical endpoint later; currently keep empty.
   useEffect(() => {
-    // placeholder: if an API for fetching lessons exists, load them here.
+    // attempt to load lessons from server
+    loadLessons();
   }, []);
 
   const loadLessons = async () => {
-    // No server GET endpoint implemented; keep current local lessons.
-    // This function exists to mirror the rooms page and can be wired later.
-    console.debug && console.debug("loadLessons called - no server endpoint");
+    try {
+      const data = await getAllLessons();
+      if (Array.isArray(data)) {
+        setLessons(data || []);
+      } else {
+        // If server returned a wrapper or text, attempt best-effort handling
+        console.debug && console.debug("getAllLessons returned non-array", data);
+        setLessons([]);
+      }
+    } catch (err) {
+      console.error("Failed to load lessons:", err);
+      setLessons([]);
+    }
   };
 
   const handleUpload = async (file) => {
@@ -48,6 +59,8 @@ function UploadPage() {
     try {
       const result = await uploadLessons(pendingFile);
       alert(result || "Upload successful");
+      // refresh list after successful upload
+      try { await loadLessons(); } catch (e) { /* ignore */ }
     } catch (err) {
       console.error(err);
       alert("Upload failed. Check console for details.");
@@ -59,34 +72,24 @@ function UploadPage() {
     setPendingFile(null);
   };
 
-  // Map lesson -> classroom-like object so we can reuse ClassroomList component
-  const mappedLessons = lessons.map((l) => ({
-    // use courseId as building and courseName as classroomName for display
-    building: l.courseId || "",
-    classroomName: l.courseName || "",
-    capacity: l.duration != null ? String(l.duration) : "",
-    type: l.type ? String(l.type) : "",
-    __source: l, // keep original lesson for actions
-  }));
-
-  const filtered = mappedLessons.filter((c) => {
+  // Filter lessons directly by relevant fields
+  const filtered = lessons.filter((l) => {
     if (!query) return true;
     const q = query.toLowerCase();
     return (
-      (c.building && c.building.toLowerCase().includes(q)) ||
-      (c.classroomName && c.classroomName.toLowerCase().includes(q)) ||
-      (c.type && c.type.toLowerCase().includes(q))
+      (l.courseId && String(l.courseId).toLowerCase().includes(q)) ||
+      (l.courseName && String(l.courseName).toLowerCase().includes(q)) ||
+      (l.type && String(l.type).toLowerCase().includes(q))
     );
   });
 
-  const handleEditLesson = (item) => {
-    // item is the mapped classroom-like object
-    setEditingLesson(item.__source || null);
+  const handleEditLesson = (lesson) => {
+    setEditingLesson(lesson || null);
     setIsModalOpen(true);
   };
 
-  const handleDeleteLesson = (item) => {
-    setPendingDelete(item.__source || null);
+  const handleDeleteLesson = (lesson) => {
+    setPendingDelete(lesson || null);
     setDeleteConfirmOpen(true);
   };
 
@@ -178,8 +181,8 @@ function UploadPage() {
         
 
       <div style={{ marginTop: 12 }}>
-        <ClassroomList
-          classrooms={filtered}
+        <LessonList
+          lessons={filtered}
           onEdit={handleEditLesson}
           onDelete={handleDeleteLesson}
           onSelectionChange={(arr) => setSelectedLessons(arr)}
@@ -190,7 +193,7 @@ function UploadPage() {
             variant="ghost"
             onClick={() => {
               if (!selectedLessons || selectedLessons.length === 0) return;
-              setPendingDelete(selectedLessons.map((s) => s.__source));
+              setPendingDelete(selectedLessons);
               setDeleteConfirmOpen(true);
             }}
             disabled={!selectedLessons || selectedLessons.length === 0}
@@ -222,7 +225,15 @@ function UploadPage() {
         isOpen={deleteConfirmOpen}
         title="Delete lesson"
         message={"Are you sure you want to delete this lesson?"}
-        fileName={pendingDelete ? `${pendingDelete.courseId} — ${pendingDelete.courseName}` : ""}
+        fileName={
+          Array.isArray(pendingDelete)
+            ? pendingDelete.length > 0
+              ? pendingDelete.map((p) => `${p.courseId} — ${p.courseName}`).join(", ")
+              : ""
+            : pendingDelete
+            ? `${pendingDelete.courseId} — ${pendingDelete.courseName}`
+            : ""
+        }
         onConfirm={performDeleteLesson}
         onCancel={() => { setDeleteConfirmOpen(false); setPendingDelete(null); }}
         confirmLabel="Yes, delete"

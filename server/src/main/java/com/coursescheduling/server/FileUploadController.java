@@ -168,6 +168,15 @@ public class FileUploadController {
         return lessonService.getAllLessons();
     }
     
+    @PostMapping("/addSingelLesson")
+    public void addLesson(@RequestBody Lesson lesson) throws Exception {
+        lessonService.addLesson(lesson);
+    }
+    
+    @DeleteMapping("/deleteLessons")
+    public void deleteLessons(@RequestBody List<Lesson> lessons) throws Exception {
+        lessonService.deleteLessons(lessons);
+    }
     
     
 }

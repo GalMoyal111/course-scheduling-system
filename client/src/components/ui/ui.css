@@ -152,6 +152,11 @@
 .type-network{background:rgba(168,85,247,0.08);color:#5b21b6}
 .type-physics{background:rgba(250,204,21,0.08);color:#92400e}
 
+/* Lesson-specific badge types */
+.type-lecture{background:rgba(99,102,241,0.08);color:#3730a3}
+.type-practice{background:rgba(34,197,94,0.08);color:#166534}
+.type-pbl{background:rgba(249,115,22,0.08);color:#7c2d12}
+
 /* Empty illustration */
 .empty-illustration{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;color:var(--muted)}
 .empty-illustration svg{width:160px;height:120px;opacity:0.95}

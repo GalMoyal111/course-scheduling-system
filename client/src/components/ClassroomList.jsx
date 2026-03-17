@@ -1,15 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./ui/ui.css";
-
-function typeBadge(type) {
-  if (!type) return <span className="type-badge type-normal">Normal</span>;
-  const t = type.toLowerCase();
-  if (t.includes("lab") && t.includes("network")) return <span className="type-badge type-network">Networking Lab</span>;
-  if (t.includes("network")) return <span className="type-badge type-network">Networking Lab</span>;
-  if (t.includes("physics")) return <span className="type-badge type-physics">Physics Lab</span>;
-  if (t.includes("lab")) return <span className="type-badge type-lab">Laboratory</span>;
-  return <span className="type-badge type-normal">Normal</span>;
-}
+import { typeBadge } from "./ui/typeUtils.jsx";
 
 export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSelectionChange, title = "Classrooms" }) {
   if (!classrooms || classrooms.length === 0) {

@@ -159,3 +159,19 @@ export async function updateClassroom(request) {
 
   return res.text();
 }
+
+export async function getAllLessons() {
+  const res = await fetch(`${BASE_URL}/getAlllessons`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Fetch lessons failed: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}
