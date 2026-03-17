@@ -1,12 +1,11 @@
 import UploadForm from "../components/UploadForm";
-import { uploadLessons, getAllLessons } from "../services/api";
+import { uploadLessons, getAllLessons, addLesson as addLessonApi, deleteLessons as deleteLessonsApi } from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
 import LessonList from "../components/LessonList";
 import AddCourseModal from "../components/AddCourseModal";
 import Button from "../components/ui/Button";
 import { useState, useEffect } from "react";
 import "./UploadPage.css";
-
 function UploadPage() {
   // confirmation state for uploads
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -95,20 +94,30 @@ function UploadPage() {
 
   const performDeleteLesson = async () => {
     if (!pendingDelete) return;
-    try {
-      if (Array.isArray(pendingDelete)) {
-        const set = new Set(pendingDelete.map((p) => `${p.courseId}||${p.index}`));
-        setLessons((prev) => prev.filter((l) => !set.has(`${l.courseId}||${l.index}`)));
-      } else {
-        setLessons((prev) => prev.filter((l) => !(l.courseId === pendingDelete.courseId && l.index === pendingDelete.index)));
-      }
+    const toDelete = Array.isArray(pendingDelete) ? pendingDelete : [pendingDelete];
 
-      setDeleteConfirmOpen(false);
-      setPendingDelete(null);
-      setSelectedLessons([]);
+    // Prepare keys for matching lessons
+    const keyFor = (l) => `${l.courseId}||${l.index}`;
+    const deleteSet = new Set(toDelete.map(keyFor));
+
+    // Optimistically remove from UI so user sees immediate change
+    const prevLessons = lessons;
+    setLessons((prev) => prev.filter((l) => !deleteSet.has(keyFor(l))));
+    // close modal and clear selection immediately for feedback
+    setDeleteConfirmOpen(false);
+    setPendingDelete(null);
+    setSelectedLessons([]);
+
+    try {
+      // call server delete endpoint
+      await deleteLessonsApi(toDelete);
+      // Success: keep optimistic UI. Avoid immediate reload to prevent
+      // showing stale server data if deletion hasn't fully propagated.
     } catch (err) {
       console.error(err);
-      alert("Failed to delete lesson(s)");
+      alert("Failed to delete lesson(s). Reverting UI and check console for details.");
+      // revert optimistic update
+      setLessons(prevLessons);
     }
   };
 
@@ -127,15 +136,23 @@ function UploadPage() {
       index: lessons.length + 1,
     };
 
-    if (editingLesson) {
-      // update existing lesson by courseId+index
-      setLessons((prev) => prev.map((l) => (l.courseId === editingLesson.courseId && l.index === editingLesson.index ? { ...l, ...lesson } : l)));
-    } else {
-      setLessons((prev) => [...prev, lesson]);
+    try {
+      if (editingLesson) {
+        // No server-side update endpoint available; update locally for now
+        setLessons((prev) => prev.map((l) => (l.courseId === editingLesson.courseId && l.index === editingLesson.index ? { ...l, ...lesson } : l)));
+      } else {
+        // send to server
+        await addLessonApi(lesson);
+        // refresh from server
+        await loadLessons();
+      }
+    } catch (err) {
+      console.error("Failed to add lesson:", err);
+      alert("Failed to add lesson. See console for details.");
+    } finally {
+      setIsModalOpen(false);
+      setEditingLesson(null);
     }
-
-    setIsModalOpen(false);
-    setEditingLesson(null);
   };
 
   return (

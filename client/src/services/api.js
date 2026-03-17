@@ -175,3 +175,33 @@ export async function getAllLessons() {
 
   return res.json();
 }
+
+export async function addLesson(lesson) {
+  const res = await fetch(`${BASE_URL}/addSingelLesson`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(lesson),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Add lesson failed: ${res.status} ${text}`);
+  }
+
+  return res.text();
+}
+
+export async function deleteLessons(lessons) {
+  const res = await fetch(`${BASE_URL}/deleteLessons`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(lessons),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Delete lessons failed: ${res.status} ${text}`);
+  }
+
+  return res.text();
+}
