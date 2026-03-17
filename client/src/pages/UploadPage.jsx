@@ -2,7 +2,7 @@ import UploadForm from "../components/UploadForm";
 import { uploadLessons, getAllLessons, addLesson as addLessonApi, deleteLessons as deleteLessonsApi } from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
 import LessonList from "../components/LessonList";
-import AddCourseModal from "../components/AddCourseModal";
+import AddLessonModal from "../components/AddLessonModal";
 import Button from "../components/ui/Button";
 import { useState, useEffect } from "react";
 import "./UploadPage.css";
@@ -224,7 +224,7 @@ function UploadPage() {
 
       <footer className="upload-footer">Need the template? Check the README or contact your admin.</footer>
 
-      <AddCourseModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingLesson(null); }} onSave={handleAddLesson} initialCourse={editingLesson} />
+  <AddLessonModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingLesson(null); }} onSave={handleAddLesson} initialLesson={editingLesson} />
 
       <ConfirmModal
         isOpen={confirmOpen}
