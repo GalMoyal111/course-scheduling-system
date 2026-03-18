@@ -7,12 +7,17 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.coursescheduling.server.model.ClusterCoursesList;
+import com.coursescheduling.server.model.Course;
 import com.coursescheduling.server.model.Lesson;
 import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.SetOptions;
 import com.google.cloud.firestore.WriteBatch;
 import com.google.cloud.firestore.WriteResult;
@@ -135,6 +140,41 @@ public class LessonService {
 	        docRef.update(updates);
 	    }
 	}
+	
+	/*
+	public List<ClusterCoursesList> getAllCoursesGroupedByCluster() {
+	    Firestore db = FirestoreClient.getFirestore();
+	    List<ClusterCoursesList> result = new ArrayList<>();
+
+	    try {
+	        
+	        Iterable<CollectionReference> collections = db.collection("courses").listCollections();
+
+	        for (CollectionReference clusterCollection : collections) {
+
+	            String clusterId = clusterCollection.getId();
+
+	            ApiFuture<QuerySnapshot> future = clusterCollection.get();
+	            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+	            List<Course> courses = new ArrayList<>();
+
+	            for (QueryDocumentSnapshot doc : documents) {
+	                Course course = doc.toObject(Course.class);
+	                courses.add(course);
+	            }
+
+	            result.add(new ClusterCoursesList(clusterId, courses));
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return result;
+	}
+	*/
+	
 	
 	
 	

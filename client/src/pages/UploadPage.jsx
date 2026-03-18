@@ -124,16 +124,16 @@ function UploadPage() {
   const handleAddLesson = async (courseLike) => {
     // Convert course-like object from AddCourseModal to a lesson-like object and add/update locally
     const lesson = {
-      courseId: courseLike.courseCode || courseLike.courseId || "",
+      courseId: courseLike.courseId || "",
       courseName: courseLike.courseName || "",
-      lecturer: "",
-      cluster: 0,
-      type: "",
-      duration: parseInt(courseLike.lectureHours || courseLike.duration || 0, 10),
-      splitGroupId: 0,
-      semester: null,
+      lecturer: courseLike.lecturer || "",
+      cluster: courseLike.cluster,
+      type: courseLike.type,
+      duration: parseInt(courseLike.duration || 0, 10),
+      splitGroupId: null,
+      semester: courseLike.semester,
       credits: parseFloat(courseLike.credits || 0) || 0,
-      index: lessons.length + 1,
+      index: null,
     };
 
     try {

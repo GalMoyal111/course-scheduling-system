@@ -156,7 +156,6 @@ public class FileUploadController {
     
     @PostMapping("/classrooms/update")
     public void updateClassroom(@RequestBody ClassroomUpdateRequest request) throws Exception {
-    	System.out.print("yasss!!!");
         classroomService.updateClassroom(
                 request.getOldClassroom(),
                 request.getNewClassroom()
