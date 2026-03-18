@@ -2,58 +2,53 @@ import React, { useState } from "react";
 import Button from "./ui/Button";
 import "./ui/ui.css";
 
-export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson = null }) {
-  const [courseId, setCourseId] = useState("");
+export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson = null, clusters = [], courses = [] }) {
   const [courseName, setCourseName] = useState("");
   const [lecturer, setLecturer] = useState("");
-  const [cluster, setCluster] = useState(""); // leave empty options for now
+  const [cluster, setCluster] = useState("");
   const [type, setType] = useState("lecture");
   const [duration, setDuration] = useState("1");
-  const [credits, setCredits] = useState("");
   const [semester, setSemester] = useState("");
 
   React.useEffect(() => {
     if (!isOpen) return;
     if (initialLesson) {
-      setCourseId(initialLesson.courseId || "");
       setCourseName(initialLesson.courseName || "");
       setLecturer(initialLesson.lecturer || "");
       setCluster(initialLesson.cluster != null ? String(initialLesson.cluster) : "");
       setType(initialLesson.type || "lecture");
       setDuration(initialLesson.duration != null ? String(initialLesson.duration) : "");
-      setCredits(initialLesson.credits != null ? String(initialLesson.credits) : "");
       setSemester(initialLesson.semester != null ? String(initialLesson.semester) : "");
     } else {
-      setCourseId("");
       setCourseName("");
       setLecturer("");
       setCluster("");
       setType("lecture");
       setDuration("");
-      setCredits("");
       setSemester("");
     }
   }, [isOpen, initialLesson]);
 
   if (!isOpen) return null;
 
+  // Use provided lists if available, otherwise sensible defaults
+  const courseOptions = (courses && courses.length) ? courses : ["Stats", "Algorithms", "Deep Learning"];
+  const clusterOptions = (clusters && clusters.length) ? clusters : ["Semester 1", "Semester 2", "Semester 3"];
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Basic validation
-    if (!courseId.trim()) return alert("Please enter course ID");
-    if (!courseName.trim()) return alert("Please select course name");
+  // Basic validation
+  if (!courseName.trim()) return alert("Please select course name");
 
     const payload = {
-      courseId: courseId.trim(),
       courseName: courseName.trim(),
       lecturer: lecturer.trim(),
-      cluster: cluster === "" ? 0 : parseInt(cluster, 10) || 0,
+      // send cluster as string (empty or selected value)
+      cluster: cluster === "" ? "" : cluster,
       type: type,
       duration: duration === "" ? 1 : parseInt(duration, 10) || 1,
       semester: semester === "" ? null : semester,
-      credits: credits === "" ? 0 : parseFloat(credits) || 0,
-      index: 0,
     };
 
     onSave(payload);
@@ -69,40 +64,31 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
         <div className="modal-body">
           <form className="add-course-form" onSubmit={handleSubmit}>
             <div className="add-course-grid">
-              <div className="form-field">
-                <label>Course ID</label>
-                <input className="ui-input" value={courseId} onChange={(e) => setCourseId(e.target.value)} />
-              </div>
-
-              <div className="form-field">
-                <label>Course Name</label>
-                <input className="ui-input" value={courseName} onChange={(e) => setCourseName(e.target.value)} />
-              </div>
-
-              <div className="form-field">
-                <label>Lecturer</label>
-                <input className="ui-input" value={lecturer} onChange={(e) => setLecturer(e.target.value)} />
-              </div>
+              
 
               <div className="form-field">
                 <label>Cluster</label>
                 <select className="ui-select" value={cluster} onChange={(e) => setCluster(e.target.value)}>
                   <option value="">(none)</option>
-                  <option value="Semester 1">סמסטר 1</option>
-                  <option value="Semester 2">סמסטר 2</option>
-                  <option value="Semester 3">סמסטר 3</option>
-                  <option value="Semester 4">סמסטר 4</option>
-                  <option value="Semester 5">סמסטר 5</option>
-                  <option value="Semester 6">סמסטר 6</option>
-                  <option value="Semester 7">סמסטר 7</option>
-                  <option value="Semester 8">סמסטר 8</option>
-                  <option value="9">אשכול מדעים</option>
-                  <option value="10">אשכול עיבוד אותות ורשתות תקשורת</option>
-                  <option value="11">אשכול אלגוריתמים</option>
-                  <option value="12">אשכול סמינרים</option>
-                  <option value="13">אשכול הנדסת תוכנה</option>
-                  <option value="14">אשכול מעבדות</option>
+                  {clusterOptions.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
                 </select>
+              </div>
+
+              <div className="form-field">
+                <label>Course</label>
+                <select className="ui-select" value={courseName} onChange={(e) => setCourseName(e.target.value)}>
+                  <option value="">(select)</option>
+                  {courseOptions.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-field">
+                <label>Lecturer</label>
+                <input className="ui-input" value={lecturer} onChange={(e) => setLecturer(e.target.value)} />
               </div>
 
               <div className="form-field">
@@ -120,10 +106,7 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
                 <input className="ui-input" type="number" value={duration} min="1" onChange={(e) => setDuration(e.target.value)} />
               </div>
 
-              <div className="form-field">
-                <label>Credits</label>
-                <input className="ui-input" type="number" value={credits} min="0" step="0.5" onChange={(e) => setCredits(e.target.value)} />
-              </div>
+              
 
               <div className="form-field">
                 <label>Semester</label>
