@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -141,39 +142,40 @@ public class LessonService {
 	    }
 	}
 	
-	/*
+	
+	
 	public List<ClusterCoursesList> getAllCoursesGroupedByCluster() {
 	    Firestore db = FirestoreClient.getFirestore();
-	    List<ClusterCoursesList> result = new ArrayList<>();
 
 	    try {
-	        
-	        Iterable<CollectionReference> collections = db.collection("courses").listCollections();
+	        ApiFuture<QuerySnapshot> future = db.collection("courses").get();
+	        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
 
-	        for (CollectionReference clusterCollection : collections) {
+	        List<Course> allCourses = new ArrayList<>();
 
-	            String clusterId = clusterCollection.getId();
+	        for (QueryDocumentSnapshot doc : documents) {
+	            Course course = doc.toObject(Course.class);
 
-	            ApiFuture<QuerySnapshot> future = clusterCollection.get();
-	            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+	            course.setCourseId(doc.getId());
 
-	            List<Course> courses = new ArrayList<>();
-
-	            for (QueryDocumentSnapshot doc : documents) {
-	                Course course = doc.toObject(Course.class);
-	                courses.add(course);
-	            }
-
-	            result.add(new ClusterCoursesList(clusterId, courses));
+	            allCourses.add(course);
 	        }
+
+	        Map<String, List<Course>> grouped = allCourses.stream().collect(Collectors.groupingBy(Course::getSemesterNumber));
+
+	        List<ClusterCoursesList> result = new ArrayList<>();
+
+	        for (Map.Entry<String, List<Course>> entry : grouped.entrySet()) {
+	            result.add(new ClusterCoursesList(entry.getKey(), entry.getValue()));
+	        }
+
+	        return result;
 
 	    } catch (Exception e) {
 	        e.printStackTrace();
+	        throw new RuntimeException("Failed to fetch courses");
 	    }
-
-	    return result;
 	}
-	*/
 	
 	
 	

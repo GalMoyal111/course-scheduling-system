@@ -146,7 +146,7 @@ public class CoursesExcelService {
             Map<String, Object> data = new HashMap<>();
             
             data.put("clusterId", course.getSemesterNumber()); 
-            data.put("courseId", course.getCourseCode());      
+            data.put("courseId", course.getCourseId());      
             
             
             data.put("courseName", course.getCourseName());
@@ -159,7 +159,7 @@ public class CoursesExcelService {
             data.put("notes", course.getNotes());
             data.put("clusterName", course.getClusterName());
 
-            db.collection("courses").document(course.getCourseCode()).set(data, SetOptions.merge());
+            db.collection("courses").document(course.getCourseId()).set(data, SetOptions.merge());
             //db.collection("courses").document(course.getSemesterNumber()).set(Map.of(course.getCourseCode(), data), SetOptions.merge());
             
 
@@ -256,7 +256,7 @@ public class CoursesExcelService {
     public void printCourses(List<Course> courses) {
         // Implement logic to print the list of courses for debugging purposes
         for (Course course : courses) {
-            System.out.println("Course Code: " + course.getCourseCode());
+            System.out.println("Course Code: " + course.getCourseId());
             System.out.println("Course Name: " + course.getCourseName());
             System.out.println("Prerequisites: " + course.getPrerequisiteCourseNumberOrConditions());
             System.out.println("Lecture Hours: " + course.getLectureHours());
@@ -286,7 +286,7 @@ public class CoursesExcelService {
 
         db.collection("courses")
           .document(course.getSemesterNumber())
-          .set(Map.of(course.getCourseCode(), data), SetOptions.merge());
+          .set(Map.of(course.getCourseId(), data), SetOptions.merge());
     }
 
     private String asString(Object value) {

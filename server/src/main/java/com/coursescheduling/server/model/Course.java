@@ -2,7 +2,7 @@ package com.coursescheduling.server.model;
 
 public class Course {
     private String semesterNumber;
-    private String courseCode;
+    private String courseId;
     private String courseName;
     private String prerequisiteCourseNumberOrConditions;
     private int lectureHours;
@@ -15,10 +15,10 @@ public class Course {
 
     public Course() {}
 
-    public Course(String semesterNumber, String courseCode, String courseName, String prerequisiteCourseNumberOrConditions,
+    public Course(String semesterNumber, String courseId, String courseName, String prerequisiteCourseNumberOrConditions,
                   int lectureHours, int tutorialHours, int labHours, int projectHours, int credits, String notes, String clusterName) {
         this.semesterNumber = semesterNumber;
-        this.courseCode = courseCode;
+        this.courseId = courseId;
         this.courseName = courseName;
         this.prerequisiteCourseNumberOrConditions = prerequisiteCourseNumberOrConditions;
         this.lectureHours = lectureHours;
@@ -38,15 +38,17 @@ public class Course {
         this.semesterNumber = semesterNumber;
     }
 
-    public String getCourseCode() {
-        return courseCode;
-    }
+    
 
-    public void setCourseCode(String courseCode) {
-        this.courseCode = courseCode;
-    }
+    public String getCourseId() {
+		return courseId;
+	}
 
-    public String getCourseName() {
+	public void setCourseId(String courseId) {
+		this.courseId = courseId;
+	}
+
+	public String getCourseName() {
         return courseName;
     }
 
