@@ -54,6 +54,13 @@ function SelectableTable({ classrooms, onEdit, onDelete, onSelectionChange }) {
   }, [stableKey]);
 
   console.debug && console.debug("SelectableTable render", { count: classrooms.length, selected: Object.keys(selectedMap).length });
+  // We'll keep the latest handler functions in refs and pass refs to memoized rows
+  const onEditRef = React.useRef(onEdit);
+  const onDeleteRef = React.useRef(onDelete);
+  const onToggleRef = React.useRef();
+
+  useEffect(() => { onEditRef.current = onEdit; onDeleteRef.current = onDelete; }, [onEdit, onDelete]);
+
   const toggleRow = (c) => {
     const k = keyFor(c);
     const next = { ...selectedMap };
@@ -63,6 +70,10 @@ function SelectableTable({ classrooms, onEdit, onDelete, onSelectionChange }) {
     onSelectionChange && onSelectionChange(Object.values(next));
     console.debug && console.debug("toggleRow", { key: k, totalSelected: Object.keys(next).length });
   };
+
+  // keep pointer to latest toggle handler so memoized rows can call it without
+  // requiring re-renders when the parent re-creates handler identities
+  useEffect(() => { onToggleRef.current = toggleRow; });
 
   const allSelected = classrooms.length > 0 && classrooms.every((c) => selectedMap[keyFor(c)]);
 
@@ -104,45 +115,72 @@ function SelectableTable({ classrooms, onEdit, onDelete, onSelectionChange }) {
           const k = keyFor(c);
           const checked = !!selectedMap[k];
           return (
-            <tr key={k} onClick={() => toggleRow(c)}>
-                <td>
-                  <input
-                    type="checkbox"
-                    aria-label={`Select ${c.building} ${c.classroomName}`}
-                    checked={checked}
-                    onChange={() => toggleRow(c)}
-                    onClick={(e) => e.stopPropagation()} /* prevent double toggle when clicking checkbox */
-                  />
-                </td>
-              <td>{c.building}</td>
-              <td>{c.classroomName}</td>
-              <td>{c.capacity}</td>
-              <td>{typeBadge(c.type)}</td>
-              <td>
-                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                  <button
-                      type="button"
-                      className="icon-btn icon-btn--edit"
-                      title="Edit"
-                        onClick={(e) => { e.stopPropagation(); onEdit && onEdit(c); }}
-                  >
-                      <span className="material-icons">edit</span>
-                  </button>
-
-                  <button
-                      type="button"
-                      className="icon-btn icon-btn--delete"
-                      title="Delete"
-                        onClick={(e) => { e.stopPropagation(); onDelete && onDelete(c); }}
-                  >
-                      <span className="material-icons">delete</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
+            <ClassroomRow
+              key={k}
+              c={c}
+              checked={checked}
+              onToggleRef={onToggleRef}
+              onEditRef={onEditRef}
+              onDeleteRef={onDeleteRef}
+            />
           );
         })}
       </tbody>
     </table>
   );
 }
+
+// Individual row component. Memoized to avoid re-rendering every row when only
+// one row's selection state changes. The comparator only checks the fields we
+// display and the `checked` state.
+const ClassroomRow = React.memo(function ClassroomRow({ c, checked, onToggleRef, onEditRef, onDeleteRef }) {
+  const k = `${c.building}||${c.classroomName}`;
+
+  return (
+    <tr onClick={() => onToggleRef.current && onToggleRef.current(c)}>
+      <td>
+        <input
+          type="checkbox"
+          aria-label={`Select ${c.building} ${c.classroomName}`}
+          checked={checked}
+          onChange={(e) => { e.stopPropagation(); onToggleRef.current && onToggleRef.current(c); }}
+          onClick={(e) => e.stopPropagation()} /* prevent double toggle when clicking checkbox */
+        />
+      </td>
+      <td>{c.building}</td>
+      <td>{c.classroomName}</td>
+      <td>{c.capacity}</td>
+      <td>{typeBadge(c.type)}</td>
+      <td>
+        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+          <button
+            type="button"
+            className="icon-btn icon-btn--edit"
+            title="Edit"
+            onClick={(e) => { e.stopPropagation(); onEditRef.current && onEditRef.current(c); }}
+          >
+            <span className="material-icons">edit</span>
+          </button>
+
+          <button
+            type="button"
+            className="icon-btn icon-btn--delete"
+            title="Delete"
+            onClick={(e) => { e.stopPropagation(); onDeleteRef.current && onDeleteRef.current(c); }}
+          >
+            <span className="material-icons">delete</span>
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+}, (prev, next) => {
+  // Only re-render when the displayed data or the checked state changes.
+  return (
+    prev.checked === next.checked &&
+    prev.c.building === next.c.building &&
+    prev.c.classroomName === next.c.classroomName &&
+    prev.c.capacity === next.c.capacity &&
+    prev.c.type === next.c.type
+  );
+});
