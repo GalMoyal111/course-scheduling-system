@@ -8,6 +8,8 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.SetOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import com.google.firebase.database.DatabaseReference;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -28,13 +30,15 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class CoursesExcelService {
 
+    @Autowired
+    private CourseService courseService;
+
 
     public void process(MultipartFile file) {
         // Implement logic to process the courses Excel file, read data, and save it to the database
         try {
-            InputStream inputStream = file.getInputStream();
-            List<Course> courses = readCoursesFromExcel(inputStream);
-            saveCoursesToDatabase(courses);
+            List<Course> courses = readCoursesFromExcel(file.getInputStream());
+            courseService.saveCourseToFirebase(courses);
             System.out.println("Finished processing courses Excel file");
 
         } catch (Exception e) {
@@ -47,7 +51,7 @@ public class CoursesExcelService {
     public List<Course> readCoursesFromExcel(InputStream inputStream) {
     List<Course> courses = new ArrayList<>();
     DataFormatter formatter = new DataFormatter();
-
+        
     try (Workbook workbook = new XSSFWorkbook(inputStream)) {
         Sheet sheet = workbook.getSheetAt(0);
 
@@ -268,21 +272,21 @@ public class CoursesExcelService {
             System.out.println("-----------------------------------");
         }
 
-    }
+    // }
 
-    public void saveSingleCourseToDatabase(Course course) {
-        Firestore db = FirestoreClient.getFirestore();
+    // public void saveSingleCourseToDatabase(Course course) {
+    //     Firestore db = FirestoreClient.getFirestore();
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("courseName", course.getCourseName());
-        data.put("prerequisiteCourseNumberOrConditions", course.getPrerequisiteCourseNumberOrConditions());
-        data.put("lectureHours", course.getLectureHours());
-        data.put("tutorialHours", course.getTutorialHours());
-        data.put("labHours", course.getLabHours());
-        data.put("projectHours", course.getProjectHours());
-        data.put("credits", course.getCredits());
-        data.put("notes", course.getNotes());
-        data.put("clusterName", course.getClusterName());
+    //     Map<String, Object> data = new HashMap<>();
+    //     data.put("courseName", course.getCourseName());
+    //     data.put("prerequisiteCourseNumberOrConditions", course.getPrerequisiteCourseNumberOrConditions());
+    //     data.put("lectureHours", course.getLectureHours());
+    //     data.put("tutorialHours", course.getTutorialHours());
+    //     data.put("labHours", course.getLabHours());
+    //     data.put("projectHours", course.getProjectHours());
+    //     data.put("credits", course.getCredits());
+    //     data.put("notes", course.getNotes());
+    //     data.put("clusterName", course.getClusterName());
 
         db.collection("courses")
           .document(course.getSemesterNumber())

@@ -12,6 +12,8 @@ import com.coursescheduling.server.model.ClassroomUpdateRequest;
 import com.coursescheduling.server.model.ClusterCoursesList;
 import com.coursescheduling.server.model.ClassroomDeleteRequest;
 import com.coursescheduling.server.service.ClassroomService;
+import com.coursescheduling.server.service.CourseService;
+
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +33,9 @@ public class FileUploadController {
 
     @Autowired
     private CoursesExcelService coursesExcelService;
+
+    @Autowired
+    private CourseService courseService;
     
     @Autowired
     private ClassroomService classroomService;
@@ -137,7 +142,7 @@ public class FileUploadController {
     @PostMapping("/courses")
     public String addCourse(@RequestBody Course course) {
 
-        coursesExcelService.saveSingleCourseToDatabase(course);
+        courseService.saveSingleCourse(course);
 
         return "Course added successfully";
     }
