@@ -68,8 +68,7 @@ public class CourseService {
 
             DocumentReference docRef = db.collection("courses").document(course.getCourseId());
             batch.set(docRef, Map.of(course.getCourseId(), data), SetOptions.merge());
-            DocumentReference docRef = db.collection("courses").document(course.getCourseId());
-            batch.set(docRef, Map.of(course.getCourseId(), data), SetOptions.merge());
+
         }
 
         batch.commit().get();            
@@ -170,7 +169,6 @@ public class CourseService {
         WriteBatch batch = db.batch();
 
         DocumentReference oldDoc = db.collection("courses").document(oldCourse.getCourseId());
-        DocumentReference oldDoc = db.collection("courses").document(oldCourse.getCourseId());
         
         Map<String, Object> deleteMap = new HashMap<>();
         deleteMap.put(oldCourse.getCourseId(), FieldValue.delete());
@@ -178,7 +176,6 @@ public class CourseService {
 
         batch.update(oldDoc, deleteMap);
 
-        DocumentReference newDoc = db.collection("courses").document(newCourse.getCourseId());
         DocumentReference newDoc = db.collection("courses").document(newCourse.getCourseId());
 
         Map<String, Object> data = new HashMap<>();
