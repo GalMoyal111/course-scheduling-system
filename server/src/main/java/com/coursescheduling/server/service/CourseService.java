@@ -64,8 +64,8 @@ public class CourseService {
             data.put("notes", course.getNotes());
             data.put("clusterName", course.getClusterName());
 
-            DocumentReference docRef = db.collection("courses").document(course.getCourseCode());
-            batch.set(docRef, Map.of(course.getCourseCode(), data), SetOptions.merge());
+            DocumentReference docRef = db.collection("courses").document(course.getCourseId());
+            batch.set(docRef, Map.of(course.getCourseId(), data), SetOptions.merge());
         }
 
         batch.commit().get();            
@@ -86,7 +86,7 @@ public class CourseService {
         data.put("notes", course.getNotes());
         data.put("clusterName", course.getClusterName());
 
-        db.collection("courses").document(course.getCourseCode()).set(Map.of(course.getCourseCode(), data), SetOptions.merge());
+        db.collection("courses").document(course.getCourseId()).set(Map.of(course.getCourseId(), data), SetOptions.merge());
 
     }
     
@@ -139,7 +139,7 @@ public class CourseService {
             
                 Course course = new Course();
 
-                course.setCourseCode(courseCode);
+                course.setCourseId(courseCode);
                 course.setCourseName(courseName);
                 course.setPrerequisiteCourseNumberOrConditions(prerequisiteCourseNumberOrConditions);
                 course.setLectureHours(lectureHours);
@@ -162,14 +162,14 @@ public class CourseService {
         Firestore db = FirestoreClient.getFirestore();
         WriteBatch batch = db.batch();
 
-        DocumentReference oldDoc = db.collection("courses").document(oldCourse.getCourseCode());
+        DocumentReference oldDoc = db.collection("courses").document(oldCourse.getCourseId());
         
         Map<String, Object> deleteMap = new HashMap<>();
-        deleteMap.put(oldCourse.getCourseCode(), FieldValue.delete());
+        deleteMap.put(oldCourse.getCourseId(), FieldValue.delete());
 
         batch.update(oldDoc, deleteMap);
 
-        DocumentReference newDoc = db.collection("courses").document(newCourse.getCourseCode());
+        DocumentReference newDoc = db.collection("courses").document(newCourse.getCourseId());
 
         Map<String, Object> data = new HashMap<>();
         data.put("courseName", newCourse.getCourseName());
@@ -182,7 +182,7 @@ public class CourseService {
         data.put("notes", newCourse.getNotes());
         data.put("clusterName", newCourse.getClusterName());
 
-        batch.set(newDoc, Map.of(newCourse.getCourseCode(), data), SetOptions.merge());
+        batch.set(newDoc, Map.of(newCourse.getCourseId(), data), SetOptions.merge());
 
         batch.commit().get();
     }

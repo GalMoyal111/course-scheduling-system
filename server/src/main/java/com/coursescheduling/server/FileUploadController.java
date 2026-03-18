@@ -189,7 +189,7 @@ public class FileUploadController {
     
     @GetMapping("/getAllCoursesGrouped")
     public List<ClusterCoursesList> getAllCoursesGrouped() {
-        return clusterCoursesList.getAllCoursesGroupedByCluster();
+        return lessonService.getAllCoursesGroupedByCluster();
     }
     
 }
