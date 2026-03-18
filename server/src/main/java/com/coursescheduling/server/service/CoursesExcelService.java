@@ -144,6 +144,11 @@ public class CoursesExcelService {
         Firestore db = FirestoreClient.getFirestore();
         for (Course course : courses) {
             Map<String, Object> data = new HashMap<>();
+            
+            data.put("clusterId", course.getSemesterNumber()); 
+            data.put("courseId", course.getCourseCode());      
+            
+            
             data.put("courseName", course.getCourseName());
             data.put("prerequisiteCourseNumberOrConditions", course.getPrerequisiteCourseNumberOrConditions());
             data.put("lectureHours", course.getLectureHours());
@@ -154,8 +159,10 @@ public class CoursesExcelService {
             data.put("notes", course.getNotes());
             data.put("clusterName", course.getClusterName());
 
-            // db.collection("courses").document(course.getCourseCode()).set(data, SetOptions.merge());
-            db.collection("courses").document(course.getSemesterNumber()).set(Map.of(course.getCourseCode(), data), SetOptions.merge());
+            db.collection("courses").document(course.getCourseCode()).set(data, SetOptions.merge());
+            //db.collection("courses").document(course.getSemesterNumber()).set(Map.of(course.getCourseCode(), data), SetOptions.merge());
+            
+
         }
     }
 
