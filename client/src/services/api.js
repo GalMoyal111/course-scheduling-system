@@ -62,6 +62,54 @@ export async function addCourse(course) {
   return res.text();
 }
 
+export async function getAllCourses() {
+  const res = await fetch(`${BASE_URL}/getAllCourses`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Fetch courses failed: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}
+
+export async function deleteCourses(courses) {
+  const res = await fetch(`${BASE_URL}/deleteCourses`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(courses),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Delete courses failed: ${res.status} ${text}`);
+  }
+
+  return res.text();
+}
+
+export async function updateCourse(request) {
+  const res = await fetch(`${BASE_URL}/courses/update`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Update course failed: ${res.status} ${text}`);
+  }
+
+  return res.text();
+}
+
 export async function uploadRooms(file) {
   const formData = new FormData();
   formData.append("file", file);

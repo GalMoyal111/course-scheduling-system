@@ -54,6 +54,8 @@ public class CourseService {
         WriteBatch batch = db.batch();
         for (Course course : courses) {
             Map<String, Object> data = new HashMap<>();
+            data.put("semesterNumber", course.getSemesterNumber());
+            data.put("courseId", course.getCourseId());
             data.put("courseName", course.getCourseName());
             data.put("prerequisiteCourseNumberOrConditions", course.getPrerequisiteCourseNumberOrConditions());
             data.put("lectureHours", course.getLectureHours());
@@ -66,6 +68,8 @@ public class CourseService {
 
             DocumentReference docRef = db.collection("courses").document(course.getCourseId());
             batch.set(docRef, Map.of(course.getCourseId(), data), SetOptions.merge());
+            DocumentReference docRef = db.collection("courses").document(course.getCourseId());
+            batch.set(docRef, Map.of(course.getCourseId(), data), SetOptions.merge());
         }
 
         batch.commit().get();            
@@ -76,6 +80,8 @@ public class CourseService {
         Firestore db = FirestoreClient.getFirestore();
 
         Map<String, Object> data = new HashMap<>();
+        data.put("semesterNumber", course.getSemesterNumber());
+        data.put("courseId", course.getCourseId());
         data.put("courseName", course.getCourseName());
         data.put("prerequisiteCourseNumberOrConditions", course.getPrerequisiteCourseNumberOrConditions());
         data.put("lectureHours", course.getLectureHours());
@@ -96,10 +102,11 @@ public class CourseService {
         WriteBatch batch = db.batch();
 
         for(CourseDeleteRequest course : courses) {
-            DocumentReference docRef = db.collection("courses").document(course.getCourseCode());
+            // DocumentReference docRef = db.collection("courses").document(course.getCourseCode());]
+            DocumentReference docRef = db.collection("courses").document(course.getCourseId());
 
             Map<String, Object> updates = new HashMap<>();
-            updates.put(course.getCourseCode(), FieldValue.delete());
+            updates.put(course.getCourseId(), FieldValue.delete());
             batch.update(docRef, updates);
 
         }
@@ -125,7 +132,7 @@ public class CourseService {
                 Map<String, Object> courseData =
                         (Map<String, Object>) data.get(courseKey);
 
-                
+                String semesterNumber = (String) courseData.get("semesterNumber");
                 String courseName = (String) courseData.get("courseName");
                 String prerequisiteCourseNumberOrConditions = (String) courseData.get("prerequisiteCourseNumberOrConditions");
                 int lectureHours = ((Number) courseData.get("lectureHours")).intValue();
@@ -163,15 +170,20 @@ public class CourseService {
         WriteBatch batch = db.batch();
 
         DocumentReference oldDoc = db.collection("courses").document(oldCourse.getCourseId());
+        DocumentReference oldDoc = db.collection("courses").document(oldCourse.getCourseId());
         
         Map<String, Object> deleteMap = new HashMap<>();
+        deleteMap.put(oldCourse.getCourseId(), FieldValue.delete());
         deleteMap.put(oldCourse.getCourseId(), FieldValue.delete());
 
         batch.update(oldDoc, deleteMap);
 
         DocumentReference newDoc = db.collection("courses").document(newCourse.getCourseId());
+        DocumentReference newDoc = db.collection("courses").document(newCourse.getCourseId());
 
         Map<String, Object> data = new HashMap<>();
+        data.put("semesterNumber", newCourse.getSemesterNumber());
+        data.put("courseId", newCourse.getCourseId());
         data.put("courseName", newCourse.getCourseName());
         data.put("prerequisiteCourseNumberOrConditions", newCourse.getPrerequisiteCourseNumberOrConditions());
         data.put("lectureHours", newCourse.getLectureHours());
@@ -182,6 +194,7 @@ public class CourseService {
         data.put("notes", newCourse.getNotes());
         data.put("clusterName", newCourse.getClusterName());
 
+        batch.set(newDoc, Map.of(newCourse.getCourseId(), data), SetOptions.merge());
         batch.set(newDoc, Map.of(newCourse.getCourseId(), data), SetOptions.merge());
 
         batch.commit().get();
