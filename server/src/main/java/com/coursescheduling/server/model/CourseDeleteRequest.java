@@ -2,7 +2,7 @@ package com.coursescheduling.server.model;
 
 public class CourseDeleteRequest {
     private String semesterNumber;
-    private String courseCode;
+    private String courseId;
 
     public CourseDeleteRequest() {}
 
@@ -14,12 +14,12 @@ public class CourseDeleteRequest {
         this.semesterNumber = semesterNumber;
     }
 
-    public String getCourseCode() {
-        return courseCode;
+    public String getCourseId() {
+        return courseId;
     }
 
-    public void setCourseCode(String courseCode) {
-        this.courseCode = courseCode;
+    public void setCourseId(String courseId) {
+        this.courseId = courseId;
     }
 
 

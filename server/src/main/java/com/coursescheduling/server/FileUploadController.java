@@ -9,6 +9,8 @@ import com.coursescheduling.server.service.ExcelProcessingService;
 import com.coursescheduling.server.service.LessonService;
 import com.coursescheduling.server.model.ClassroomDeleteRequest;
 import com.coursescheduling.server.model.ClassroomUpdateRequest;
+import com.coursescheduling.server.model.CourseDeleteRequest;
+import com.coursescheduling.server.model.CourseUpdateRequest;
 import com.coursescheduling.server.model.ClusterCoursesList;
 import com.coursescheduling.server.model.ClassroomDeleteRequest;
 import com.coursescheduling.server.service.ClassroomService;
@@ -43,8 +45,8 @@ public class FileUploadController {
     @Autowired
     private LessonService lessonService;
     
-    @Autowired
-    private ClusterCoursesList clusterCoursesList;
+    // @Autowired
+    // private ClusterCoursesList clusterCoursesList;
     
 
     // Constructor-based dependency injection of the ExcelProcessingService.
@@ -146,6 +148,24 @@ public class FileUploadController {
 
         return "Course added successfully";
     }
+
+    @GetMapping("/getAllCourses")
+    public List<Course> getAllCourses() throws Exception {
+
+        return courseService.getAllCourses();
+    }
+
+    @DeleteMapping("/deleteCourses")
+    public void deleteCourses(@RequestBody List<CourseDeleteRequest> courses) throws Exception {
+
+        courseService.deleteCourses(courses);
+    }
+
+    @PostMapping("/courses/update")
+    public void updateCourse(@RequestBody CourseUpdateRequest request) throws Exception {
+
+        courseService.updateCourse(request.getOldCourse(), request.getNewCourse());
+    }
     
     
     @PostMapping("/classrooms/delete")
@@ -186,10 +206,10 @@ public class FileUploadController {
         lessonService.deleteLessons(lessons);
     }
     
-    
-    @GetMapping("/getAllCoursesGrouped")
-    public List<ClusterCoursesList> getAllCoursesGrouped() {
-        return clusterCoursesList.getAllCoursesGroupedByCluster();
-    }
+    //delete comment
+    // @GetMapping("/getAllCoursesGrouped")
+    // public List<ClusterCoursesList> getAllCoursesGrouped() {
+    //     return clusterCoursesList.getAllCoursesGroupedByCluster();
+    // }
     
 }

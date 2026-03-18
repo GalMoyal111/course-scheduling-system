@@ -196,7 +196,7 @@ public class CoursesExcelService {
             int rowIndex = 1;
 
             for (QueryDocumentSnapshot doc : documents) {
-                String semesterNumber = doc.getId();
+                String documentId = doc.getId();
                 Map<String, Object> coursesInSemester = doc.getData();
                 for (Map.Entry<String, Object> entry : coursesInSemester.entrySet()) {
                     System.out.println("Key = " + entry.getKey());
@@ -212,6 +212,10 @@ public class CoursesExcelService {
                     }
 
                     Map<String, Object> data = (Map<String, Object>) value;
+                    String semesterNumber = asString(data.get("semesterNumber"));
+                    if (semesterNumber.isEmpty()) {
+                        semesterNumber = documentId;
+                    }
                     Row row = sheet.createRow(rowIndex++);
 
                     row.createCell(0).setCellValue(semesterNumber);
@@ -288,9 +292,9 @@ public class CoursesExcelService {
     //     data.put("notes", course.getNotes());
     //     data.put("clusterName", course.getClusterName());
 
-        db.collection("courses")
-          .document(course.getSemesterNumber())
-          .set(Map.of(course.getCourseId(), data), SetOptions.merge());
+        // db.collection("courses")
+        //   .document(course.getSemesterNumber())
+        //   .set(Map.of(course.getCourseId(), data), SetOptions.merge());
     }
 
     private String asString(Object value) {

@@ -1,8 +1,10 @@
 import UploadForm from "../components/UploadForm";
 import AddCourseModal from "../components/AddCourseModal";
+import ConfirmModal from "../components/ConfirmModal";
+import CourseList from "../components/CourseList";
 import Button from "../components/ui/Button";
-import { uploadCourses, exportCourses, addCourse } from "../services/api";
-import { useState } from "react";
+import { uploadCourses, exportCourses, addCourse, getAllCourses, deleteCourses, updateCourse } from "../services/api";
+import { useEffect, useState } from "react";
 
 import "./UploadPage.css"; // reuse the Upload page styles
 
@@ -10,17 +12,80 @@ import "./UploadPage.css"; // reuse the Upload page styles
  * Minimal page for uploading course files (similar to lessons upload).
  */
 export default function UploadCoursesPage() {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingFile, setPendingFile] = useState(null);
   const [exporting, setExporting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [query, setQuery] = useState("");
+  const [selectedCourses, setSelectedCourses] = useState([]);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(null);
+
+  
+
+  const loadCourses = async () => {
+    try {
+      const data = await getAllCourses();
+      if (Array.isArray(data)) {
+        setCourses(data || []);
+      } else {
+        setCourses([]);
+      }
+    } catch (err) {
+      console.error("Failed to load courses:", err);
+      setCourses([]);
+    }
+  };
+
+  useEffect(() => {
+    let active = true;
+
+    getAllCourses()
+      .then((data) => {
+        if (!active) return;
+        if (Array.isArray(data)) {
+          setCourses(data || []);
+        } else {
+          setCourses([]);
+        }
+      })
+      .catch((err) => {
+        if (!active) return;
+        console.error("Failed to load courses:", err);
+        setCourses([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleUpload = async (file) => {
+    setPendingFile(file);
+    setConfirmOpen(true);
+  };
+
+  const performUpload = async () => {
+    if (!pendingFile) return;
+    setConfirmOpen(false);
+    const fileToUpload = pendingFile;
+    setPendingFile(null);
+
     try {
-      const result = await uploadCourses(file);
+      const result = await uploadCourses(fileToUpload);
       alert(result || "Upload successful");
+      await loadCourses();
     } catch (err) {
       console.error(err);
       alert("Upload failed. Check console for details.");
     }
+  };
+
+  const cancelUpload = () => {
+    setConfirmOpen(false);
+    setPendingFile(null);
   };
 
   const handleExport = async () => {
@@ -47,45 +112,197 @@ export default function UploadCoursesPage() {
 
   const handleAddCourse = async (course) => {
     try {
-      await addCourse(course);
-      alert("Course added successfully");
+      if (editingCourse) {
+        await updateCourse({ oldCourse: editingCourse, newCourse: course });
+        alert("Course updated successfully");
+      } else {
+        await addCourse(course);
+        alert("Course added successfully");
+      }
+      await loadCourses();
       setIsModalOpen(false);
+      setEditingCourse(null);
     } catch (err) {
       console.error(err);
-      alert("Failed to add course");
+      alert(editingCourse ? "Failed to update course" : "Failed to add course");
     }
   };
 
+  const handleEditCourse = (course) => {
+    setEditingCourse(course || null);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteCourse = (course) => {
+    setPendingDelete(course || null);
+    setDeleteConfirmOpen(true);
+  };
+
+  const performDeleteCourses = async () => {
+    if (!pendingDelete) return;
+    const toDelete = Array.isArray(pendingDelete) ? pendingDelete : [pendingDelete];
+
+    const payload = toDelete.map((course) => ({
+      courseId: course.courseId,
+      semesterNumber: course.semesterNumber,
+    }));
+
+    setDeleteConfirmOpen(false);
+    setPendingDelete(null);
+
+    try {
+      await deleteCourses(payload);
+      setSelectedCourses([]);
+      await loadCourses();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete course(s). Check console for details.");
+    }
+  };
+
+  const filtered = courses.filter((c) => {
+    if (!query) return true;
+    const q = query.toLowerCase();
+    return (
+      (c.courseId && String(c.courseId).toLowerCase().includes(q)) ||
+      (c.courseName && String(c.courseName).toLowerCase().includes(q)) ||
+      (c.semesterNumber && String(c.semesterNumber).toLowerCase().includes(q))
+    );
+  });
+
+  const sortedCourses = [...filtered].sort((a, b) => {
+    const aSem = String(a.semesterNumber || "").trim();
+    const bSem = String(b.semesterNumber || "").trim();
+
+    const aNum = Number(aSem);
+    const bNum = Number(bSem);
+    const aIsNum = aSem !== "" && Number.isFinite(aNum);
+    const bIsNum = bSem !== "" && Number.isFinite(bNum);
+
+    if (aIsNum && bIsNum && aNum !== bNum) {
+      return aNum - bNum;
+    }
+
+    if (aSem !== bSem) {
+      return aSem.localeCompare(bSem, undefined, { numeric: true, sensitivity: "base" });
+    }
+
+    return String(a.courseId || "").localeCompare(String(b.courseId || ""), undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
+  });
+
   return (
-    <div className="upload-page">
-      <header className="upload-hero">
-        <h1>Upload Courses</h1>
-        <p className="lead">Upload a course file (structure similar to class file).</p>
-      </header>
+    <div>
+      <h2>Upload Courses Excel</h2>
 
-      <main className="upload-content">
-        <section className="upload-card ui-card">
-          <h2 className="card-title">Upload Course File</h2>
-          <p className="card-sub">Supported formats: .xlsx, .xls</p>
-
-          <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}>
-            <Button onClick={() => setIsModalOpen(true)} variant="secondary">
-              Add Course
-            </Button>
-            <Button onClick={handleExport} disabled={exporting}>
-              {exporting ? "Exporting..." : "Export to Excel"}
-            </Button>
+      <div className="toolbar">
+        <div className="left">
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2" />
+            </svg>
+            <input
+              className="search-input"
+              placeholder="Search by course id, name or semester"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
           </div>
+        </div>
 
-          <UploadForm onUpload={handleUpload} />
+        <div className="right">
+          <button className="icon-btn" title="Refresh list" onClick={loadCourses} aria-label="Refresh">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path d="M21 12a9 9 0 10-3.22 6.72" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M21 3v6h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <Button onClick={() => setIsModalOpen(true)} variant="secondary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden style={{ marginRight: 8 }}>
+              <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Add Course
+          </Button>
+          <Button onClick={handleExport} disabled={exporting}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden style={{ marginRight: 8 }}>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M7 10l5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M12 5v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            {exporting ? "Exporting..." : "Export"}
+          </Button>
+        </div>
+      </div>
 
-          <AddCourseModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSave={handleAddCourse}
-          />
-        </section>
-      </main>
+      <UploadForm onUpload={handleUpload} />
+
+      <div style={{ marginTop: 12 }}>
+        <CourseList
+          courses={sortedCourses}
+          onEdit={handleEditCourse}
+          onDelete={handleDeleteCourse}
+          onSelectionChange={setSelectedCourses}
+          title="Courses"
+        />
+        <div style={{ marginTop: 8, display: "flex", justifyContent: "flex-start", gap: 8 }}>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              if (!selectedCourses || selectedCourses.length === 0) return;
+              setPendingDelete(selectedCourses);
+              setDeleteConfirmOpen(true);
+            }}
+            disabled={!selectedCourses || selectedCourses.length === 0}
+            style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+          >
+            <span className="material-icons">delete</span>
+            Delete selected ({selectedCourses.length})
+          </Button>
+        </div>
+      </div>
+
+      <footer className="upload-footer">Need the template? Check the README or contact your admin.</footer>
+
+      <AddCourseModal
+        isOpen={isModalOpen}
+        onClose={() => { setIsModalOpen(false); setEditingCourse(null); }}
+        onSave={handleAddCourse}
+        initialCourse={editingCourse}
+      />
+
+      <ConfirmModal
+        isOpen={confirmOpen}
+        title="Upload will overwrite existing data"
+        message={
+          "Note: uploading a new file will completely delete everything that existed in the system. "
+        }
+        fileName={pendingFile ? pendingFile.name : ""}
+        onConfirm={performUpload}
+        onCancel={cancelUpload}
+        confirmLabel="Yes, upload"
+        cancelLabel="No, cancel"
+      />
+      <ConfirmModal
+        isOpen={deleteConfirmOpen}
+        title="Delete course"
+        message={"Are you sure you want to delete the selected course(s)?"}
+        fileName={
+          Array.isArray(pendingDelete)
+            ? pendingDelete.length > 0
+              ? pendingDelete.map((p) => `${p.courseId} - ${p.courseName}`).join(", ")
+              : ""
+            : pendingDelete
+            ? `${pendingDelete.courseId} - ${pendingDelete.courseName}`
+            : ""
+        }
+        onConfirm={performDeleteCourses}
+        onCancel={() => { setDeleteConfirmOpen(false); setPendingDelete(null); }}
+        confirmLabel="Yes, delete"
+        cancelLabel="No, keep"
+      />
     </div>
   );
 }

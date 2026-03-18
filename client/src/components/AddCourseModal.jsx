@@ -16,6 +16,20 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
   const [notes, setNotes] = useState("");
   const [clusterName, setClusterName] = useState("");
 
+  const resetForm = () => {
+    setSemesterNumber("");
+    setCourseCode("");
+    setCourseName("");
+    setPrerequisiteCourseNumberOrConditions("");
+    setLectureHours("");
+    setTutorialHours("");
+    setLabHours("");
+    setProjectHours("");
+    setCredits("");
+    setNotes("");
+    setClusterName("");
+  };
+  
   // Initialize fields when modal opens or when initialCourse changes
   React.useEffect(() => {
     if (!isOpen) return;
@@ -40,20 +54,6 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
 
   const isEditing = Boolean(initialCourse);
 
-  const resetForm = () => {
-    setSemesterNumber("");
-    setCourseCode("");
-    setCourseName("");
-    setPrerequisiteCourseNumberOrConditions("");
-    setLectureHours("");
-    setTutorialHours("");
-    setLabHours("");
-    setProjectHours("");
-    setCredits("");
-    setNotes("");
-    setClusterName("");
-  };
-
   const toNonNegativeInt = (value, fieldName) => {
     const parsed = parseInt(value, 10);
     if (isNaN(parsed) || parsed < 0) {
@@ -68,7 +68,8 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
     try {
       const course = {
         semesterNumber: semesterNumber.trim(),
-        courseCode: courseCode.trim(),
+        courseId: courseCode.trim(),
+        // courseCode: courseCode.trim(),
         courseName: courseName.trim(),
         prerequisiteCourseNumberOrConditions: prerequisiteCourseNumberOrConditions.trim(),
         lectureHours: toNonNegativeInt(lectureHours, "lecture hours"),
