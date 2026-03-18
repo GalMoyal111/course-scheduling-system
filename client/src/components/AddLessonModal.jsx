@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Button from "./ui/Button";
 import "./ui/ui.css";
+import { getAllCoursesGrouped } from "../services/api";
 
 export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson = null, clusters = [], courses = [] }) {
   const [courseName, setCourseName] = useState("");
@@ -9,9 +10,11 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
   const [type, setType] = useState("lecture");
   const [duration, setDuration] = useState("1");
   const [semester, setSemester] = useState("");
+  const [groupedCourses, setGroupedCourses] = useState([]);
 
   React.useEffect(() => {
     if (!isOpen) return;
+
     if (initialLesson) {
       setCourseName(initialLesson.courseName || "");
       setLecturer(initialLesson.lecturer || "");
@@ -29,11 +32,29 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
     }
   }, [isOpen, initialLesson]);
 
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    getAllCoursesGrouped()
+      .then((data) => {
+        console.log("courses from server:", data);
+        setGroupedCourses(data);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch courses", err);
+      });
+
+  }, [isOpen]);
+
+
   if (!isOpen) return null;
 
-  // Use provided lists if available, otherwise sensible defaults
-  const courseOptions = (courses && courses.length) ? courses : ["Stats", "Algorithms", "Deep Learning"];
-  const clusterOptions = (clusters && clusters.length) ? clusters : ["Semester 1", "Semester 2", "Semester 3"];
+  const clusterOptions = groupedCourses.map(c => c.clusterName);
+  const selectedClusterObj = groupedCourses.find(
+    c => c.clusterName  === cluster
+  );
+
+  const courseOptions = selectedClusterObj ? selectedClusterObj.courses : [];
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -68,7 +89,14 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
 
               <div className="form-field">
                 <label>Cluster</label>
-                <select className="ui-select" value={cluster} onChange={(e) => setCluster(e.target.value)}>
+                <select
+                  className="ui-select"
+                  value={cluster}
+                  onChange={(e) => {
+                    setCluster(e.target.value);
+                    setCourseName(""); // 🔥 NEW (reset course)
+                  }}
+                >
                   <option value="">(none)</option>
                   {clusterOptions.map((c) => (
                     <option key={c} value={c}>{c}</option>
@@ -78,10 +106,16 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
 
               <div className="form-field">
                 <label>Course</label>
-                <select className="ui-select" value={courseName} onChange={(e) => setCourseName(e.target.value)}>
+                <select
+                  className="ui-select"
+                  value={courseName}
+                  onChange={(e) => setCourseName(e.target.value)}
+                >
                   <option value="">(select)</option>
                   {courseOptions.map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                    <option key={c.courseId} value={c.courseName}>
+                      {c.courseName}
+                    </option>
                   ))}
                 </select>
               </div>

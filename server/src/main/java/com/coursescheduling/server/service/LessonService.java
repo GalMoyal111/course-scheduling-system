@@ -154,6 +154,8 @@ public class LessonService {
 	        List<Course> allCourses = new ArrayList<>();
 
 	        for (QueryDocumentSnapshot doc : documents) {
+	        	
+	        	
 	            Course course = doc.toObject(Course.class);
 
 	            course.setCourseId(doc.getId());
@@ -161,7 +163,7 @@ public class LessonService {
 	            allCourses.add(course);
 	        }
 
-	        Map<String, List<Course>> grouped = allCourses.stream().collect(Collectors.groupingBy(Course::getSemesterNumber));
+	        Map<String, List<Course>> grouped = allCourses.stream().collect(Collectors.groupingBy(Course::getClusterName));
 
 	        List<ClusterCoursesList> result = new ArrayList<>();
 
@@ -173,7 +175,7 @@ public class LessonService {
 
 	    } catch (Exception e) {
 	        e.printStackTrace();
-	        throw new RuntimeException("Failed to fetch courses");
+	        throw new RuntimeException("Failed to fetch courses", e);
 	    }
 	}
 	

@@ -78,6 +78,22 @@ export async function getAllCourses() {
   return res.json();
 }
 
+export async function getAllCoursesGrouped() {
+  const res = await fetch(`${BASE_URL}/getAllCoursesGrouped`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Fetch grouped courses failed: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}
+
 export async function deleteCourses(courses) {
   const res = await fetch(`${BASE_URL}/deleteCourses`, {
     method: "DELETE",

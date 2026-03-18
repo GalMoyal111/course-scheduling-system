@@ -67,7 +67,7 @@ public class CourseService {
             data.put("clusterName", course.getClusterName());
 
             DocumentReference docRef = db.collection("courses").document(course.getCourseId());
-            batch.set(docRef, Map.of(course.getCourseId(), data), SetOptions.merge());
+            batch.set(docRef, data);
 
         }
 
