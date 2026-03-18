@@ -123,45 +123,92 @@ public class CourseService {
 
         for (QueryDocumentSnapshot doc : documents) {
 
-            String courseCode = doc.getId();
+            String docId = doc.getId();
             Map<String, Object> data = doc.getData();
+
+            // Handle flat schema where course fields are stored directly on the document.
+            if (isFlatCourseRecord(data)) {
+                courses.add(buildCourseFromMap(data, docId, docId));
+                continue;
+            }
 
             for (String courseKey : data.keySet()) {
 
                 Map<String, Object> courseData =
                         (Map<String, Object>) data.get(courseKey);
+                if (!(courseData instanceof Map)) {
+                    continue;
+                }
 
-                String semesterNumber = (String) courseData.get("semesterNumber");
-                String courseName = (String) courseData.get("courseName");
-                String prerequisiteCourseNumberOrConditions = (String) courseData.get("prerequisiteCourseNumberOrConditions");
-                int lectureHours = ((Number) courseData.get("lectureHours")).intValue();
-                int tutorialHours = ((Number) courseData.get("tutorialHours")).intValue();
-                int labHours = ((Number) courseData.get("labHours")).intValue();
-                int projectHours = ((Number) courseData.get("projectHours")).intValue();
-                int credits = ((Number) courseData.get("credits")).intValue();
-                String notes = (String) courseData.get("notes");
-                String clusterName = (String) courseData.get("clusterName");
-                
-            
-                Course course = new Course();
-
-                course.setCourseId(courseCode);
-                course.setCourseName(courseName);
-                course.setPrerequisiteCourseNumberOrConditions(prerequisiteCourseNumberOrConditions);
-                course.setLectureHours(lectureHours);
-                course.setTutorialHours(tutorialHours);
-                course.setLabHours(labHours);
-                course.setProjectHours(projectHours);
-                course.setCredits(credits);
-                course.setNotes(notes);
-                course.setClusterName(clusterName);
-
-                courses.add(course);
+                courses.add(buildCourseFromMap(courseData, docId, courseKey));
             }
 
         }
 
         return courses;
+    }
+
+    private boolean isFlatCourseRecord(Map<String, Object> data) {
+        if (data == null) {
+            return false;
+        }
+
+        return data.containsKey("courseName") || data.containsKey("courseId") || data.containsKey("semesterNumber");
+    }
+
+    private Course buildCourseFromMap(Map<String, Object> courseData, String docId, String courseKey) {
+        String semesterNumber = getString(courseData.get("semesterNumber"));
+        if (semesterNumber.isEmpty()) {
+            // Legacy fallback: in older uploads semester was stored as clusterId.
+            semesterNumber = getString(courseData.get("clusterId"));
+        }
+        if (semesterNumber.isEmpty() && !docId.equals(courseKey)) {
+            // Legacy schema fallback: document ID represented the semester.
+            semesterNumber = docId;
+        }
+
+        String courseId = getString(courseData.get("courseId"));
+        if (courseId.isEmpty()) {
+            courseId = courseKey;
+        }
+        if (courseId.isEmpty()) {
+            courseId = docId;
+        }
+
+        Course course = new Course();
+        course.setSemesterNumber(semesterNumber);
+        course.setCourseId(courseId);
+        course.setCourseName(getString(courseData.get("courseName")));
+        course.setPrerequisiteCourseNumberOrConditions(getString(courseData.get("prerequisiteCourseNumberOrConditions")));
+        course.setLectureHours(getInt(courseData.get("lectureHours")));
+        course.setTutorialHours(getInt(courseData.get("tutorialHours")));
+        course.setLabHours(getInt(courseData.get("labHours")));
+        course.setProjectHours(getInt(courseData.get("projectHours")));
+        course.setCredits(getInt(courseData.get("credits")));
+        course.setNotes(getString(courseData.get("notes")));
+        course.setClusterName(getString(courseData.get("clusterName")));
+
+        return course;
+    }
+
+    private String getString(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+
+    private int getInt(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+
+        if (value == null) {
+            return 0;
+        }
+
+        try {
+            return Integer.parseInt(String.valueOf(value));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     public void updateCourse(Course oldCourse, Course newCourse) throws Exception {
