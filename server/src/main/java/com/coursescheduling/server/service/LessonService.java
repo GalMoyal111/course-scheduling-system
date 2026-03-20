@@ -102,10 +102,40 @@ public class LessonService {
 	public void addLesson(Lesson lesson){
 	    Firestore db = FirestoreClient.getFirestore();
 
-	    String semester = lesson.getSemester().name();
-	    String key = lesson.getCourseId() + "_" + lesson.getIndex();
+	    CourseService courseService = new CourseService();
+		Course course = courseService.getCourseByName(lesson.getCourseName());
+		
+	    if (lesson.getCourseId() == null ) {
+	    	      
+			if (course == null) {
+	            throw new RuntimeException("Course not found");
+	        }
+	        lesson.setCourseId(course.getCourseId());
+	    }
 
+	    String semester = lesson.getSemester().name();
 	    DocumentReference docRef = db.collection("lessons").document(semester);
+
+	    try {
+	        DocumentSnapshot snapshot = docRef.get().get();
+
+	        int index = 1;
+
+	        if (snapshot.exists()) {
+	            Map<String, Object> data = snapshot.getData();
+
+	            long count = data.keySet().stream().filter(key -> key.startsWith(lesson.getCourseId() + "_")).count();
+
+	            index = (int) count + 1;
+	        }
+
+	        lesson.setIndex(index);
+
+	    } catch (Exception e) {
+	        throw new RuntimeException("Failed to calculate index");
+	    }
+
+	    String key = lesson.getCourseId() + "_" + lesson.getIndex();
 
 	    Map<String, Lesson> update = new HashMap<>();
 	    update.put(key, lesson);
