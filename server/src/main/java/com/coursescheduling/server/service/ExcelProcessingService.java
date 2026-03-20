@@ -94,23 +94,6 @@ public class ExcelProcessingService {
 	    throw new IllegalArgumentException("Unknown semester: " + semesterText);
 	}
 	
-	// Return an ordering priority for types so sorting groups similar items.
-	private int getTypePriority(LessonType type) {
-	    switch (type) {
-	        case LECTURE:
-	            return 1;
-	        case TUTORIAL:
-	            return 2;
-	        case LAB:
-	            return 3;
-	        case PBL:
-	            return 4;
-	        case PROJECT:
-	            return 5;
-	        default:
-	            return 100;
-	    }
-	}
 	
 	// Convert a single sheet row into one or more Lesson objects.
 	private void addLessonFromRow(Row row, List<Lesson> lessons) {
@@ -185,10 +168,7 @@ public class ExcelProcessingService {
 	        if (semesterCompare != 0)
 	            return semesterCompare;
 
-	        return Integer.compare(
-	            getTypePriority(l1.getType()),
-	            getTypePriority(l2.getType())
-	        );
+	        return Integer.compare(l1.getType().getPriority(), l2.getType().getPriority());
 	    });
 	}
 	

@@ -196,8 +196,9 @@ public class FileUploadController {
         return lessonService.getAllLessons();
     }
     
-    @PostMapping("/addSingelLesson")
+    @PostMapping("/addSingleLesson")
     public void addLesson(@RequestBody Lesson lesson) throws Exception {
+    	System.out.println("test");
         lessonService.addLesson(lesson);
     }
     

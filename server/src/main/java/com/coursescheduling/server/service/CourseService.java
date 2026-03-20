@@ -197,25 +197,23 @@ public class CourseService {
     
     
     
-    public Course  getCourseByName(String courseName) {
-		Firestore db = FirestoreClient.getFirestore();
-		
-		try {
-			Query query = db.collection("courses").whereEqualTo("courseName", courseName).limit(1);
-			QuerySnapshot querySnapshot = query.get().get();
-			
-			if (querySnapshot.isEmpty()) 
-	            return null;
-	        
-			DocumentSnapshot doc = querySnapshot.getDocuments().get(0);
+    public Course getCourseById(String courseId) {
+        Firestore db = FirestoreClient.getFirestore();
 
-	        return doc.toObject(Course.class);
-			
-		}catch (Exception e) {
-			throw new RuntimeException("Failed to fetch course by name", e);
-		}
+        try {
+            DocumentSnapshot doc = db.collection("courses")
+                    .document(courseId)
+                    .get()
+                    .get();
 
-	}
+            if (!doc.exists()) return null;
+
+            return doc.toObject(Course.class);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch course", e);
+        }
+    }
     
    
 }

@@ -61,6 +61,8 @@ public class Lesson {
 	public void setCluster(int groupId) {
 		this.cluster = groupId;
 	}
+	
+	
 
 	public LessonType getType() {
 	    return type;

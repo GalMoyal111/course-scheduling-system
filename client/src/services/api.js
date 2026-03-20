@@ -241,7 +241,7 @@ export async function getAllLessons() {
 }
 
 export async function addLesson(lesson) {
-  const res = await fetch(`${BASE_URL}/addSingelLesson`, {
+  const res = await fetch(`${BASE_URL}/addSingleLesson`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(lesson),

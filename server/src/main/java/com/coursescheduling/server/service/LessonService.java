@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.coursescheduling.server.model.ClusterCoursesList;
 import com.coursescheduling.server.model.Course;
 import com.coursescheduling.server.model.Lesson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
@@ -28,7 +29,13 @@ import com.google.firebase.database.utilities.encoding.CustomClassMapper;
 @Service
 public class LessonService {
 
-	
+	private final CourseService courseService;
+	private int splitGroupCounter = 1;
+
+
+    public LessonService(CourseService courseService) {
+        this.courseService = courseService;
+    }
 	
 	public void deleteAllLessons() {
 		Firestore db = FirestoreClient.getFirestore();
@@ -67,6 +74,9 @@ public class LessonService {
 		
 	}
 	
+	private int generateSplitGroupId() {
+	    return splitGroupCounter++;
+	}
 	
 	public List<Lesson> getAllLessons() {
 
@@ -99,18 +109,35 @@ public class LessonService {
 	}
 	
 	
-	public void addLesson(Lesson lesson){
+	private Lesson copyLesson(Lesson original) {
+	    Lesson l = new Lesson();
+
+	    l.setCourseId(original.getCourseId());
+	    l.setCourseName(original.getCourseName());
+	    l.setLecturer(original.getLecturer());
+	    l.setCluster(original.getCluster());
+	    l.setType(original.getType());
+	    l.setSemester(original.getSemester());
+	    l.setCredits(original.getCredits());
+
+	    return l;
+	}
+	
+	public void addLesson(Lesson lesson) {
 	    Firestore db = FirestoreClient.getFirestore();
 
-	    CourseService courseService = new CourseService();
-		Course course = courseService.getCourseByName(lesson.getCourseName());
-		
-	    if (lesson.getCourseId() == null ) {
-	    	      
-			if (course == null) {
-	            throw new RuntimeException("Course not found");
-	        }
-	        lesson.setCourseId(course.getCourseId());
+	    Course course = courseService.getCourseById(lesson.getCourseId());
+
+	    if (course == null) {
+	        throw new RuntimeException("Course not found");
+	    }
+
+	    lesson.setCourseName(course.getCourseName());
+	    lesson.setCluster(Integer.parseInt(course.getSemesterNumber()));
+	    lesson.setCredits(course.getCredits());
+
+	    if (lesson.getSemester() == null) {
+	        throw new RuntimeException("Semester is required");
 	    }
 
 	    String semester = lesson.getSemester().name();
@@ -118,29 +145,82 @@ public class LessonService {
 
 	    try {
 	        DocumentSnapshot snapshot = docRef.get().get();
+	        Map<String, Object> data = snapshot.exists() ? snapshot.getData() : null;
 
-	        int index = 1;
+	        List<Lesson> lessons = new ArrayList<>();
 
-	        if (snapshot.exists()) {
-	            Map<String, Object> data = snapshot.getData();
+	        if (data != null) {
+	            for (Map.Entry<String, Object> entry : data.entrySet()) {
+	                String key = entry.getKey();
 
-	            long count = data.keySet().stream().filter(key -> key.startsWith(lesson.getCourseId() + "_")).count();
-
-	            index = (int) count + 1;
+	                if (key.startsWith(lesson.getCourseId() + "_")) {
+	                    Lesson l = convertToLesson(entry.getValue());
+	                    lessons.add(l);
+	                }
+	            }
 	        }
 
-	        lesson.setIndex(index);
+	        if (lesson.getDuration() > 3) {
+
+	            int splitGroupId = generateSplitGroupId(); // פונקציה קטנה שנוסיף
+
+	            int half = lesson.getDuration() / 2;
+
+	            Lesson l1 = copyLesson(lesson);
+	            Lesson l2 = copyLesson(lesson);
+
+	            l1.setDuration(half);
+	            l2.setDuration(half);
+
+	            l1.setSplitGroupId(splitGroupId);
+	            l2.setSplitGroupId(splitGroupId);
+
+	            lessons.add(l1);
+	            lessons.add(l2);
+
+	        } else {
+	            lesson.setSplitGroupId(0);
+	            lessons.add(lesson);
+	        }
+
+	        lessons.sort((l1, l2) ->
+	            Integer.compare(
+	                l1.getType().getPriority(),
+	                l2.getType().getPriority()
+	            )
+	        );
+
+	        int index = 1;
+	        for (Lesson l : lessons) {
+	            l.setIndex(index++);
+	        }
+
+	        if (data != null) {
+	            Map<String, Object> deleteMap = new HashMap<>();
+
+	            for (String key : data.keySet()) {
+	                if (key.startsWith(lesson.getCourseId() + "_")) {
+	                    deleteMap.put(key, FieldValue.delete());
+	                }
+	            }
+
+	            if (!deleteMap.isEmpty()) {
+	                docRef.update(deleteMap);
+	            }
+	        }
+
+	        Map<String, Object> update = new HashMap<>();
+
+	        for (Lesson l : lessons) {
+	            String key = l.getCourseId() + "_" + l.getIndex();
+	            update.put(key, l);
+	        }
+
+	        docRef.set(update, SetOptions.merge());
 
 	    } catch (Exception e) {
-	        throw new RuntimeException("Failed to calculate index");
+	        throw new RuntimeException("Failed to add lesson", e);
 	    }
-
-	    String key = lesson.getCourseId() + "_" + lesson.getIndex();
-
-	    Map<String, Lesson> update = new HashMap<>();
-	    update.put(key, lesson);
-
-	    docRef.set(update, SetOptions.merge());
 	}
 	
 	
@@ -207,6 +287,12 @@ public class LessonService {
 	        e.printStackTrace();
 	        throw new RuntimeException("Failed to fetch courses", e);
 	    }
+	}
+	
+	
+	private Lesson convertToLesson(Object obj) {
+	    ObjectMapper mapper = new ObjectMapper();
+	    return mapper.convertValue(obj, Lesson.class);
 	}
 	
 	

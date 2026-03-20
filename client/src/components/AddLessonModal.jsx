@@ -62,14 +62,17 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
   // Basic validation
   if (!courseName.trim()) return alert("Please select course name");
 
+    // find the selected course object so we can send courseId and semesterNumber
+    const selectedCourse = courseOptions.find(c => c.courseName === courseName.trim());
+    if (!selectedCourse) return alert("Selected course not found. Please re-open the modal and try again.");
+
     const payload = {
-      courseName: courseName.trim(),
+      courseId: selectedCourse.courseId || null,
       lecturer: lecturer.trim(),
-      // send cluster as string (empty or selected value)
-      cluster: cluster === "" ? "" : cluster,
-      type: type,
+      cluster: cluster === "" ? 0 : parseInt(cluster),
+      type: type.toUpperCase(), 
       duration: duration === "" ? 1 : parseInt(duration, 10) || 1,
-      semester: semester === "" ? null : semester,
+      semester: semester === "Summer" ? "SUMMER" : semester 
     };
 
     onSave(payload);
