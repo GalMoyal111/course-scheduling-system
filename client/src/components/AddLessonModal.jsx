@@ -68,6 +68,7 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
 
     const payload = {
       courseId: selectedCourse.courseId || null,
+      courseName: selectedCourse.courseName || "",
       lecturer: lecturer.trim(),
       cluster: cluster === "" ? 0 : parseInt(cluster),
       type: type.toUpperCase(), 

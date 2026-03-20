@@ -141,10 +141,14 @@ function UploadPage() {
         // No server-side update endpoint available; update locally for now
         setLessons((prev) => prev.map((l) => (l.courseId === editingLesson.courseId && l.index === editingLesson.index ? { ...l, ...lesson } : l)));
       } else {
-        // send to server
+        // send to server and optimistically append to local state so UI updates immediately
         await addLessonApi(lesson);
-        // refresh from server
-        await loadLessons();
+        setLessons((prev) => {
+          // create a client-side index to avoid collisions; server will have authoritative data on full reload
+          const nextIndex = prev && prev.length ? Math.max(...prev.map(p => (typeof p.index === 'number' ? p.index : 0))) + 1 : 0;
+          const newLesson = { ...lesson, index: nextIndex, courseName: lesson.courseName || "", credits: lesson.credits || 0 };
+          return [...prev, newLesson];
+        });
       }
     } catch (err) {
       console.error("Failed to add lesson:", err);
