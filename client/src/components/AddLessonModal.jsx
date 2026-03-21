@@ -12,6 +12,12 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
   const [semester, setSemester] = useState("");
   const [groupedCourses, setGroupedCourses] = useState([]);
 
+
+  const clusterOptions = groupedCourses.map(c => c.clusterName);
+  const selectedClusterObj = groupedCourses.find(c => c.clusterName === cluster);
+  const courseOptions = selectedClusterObj ? selectedClusterObj.courses : [];
+
+
   React.useEffect(() => {
     if (!isOpen) return;
 
@@ -46,11 +52,35 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
 
   }, [isOpen]);
 
+  React.useEffect(() => {
+    if (!courseName || !type) return;
+
+    const selectedCourse = courseOptions.find(c => c.courseName === courseName);
+    if (!selectedCourse) return;
+
+    let newDuration = 1;
+
+    switch (type) {
+      case "lecture":
+        newDuration = selectedCourse.lectureHours || 0;
+        break;
+      case "practice":
+        newDuration = selectedCourse.tutorialHours || 0;
+        break;
+      case "laboratory":
+        newDuration = selectedCourse.labHours || 0;
+        break;
+      case "pbl":
+        newDuration = selectedCourse.projectHours || 0;
+        break;
+      default:
+        newDuration = 1;
+    }
+    setDuration(String(newDuration));
+  }, [courseName, type, courseOptions]);
 
   if (!isOpen) return null;
-
-  const clusterOptions = groupedCourses.map(c => c.clusterName);
-  const selectedClusterObj = groupedCourses.find(c => c.clusterName === cluster);
+  
   const mapType = (type) => {
     switch (type) {
       case "lecture":
@@ -66,7 +96,7 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
     }
   };
 
-  const courseOptions = selectedClusterObj ? selectedClusterObj.courses : [];
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -111,6 +141,7 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
                   onChange={(e) => {
                     setCluster(e.target.value);
                     setCourseName(""); 
+                    setDuration("");
                   }}
                 >
                   <option value="">(none)</option>
@@ -153,7 +184,12 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
 
               <div className="form-field">
                 <label>Duration</label>
-                <input className="ui-input" type="number" value={duration} min="1" onChange={(e) => setDuration(e.target.value)} />
+                <input 
+                  className="ui-input" 
+                  type="number" 
+                  value={duration} 
+                  readOnly 
+                />
               </div>
 
               

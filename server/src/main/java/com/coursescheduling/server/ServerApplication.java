@@ -14,15 +14,4 @@ public class ServerApplication {
     public static void main(String[] args) {
         SpringApplication.run(ServerApplication.class, args);
     }
-    
-
-    // temp for testing the service, will be removed later
-    /*
-    @Bean
-    CommandLineRunner test(ClassroomExcelService service) {
-        return args -> {
-            service.testLocalFile();
-        };
-    }
-    */
 }
