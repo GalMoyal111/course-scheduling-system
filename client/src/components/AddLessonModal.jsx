@@ -50,9 +50,21 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
   if (!isOpen) return null;
 
   const clusterOptions = groupedCourses.map(c => c.clusterName);
-  const selectedClusterObj = groupedCourses.find(
-    c => c.clusterName  === cluster
-  );
+  const selectedClusterObj = groupedCourses.find(c => c.clusterName === cluster);
+  const mapType = (type) => {
+    switch (type) {
+      case "lecture":
+        return "LECTURE";
+      case "practice":
+        return "TUTORIAL";
+      case "laboratory":
+        return "LAB";  
+      case "pbl":
+        return "PBL";
+      default:
+        return "LECTURE";
+    }
+  };
 
   const courseOptions = selectedClusterObj ? selectedClusterObj.courses : [];
 
@@ -62,7 +74,6 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
   // Basic validation
   if (!courseName.trim()) return alert("Please select course name");
 
-    // find the selected course object so we can send courseId and semesterNumber
     const selectedCourse = courseOptions.find(c => c.courseName === courseName.trim());
     if (!selectedCourse) return alert("Selected course not found. Please re-open the modal and try again.");
 
@@ -70,11 +81,12 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
       courseId: selectedCourse.courseId || null,
       courseName: selectedCourse.courseName || "",
       lecturer: lecturer.trim(),
-      cluster: cluster === "" ? 0 : parseInt(cluster),
-      type: type.toUpperCase(), 
+      cluster: selectedClusterObj ? selectedClusterObj.clusterId : 0,
+      type: mapType(type),
       duration: duration === "" ? 1 : parseInt(duration, 10) || 1,
       semester: semester === "Summer" ? "SUMMER" : semester 
     };
+    
 
     onSave(payload);
   };
