@@ -91,7 +91,7 @@ public class CourseService {
         data.put("notes", course.getNotes());
         data.put("clusterName", course.getClusterName());
 
-        db.collection("courses").document(course.getCourseId()).set(Map.of(course.getCourseId(), data), SetOptions.merge());
+        db.collection("courses").document(course.getCourseId()).set(data);
 
     }
     
@@ -113,7 +113,7 @@ public class CourseService {
         batch.commit().get();
     }
 
-    public List<Course> getAllCourses() throws Exception{
+    public List<Course> getAllCourses() throws Exception {
         Firestore db = FirestoreClient.getFirestore();
 
         List<Course> courses = new ArrayList<>();
@@ -122,40 +122,39 @@ public class CourseService {
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
 
         for (QueryDocumentSnapshot doc : documents) {
-            String courseId = doc.getId();
-            Map<String, Object> data = doc.getData();
-            for (String courseKey : data.keySet()) {
-                Map<String, Object> courseData =
-                        (Map<String, Object>) data.get(courseKey);
 
-                String semesterNumber = (String) courseData.get("semesterNumber");
-                String courseName = (String) courseData.get("courseName");
-                String prerequisiteCourseNumberOrConditions = (String) courseData.get("prerequisiteCourseNumberOrConditions");
-                int lectureHours = ((Number) courseData.get("lectureHours")).intValue();
-                int tutorialHours = ((Number) courseData.get("tutorialHours")).intValue();
-                int labHours = ((Number) courseData.get("labHours")).intValue();
-                int projectHours = ((Number) courseData.get("projectHours")).intValue();
-                int credits = ((Number) courseData.get("credits")).intValue();
-                String notes = (String) courseData.get("notes");
-                String clusterName = (String) courseData.get("clusterName");
+            Map<String, Object> courseData = doc.getData();
 
-                Course course = new Course();
 
-                course.setSemesterNumber(semesterNumber);
-                course.setCourseId(courseId);
-                course.setCourseName(courseName);
-                course.setPrerequisiteCourseNumberOrConditions(prerequisiteCourseNumberOrConditions);
-                course.setLectureHours(lectureHours);
-                course.setTutorialHours(tutorialHours);
-                course.setLabHours(labHours);
-                course.setProjectHours(projectHours);
-                course.setCredits(credits);
-                course.setNotes(notes);
-                course.setClusterName(clusterName);
+            String semesterNumber = (String) courseData.get("semesterNumber");
+            String courseName = (String) courseData.get("courseName");
+            String prerequisiteCourseNumberOrConditions = (String) courseData.get("prerequisiteCourseNumberOrConditions");
 
-                courses.add(course);
-            }
+            int lectureHours = ((Number) courseData.get("lectureHours")).intValue();
+            int tutorialHours = ((Number) courseData.get("tutorialHours")).intValue();
+            int labHours = ((Number) courseData.get("labHours")).intValue();
+            int projectHours = ((Number) courseData.get("projectHours")).intValue();
+            int credits = ((Number) courseData.get("credits")).intValue();
 
+            String notes = (String) courseData.get("notes");
+            String clusterName = (String) courseData.get("clusterName");
+
+            Course course = new Course();
+
+            course.setCourseId(doc.getId());
+
+            course.setSemesterNumber(semesterNumber);
+            course.setCourseName(courseName);
+            course.setPrerequisiteCourseNumberOrConditions(prerequisiteCourseNumberOrConditions);
+            course.setLectureHours(lectureHours);
+            course.setTutorialHours(tutorialHours);
+            course.setLabHours(labHours);
+            course.setProjectHours(projectHours);
+            course.setCredits(credits);
+            course.setNotes(notes);
+            course.setClusterName(clusterName);
+
+            courses.add(course);
         }
 
         return courses;
@@ -189,8 +188,7 @@ public class CourseService {
         data.put("notes", newCourse.getNotes());
         data.put("clusterName", newCourse.getClusterName());
 
-        batch.set(newDoc, Map.of(newCourse.getCourseId(), data), SetOptions.merge());
-        batch.set(newDoc, Map.of(newCourse.getCourseId(), data), SetOptions.merge());
+        batch.set(newDoc, data);
 
         batch.commit().get();
     }

@@ -98,7 +98,7 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
                   value={cluster}
                   onChange={(e) => {
                     setCluster(e.target.value);
-                    setCourseName(""); // 🔥 NEW (reset course)
+                    setCourseName(""); 
                   }}
                 >
                   <option value="">(none)</option>
