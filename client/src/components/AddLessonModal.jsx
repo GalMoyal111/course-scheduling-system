@@ -1,86 +1,103 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "./ui/Button";
 import "./ui/ui.css";
 import { getAllCoursesGrouped } from "../services/api";
 
-export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson = null, clusters = [], courses = [] }) {
+export default function AddLessonModal({
+  isOpen,
+  onClose,
+  onSave,
+  initialLesson = null,
+  mode = "add",
+}) {
+  const isEdit = mode === "edit";
+
   const [courseName, setCourseName] = useState("");
   const [lecturer, setLecturer] = useState("");
   const [cluster, setCluster] = useState("");
   const [type, setType] = useState("lecture");
-  const [duration, setDuration] = useState("1");
   const [semester, setSemester] = useState("");
   const [groupedCourses, setGroupedCourses] = useState([]);
 
-
-  const clusterOptions = groupedCourses.map(c => c.clusterName);
-  const selectedClusterObj = groupedCourses.find(c => c.clusterName === cluster);
-  const courseOptions = selectedClusterObj ? selectedClusterObj.courses : [];
-
-
-  React.useEffect(() => {
-    if (!isOpen) return;
-
-    if (initialLesson) {
-      setCourseName(initialLesson.courseName || "");
-      setLecturer(initialLesson.lecturer || "");
-      setCluster(initialLesson.cluster != null ? String(initialLesson.cluster) : "");
-      setType(initialLesson.type || "lecture");
-      setDuration(initialLesson.duration != null ? String(initialLesson.duration) : "");
-      setSemester(initialLesson.semester != null ? String(initialLesson.semester) : "");
-    } else {
-      setCourseName("");
-      setLecturer("");
-      setCluster("");
-      setType("lecture");
-      setDuration("");
-      setSemester("");
-    }
-  }, [isOpen, initialLesson]);
-
-  React.useEffect(() => {
+  // load courses
+  useEffect(() => {
     if (!isOpen) return;
 
     getAllCoursesGrouped()
       .then((data) => {
-        console.log("courses from server:", data);
-        setGroupedCourses(data);
+        setGroupedCourses(data || []);
       })
-      .catch((err) => {
-        console.error("Failed to fetch courses", err);
-      });
-
+      .catch(() => setGroupedCourses([]));
   }, [isOpen]);
 
-  React.useEffect(() => {
-    if (!courseName || !type) return;
+  // init state
+  useEffect(() => {
+    if (!isOpen) return;
 
-    const selectedCourse = courseOptions.find(c => c.courseName === courseName);
-    if (!selectedCourse) return;
+    if (isEdit && initialLesson && groupedCourses.length > 0) {
+      const allCourses = groupedCourses.flatMap(c => c.courses);
 
-    let newDuration = 1;
+      const course = allCourses.find(
+        c => c.courseId === initialLesson.courseId
+      );
+
+      const clusterObj = groupedCourses.find(
+        c => c.courses.some(courseItem => courseItem.courseId === course?.courseId)
+      );
+
+      setCluster(clusterObj ? clusterObj.clusterName : "");
+
+      setCluster(clusterObj ? clusterObj.clusterName : "");
+      setCourseName(initialLesson.courseName || "");
+      setLecturer(initialLesson.lecturer || "");
+      setType(initialLesson.type?.toLowerCase() || "lecture");
+      setSemester(initialLesson.semester || "");
+    }
+
+    if (!isEdit) {
+      setCourseName("");
+      setLecturer("");
+      setCluster("");
+      setType("lecture");
+      setSemester("");
+    }
+  }, [isOpen, isEdit, initialLesson, groupedCourses]);
+
+  const allCourses = groupedCourses.flatMap((c) => c.courses);
+
+  const clusterOptions = groupedCourses.map((c) => c.clusterName);
+
+  const selectedClusterObj = groupedCourses.find(
+    (c) => c.clusterName === cluster
+  );
+
+  const courseOptions = selectedClusterObj
+    ? selectedClusterObj.courses
+    : [];
+
+  const selectedCourse =
+    allCourses.find((c) => c.courseId === initialLesson?.courseId) ||
+    allCourses.find((c) => c.courseName === courseName);
+
+  const computedDuration = (() => {
+    if (!selectedCourse) return "";
 
     switch (type) {
       case "lecture":
-        newDuration = selectedCourse.lectureHours || 0;
-        break;
+        return selectedCourse.lectureHours || 0;
       case "practice":
-        newDuration = selectedCourse.tutorialHours || 0;
-        break;
+        return selectedCourse.tutorialHours || 0;
       case "laboratory":
-        newDuration = selectedCourse.labHours || 0;
-        break;
+        return selectedCourse.labHours || 0;
       case "pbl":
-        newDuration = selectedCourse.projectHours || 0;
-        break;
+        return selectedCourse.projectHours || 0;
       default:
-        newDuration = 1;
+        return 1;
     }
-    setDuration(String(newDuration));
-  }, [courseName, type, courseOptions]);
+  })();
 
   if (!isOpen) return null;
-  
+
   const mapType = (type) => {
     switch (type) {
       case "lecture":
@@ -88,7 +105,7 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
       case "practice":
         return "TUTORIAL";
       case "laboratory":
-        return "LAB";  
+        return "LAB";
       case "pbl":
         return "PBL";
       default:
@@ -96,57 +113,60 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
     }
   };
 
-  
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
-  // Basic validation
-  if (!courseName.trim()) return alert("Please select course name");
-
-    const selectedCourse = courseOptions.find(c => c.courseName === courseName.trim());
-    if (!selectedCourse) return alert("Selected course not found. Please re-open the modal and try again.");
+    if (!selectedCourse) {
+      alert("Course not found");
+      return;
+    }
 
     const payload = {
-      courseId: selectedCourse.courseId || null,
-      courseName: selectedCourse.courseName || "",
+      courseId: selectedCourse.courseId,
+      courseName: selectedCourse.courseName,
       lecturer: lecturer.trim(),
-      cluster: selectedClusterObj ? selectedClusterObj.clusterId : 0,
+      cluster:
+        selectedClusterObj?.clusterId ??
+        initialLesson?.cluster ??
+        0,
       type: mapType(type),
-      duration: duration === "" ? 1 : parseInt(duration, 10) || 1,
-      semester: semester === "Summer" ? "SUMMER" : semester 
+      duration: parseInt(computedDuration || 1, 10),
+      semester: semester === "Summer" ? "SUMMER" : semester,
     };
-    
 
     onSave(payload);
   };
 
   return (
     <div className="modal-overlay">
-      <div className="modal-card modal-card--wide" role="dialog" aria-modal="true">
+      <div className="modal-card modal-card--wide">
         <div className="modal-header">
-          <h3>Add Lesson</h3>
+          <h3>{isEdit ? "Edit Lesson" : "Add Lesson"}</h3>
         </div>
 
         <div className="modal-body">
           <form className="add-course-form" onSubmit={handleSubmit}>
             <div className="add-course-grid">
-              
 
               <div className="form-field">
                 <label>Cluster</label>
                 <select
                   className="ui-select"
                   value={cluster}
+                  disabled={isEdit}
                   onChange={(e) => {
+                    if (isEdit) return;
                     setCluster(e.target.value);
-                    setCourseName(""); 
-                    setDuration("");
+                    setCourseName("");
                   }}
                 >
-                  <option value="">(none)</option>
-                  {clusterOptions.map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                  <option value="">(none)</option>         
+                    {isEdit && cluster && (
+                      <option value={cluster}>{cluster}</option>
+                    )}
+
+                    {clusterOptions.map((c) => (
+                      <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
               </div>
@@ -156,25 +176,41 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
                 <select
                   className="ui-select"
                   value={courseName}
-                  onChange={(e) => setCourseName(e.target.value)}
+                  disabled={isEdit}
+                  onChange={(e) => {
+                    if (isEdit) return;
+                    setCourseName(e.target.value);
+                  }}
                 >
-                  <option value="">(select)</option>
-                  {courseOptions.map((c) => (
+                <option value="">(select)</option>
+                  {isEdit && courseName && (
+                  <option value={courseName}>{courseName}</option>
+                    )}
+
+                    {courseOptions.map((c) => (
                     <option key={c.courseId} value={c.courseName}>
                       {c.courseName}
-                    </option>
-                  ))}
+                  </option>
+                ))}
                 </select>
               </div>
 
               <div className="form-field">
                 <label>Lecturer</label>
-                <input className="ui-input" value={lecturer} onChange={(e) => setLecturer(e.target.value)} />
+                <input
+                  className="ui-input"
+                  value={lecturer}
+                  onChange={(e) => setLecturer(e.target.value)}
+                />
               </div>
 
               <div className="form-field">
                 <label>Type</label>
-                <select className="ui-select" value={type} onChange={(e) => setType(e.target.value)}>
+                <select
+                  className="ui-select"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                >
                   <option value="lecture">Lecture</option>
                   <option value="practice">Practice</option>
                   <option value="laboratory">Laboratory</option>
@@ -184,30 +220,37 @@ export default function AddLessonModal({ isOpen, onClose, onSave, initialLesson 
 
               <div className="form-field">
                 <label>Duration</label>
-                <input 
-                  className="ui-input" 
-                  type="number" 
-                  value={duration} 
-                  readOnly 
+                <input
+                  className="ui-input"
+                  type="number"
+                  value={computedDuration}
+                  readOnly
                 />
               </div>
 
-              
-
               <div className="form-field">
                 <label>Semester</label>
-                <select className="ui-select" value={semester} onChange={(e) => setSemester(e.target.value)}>
+                <select
+                  className="ui-select"
+                  value={semester}
+                  onChange={(e) => setSemester(e.target.value)}
+                >
                   <option value="">(select)</option>
                   <option value="A">A</option>
                   <option value="B">B</option>
                   <option value="Summer">Summer</option>
                 </select>
               </div>
+
             </div>
 
             <div className="modal-actions">
-              <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-              <Button type="submit" variant="primary">Save</Button>
+              <Button type="button" variant="ghost" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary">
+                Save
+              </Button>
             </div>
           </form>
         </div>
