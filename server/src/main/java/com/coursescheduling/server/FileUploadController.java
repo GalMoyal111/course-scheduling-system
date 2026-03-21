@@ -213,9 +213,6 @@ public class FileUploadController {
         return lessonService.getAllCoursesGroupedByCluster();
     }
     
-    @PutMapping("/updateLesson")
-    public void updateLesson(@RequestBody Lesson lesson) throws Exception {
-        lessonService.updateLesson(lesson);
-    }
+
     
 }
