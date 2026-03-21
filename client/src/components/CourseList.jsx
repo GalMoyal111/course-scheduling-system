@@ -90,7 +90,6 @@ function SelectableTable({ courses, onEdit, onDelete, onSelectionChange }) {
           <th>Lab</th>
           <th>Project</th>
           <th>Credits</th>
-          <th>Cluster</th>
           <th style={{ width: 88 }}></th>
         </tr>
       </thead>
@@ -109,7 +108,7 @@ function SelectableTable({ courses, onEdit, onDelete, onSelectionChange }) {
                   onClick={(e) => e.stopPropagation()}
                 />
               </td>
-              <td>{course.cluster || ""}</td>
+              <td>{course.clusterName || course.cluster || ""}</td>
               <td>{course.courseId || ""}</td>
               <td>{course.courseName || ""}</td>
               <td>{course.lectureHours ?? ""}</td>
@@ -117,7 +116,6 @@ function SelectableTable({ courses, onEdit, onDelete, onSelectionChange }) {
               <td>{course.labHours ?? ""}</td>
               <td>{course.projectHours ?? ""}</td>
               <td>{course.credits ?? ""}</td>
-              <td>{course.clusterName || ""}</td>
               <td>
                 <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
                   <button

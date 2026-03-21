@@ -2,9 +2,46 @@ import React, { useState } from "react";
 import Button from "./ui/Button";
 import "./ui/ui.css";
 
+const CLUSTER_NAME_OPTIONS = [
+  "מדעים",
+  "עיבוד אותות ורשתות תקשורת",
+  "אלגוריתמים",
+  "סמינרים",
+  "הנדסת תוכנה",
+  "מעבדות",
+];
+
+const CLUSTER_NAME_TO_NUMBER = {
+  "מדעים": 9,
+  "עיבוד אותות ורשתות תקשורת": 10,
+  "אלגוריתמים": 11,
+  "סמינרים": 12,
+  "הנדסת תוכנה": 13,
+  "מעבדות": 14,
+};
+
+const CLUSTER_NUMBER_TO_NAME = {
+  9: "מדעים",
+  10: "עיבוד אותות ורשתות תקשורת",
+  11: "אלגוריתמים",
+  12: "סמינרים",
+  13: "הנדסת תוכנה",
+  14: "מעבדות",
+};
+
+const SemesterOptions = [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8"];
+
 // Simple modal for adding a single course (uses app UI styles).
 export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse = null }) {
-  const [semesterNumber, setSemesterNumber] = useState("");
+  const [cluster, setCluster] = useState("");
   const [courseCode, setCourseCode] = useState("");
   const [courseName, setCourseName] = useState("");
   const [prerequisiteCourseNumberOrConditions, setPrerequisiteCourseNumberOrConditions] = useState("");
@@ -15,9 +52,11 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
   const [credits, setCredits] = useState("");
   const [notes, setNotes] = useState("");
   const [clusterName, setClusterName] = useState("");
+  const isSemesterDisabled = clusterName !== "" && cluster === "";
+  const isClusterNameDisabled = cluster !== "" && clusterName === "";
 
   const resetForm = () => {
-    setSemesterNumber("");
+    setCluster("");
     setCourseCode("");
     setCourseName("");
     setPrerequisiteCourseNumberOrConditions("");
@@ -34,7 +73,20 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
   React.useEffect(() => {
     if (!isOpen) return;
     if (initialCourse) {
-      setSemesterNumber(initialCourse.semesterNumber || "");
+      const initialClusterValue =
+        initialCourse.semesterNumber != null
+          ? String(initialCourse.semesterNumber)
+          : initialCourse.cluster != null
+          ? String(initialCourse.cluster)
+          : "";
+
+      const initialClusterAsNumber = Number(initialClusterValue);
+      const inferredClusterName = Number.isFinite(initialClusterAsNumber)
+        ? CLUSTER_NUMBER_TO_NAME[initialClusterAsNumber]
+        : "";
+
+      const resolvedClusterName = initialCourse.clusterName || inferredClusterName || "";
+      setCluster(resolvedClusterName ? "" : initialClusterValue);
       setCourseCode(initialCourse.courseCode || initialCourse.courseId || "");
       setCourseName(initialCourse.courseName || "");
       setPrerequisiteCourseNumberOrConditions(initialCourse.prerequisiteCourseNumberOrConditions || "");
@@ -44,7 +96,7 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
       setProjectHours(initialCourse.projectHours != null ? String(initialCourse.projectHours) : "");
       setCredits(initialCourse.credits != null ? String(initialCourse.credits) : "");
       setNotes(initialCourse.notes || "");
-      setClusterName(initialCourse.clusterName || "");
+      setClusterName(resolvedClusterName);
     } else {
       resetForm();
     }
@@ -66,8 +118,22 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
     e.preventDefault();
 
     try {
+      if (cluster.trim() === "" && clusterName.trim() === "") {
+        throw new Error("Please choose a semester number or a cluster name.");
+      }
+
+      const mappedClusterFromName = CLUSTER_NAME_TO_NUMBER[clusterName.trim()];
+      const resolvedCluster =
+        cluster.trim() !== ""
+          ? toNonNegativeInt(cluster, "cluster")
+          : mappedClusterFromName;
+
+      if (resolvedCluster == null) {
+        throw new Error("Please choose a valid cluster name.");
+      }
+
       const course = {
-        semesterNumber: semesterNumber.trim(),
+        cluster: resolvedCluster,
         courseId: courseCode.trim(),
         // courseCode: courseCode.trim(),
         courseName: courseName.trim(),
@@ -104,13 +170,32 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
           <form className="add-course-form" onSubmit={handleSubmit}>
             <div className="add-course-grid">
             <div className="form-field">
-              <label>Semester Number</label>
-              <input
-                className="ui-input"
-                value={semesterNumber}
-                onChange={(e) => setSemesterNumber(e.target.value)}
-                required
-              />
+              <label>Semester</label>
+                <select
+                  className="ui-input"
+                  value={cluster}
+                  onChange={(e) => {
+                    const selectedCluster = e.target.value;
+                    setCluster(selectedCluster);
+                    if (selectedCluster !== "") {
+                      setClusterName("");
+                    }
+                  }}
+                  disabled={isSemesterDisabled}
+              >
+                {isSemesterDisabled ? (
+                  <option value="">NOT AVAILABLE - CHOSE CLUSTER NAME</option>
+                ) : (
+                  <>
+                    <option value="">Select a semester</option>
+                    {SemesterOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </>
+                )}
+              </select>
             </div>
 
             <div className="form-field">
@@ -203,11 +288,31 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
 
             <div className="form-field">
               <label>Cluster Name</label>
-              <input
+              <select
                 className="ui-input"
                 value={clusterName}
-                onChange={(e) => setClusterName(e.target.value)}
-              />
+                onChange={(e) => {
+                  const selectedClusterName = e.target.value;
+                  setClusterName(selectedClusterName);
+                  if (selectedClusterName !== "") {
+                    setCluster("");
+                  }
+                }}
+                disabled={isClusterNameDisabled}
+              >
+                {isClusterNameDisabled ? (
+                  <option value="">NOT AVAILABLE - CHOSE SEMSTER NUMBER</option>
+                ) : (
+                  <>
+                    <option value="">Select cluster name</option>
+                    {CLUSTER_NAME_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </>
+                )}
+              </select>
             </div>
             </div>
 

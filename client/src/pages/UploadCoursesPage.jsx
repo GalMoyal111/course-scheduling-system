@@ -206,7 +206,7 @@ export default function UploadCoursesPage() {
             </svg>
             <input
               className="search-input"
-              placeholder="Search by course id, name or semester"
+              placeholder="Search by course id, name or cluster"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
