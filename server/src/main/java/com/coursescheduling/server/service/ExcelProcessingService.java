@@ -211,7 +211,7 @@ public class ExcelProcessingService {
 	    boolean lectureAdded = false;
 	    boolean tutorialAdded = false;
 	    boolean labAdded = false;
-	    double credits = 0;
+	    float credits = 0;
 	}
 	
 	private void calculateCredits(List<Lesson> lessons) {

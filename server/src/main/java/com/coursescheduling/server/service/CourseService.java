@@ -54,7 +54,7 @@ public class CourseService {
         WriteBatch batch = db.batch();
         for (Course course : courses) {
             Map<String, Object> data = new HashMap<>();
-            data.put("semesterNumber", course.getSemesterNumber());
+            data.put("cluster", course.getCluster());
             data.put("courseId", course.getCourseId());
             data.put("courseName", course.getCourseName());
             data.put("prerequisiteCourseNumberOrConditions", course.getPrerequisiteCourseNumberOrConditions());
@@ -79,7 +79,7 @@ public class CourseService {
         Firestore db = FirestoreClient.getFirestore();
 
         Map<String, Object> data = new HashMap<>();
-        data.put("semesterNumber", course.getSemesterNumber());
+        data.put("cluster", course.getCluster());
         data.put("courseId", course.getCourseId());
         data.put("courseName", course.getCourseName());
         data.put("prerequisiteCourseNumberOrConditions", course.getPrerequisiteCourseNumberOrConditions());
@@ -101,13 +101,8 @@ public class CourseService {
         WriteBatch batch = db.batch();
 
         for(CourseDeleteRequest course : courses) {
-            // DocumentReference docRef = db.collection("courses").document(course.getCourseCode());]
             DocumentReference docRef = db.collection("courses").document(course.getCourseId());
-
-            Map<String, Object> updates = new HashMap<>();
-            updates.put(course.getCourseId(), FieldValue.delete());
-            batch.update(docRef, updates);
-
+            batch.delete(docRef);
         }
 
         batch.commit().get();
@@ -126,7 +121,7 @@ public class CourseService {
             Map<String, Object> courseData = doc.getData();
 
 
-            String semesterNumber = (String) courseData.get("semesterNumber");
+            int cluster = ((Number) courseData.get("cluster")).intValue();
             String courseName = (String) courseData.get("courseName");
             String prerequisiteCourseNumberOrConditions = (String) courseData.get("prerequisiteCourseNumberOrConditions");
 
@@ -134,7 +129,7 @@ public class CourseService {
             int tutorialHours = ((Number) courseData.get("tutorialHours")).intValue();
             int labHours = ((Number) courseData.get("labHours")).intValue();
             int projectHours = ((Number) courseData.get("projectHours")).intValue();
-            int credits = ((Number) courseData.get("credits")).intValue();
+            float credits = ((Number) courseData.get("credits")).floatValue();
 
             String notes = (String) courseData.get("notes");
             String clusterName = (String) courseData.get("clusterName");
@@ -143,7 +138,7 @@ public class CourseService {
 
             course.setCourseId(doc.getId());
 
-            course.setSemesterNumber(semesterNumber);
+            course.setCluster(cluster);
             course.setCourseName(courseName);
             course.setPrerequisiteCourseNumberOrConditions(prerequisiteCourseNumberOrConditions);
             course.setLectureHours(lectureHours);
@@ -176,7 +171,7 @@ public class CourseService {
         DocumentReference newDoc = db.collection("courses").document(newCourse.getCourseId());
 
         Map<String, Object> data = new HashMap<>();
-        data.put("semesterNumber", newCourse.getSemesterNumber());
+        data.put("cluster", newCourse.getCluster());
         data.put("courseId", newCourse.getCourseId());
         data.put("courseName", newCourse.getCourseName());
         data.put("prerequisiteCourseNumberOrConditions", newCourse.getPrerequisiteCourseNumberOrConditions());
@@ -199,12 +194,9 @@ public class CourseService {
         Firestore db = FirestoreClient.getFirestore();
 
         try {
-            DocumentSnapshot doc = db.collection("courses")
-                    .document(courseId)
-                    .get()
-                    .get();
-
-            if (!doc.exists()) return null;
+            DocumentSnapshot doc = db.collection("courses").document(courseId).get().get();
+            if (!doc.exists()) 
+            	return null;
 
             return doc.toObject(Course.class);
 

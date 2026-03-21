@@ -144,7 +144,7 @@ export default function UploadCoursesPage() {
 
     const payload = toDelete.map((course) => ({
       courseId: course.courseId,
-      semesterNumber: course.semesterNumber,
+      cluster: course.cluster,
     }));
 
     setDeleteConfirmOpen(false);
@@ -166,13 +166,13 @@ export default function UploadCoursesPage() {
     return (
       (c.courseId && String(c.courseId).toLowerCase().includes(q)) ||
       (c.courseName && String(c.courseName).toLowerCase().includes(q)) ||
-      (c.semesterNumber && String(c.semesterNumber).toLowerCase().includes(q))
+      (c.cluster && String(c.cluster).toLowerCase().includes(q))
     );
   });
 
   const sortedCourses = [...filtered].sort((a, b) => {
-    const aSem = String(a.semesterNumber || "").trim();
-    const bSem = String(b.semesterNumber || "").trim();
+    const aSem = String(a.cluster || "").trim();
+    const bSem = String(b.cluster || "").trim();
 
     const aNum = Number(aSem);
     const bNum = Number(bSem);

@@ -1,7 +1,7 @@
 package com.coursescheduling.server.model;
 
 public class Course {
-    private String semesterNumber;
+    private int cluster;
     private String courseId;
     private String courseName;
     private String prerequisiteCourseNumberOrConditions;
@@ -9,15 +9,15 @@ public class Course {
     private int tutorialHours;
     private int labHours;
     private int projectHours;
-    private int credits;
+    private float credits;
     private String notes;
     private String clusterName;
 
     public Course() {}
 
-    public Course(String semesterNumber, String courseId, String courseName, String prerequisiteCourseNumberOrConditions,
-                  int lectureHours, int tutorialHours, int labHours, int projectHours, int credits, String notes, String clusterName) {
-        this.semesterNumber = semesterNumber;
+    public Course(int cluster, String courseId, String courseName, String prerequisiteCourseNumberOrConditions,
+                  int lectureHours, int tutorialHours, int labHours, int projectHours, float credits, String notes, String clusterName) {
+        this.cluster = cluster;
         this.courseId = courseId;
         this.courseName = courseName;
         this.prerequisiteCourseNumberOrConditions = prerequisiteCourseNumberOrConditions;
@@ -30,14 +30,7 @@ public class Course {
         this.clusterName = clusterName;
     }
 
-    public String getSemesterNumber() {
-        return semesterNumber;
-    }
-
-    public void setSemesterNumber(String semesterNumber) {
-        this.semesterNumber = semesterNumber;
-    }
-
+  
     
 
     public String getCourseId() {
@@ -96,15 +89,25 @@ public class Course {
         this.projectHours = projectHours;
     }
 
-    public int getCredits() {
-        return credits;
-    }
+    
 
-    public void setCredits(int credits) {
-        this.credits = credits;
-    }
+    public int getCluster() {
+		return cluster;
+	}
 
-    public String getNotes() {
+	public void setCluster(int cluster) {
+		this.cluster = cluster;
+	}
+
+	public float getCredits() {
+		return credits;
+	}
+
+	public void setCredits(float credits) {
+		this.credits = credits;
+	}
+
+	public String getNotes() {
         return notes;
     }
 

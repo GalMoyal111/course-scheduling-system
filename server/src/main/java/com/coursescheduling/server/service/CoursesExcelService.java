@@ -59,7 +59,8 @@ public class CoursesExcelService {
             Row row = sheet.getRow(i);
             if (row == null) continue;
 
-            String semesterNumber = formatter.formatCellValue(row.getCell(0)).trim();
+            int cluster = (int) Double.parseDouble(formatter.formatCellValue(row.getCell(0)));
+
             String courseCode = formatter.formatCellValue(row.getCell(1)).trim();
             String courseName = formatter.formatCellValue(row.getCell(2)).trim();
             String prerequisiteCourseNumberOrConditions = formatter.formatCellValue(row.getCell(3)).trim();
@@ -68,13 +69,17 @@ public class CoursesExcelService {
             int tutorialHours = parseIntCell(row.getCell(5), formatter);
             int labHours = parseIntCell(row.getCell(6), formatter);
             int projectHours = parseIntCell(row.getCell(7), formatter);
-            int credits = parseIntCell(row.getCell(8), formatter);
+            float credits = 0;
+            String creditStr = formatter.formatCellValue(row.getCell(8)).trim();
+            if (!creditStr.isEmpty()) {
+                credits = Float.parseFloat(creditStr);
+            }
 
             String notes = formatter.formatCellValue(row.getCell(9)).trim();
             String clusterName = formatter.formatCellValue(row.getCell(10)).trim();
 
             Course course = new Course(
-                    semesterNumber,
+            		cluster,
                     courseCode,
                     courseName,
                     prerequisiteCourseNumberOrConditions,
@@ -95,7 +100,7 @@ public class CoursesExcelService {
     }
 
     return courses;
-}
+    }
 
     private int parseIntCell(Cell cell, DataFormatter formatter) {
         if (cell == null) return 0;
@@ -149,7 +154,7 @@ public class CoursesExcelService {
         for (Course course : courses) {
             Map<String, Object> data = new HashMap<>();
             
-            data.put("clusterId", course.getSemesterNumber()); 
+            data.put("cluster", course.getCluster()); 
             data.put("courseId", course.getCourseId());      
             
             
@@ -181,7 +186,7 @@ public class CoursesExcelService {
             Sheet sheet = workbook.createSheet("Courses");
 
             Row header = sheet.createRow(0);
-            header.createCell(0).setCellValue("Semester Number");
+            header.createCell(0).setCellValue("cluster");
             header.createCell(1).setCellValue("Course Code");
             header.createCell(2).setCellValue("Course Name");
             header.createCell(3).setCellValue("Prerequisites / Conditions");
@@ -197,39 +202,23 @@ public class CoursesExcelService {
 
             for (QueryDocumentSnapshot doc : documents) {
                 String documentId = doc.getId();
-                Map<String, Object> coursesInSemester = doc.getData();
-                for (Map.Entry<String, Object> entry : coursesInSemester.entrySet()) {
-                    System.out.println("Key = " + entry.getKey());
-                    System.out.println("Value class = " + entry.getValue().getClass().getName());
-                    System.out.println("Value = " + entry.getValue());
+                Map<String, Object> data = doc.getData();
 
-                    String courseCode = entry.getKey();
-                    Object value = entry.getValue();
+                Row row = sheet.createRow(rowIndex++);
 
-                    if (!(value instanceof Map)) {
-                        System.out.println("Skipping non-map field: " + courseCode + " = " + value);
-                        continue;
-                    }
-
-                    Map<String, Object> data = (Map<String, Object>) value;
-                    String semesterNumber = asString(data.get("semesterNumber"));
-                    if (semesterNumber.isEmpty()) {
-                        semesterNumber = documentId;
-                    }
-                    Row row = sheet.createRow(rowIndex++);
-
-                    row.createCell(0).setCellValue(semesterNumber);
-                    row.createCell(1).setCellValue(courseCode);
-                    row.createCell(2).setCellValue(asString(data.get("courseName")));
-                    row.createCell(3).setCellValue(asString(data.get("prerequisiteCourseNumberOrConditions")));
-                    row.createCell(4).setCellValue(asDouble(data.get("lectureHours")));
-                    row.createCell(5).setCellValue(asDouble(data.get("tutorialHours")));
-                    row.createCell(6).setCellValue(asDouble(data.get("labHours")));
-                    row.createCell(7).setCellValue(asDouble(data.get("projectHours")));
-                    row.createCell(8).setCellValue(asDouble(data.get("credits")));
-                    row.createCell(9).setCellValue(asString(data.get("notes")));
-                    row.createCell(10).setCellValue(asString(data.get("clusterName")));
-                }
+                row.createCell(0).setCellValue(asString(data.get("cluster")));
+                row.createCell(1).setCellValue(doc.getId());
+                row.createCell(2).setCellValue(asString(data.get("courseName")));
+                row.createCell(3).setCellValue(asString(data.get("prerequisiteCourseNumberOrConditions")));
+                row.createCell(4).setCellValue(asDouble(data.get("lectureHours")));
+                row.createCell(5).setCellValue(asDouble(data.get("tutorialHours")));
+                row.createCell(6).setCellValue(asDouble(data.get("labHours")));
+                row.createCell(7).setCellValue(asDouble(data.get("projectHours")));
+                row.createCell(8).setCellValue(asDouble(data.get("credits")));
+                row.createCell(9).setCellValue(asString(data.get("notes")));
+                row.createCell(10).setCellValue(asString(data.get("clusterName")));
+                
+                
                 // for (String courseCode : coursesInSemester.keySet()) {
                 //     Map<String, Object> data = (Map<String, Object>) coursesInSemester.get(courseCode);
                 //     Row row = sheet.createRow(rowIndex++);

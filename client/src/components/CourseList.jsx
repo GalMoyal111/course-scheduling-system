@@ -40,7 +40,7 @@ export default function CourseList({ courses = [], onEdit, onDelete, onSelection
 function SelectableTable({ courses, onEdit, onDelete, onSelectionChange }) {
   const [selectedMap, setSelectedMap] = useState({});
 
-  const keyFor = (course) => `${course.courseId || ""}||${course.semesterNumber || ""}`;
+  const keyFor = (course) => `${course.courseId || ""}||${course.cluster || ""}`;
 
   const toggleRow = (course) => {
     const key = keyFor(course);
@@ -109,7 +109,7 @@ function SelectableTable({ courses, onEdit, onDelete, onSelectionChange }) {
                   onClick={(e) => e.stopPropagation()}
                 />
               </td>
-              <td>{course.semesterNumber || ""}</td>
+              <td>{course.cluster || ""}</td>
               <td>{course.courseId || ""}</td>
               <td>{course.courseName || ""}</td>
               <td>{course.lectureHours ?? ""}</td>

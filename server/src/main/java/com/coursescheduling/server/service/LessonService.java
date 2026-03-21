@@ -134,7 +134,7 @@ public class LessonService {
 	    
 
 	    lesson.setCourseName(course.getCourseName());
-	    lesson.setCluster(Integer.parseInt(course.getSemesterNumber()));
+	    lesson.setCluster(course.getCluster());
 	    lesson.setCredits(course.getCredits());
 
 	    if (lesson.getSemester() == null) 
