@@ -72,14 +72,41 @@ function UploadPage() {
   };
 
   // Filter lessons directly by relevant fields
-  const filtered = lessons.filter((l) => {
-    if (!query) return true;
-    const q = query.toLowerCase();
-    return (
-      (l.courseId && String(l.courseId).toLowerCase().includes(q)) ||
-      (l.courseName && String(l.courseName).toLowerCase().includes(q)) ||
-      (l.type && String(l.type).toLowerCase().includes(q))
-    );
+  const filtered = lessons
+    .filter((l) => {
+      if (!query) return true;
+      const q = query.toLowerCase();
+      return (
+        (l.courseId && String(l.courseId).toLowerCase().includes(q)) ||
+        (l.courseName && String(l.courseName).toLowerCase().includes(q)) ||
+        (l.type && String(l.type).toLowerCase().includes(q))
+      );
+    })
+    .sort((a, b) => {
+      // semester
+      const semesterOrder = { A: 1, B: 2, SUMMER: 3 };
+      const semDiff =
+        (semesterOrder[a.semester] || 99) -
+        (semesterOrder[b.semester] || 99);
+      if (semDiff !== 0) return semDiff;
+
+      // cluster
+      const clusterDiff = (a.cluster || 0) - (b.cluster || 0);
+      if (clusterDiff !== 0) return clusterDiff;
+
+      // type (priority)
+      const typePriority = {
+        LECTURE: 1,
+        TUTORIAL: 2,
+        LAB: 3,
+        PBL: 4,
+        PROJECT: 5,
+      };
+
+      return (
+        (typePriority[a.type] || 99) -
+        (typePriority[b.type] || 99)
+      );
   });
 
   const handleEditLesson = (lesson) => {
@@ -97,7 +124,7 @@ function UploadPage() {
     const toDelete = Array.isArray(pendingDelete) ? pendingDelete : [pendingDelete];
 
     // Prepare keys for matching lessons
-    const keyFor = (l) => `${l.courseId}||${l.index}`;
+    const keyFor = (l) => l.lessonId;
     const deleteSet = new Set(toDelete.map(keyFor));
 
     // Optimistically remove from UI so user sees immediate change
@@ -121,43 +148,24 @@ function UploadPage() {
     }
   };
 
-  const handleAddLesson = async (courseLike) => {
-    // Convert course-like object from AddCourseModal to a lesson-like object and add/update locally
-    const lesson = {
-      courseId: courseLike.courseId ?? null,
-      courseName: courseLike.courseName || "",
-      lecturer: courseLike.lecturer || "",
-      cluster: courseLike.cluster,
-      type: courseLike.type,
-      duration: parseInt(courseLike.duration || 0, 10),
-      splitGroupId: null,
-      semester: courseLike.semester,
-      credits: parseFloat(courseLike.credits || 0) || 0,
-      index: null,
-    };
-
-    try {
-      if (editingLesson) {
-        // No server-side update endpoint available; update locally for now
-        setLessons((prev) => prev.map((l) => (l.courseId === editingLesson.courseId && l.index === editingLesson.index ? { ...l, ...lesson } : l)));
-      } else {
-        // send to server and optimistically append to local state so UI updates immediately
-        await addLessonApi(lesson);
-        setLessons((prev) => {
-          // create a client-side index to avoid collisions; server will have authoritative data on full reload
-          const nextIndex = prev && prev.length ? Math.max(...prev.map(p => (typeof p.index === 'number' ? p.index : 0))) + 1 : 0;
-          const newLesson = { ...lesson, index: nextIndex, courseName: lesson.courseName || "", credits: lesson.credits || 0 };
-          return [...prev, newLesson];
-        });
-      }
-    } catch (err) {
-      console.error("Failed to add lesson:", err);
-      alert("Failed to add lesson. See console for details.");
-    } finally {
-      setIsModalOpen(false);
-      setEditingLesson(null);
+  const handleAddLesson = async (oldLesson, newLesson) => {
+  try {
+    if (oldLesson) {
+      await deleteLessonsApi([oldLesson]);
     }
-  };
+
+    await addLessonApi(newLesson);
+
+    await loadLessons();
+
+  } catch (err) {
+    console.error("Failed to save lesson:", err);
+    alert("Failed to save lesson. See console for details.");
+  } finally {
+    setIsModalOpen(false);
+    setEditingLesson(null);
+  }
+};
 
   return (
     <div>

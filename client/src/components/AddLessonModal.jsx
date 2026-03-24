@@ -122,6 +122,8 @@ export default function AddLessonModal({
     }
 
     const payload = {
+    ...(initialLesson || {}), 
+
       courseId: selectedCourse.courseId,
       courseName: selectedCourse.courseName,
       lecturer: lecturer.trim(),
@@ -134,7 +136,7 @@ export default function AddLessonModal({
       semester: semester === "Summer" ? "SUMMER" : semester,
     };
 
-    onSave(payload);
+    onSave(initialLesson, payload);
   };
 
   return (

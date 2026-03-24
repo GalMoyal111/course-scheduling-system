@@ -41,7 +41,7 @@ export default function LessonList({ lessons = [], onEdit, onDelete, onSelection
 function SelectableTable({ lessons, onEdit, onDelete, onSelectionChange }) {
   const [selectedMap, setSelectedMap] = useState({});
 
-  const keyFor = (l) => `${l.courseId}||${l.index}`;
+  const keyFor = (l) => l.lessonId;
 
   const stableKey = lessons.map(keyFor).join("|");
 
