@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.cloud.firestore.Firestore;
+import com.coursescheduling.server.model.Course;
 import com.coursescheduling.server.model.Lesson;
 import com.coursescheduling.server.model.LessonType;
 import com.coursescheduling.server.model.Semester;
@@ -28,12 +29,14 @@ public class ExcelProcessingService {
 	private final Firestore firestore;
 	
 	private final LessonService lessonService;
+	private final CourseService courseService;
 	
 	private int splitGroupCounter = 1;
 	
-	public ExcelProcessingService(Firestore firestore, LessonService lessonService) { 
-		this.firestore = firestore; 
-		this.lessonService = lessonService;
+	public ExcelProcessingService(Firestore firestore, LessonService lessonService, CourseService courseService) {
+	    this.firestore = firestore;
+	    this.lessonService = lessonService;
+	    this.courseService = courseService;
 	}
 	
 	
@@ -41,7 +44,21 @@ public class ExcelProcessingService {
 	public void process(MultipartFile file) {
 		
 	    List<Lesson> lessons = new ArrayList<>();
+	    
+	    Map<String, Course> courseMap = new HashMap<>();
 
+	    try {
+	        List<Course> courses = courseService.getAllCourses();
+
+	        for (Course c : courses) {
+	            courseMap.put(c.getCourseId(), c);
+	        }
+
+	    } catch (Exception e) {
+	        throw new RuntimeException("Failed to load courses", e);
+	    }
+	    
+	    
 	    try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
 	        Sheet sheet = workbook.getSheetAt(0);
 	        
@@ -51,10 +68,9 @@ public class ExcelProcessingService {
 	            if (row == null)
 	                continue;
 
-	            addLessonFromRow(row, lessons);
+	            addLessonFromRow(row, lessons, courseMap);
 	        }
 	        sortLessons(lessons);
-	        calculateCredits(lessons);
 	        lessonService.saveLessons(lessons);
 	        
 
@@ -77,7 +93,7 @@ public class ExcelProcessingService {
 	    if (typeText.contains("הנחיה")) 
 	        return LessonType.PROJECT;
 	    
-	    throw new IllegalArgumentException("Unknown lesson type: " + typeText);
+	    return null;
 	}
 	
 	
@@ -94,7 +110,7 @@ public class ExcelProcessingService {
 	
 	
 	// Convert a single sheet row into one or more Lesson objects.
-	private void addLessonFromRow(Row row, List<Lesson> lessons) {
+	private void addLessonFromRow(Row row, List<Lesson> lessons, Map<String, Course> courseMap) {
 
 		if (row.getCell(0) == null)
 		    return;
@@ -103,35 +119,69 @@ public class ExcelProcessingService {
 		    return;
 
 		String courseId = String.valueOf((int) row.getCell(0).getNumericCellValue());
+		
+		if (courseId.contains("/")) {
+		    System.out.println("Skipping row: invalid courseId " + courseId);
+		    return;
+		}
+		
 
+		if (courseId == null || courseId.trim().isEmpty()) {
+		    System.out.println("Skipping row: missing courseId");
+		    return;
+		}
+		
 	    String courseName = row.getCell(1).toString();
 	    String typeText = row.getCell(2).toString();
 	    LessonType type = parseType(typeText);
+	    
+	    if (type == null) {
+	        System.out.println("Skipping row: unknown type " + typeText);
+	        return;
+	    }
+	    
+	    if (type != LessonType.LECTURE && type != LessonType.TUTORIAL && type != LessonType.LAB && type != LessonType.PBL && type != LessonType.PROJECT) {
+	        System.out.println("Skipping row: unsupported type " + typeText);
+	        return;
+	    }
+	    
 	    String lecturer = row.getCell(3).toString();
 
 	    String semesterText = row.getCell(5).toString();
 	    Semester semester = parseSemester(semesterText);
 
 	    int duration = (int) row.getCell(7).getNumericCellValue();
+	    
+	    if (lecturer == null || lecturer.trim().isEmpty()) {
+	        System.out.println("Skipping row: missing lecturer for course " + courseId);
+	        return;
+	    }
+
+	    if (duration <= 0) {
+	        System.out.println("Skipping row: invalid duration for course " + courseId);
+	        return;
+	    }
 
 	    if (duration == 4) {
 	    	
 	    	int splitGroupId = splitGroupCounter++;
-	        Lesson lesson1 = createLesson(courseId, courseName, type, lecturer, semester, 2, splitGroupId);
-	        Lesson lesson2 = createLesson(courseId, courseName, type, lecturer, semester, 2, splitGroupId);
+	        Lesson lesson1 = createLesson(courseId, courseName, type, lecturer, semester, 2, splitGroupId, courseMap);
+	        Lesson lesson2 = createLesson(courseId, courseName, type, lecturer, semester, 2, splitGroupId , courseMap);
 
-	        lessons.add(lesson1);
-	        lessons.add(lesson2);
+	        if (lesson1 != null) lessons.add(lesson1);
+	        if (lesson2 != null) lessons.add(lesson2);
 
 	    } else {
 
-	        Lesson lesson = createLesson(courseId, courseName, type, lecturer, semester, duration, 0);
-	        lessons.add(lesson);
+	        Lesson lesson = createLesson(courseId, courseName, type, lecturer, semester, duration, 0 , courseMap);
+	        if (lesson != null) {
+	            lessons.add(lesson);
+	        }
 	    }
 	}
 	
 	// Helper method to create a Lesson object with the given properties.
-	private Lesson createLesson(String courseId, String courseName, LessonType type, String lecturer, Semester semester, int duration, int splitGroupId) {
+	private Lesson createLesson(String courseId, String courseName, LessonType type, String lecturer, Semester semester, int duration, int splitGroupId, Map<String, Course> courseMap) {
 		// Create and populate the Lesson object
 		Lesson lesson = new Lesson();
 		
@@ -143,8 +193,15 @@ public class ExcelProcessingService {
 		lesson.setSemester(semester);
 		lesson.setDuration(duration);
 		
-		lesson.setCluster(0);
-		lesson.setCredits(0);
+		Course course = courseMap.get(courseId);
+
+		if (course == null) {
+		    System.out.println("Skipping row: course not found in DB for courseId " + courseId);
+		    return null;
+		}
+
+		lesson.setCluster(course.getCluster());
+		lesson.setCredits(course.getCredits());
 		
 		if(splitGroupId != 0)
 			lesson.setSplitGroupId(splitGroupId);
@@ -171,59 +228,9 @@ public class ExcelProcessingService {
 	    });
 	}
 	
+
 	
 	
-	private static class CourseCreditData {
-	    boolean lectureAdded = false;
-	    boolean tutorialAdded = false;
-	    boolean labAdded = false;
-	    float credits = 0;
-	}
-	
-	private void calculateCredits(List<Lesson> lessons) {
-	    Map<String, CourseCreditData> courseMap = new HashMap<>();
-
-	    for (Lesson lesson : lessons) {
-
-	        String courseId = lesson.getCourseId();
-	        LessonType type = lesson.getType();
-	        int duration = lesson.getDuration();
-
-	        CourseCreditData data = courseMap.get(courseId);
-
-	        if (data == null) {
-	            data = new CourseCreditData();
-	            courseMap.put(courseId, data);
-	        }
-
-	        if (type == LessonType.LECTURE && !data.lectureAdded) {
-
-	            if (lesson.getSplitGroupId() != 0)
-	                duration = duration * 2;
-
-	            data.credits += duration * 1.0;
-	            data.lectureAdded = true;
-	        }
-
-	        else if (type == LessonType.TUTORIAL && !data.tutorialAdded) {
-
-	            data.credits += duration * 0.5;
-	            data.tutorialAdded = true;
-	        }
-
-	        else if (type == LessonType.LAB && !data.labAdded) {
-
-	            data.credits += duration * 0.5;
-	            data.labAdded = true;
-	        }
-	    }
-
-	    for (Lesson lesson : lessons) {
-	        CourseCreditData data = courseMap.get(lesson.getCourseId());
-	        if (data != null)
-	            lesson.setCredits(data.credits);
-	    }
-	}
 	
 	
 	
