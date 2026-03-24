@@ -6,7 +6,7 @@ public class Lesson {
 
     private String courseName; // e.g., "Introduction to Computer Science"
 
-    private int index; // Sequential index for lessons of the same course+semester, assigned after sorting.
+    private String lessonId; 
 
     private String lecturer; // e.g., "Dr. Smith"
 
@@ -38,12 +38,13 @@ public class Lesson {
 		this.courseName = courseName;
 	}
 
-	public int getIndex() {
-		return index;
+
+	public String getLessonId() {
+		return lessonId;
 	}
 
-	public void setIndex(int index) {
-		this.index = index;
+	public void setLessonId(String lessonId) {
+		this.lessonId = lessonId;
 	}
 
 	public String getLecturer() {

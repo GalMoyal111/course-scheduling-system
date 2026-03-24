@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,9 +55,7 @@ public class ExcelProcessingService {
 	            addLessonFromRow(row, lessons);
 	        }
 	        sortLessons(lessons);
-	        assignIndexes(lessons);
 	        calculateCredits(lessons);
-	        //printLessons(lessons);
 	        lessonService.saveLessons(lessons);
 	        
 
@@ -137,6 +136,7 @@ public class ExcelProcessingService {
 		// Create and populate the Lesson object
 		Lesson lesson = new Lesson();
 		
+		lesson.setLessonId(UUID.randomUUID().toString());
 		lesson.setCourseId(courseId);
 		lesson.setCourseName(courseName);
 		lesson.setType(type);
@@ -172,39 +172,6 @@ public class ExcelProcessingService {
 	    });
 	}
 	
-	
-	
-	// Assign a sequential index per course+semester group.
-	private void assignIndexes(List<Lesson> lessons) {
-
-	    Map<String, Integer> courseIndexMap = new HashMap<>();
-
-	    for (Lesson lesson : lessons) {
-	        String key = lesson.getCourseId() + "-" + lesson.getSemester();
-	        int index = courseIndexMap.getOrDefault(key, 0) + 1;
-	        lesson.setIndex(index);
-	        courseIndexMap.put(key, index);
-	    }
-	}
-	
-	
-	// Debug: print brief info for each lesson to stdout.
-	private void printLessons(List<Lesson> lessons) {
-	    for (Lesson lesson : lessons) {
-	        System.out.println(
-	            lesson.getCourseId() + " " +
-	            lesson.getSemester() + " " +
-	            lesson.getType() + " " +
-	            lesson.getLecturer() + " index=" +
-	            lesson.getIndex()+ " " +
-	            lesson.getDuration()+ " " +
-	            lesson.getSplitGroupId()+ " credits " +
-	            lesson.getCredits()
-	        );
-	    }
-
-	    System.out.println("Total lessons loaded: " + lessons.size());
-	}
 	
 	
 	private static class CourseCreditData {
@@ -259,32 +226,6 @@ public class ExcelProcessingService {
 	    }
 	}
 	
-	
-	
-	
-	/**
-	 * Minimal test helper that writes a sample course document to Firestore.
-	 * Kept for manual testing / demos.
-	 */
-	public void process() {
-		try { 
-			Map<String, Object> course = new HashMap<>();
-			course.put("name", "Algebra"); 
-			course.put("lecturer", "Dr. Valeria"); 
-			course.put("hours", 16);
-			
-			DocumentReference docRef = firestore
-				.collection("courses")
-				.document("course2");
-			
-			docRef.set(course);
-			
-			System.out.println("Course saved to Firestore!");
-			
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 	
 	
 }
