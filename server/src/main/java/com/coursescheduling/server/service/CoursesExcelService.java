@@ -7,13 +7,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.SetOptions;
 import com.google.firebase.cloud.FirestoreClient;
-import com.google.firebase.database.DatabaseReference;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.google.firebase.database.FirebaseDatabase;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;

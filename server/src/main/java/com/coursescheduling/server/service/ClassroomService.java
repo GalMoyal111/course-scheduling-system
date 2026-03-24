@@ -7,7 +7,6 @@ import com.google.firebase.cloud.FirestoreClient;
 import com.google.api.core.ApiFuture;
 import org.springframework.stereotype.Service;
 import java.util.*;
-import com.google.api.core.ApiFuture;
 
 @Service
 public class ClassroomService {
@@ -104,8 +103,7 @@ public class ClassroomService {
 
             for (String classroomName : data.keySet()) {
 
-                Map<String, Object> classroomData =
-                        (Map<String, Object>) data.get(classroomName);
+                Map<String, Object> classroomData = (Map<String, Object>) data.get(classroomName);
 
                 int capacity = ((Number) classroomData.get("capacity")).intValue();
                 String type = (String) classroomData.get("type");

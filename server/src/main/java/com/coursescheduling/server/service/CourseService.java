@@ -9,13 +9,10 @@ import java.util.*;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
-import com.google.protobuf.Api;
-import com.coursescheduling.server.model.Classroom;
 import com.coursescheduling.server.model.Course;
 import com.coursescheduling.server.model.CourseDeleteRequest;
 import org.springframework.stereotype.Service;
 
-import org.checkerframework.checker.units.qual.C;
 
 @Service
 public class CourseService {

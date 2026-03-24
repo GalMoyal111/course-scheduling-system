@@ -1,27 +1,18 @@
 package com.coursescheduling.server.service;
 
 import com.coursescheduling.server.model.Classroom;
-import com.coursescheduling.server.model.ClassroomDeleteRequest;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.SetOptions;
-import com.google.cloud.firestore.WriteBatch;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import org.springframework.web.multipart.MultipartFile;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
-import com.google.cloud.firestore.QuerySnapshot;
 
 import java.io.ByteArrayOutputStream;
 
@@ -107,8 +98,7 @@ public class ClassroomExcelService {
 
 	        for (String classroomName : classrooms.keySet()) {
 
-	            Map<String, Object> data =
-	                    (Map<String, Object>) classrooms.get(classroomName);
+	            Map<String, Object> data = (Map<String, Object>) classrooms.get(classroomName);
 
 	            Row row = sheet.createRow(rowIndex++);
 

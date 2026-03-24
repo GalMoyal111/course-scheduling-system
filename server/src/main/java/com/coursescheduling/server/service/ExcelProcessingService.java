@@ -13,7 +13,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
 import com.coursescheduling.server.model.Lesson;
 import com.coursescheduling.server.model.LessonType;
