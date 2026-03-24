@@ -73,15 +73,17 @@ function UploadPage() {
 
   // Filter lessons directly by relevant fields
   const filtered = lessons
-    .filter((l) => {
+    .filter((lesson) => {
       if (!query) return true;
+
       const q = query.toLowerCase();
-      return (
-        (l.courseId && String(l.courseId).toLowerCase().includes(q)) ||
-        (l.courseName && String(l.courseName).toLowerCase().includes(q)) ||
-        (l.type && String(l.type).toLowerCase().includes(q))
-      );
-    })
+
+      return Object.values(lesson).some((value) => {
+        if (value === null || value === undefined) 
+          return false;
+        return String(value).toLowerCase().includes(q);
+    });
+  })
     .sort((a, b) => {
       // semester
       const semesterOrder = { A: 1, B: 2, SUMMER: 3 };
