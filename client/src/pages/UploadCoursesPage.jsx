@@ -5,6 +5,7 @@ import CourseList from "../components/CourseList";
 import Button from "../components/ui/Button";
 import { uploadCourses, exportCourses, addCourse, getAllCourses, deleteCourses, updateCourse } from "../services/api";
 import { useEffect, useState } from "react";
+import { useData } from "../context/DataContext";
 
 import "./UploadPage.css"; // reuse the Upload page styles
 
@@ -17,11 +18,11 @@ export default function UploadCoursesPage() {
   const [exporting, setExporting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
-  const [courses, setCourses] = useState([]);
   const [query, setQuery] = useState("");
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
+  const { courses, setCourses } = useData();
 
   
 
@@ -40,26 +41,9 @@ export default function UploadCoursesPage() {
   };
 
   useEffect(() => {
-    let active = true;
-
-    getAllCourses()
-      .then((data) => {
-        if (!active) return;
-        if (Array.isArray(data)) {
-          setCourses(data || []);
-        } else {
-          setCourses([]);
-        }
-      })
-      .catch((err) => {
-        if (!active) return;
-        console.error("Failed to load courses:", err);
-        setCourses([]);
-      });
-
-    return () => {
-      active = false;
-    };
+    if (courses.length === 0) {
+      loadCourses();
+    }
   }, []);
 
   const handleUpload = async (file) => {

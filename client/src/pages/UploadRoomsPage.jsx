@@ -6,6 +6,8 @@ import Button from "../components/ui/Button";
 import { uploadRooms, exportRooms, addRoom, getAllClassrooms, deleteClassrooms, updateClassroom } from "../services/api";
 import { useState } from "react";
 import { useEffect } from "react";
+import { useData } from "../context/DataContext";
+
 
 function UploadRoomsPage() {
 
@@ -16,6 +18,7 @@ function UploadRoomsPage() {
   };
 
   const [exporting, setExporting] = useState(false);
+  const { classrooms, setClassrooms } = useData();
 
   const handleExport = async () => {
     try {
@@ -130,7 +133,6 @@ function UploadRoomsPage() {
     }
   };
 
-  const [classrooms, setClassrooms] = useState([]);
   const [query, setQuery] = useState("");
 
   const loadClassrooms = async () => {
@@ -143,7 +145,9 @@ function UploadRoomsPage() {
   };
 
   useEffect(() => {
-    loadClassrooms();
+    if (classrooms.length === 0) {
+      loadClassrooms();
+    }
   }, []);
 
   const filteredClassrooms = classrooms.filter((c) => {

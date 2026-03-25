@@ -5,28 +5,30 @@ import LessonList from "../components/LessonList";
 import AddLessonModal from "../components/AddLessonModal";
 import Button from "../components/ui/Button";
 import { useState, useEffect } from "react";
+import { useData } from "../context/DataContext";
+
+
 import "./UploadPage.css";
 function UploadPage() {
   // confirmation state for uploads
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState(null);
   // lessons list (local state for now). Will be shown using LessonList component.
-  const [lessons, setLessons] = useState([]);
   const [query, setQuery] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
   const [selectedLessons, setSelectedLessons] = useState([]);
   const [exporting, setExporting] = useState(false);
-
+  const { lessons, setLessons } = useData();
   // delete confirmation state
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
 
-  // Attempt to load lessons from a hypothetical endpoint later; currently keep empty.
   useEffect(() => {
-    // attempt to load lessons from server
-    loadLessons();
+    if (lessons.length === 0) {
+      loadLessons();
+    }
   }, []);
 
   const loadLessons = async () => {
