@@ -159,6 +159,27 @@ export async function exportRooms() {
 }
 
 
+// Download lessons data as an Excel file (returns the Blob).
+export async function exportLessons() {
+  const res = await fetch(`${BASE_URL}/lessons/export`, {
+    method: "GET",
+    headers: {
+      // Accepting binary Excel data
+      Accept:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/octet-stream",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Export failed: ${res.status} ${text}`);
+  }
+
+  const blob = await res.blob();
+  return blob;
+}
+
+
 export async function addRoom(classroom) {
   const res = await fetch(`${BASE_URL}/rooms`, {
     method: "POST",

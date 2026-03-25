@@ -1,16 +1,20 @@
 package com.coursescheduling.server.service;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.Row;
 import org.springframework.stereotype.Service;
 
 import com.coursescheduling.server.model.ClusterCoursesList;
 import com.coursescheduling.server.model.Course;
 import com.coursescheduling.server.model.Lesson;
+import com.coursescheduling.server.model.LessonType;
+import com.coursescheduling.server.model.Semester;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
@@ -20,7 +24,9 @@ import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteBatch;
 import com.google.firebase.cloud.FirestoreClient;
 import java.util.UUID;
-
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 @Service
 public class LessonService {
@@ -245,5 +251,132 @@ public class LessonService {
 	        throw new RuntimeException("Failed to fetch courses", e);
 	    }
 	}
+	
+	
+	public byte[] exportLessonsToExcel() {
+	    try (Workbook workbook = new XSSFWorkbook()) {
+
+	        Sheet sheet = workbook.createSheet("Lessons");
+
+	        List<Lesson> lessons = getAllLessons();
+
+	        Map<String, List<Lesson>> grouped = new HashMap<>();
+	        List<Lesson> singles = new ArrayList<>();
+
+	        for (Lesson lesson : lessons) {
+	            if (lesson.getSplitGroupId() == null) {
+	                singles.add(lesson);
+	            } else {
+	                grouped.computeIfAbsent(lesson.getSplitGroupId(), k -> new ArrayList<>())
+	                       .add(lesson);
+	            }
+	        }
+
+	        List<Lesson> finalLessons = new ArrayList<>();
+
+	        finalLessons.addAll(singles);
+
+	        for (List<Lesson> group : grouped.values()) {
+	            Lesson base = group.get(0);
+
+	            int totalDuration = group.stream().mapToInt(Lesson::getDuration).sum();
+
+	            Lesson merged = new Lesson();
+	            merged.setCourseId(base.getCourseId());
+	            merged.setCourseName(base.getCourseName());
+	            merged.setLecturer(base.getLecturer());
+	            merged.setType(base.getType());
+	            merged.setSemester(base.getSemester());
+	            merged.setDuration(totalDuration);
+
+	            finalLessons.add(merged);
+	        }
+
+	        Row header = sheet.createRow(0);
+	        header.createCell(0).setCellValue("מס' קורס");
+	        header.createCell(1).setCellValue("שם הקורס");
+	        header.createCell(2).setCellValue("סוג");
+	        header.createCell(3).setCellValue("מרצה");
+	        header.createCell(4).setCellValue("סגל / ממח / עמית");
+	        header.createCell(5).setCellValue("סמסטר");
+	        header.createCell(6).setCellValue("מחלקה");
+	        header.createCell(7).setCellValue("שע'");
+	        header.createCell(8).setCellValue("מרצה");
+	        header.createCell(9).setCellValue("הערות");
+	        header.createCell(10).setCellValue("תאריך עדכון");
+
+	        int rowNum = 1;
+
+	        for (Lesson lesson : finalLessons) {
+	            Row row = sheet.createRow(rowNum++);
+
+	            row.createCell(0).setCellValue(lesson.getCourseId());
+	            row.createCell(1).setCellValue(lesson.getCourseName());
+	            row.createCell(2).setCellValue(formatType(lesson.getType()));
+	            row.createCell(3).setCellValue(lesson.getLecturer());
+	            row.createCell(4).setCellValue(formatSemester(lesson.getSemester()));
+	            
+	            row.createCell(4).setCellValue(""); 
+	            row.createCell(6).setCellValue(""); 
+	            row.createCell(8).setCellValue("");  
+	            row.createCell(9).setCellValue(""); 
+	            row.createCell(10).setCellValue(""); 
+
+	            row.createCell(5).setCellValue(formatSemester(lesson.getSemester()));
+	            row.createCell(7).setCellValue(lesson.getDuration());
+	        }
+
+	        for (int i = 0; i < 6; i++) {
+	            sheet.autoSizeColumn(i);
+	        }
+
+	        ByteArrayOutputStream out = new ByteArrayOutputStream();
+	        workbook.write(out);
+
+	        return out.toByteArray();
+
+	    } catch (Exception e) {
+	        throw new RuntimeException("Failed to export lessons", e);
+	    }
+	}
+	
+	
+	private String formatSemester(Semester semester) {
+	    switch (semester) {
+	        case A:
+	            return "סמסטר א";
+	        case B:
+	            return "סמסטר ב";
+	        case SUMMER:
+	            return "סמסטר קיץ";
+	        default:
+	            return "";
+	    }
+	}
+	
+	private String formatType(LessonType type) {
+	    switch (type) {
+	        case LECTURE:
+	            return "הרצאה";
+	        case TUTORIAL:
+	            return "תרגול";
+	        case LAB:
+	            return "מעבדה";
+	        case PBL:
+	            return "PBL";
+	        case PROJECT:
+	            return "פרויקט";
+	        default:
+	            return "";
+	    }
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 		
 }

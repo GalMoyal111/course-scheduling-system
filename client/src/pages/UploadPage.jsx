@@ -1,5 +1,5 @@
 import UploadForm from "../components/UploadForm";
-import { uploadLessons, getAllLessons, addLesson as addLessonApi, deleteLessons as deleteLessonsApi } from "../services/api";
+import { uploadLessons, getAllLessons, addLesson as addLessonApi, deleteLessons as deleteLessonsApi, exportLessons } from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
 import LessonList from "../components/LessonList";
 import AddLessonModal from "../components/AddLessonModal";
@@ -17,6 +17,7 @@ function UploadPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
   const [selectedLessons, setSelectedLessons] = useState([]);
+  const [exporting, setExporting] = useState(false);
 
   // delete confirmation state
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -196,13 +197,31 @@ function UploadPage() {
             </svg>
             Add Lesson
           </Button>
-          <Button disabled>
+          <Button onClick={async () => {
+            try {
+              setExporting(true);
+              const blob = await exportLessons();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "lessons.xlsx";
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(url);
+            } catch (err) {
+              console.error(err);
+              alert("Export failed");
+            } finally {
+              setExporting(false);
+            }
+          }} disabled={exporting}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden style={{ marginRight: 8 }}>
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M7 10l5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M12 5v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Export
+            {exporting ? "Exporting..." : "Export"}
           </Button>
         </div>
       </div>

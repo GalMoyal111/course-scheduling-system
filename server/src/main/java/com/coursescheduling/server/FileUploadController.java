@@ -212,6 +212,25 @@ public class FileUploadController {
         return lessonService.getAllCoursesGroupedByCluster();
     }
     
+    
+    @GetMapping("/lessons/export")
+    public ResponseEntity<byte[]> exportLessons() {
+
+        try {
+
+            byte[] excelData = lessonService.exportLessonsToExcel();
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=lessons.xlsx")
+                    .header("Content-Type",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    .body(excelData);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export lessons", e);
+        }
+    }
+    
 
     
 }
