@@ -1,13 +1,15 @@
 import React from "react";
+import Sidebar from "./Sidebar";
 import "./ui.css";
 
-/**
- * Simple layout wrapper to provide centered container and basic spacing.
- */
-export default function Layout({ children }) {
+export default function Layout({ children, page, onNavigate }) {
   return (
-    <div className="app-shell">
-      <div className="app-container">{children}</div>
+    <div style={{ display: "flex" }}>
+      <Sidebar page={page} onNavigate={onNavigate} />
+
+      <div style={{ flex: 1, padding: "20px" }}>
+        {children}
+      </div>
     </div>
   );
 }

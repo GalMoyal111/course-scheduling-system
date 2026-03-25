@@ -127,7 +127,11 @@
 .toolbar .left{display:flex;align-items:center;gap:8px}
 .toolbar .right{display:flex;align-items:center;gap:8px}
 .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;border:0;background:transparent;cursor:pointer;color:var(--text)}
-.icon-btn:hover{background:rgba(15,23,36,0.04)}
+.icon-btn{
+  display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;border:0;background:transparent;cursor:pointer;color:var(--text);
+  transition:background-color .16s ease, transform .08s ease, box-shadow .12s ease;
+}
+.icon-btn:hover{background:linear-gradient(180deg, rgba(79,70,229,0.06), rgba(124,58,237,0.02));transform:translateY(-1px)}
 .icon-btn svg{display:block;color:inherit;width:16px;height:16px}
 /* Ensure SVG strokes/fills inherit the button color so icons are visible
   even if the SVG markup doesn't explicitly use currentColor. Also
@@ -140,11 +144,25 @@
   fill:currentColor;
 }
 
+/* Material Icons inside icon buttons should match SVG sizing and inherit color */
+.icon-btn .material-icons{
+  display:block;
+  font-size:16px;
+  line-height:16px;
+  width:16px;
+  height:16px;
+  color:inherit;
+}
+
 
 .icon-btn--edit{color:var(--muted)}
 .icon-btn--edit:hover{color:var(--text);background:rgba(79,70,229,0.06)}
 .icon-btn--delete{color:#ef4444}
 .icon-btn--delete:hover{background:rgba(239,68,68,0.08);color:var(--danger-color)}
+.icon-btn:focus{outline:none}
+/* Keep a visible ring for keyboard users while preventing the button from appearing "selected" after click */
+.icon-btn:focus-visible{box-shadow:0 0 0 4px rgba(79,70,229,0.10);border-radius:8px}
+.icon-btn:active{transform:translateY(0)}
 .search-input{padding:8px 12px;border-radius:10px;border:1px solid rgba(15,23,36,0.08);min-width:220px}
 
 /* Type badge */
@@ -164,3 +182,53 @@
 .empty-illustration svg{width:160px;height:120px;opacity:0.95}
 
 
+/* ===== Sidebar ===== */
+
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  max-width: 240px;
+  height: 100vh;
+  background: white;
+  border-right: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 12px;
+}
+
+.sidebar-logo {
+  cursor: pointer;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.sidebar-logo img {
+  width: 120px;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #555;
+}
+
+.sidebar-item:hover {
+  background: #f3f4f6;
+}
+
+.sidebar-item.active {
+  background: #e0e7ff;
+  color: #4f46e5;
+  font-weight: 600;
+}

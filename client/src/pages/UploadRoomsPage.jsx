@@ -171,11 +171,8 @@ function UploadRoomsPage() {
         </div>
 
         <div className="right">
-          <button className="icon-btn" title="Refresh list" onClick={loadClassrooms} aria-label="Refresh">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M21 12a9 9 0 10-3.22 6.72" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M21 3v6h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+          <button className="icon-btn" title="Refresh list" onClick={(e) => { e.currentTarget.blur(); loadClassrooms(); }} aria-label="Refresh">
+            <span className="material-icons" aria-hidden>refresh</span>
           </button>
           <Button onClick={() => { setEditingClassroom(null); setIsModalOpen(true); }} variant="secondary">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden style={{ marginRight: 8 }}>
