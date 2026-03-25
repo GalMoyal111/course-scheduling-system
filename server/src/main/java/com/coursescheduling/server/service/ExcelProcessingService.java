@@ -30,9 +30,7 @@ public class ExcelProcessingService {
 	
 	private final LessonService lessonService;
 	private final CourseService courseService;
-	
-	private int splitGroupCounter = 1;
-	
+		
 	public ExcelProcessingService(Firestore firestore, LessonService lessonService, CourseService courseService) {
 	    this.firestore = firestore;
 	    this.lessonService = lessonService;
@@ -70,7 +68,6 @@ public class ExcelProcessingService {
 
 	            addLessonFromRow(row, lessons, courseMap);
 	        }
-	        sortLessons(lessons);
 	        lessonService.saveLessons(lessons);
 	        
 
@@ -164,7 +161,7 @@ public class ExcelProcessingService {
 
 	    if (duration == 4) {
 	    	
-	    	int splitGroupId = splitGroupCounter++;
+	    	String splitGroupId = UUID.randomUUID().toString();
 	        Lesson lesson1 = createLesson(courseId, courseName, type, lecturer, semester, 2, splitGroupId, courseMap);
 	        Lesson lesson2 = createLesson(courseId, courseName, type, lecturer, semester, 2, splitGroupId , courseMap);
 
@@ -173,7 +170,7 @@ public class ExcelProcessingService {
 
 	    } else {
 
-	        Lesson lesson = createLesson(courseId, courseName, type, lecturer, semester, duration, 0 , courseMap);
+	        Lesson lesson = createLesson(courseId, courseName, type, lecturer, semester, duration, null , courseMap);
 	        if (lesson != null) {
 	            lessons.add(lesson);
 	        }
@@ -181,7 +178,7 @@ public class ExcelProcessingService {
 	}
 	
 	// Helper method to create a Lesson object with the given properties.
-	private Lesson createLesson(String courseId, String courseName, LessonType type, String lecturer, Semester semester, int duration, int splitGroupId, Map<String, Course> courseMap) {
+	private Lesson createLesson(String courseId, String courseName, LessonType type, String lecturer, Semester semester, int duration, String splitGroupId, Map<String, Course> courseMap) {
 		// Create and populate the Lesson object
 		Lesson lesson = new Lesson();
 		
@@ -203,11 +200,7 @@ public class ExcelProcessingService {
 		lesson.setCluster(course.getCluster());
 		lesson.setCredits(course.getCredits());
 		
-		if(splitGroupId != 0)
-			lesson.setSplitGroupId(splitGroupId);
-		
-		else
-			lesson.setSplitGroupId(0);
+		lesson.setSplitGroupId(splitGroupId);
 		
 		return lesson;
 		}

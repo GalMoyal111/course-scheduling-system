@@ -81,19 +81,28 @@ export default function AddLessonModal({
 
   const computedDuration = (() => {
     if (!selectedCourse) return "";
-
+    let duration;
     switch (type) {
       case "lecture":
-        return selectedCourse.lectureHours || 0;
+        duration = selectedCourse.lectureHours || 0;
+        break;
       case "practice":
-        return selectedCourse.tutorialHours || 0;
+        duration = selectedCourse.tutorialHours || 0;
+        break;
       case "laboratory":
-        return selectedCourse.labHours || 0;
+        duration = selectedCourse.labHours || 0;
+        break;
       case "pbl":
-        return selectedCourse.projectHours || 0;
+        duration = selectedCourse.projectHours || 0;
+        break;
       default:
-        return 1;
+        duration = 1;
     }
+    if (isEdit && duration === 4) {
+      return 2;
+    }
+
+  return duration;
   })();
 
   if (!isOpen) return null;

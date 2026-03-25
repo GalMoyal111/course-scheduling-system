@@ -26,8 +26,6 @@ import java.util.UUID;
 public class LessonService {
 
 	private final CourseService courseService;
-	private int splitGroupCounter = 1;
-
 
     public LessonService(CourseService courseService) {
         this.courseService = courseService;
@@ -76,11 +74,6 @@ public class LessonService {
 
 	    batch.commit();
 	}
-	
-	private int generateSplitGroupId() {
-	    return splitGroupCounter++;
-	}
-	
 	
 	
 	
@@ -139,7 +132,7 @@ public class LessonService {
 
 	    if (lesson.getDuration() > 3) {
 
-	        int splitGroupId = generateSplitGroupId();
+	    	String splitGroupId = UUID.randomUUID().toString();
 	        int half = lesson.getDuration() / 2;
 
 	        Lesson l1 = copyLesson(lesson);
@@ -159,7 +152,7 @@ public class LessonService {
 
 	    } else {
 
-	        lesson.setSplitGroupId(0);
+	        lesson.setSplitGroupId(null);
 	        lesson.setLessonId(UUID.randomUUID().toString());
 
 	        lessonsToSave.add(lesson);
@@ -252,18 +245,5 @@ public class LessonService {
 	        throw new RuntimeException("Failed to fetch courses", e);
 	    }
 	}
-	
-	
-	private Lesson convertToLesson(Object obj) {
-	    ObjectMapper mapper = new ObjectMapper();
-	    return mapper.convertValue(obj, Lesson.class);
-	}
-	
-	
-	
-	
-	
-	
-	
-	
+		
 }

@@ -16,7 +16,7 @@ public class Lesson {
 
     private int duration;  // duration in hours
 
-    private int splitGroupId;  // for splitting lessons of 4 hours into two 2-hour lessons. 0 means no split.
+    private String splitGroupId;  // for splitting lessons of 4 hours into two 2-hour lessons. 0 means no split.
 
     private Semester semester; // 1 for first semester, 2 for second semester, summer for summer semester
 
@@ -81,11 +81,11 @@ public class Lesson {
 		this.duration = duration;
 	}
 
-	public int getSplitGroupId() {
+	public String getSplitGroupId() {
 		return splitGroupId;
 	}
 
-	public void setSplitGroupId(int splitGroupId) {
+	public void setSplitGroupId(String splitGroupId) {
 		this.splitGroupId = splitGroupId;
 	}
 
