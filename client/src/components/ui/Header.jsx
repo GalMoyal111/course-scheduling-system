@@ -1,5 +1,6 @@
 import React from "react";
 import Button from "./Button";
+import logo from "../../assets/logo.png";
 import "./ui.css";
 
 /**
@@ -10,11 +11,7 @@ export default function Header({ page, onNavigate, serverMsg }) {
   return (
     <header className="ui-header">
       <div className="ui-header__brand">
-        <div className="ui-logo" aria-hidden>📚</div>
-        <div>
-          <div className="ui-title">Course Scheduling</div>
-          <div className="ui-sub">Client</div>
-        </div>
+        <img src={logo} alt="Unisched logo" className="ui-logo-large" />
       </div>
 
       <nav className="ui-nav" aria-label="Main navigation">

@@ -20,9 +20,11 @@
 /* Header */
 .ui-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.25rem}
 .ui-header__brand{display:flex;gap:.75rem;align-items:center}
-.ui-logo{font-size:1.6rem}
 .ui-title{font-weight:700;font-size:1.125rem}
 .ui-sub{font-size:.78rem;color:var(--muted)}
+.ui-logo-large {
+  height: 100px;
+}
 
 .ui-nav{display:flex;gap:.5rem}
 
@@ -160,3 +162,5 @@
 /* Empty illustration */
 .empty-illustration{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;color:var(--muted)}
 .empty-illustration svg{width:160px;height:120px;opacity:0.95}
+
+
