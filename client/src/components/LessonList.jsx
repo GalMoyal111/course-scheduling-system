@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./ui/ui.css";
-import { typeBadge } from "./ui/typeUtils.jsx";
+import { typeBadge } from "./ui/typeUtils";
+
 
 export default function LessonList({ lessons = [], onEdit, onDelete, onSelectionChange, title = "Lessons" }) {
   if (!lessons || lessons.length === 0) {
