@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { ping } from "./services/api";
 import { useLocation } from "react-router-dom";
 import { Routes, Route } from "react-router-dom";
-
+import { useState } from "react";
 import UploadPage from "./pages/UploadPage";
 import UploadRoomsPage from "./pages/UploadRoomsPage";
 import UploadCoursesPage from "./pages/UploadCoursesPage";
@@ -11,6 +11,7 @@ import Layout from "./components/ui/Layout";
 import Footer from "./components/ui/Footer";
 
 function App() {
+  const [user, setUser] = useState(null);
   const location = useLocation();
 
   useEffect(() => {
@@ -33,7 +34,7 @@ function App() {
   }, []);
 
   return (
-    <Layout>
+    <Layout user={user} onLogin={setUser} onLogout={() => setUser(null)}>
       <Routes>
         <Route path="/" element={<h2>Dashboard</h2>} />
         <Route path="/classrooms" element={<UploadRoomsPage />} />
