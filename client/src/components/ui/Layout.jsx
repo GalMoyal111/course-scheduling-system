@@ -2,11 +2,10 @@ import React from "react";
 import Sidebar from "./Sidebar";
 import "./ui.css";
 
-export default function Layout({ children, page, onNavigate }) {
+export default function Layout({ children }) {
   return (
     <div style={{ display: "flex" }}>
-      <Sidebar page={page} onNavigate={onNavigate} />
-
+      <Sidebar />
       <div style={{ flex: 1, padding: "20px" }}>
         {children}
       </div>

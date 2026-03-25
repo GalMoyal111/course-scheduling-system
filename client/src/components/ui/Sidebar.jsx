@@ -2,22 +2,26 @@ import React from "react";
 import logo from "../../assets/logo.png";
 import "./ui.css";
 
-export default function Sidebar({ page, onNavigate }) {
+import { useNavigate, useLocation } from "react-router-dom";
+
+export default function Sidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const items = [
-    { key: "dashboard", label: "Dashboard", icon: "dashboard" },
-    { key: "rooms", label: "Classrooms", icon: "meeting_room" },
-    { key: "courses", label: "Courses", icon: "menu_book" },
-    { key: "lessons", label: "Lessons", icon: "school" },
-    { key: "generate", label: "Generate", icon: "auto_awesome" },
-    { key: "timetable", label: "Timetable", icon: "calendar_month" },
-    { key: "history", label: "History", icon: "history" },
-    { key: "settings", label: "Settings", icon: "settings" },
+    { path: "/", label: "Dashboard", icon: "dashboard" },
+    { path: "/classrooms", label: "Classrooms", icon: "meeting_room" },
+    { path: "/courses", label: "Courses", icon: "menu_book" },
+    { path: "/lessons", label: "Lessons", icon: "school" },
+    { path: "/generate", label: "Generate", icon: "auto_awesome" },
+    { path: "/timetable", label: "Timetable", icon: "calendar_month" },
+    { path: "/history", label: "History", icon: "history" },
+    { path: "/settings", label: "Settings", icon: "settings" },
   ];
 
   return (
     <div className="sidebar">
       {/* לוגו */}
-      <div className="sidebar-logo" onClick={() => onNavigate("dashboard")}>
+      <div className="sidebar-logo" onClick={() => navigate("/")}>
         <img src={logo} alt="logo" />
       </div>
 
@@ -25,9 +29,11 @@ export default function Sidebar({ page, onNavigate }) {
       <div className="sidebar-menu">
         {items.map((item) => (
           <div
-            key={item.key}
-            className={`sidebar-item ${page === item.key ? "active" : ""}`}
-            onClick={() => onNavigate(item.key)}
+            key={item.path}
+            className={`sidebar-item ${
+              location.pathname === item.path ? "active" : ""
+            }`}
+            onClick={() => navigate(item.path)}
           >
             <span className="material-icons">{item.icon}</span>
             <span>{item.label}</span>
