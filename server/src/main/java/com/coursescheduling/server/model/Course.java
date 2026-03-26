@@ -4,7 +4,7 @@ public class Course {
     private int cluster;
     private String courseId;
     private String courseName;
-    private String prerequisiteCourseNumberOrConditions;
+    private String prerequisiteCourseNumber;
     private int lectureHours;
     private int tutorialHours;
     private int labHours;
@@ -15,12 +15,12 @@ public class Course {
 
     public Course() {}
 
-    public Course(int cluster, String courseId, String courseName, String prerequisiteCourseNumberOrConditions,
+    public Course(int cluster, String courseId, String courseName, String prerequisiteCourseNumber,
                   int lectureHours, int tutorialHours, int labHours, int projectHours, float credits, String notes, String clusterName) {
         this.cluster = cluster;
         this.courseId = courseId;
         this.courseName = courseName;
-        this.prerequisiteCourseNumberOrConditions = prerequisiteCourseNumberOrConditions;
+        this.prerequisiteCourseNumber = prerequisiteCourseNumber;
         this.lectureHours = lectureHours;
         this.tutorialHours = tutorialHours;
         this.labHours = labHours;
@@ -49,12 +49,12 @@ public class Course {
         this.courseName = courseName;
     }
 
-    public String getPrerequisiteCourseNumberOrConditions() {
-        return prerequisiteCourseNumberOrConditions;
+    public String getPrerequisiteCourseNumber() {
+        return prerequisiteCourseNumber;
     }
 
-    public void setPrerequisiteCourseNumberOrConditions(String prerequisiteCourseNumberOrConditions) {
-        this.prerequisiteCourseNumberOrConditions = prerequisiteCourseNumberOrConditions;
+    public void setPrerequisiteCourseNumber(String prerequisiteCourseNumber) {
+        this.prerequisiteCourseNumber = prerequisiteCourseNumber;
     }
 
     public int getLectureHours() {

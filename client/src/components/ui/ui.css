@@ -97,6 +97,25 @@
 .modal-card--wide{width:min(920px, 96vw)}
 .add-course-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
 
+.prereq-input-row{display:flex;gap:8px;align-items:center}
+.prereq-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.prereq-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid #d1d5db;
+  background:#f8fafc;
+}
+.prereq-chip-remove{
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  font-weight:700;
+  line-height:1;
+}
+
 @media (max-width:760px){
   .add-course-grid{grid-template-columns:1fr}
 }

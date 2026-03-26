@@ -44,7 +44,8 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
   const [cluster, setCluster] = useState("");
   const [courseCode, setCourseCode] = useState("");
   const [courseName, setCourseName] = useState("");
-  const [prerequisiteCourseNumberOrConditions, setPrerequisiteCourseNumberOrConditions] = useState("");
+  const [prerequisiteCourseNumbers, setPrerequisiteCourseNumbers] = useState([]);
+  const [prerequisiteInput, setPrerequisiteInput] = useState("");
   const [lectureHours, setLectureHours] = useState("");
   const [tutorialHours, setTutorialHours] = useState("");
   const [labHours, setLabHours] = useState("");
@@ -52,14 +53,18 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
   const [credits, setCredits] = useState("");
   const [notes, setNotes] = useState("");
   const [clusterName, setClusterName] = useState("");
-  const isSemesterDisabled = clusterName !== "" && cluster === "";
+  // Disable semester selection if the cluster is between 9-14, otherwise disable cluster name selection. This ensures users can't select both a semester and a cluster name at the same time.
+  const selectedClusterNumber =cluster.trim() !== "" ? Number(cluster) : CLUSTER_NAME_TO_NUMBER[clusterName.trim()];
+  const isSemesterDisabled = Number.isInteger(selectedClusterNumber) && selectedClusterNumber >= 9 && selectedClusterNumber <= 14;
+  // const isSemesterDisabled = clusterName !== "" && cluster === "";
   const isClusterNameDisabled = cluster !== "" && clusterName === "";
 
   const resetForm = () => {
     setCluster("");
     setCourseCode("");
     setCourseName("");
-    setPrerequisiteCourseNumberOrConditions("");
+    setPrerequisiteCourseNumbers([]);
+    setPrerequisiteInput("");
     setLectureHours("");
     setTutorialHours("");
     setLabHours("");
@@ -81,22 +86,40 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
           : "";
 
       const initialClusterAsNumber = Number(initialClusterValue);
-      const inferredClusterName = Number.isFinite(initialClusterAsNumber)
-        ? CLUSTER_NUMBER_TO_NAME[initialClusterAsNumber]
-        : "";
+      if (
+        Number.isInteger(initialClusterAsNumber) &&
+        initialClusterAsNumber >= 1 &&
+        initialClusterAsNumber <= 8
+      ) {
+        setCluster(String(initialClusterAsNumber));
+        setClusterName("");
+      } else if (
+        Number.isInteger(initialClusterAsNumber) &&
+        initialClusterAsNumber >= 9 &&
+        initialClusterAsNumber <= 14
+      ) {
+        const inferredClusterName = CLUSTER_NUMBER_TO_NAME[initialClusterAsNumber] || "";
+        setCluster("");
+        setClusterName(initialCourse.clusterName || inferredClusterName);
+      } else {
+        setCluster("");
+        setClusterName("");
+      }
 
-      const resolvedClusterName = initialCourse.clusterName || inferredClusterName || "";
-      setCluster(resolvedClusterName ? "" : initialClusterValue);
       setCourseCode(initialCourse.courseCode || initialCourse.courseId || "");
       setCourseName(initialCourse.courseName || "");
-      setPrerequisiteCourseNumberOrConditions(initialCourse.prerequisiteCourseNumberOrConditions || "");
+      const parsedPrerequisites = (initialCourse.prerequisiteCourseNumber || "")
+        .split(",")
+        .map((value) => value.trim())
+        .filter((value) => value !== "");
+      setPrerequisiteCourseNumbers(parsedPrerequisites);
+      setPrerequisiteInput("");
       setLectureHours(initialCourse.lectureHours != null ? String(initialCourse.lectureHours) : "");
       setTutorialHours(initialCourse.tutorialHours != null ? String(initialCourse.tutorialHours) : "");
       setLabHours(initialCourse.labHours != null ? String(initialCourse.labHours) : "");
       setProjectHours(initialCourse.projectHours != null ? String(initialCourse.projectHours) : "");
       setCredits(initialCourse.credits != null ? String(initialCourse.credits) : "");
       setNotes(initialCourse.notes || "");
-      setClusterName(resolvedClusterName);
     } else {
       resetForm();
     }
@@ -112,6 +135,30 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
       throw new Error(`Please enter a valid non-negative number for ${fieldName}.`);
     }
     return parsed;
+  };
+
+  // Validates that the prerequisite course code is 5 or 6 digits (e.g., "12345").
+  const validatePrerequisiteCode = (code) => /^\d{5,6}$/.test(code);
+  // const validatePrerequisiteCode = (code) => /^\d{5}$/.test(code);
+
+  const handleAddPrerequisite = () => {
+    const nextCode = prerequisiteInput.trim();
+    if (nextCode === "") {
+      return;
+    }
+    if (!validatePrerequisiteCode(nextCode)) {
+      throw new Error("Prerequisite course code must contain exactly 5 or 6 digits.");
+    }
+    if (prerequisiteCourseNumbers.includes(nextCode)) {
+      throw new Error("This prerequisite course code is already added.");
+    }
+
+    setPrerequisiteCourseNumbers((prev) => [...prev, nextCode]);
+    setPrerequisiteInput("");
+  };
+
+  const handleRemovePrerequisite = (codeToRemove) => {
+    setPrerequisiteCourseNumbers((prev) => prev.filter((code) => code !== codeToRemove));
   };
 
   const handleSubmit = (e) => {
@@ -132,12 +179,16 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
         throw new Error("Please choose a valid cluster name.");
       }
 
+      if (prerequisiteInput.trim() !== "") {
+        throw new Error("Please click + to add the prerequisite code before saving.");
+      }
+
       const course = {
         cluster: resolvedCluster,
         courseId: courseCode.trim(),
         // courseCode: courseCode.trim(),
         courseName: courseName.trim(),
-        prerequisiteCourseNumberOrConditions: prerequisiteCourseNumberOrConditions.trim(),
+        prerequisiteCourseNumber: prerequisiteCourseNumbers.join(","),
         lectureHours: toNonNegativeInt(lectureHours, "lecture hours"),
         tutorialHours: toNonNegativeInt(tutorialHours, "tutorial hours"),
         labHours: toNonNegativeInt(labHours, "lab hours"),
@@ -199,6 +250,35 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
             </div>
 
             <div className="form-field">
+              <label>Cluster Name</label>
+              <select
+                className="ui-input"
+                value={clusterName}
+                onChange={(e) => {
+                  const selectedClusterName = e.target.value;
+                  setClusterName(selectedClusterName);
+                  if (selectedClusterName !== "") {
+                    setCluster("");
+                  }
+                }}
+                disabled={isClusterNameDisabled}
+              >
+                {isClusterNameDisabled ? (
+                  <option value="">NOT AVAILABLE - CHOSE SEMSTER NUMBER</option>
+                ) : (
+                  <>
+                    <option value="">Select cluster name</option>
+                    {CLUSTER_NAME_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </>
+                )}
+              </select>
+            </div>
+
+            <div className="form-field">
               <label>Course Code</label>
               <input
                 className="ui-input"
@@ -219,12 +299,55 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
             </div>
 
             <div className="form-field">
-              <label>Prerequisites / Conditions</label>
-              <input
-                className="ui-input"
-                value={prerequisiteCourseNumberOrConditions}
-                onChange={(e) => setPrerequisiteCourseNumberOrConditions(e.target.value)}
-              />
+              <label>Prerequisites</label>
+              <div className="prereq-input-row">
+                <input
+                  className="ui-input"
+                  value={prerequisiteInput}
+                  onChange={(e) => setPrerequisiteInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      try {
+                        handleAddPrerequisite();
+                      } catch (err) {
+                        alert(err.message || "Invalid prerequisite course code.");
+                      }
+                    }
+                  }}
+                  placeholder="5 or 6-digit course code"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    try {
+                      handleAddPrerequisite();
+                    } catch (err) {
+                      alert(err.message || "Invalid prerequisite course code.");
+                    }
+                  }}
+                >
+                  +
+                </Button>
+              </div>
+              {prerequisiteCourseNumbers.length > 0 && (
+                <div className="prereq-chips">
+                  {prerequisiteCourseNumbers.map((code) => (
+                    <div key={code} className="prereq-chip">
+                      <span>{code}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePrerequisite(code)}
+                        className="prereq-chip-remove"
+                        aria-label={`Remove prerequisite ${code}`}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="form-field">
@@ -284,35 +407,6 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
               />
-            </div>
-
-            <div className="form-field">
-              <label>Cluster Name</label>
-              <select
-                className="ui-input"
-                value={clusterName}
-                onChange={(e) => {
-                  const selectedClusterName = e.target.value;
-                  setClusterName(selectedClusterName);
-                  if (selectedClusterName !== "") {
-                    setCluster("");
-                  }
-                }}
-                disabled={isClusterNameDisabled}
-              >
-                {isClusterNameDisabled ? (
-                  <option value="">NOT AVAILABLE - CHOSE SEMSTER NUMBER</option>
-                ) : (
-                  <>
-                    <option value="">Select cluster name</option>
-                    {CLUSTER_NAME_OPTIONS.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </>
-                )}
-              </select>
             </div>
             </div>
 

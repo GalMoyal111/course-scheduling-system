@@ -60,7 +60,7 @@ public class CoursesExcelService {
 
             String courseCode = formatter.formatCellValue(row.getCell(1)).trim();
             String courseName = formatter.formatCellValue(row.getCell(2)).trim();
-            String prerequisiteCourseNumberOrConditions = formatter.formatCellValue(row.getCell(3)).trim();
+            String prerequisiteCourseNumber = formatter.formatCellValue(row.getCell(3)).trim();
 
             int lectureHours = parseIntCell(row.getCell(4), formatter);
             int tutorialHours = parseIntCell(row.getCell(5), formatter);
@@ -79,7 +79,7 @@ public class CoursesExcelService {
             		cluster,
                     courseCode,
                     courseName,
-                    prerequisiteCourseNumberOrConditions,
+                    prerequisiteCourseNumber,
                     lectureHours,
                     tutorialHours,
                     labHours,
@@ -124,7 +124,7 @@ public class CoursesExcelService {
                 String semesterNumber = String.valueOf((int) row.getCell(0).getNumericCellValue());
                 String courseCode = row.getCell(1).getStringCellValue();
                 String courseName = row.getCell(2).getStringCellValue();
-                String prerequisiteCourseNumberOrConditions = row.getCell(3).getStringCellValue();
+                String prerequisiteCourseNumber = row.getCell(3).getStringCellValue();
                 int lectureHours = (int) row.getCell(4).getNumericCellValue();
                 int tutorialHours = (int) row.getCell(5).getNumericCellValue();
                 int labHours = (int) row.getCell(6).getNumericCellValue();
@@ -132,7 +132,7 @@ public class CoursesExcelService {
                 int credits = (int) row.getCell(8).getNumericCellValue();
                 String notes = row.getCell(9).getStringCellValue();
 
-                Course course = new Course(semesterNumber, courseCode, courseName, prerequisiteCourseNumberOrConditions,
+                Course course = new Course(semesterNumber, courseCode, courseName, prerequisiteCourseNumber,
                         lectureHours, tutorialHours, labHours, projectHours, credits, notes);
 
                 courses.add(course);
@@ -149,23 +149,32 @@ public class CoursesExcelService {
         // Implement logic to save the list of courses to the database (e.g., Firestore)
         Firestore db = FirestoreClient.getFirestore();
         for (Course course : courses) {
+            String courseId = course.getCourseId();
+            if (courseId == null || courseId.isBlank()) {
+                continue;
+            }
+
             Map<String, Object> data = new HashMap<>();
+            String normalizedClusterName =
+                (course.getClusterName() == null || course.getClusterName().isBlank())
+                    ? (course.getCluster() >= 1 && course.getCluster() <= 8 ? "סמסטר " + course.getCluster() : "")
+                    : course.getClusterName().trim();
             
             data.put("cluster", course.getCluster()); 
             data.put("courseId", course.getCourseId());      
             
             
             data.put("courseName", course.getCourseName());
-            data.put("prerequisiteCourseNumberOrConditions", course.getPrerequisiteCourseNumberOrConditions());
+            data.put("prerequisiteCourseNumber", course.getPrerequisiteCourseNumber());
             data.put("lectureHours", course.getLectureHours());
             data.put("tutorialHours", course.getTutorialHours());
             data.put("labHours", course.getLabHours());
             data.put("projectHours", course.getProjectHours());
             data.put("credits", course.getCredits());
             data.put("notes", course.getNotes());
-            data.put("clusterName", course.getClusterName());
+            data.put("clusterName", normalizedClusterName);
 
-            db.collection("courses").document(course.getCourseId()).set(data, SetOptions.merge());
+            db.collection("courses").document(courseId).set(data, SetOptions.merge());
             //db.collection("courses").document(course.getSemesterNumber()).set(Map.of(course.getCourseCode(), data), SetOptions.merge());
             
 
@@ -198,7 +207,6 @@ public class CoursesExcelService {
             int rowIndex = 1;
 
             for (QueryDocumentSnapshot doc : documents) {
-                String documentId = doc.getId();
                 Map<String, Object> data = doc.getData();
 
                 Row row = sheet.createRow(rowIndex++);
@@ -206,7 +214,7 @@ public class CoursesExcelService {
                 row.createCell(0).setCellValue(asString(data.get("cluster")));
                 row.createCell(1).setCellValue(doc.getId());
                 row.createCell(2).setCellValue(asString(data.get("courseName")));
-                row.createCell(3).setCellValue(asString(data.get("prerequisiteCourseNumberOrConditions")));
+                row.createCell(3).setCellValue(asString(data.get("prerequisiteCourseNumber")));
                 row.createCell(4).setCellValue(asDouble(data.get("lectureHours")));
                 row.createCell(5).setCellValue(asDouble(data.get("tutorialHours")));
                 row.createCell(6).setCellValue(asDouble(data.get("labHours")));
@@ -223,7 +231,7 @@ public class CoursesExcelService {
                 //     row.createCell(0).setCellValue(semesterNumber);
                 //     row.createCell(1).setCellValue(courseCode);
                 //     row.createCell(2).setCellValue(asString(data.get("courseName")));
-                //     row.createCell(3).setCellValue(asString(data.get("prerequisiteCourseNumberOrConditions")));
+                //     row.createCell(3).setCellValue(asString(data.get("prerequisiteCourseNumber")));
                 //     row.createCell(4).setCellValue(asDouble(data.get("lectureHours")));
                 //     row.createCell(5).setCellValue(asDouble(data.get("tutorialHours")));
                 //     row.createCell(6).setCellValue(asDouble(data.get("labHours")));
@@ -252,7 +260,7 @@ public class CoursesExcelService {
         for (Course course : courses) {
             System.out.println("Course Code: " + course.getCourseId());
             System.out.println("Course Name: " + course.getCourseName());
-            System.out.println("Prerequisites: " + course.getPrerequisiteCourseNumberOrConditions());
+            System.out.println("Prerequisites: " + course.getPrerequisiteCourseNumber());
             System.out.println("Lecture Hours: " + course.getLectureHours());
             System.out.println("Tutorial Hours: " + course.getTutorialHours());
             System.out.println("Lab Hours: " + course.getLabHours());
@@ -269,7 +277,7 @@ public class CoursesExcelService {
 
     //     Map<String, Object> data = new HashMap<>();
     //     data.put("courseName", course.getCourseName());
-    //     data.put("prerequisiteCourseNumberOrConditions", course.getPrerequisiteCourseNumberOrConditions());
+    //     data.put("prerequisiteCourseNumber", course.getPrerequisiteCourseNumber());
     //     data.put("lectureHours", course.getLectureHours());
     //     data.put("tutorialHours", course.getTutorialHours());
     //     data.put("labHours", course.getLabHours());
