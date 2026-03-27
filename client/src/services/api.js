@@ -290,3 +290,20 @@ export async function deleteLessons(lessons) {
 
   return res.text();
 }
+
+
+
+export async function getUserRole(token) {
+  const res = await fetch("http://localhost:8080/api/auth/me", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to get user role");
+  }
+
+  return res.json();
+}

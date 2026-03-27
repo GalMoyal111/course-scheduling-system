@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Button from "./ui/Button";
 import "./ui/ui.css";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase.js";
+import { getUserRole } from "../services/api";
+
 
 export default function LoginModal({ isOpen, onClose, onLogin }) {
     const [email, setEmail] = useState("");
@@ -16,13 +20,23 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
     if (!isOpen) return null;
 
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
 
-        // fake login
-        onLogin({ email, role: "ADMIN" });
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth,email,password);
 
-        onClose();
+            const user = userCredential.user;
+            const token = await user.getIdToken();
+            const data = await getUserRole(token);
+
+            onLogin({email: user.email,role : data.role, });  
+            onClose();
+
+        } catch (error) {
+            alert("Login failed");
+        }
+
     };
 
 

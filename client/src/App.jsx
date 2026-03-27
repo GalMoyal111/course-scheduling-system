@@ -6,6 +6,9 @@ import { useState } from "react";
 import UploadPage from "./pages/UploadPage";
 import UploadRoomsPage from "./pages/UploadRoomsPage";
 import UploadCoursesPage from "./pages/UploadCoursesPage";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebase";
+
 
 import Layout from "./components/ui/Layout";
 import Footer from "./components/ui/Footer";
@@ -32,6 +35,19 @@ function App() {
   useEffect(() => {
     ping().catch(() => {});
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser({email: user.email,role: "USER", });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
 
   return (
     <Layout user={user} onLogin={setUser} onLogout={() => setUser(null)}>

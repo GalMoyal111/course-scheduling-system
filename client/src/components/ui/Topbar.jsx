@@ -4,11 +4,17 @@ import logo from "../../assets/logo-small.png";
 import "./ui.css";
 import { useState } from "react";
 import LoginModal from "../LoginModal";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase";
 
 export default function Topbar( {user , onLogin , onLogout } ) {
   const location = useLocation();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
+  const handleLogout = async () => {
+    await signOut(auth);
+    onLogout();
+  };
   
   const map = {
     "/": "Dashboard",
@@ -33,7 +39,7 @@ export default function Topbar( {user , onLogin , onLogout } ) {
             </button>) : (
             <>
               <span style={{ marginRight: 10 }}>{user.email}</span>
-              <button onClick={onLogout}>Logout</button>
+              <button onClick={handleLogout}>Logout</button>
             </>
           )}
         </div>
