@@ -65,7 +65,24 @@ export default function AddLessonModal({
 
   const allCourses = groupedCourses.flatMap((c) => c.courses);
 
-  const clusterOptions = groupedCourses.map((c) => c.clusterName);
+  const clusterOptions = groupedCourses.map((c) => c.clusterName).filter(Boolean).sort((a, b) => {
+    const getSemesterNumber = (str) => {
+      const match = str.match(/סמסטר\s*(\d+)/);
+      return match ? parseInt(match[1], 10) : null;
+    };
+
+    const aSem = getSemesterNumber(a);
+    const bSem = getSemesterNumber(b);
+
+    if (aSem !== null && bSem !== null) {
+      return aSem - bSem;
+    }
+
+    if (aSem !== null) return -1;
+    if (bSem !== null) return 1;
+
+    return 0;
+  });
 
   const selectedClusterObj = groupedCourses.find(
     (c) => c.clusterName === cluster
