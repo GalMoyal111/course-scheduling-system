@@ -139,6 +139,7 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
 
   // Validates that the prerequisite course code is 5 or 6 digits (e.g., "12345").
   const validatePrerequisiteCode = (code) => /^\d{5,6}$/.test(code);
+  const validateCourseCode = (code) => /^\d{5,6}$/.test(code);
   // const validatePrerequisiteCode = (code) => /^\d{5}$/.test(code);
 
   const handleAddPrerequisite = () => {
@@ -179,13 +180,18 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
         throw new Error("Please choose a valid cluster name.");
       }
 
+      const normalizedCourseCode = courseCode.trim();
+      if (!validateCourseCode(normalizedCourseCode)) {
+        throw new Error("Course code must contain exactly 5 or 6 digits.");
+      }
+
       if (prerequisiteInput.trim() !== "") {
         throw new Error("Please click + to add the prerequisite code before saving.");
       }
 
       const course = {
         cluster: resolvedCluster,
-        courseId: courseCode.trim(),
+        courseId: normalizedCourseCode,
         // courseCode: courseCode.trim(),
         courseName: courseName.trim(),
         prerequisiteCourseNumber: prerequisiteCourseNumbers.join(","),
@@ -283,7 +289,13 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
               <input
                 className="ui-input"
                 value={courseCode}
-                onChange={(e) => setCourseCode(e.target.value)}
+                onChange={(e) => setCourseCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                inputMode="numeric"
+                pattern="[0-9]{5,6}"
+                minLength={5}
+                maxLength={6}
+                title="Course code must contain exactly 5 or 6 digits"
+                placeholder="5 or 6-digit course code"
                 required
               />
             </div>

@@ -19,6 +19,15 @@ public class CourseService {
 
     private static final int SEMESTER_MIN = 1;
     private static final int SEMESTER_MAX = 8;
+    private static final String COURSE_ID_PATTERN = "^\\d{5,6}$";
+
+    private String normalizeAndValidateCourseId(String rawCourseId) {
+        String normalized = rawCourseId == null ? "" : rawCourseId.trim();
+        if (!normalized.matches(COURSE_ID_PATTERN)) {
+            throw new IllegalArgumentException("Course code must contain exactly 5 or 6 digits.");
+        }
+        return normalized;
+    }
 
     private String normalizeClusterName(int cluster, String clusterName) {
         if (clusterName != null && !clusterName.isBlank()) {
@@ -90,11 +99,12 @@ public class CourseService {
 
     public void saveSingleCourse(Course course) {
         Firestore db = FirestoreClient.getFirestore();
+        String normalizedCourseId = normalizeAndValidateCourseId(course.getCourseId());
 
         Map<String, Object> data = new HashMap<>();
         String normalizedClusterName = normalizeClusterName(course.getCluster(), course.getClusterName());
         data.put("cluster", course.getCluster());
-        data.put("courseId", course.getCourseId());
+        data.put("courseId", normalizedCourseId);
         data.put("courseName", course.getCourseName());
         data.put("prerequisiteCourseNumber", course.getPrerequisiteCourseNumber());
         data.put("lectureHours", course.getLectureHours());
@@ -105,7 +115,7 @@ public class CourseService {
         data.put("notes", course.getNotes());
         data.put("clusterName", normalizedClusterName);
 
-        db.collection("courses").document(course.getCourseId()).set(data);
+        db.collection("courses").document(normalizedCourseId).set(data);
 
     }
     
@@ -174,20 +184,28 @@ public class CourseService {
         Firestore db = FirestoreClient.getFirestore();
         WriteBatch batch = db.batch();
 
-        DocumentReference oldDoc = db.collection("courses").document(oldCourse.getCourseId());
-        
-        Map<String, Object> deleteMap = new HashMap<>();
-        deleteMap.put(oldCourse.getCourseId(), FieldValue.delete());
-        deleteMap.put(oldCourse.getCourseId(), FieldValue.delete());
+        String oldCourseId = oldCourse != null && oldCourse.getCourseId() != null
+            ? oldCourse.getCourseId().trim()
+            : "";
+        String newCourseId = newCourse != null && newCourse.getCourseId() != null
+            ? newCourse.getCourseId().trim()
+            : "";
 
-        batch.update(oldDoc, deleteMap);
+        if (oldCourseId.isEmpty() || newCourseId.isEmpty()) {
+            throw new IllegalArgumentException("Both old and new courseId are required for update.");
+        }
 
-        DocumentReference newDoc = db.collection("courses").document(newCourse.getCourseId());
+        newCourseId = normalizeAndValidateCourseId(newCourseId);
+
+        DocumentReference oldDoc = db.collection("courses").document(oldCourseId);
+        batch.delete(oldDoc);
+
+        DocumentReference newDoc = db.collection("courses").document(newCourseId);
         String normalizedClusterName = normalizeClusterName(newCourse.getCluster(), newCourse.getClusterName());
 
         Map<String, Object> data = new HashMap<>();
         data.put("cluster", newCourse.getCluster());
-        data.put("courseId", newCourse.getCourseId());
+        data.put("courseId", newCourseId);
         data.put("courseName", newCourse.getCourseName());
         data.put("prerequisiteCourseNumber", newCourse.getPrerequisiteCourseNumber());
         data.put("lectureHours", newCourse.getLectureHours());
