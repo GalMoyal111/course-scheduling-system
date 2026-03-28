@@ -56,7 +56,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
                 <input
                     className="ui-input"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => setEmail(e.target.value.toLowerCase())}
                     required
                 />
                 </div>

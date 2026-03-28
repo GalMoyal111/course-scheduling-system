@@ -307,3 +307,71 @@ export async function getUserRole(token) {
 
   return res.json();
 }
+
+
+
+export async function getAllUsers(token) {
+  const res = await fetch("http://localhost:8080/api/auth/users", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch users");
+  }
+
+  return res.json();
+}
+
+export async function updateUserRole(uid, role, token) {
+  const res = await fetch(
+    `http://localhost:8080/api/auth/users/${uid}/role?role=${role}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to update role");
+  }
+}
+
+
+export async function createUser(email, password, role, token) {
+  const res = await fetch(
+    `http://localhost:8080/api/auth/users?email=${email}&password=${password}&role=${role}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to create user");
+  }
+
+  return res.text(); 
+}
+
+export async function deleteUser(uid, token) {
+  const res = await fetch(
+    `http://localhost:8080/api/auth/users/${uid}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to delete user");
+  }
+}

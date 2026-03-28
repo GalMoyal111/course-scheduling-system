@@ -9,6 +9,7 @@ import UploadCoursesPage from "./pages/UploadCoursesPage";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 import { getUserRole } from "./services/api";
+import SettingsPage from "./pages/SettingsPage";
 
 
 import Layout from "./components/ui/Layout";
@@ -76,7 +77,7 @@ function App() {
         <Route path="/generate" element={<h2>Generate AI</h2>} />
         <Route path="/timetable" element={<h2>Timetable</h2>} />
         <Route path="/history" element={<h2>History</h2>} />
-        <Route path="/settings" element={<h2>Settings</h2>} />
+        <Route path="/settings" element={<SettingsPage user={user} />} />
       </Routes>
 
       <Footer />
