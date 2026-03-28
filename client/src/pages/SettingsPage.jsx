@@ -14,6 +14,7 @@ export default function SettingsPage({ user }) {
     const [users, setUsers] = useState([]);
     const [newEmail, setNewEmail] = useState("");
     const [newRole, setNewRole] = useState(ROLES.USER);
+    const [isPasswordConfirmOpen, setIsPasswordConfirmOpen] = useState(false);
 
 
     const handleChangePassword = async () => {
@@ -26,6 +27,7 @@ export default function SettingsPage({ user }) {
             await updatePassword(auth.currentUser, newPassword);
             alert("Password updated successfully");
             setNewPassword("");
+            setIsPasswordConfirmOpen(false);
         } catch (err) {
             console.error(err);
             if (err.code === "auth/requires-recent-login") {
@@ -105,71 +107,190 @@ export default function SettingsPage({ user }) {
     }, [user]);
 
     return (
-        <div>
-        <h2>Settings</h2>
-
-        <div style={{ marginBottom: 30 }}>
-            <h3>Change Password</h3>
-
-            <input
-            type="password"
-            placeholder="New password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            />
-
-            <button onClick={handleChangePassword}>
-            Update Password
-            </button>
-        </div>
-
-        {user?.role === ROLES.ADMIN && (
-            <div>
-            <h3>Admin Panel</h3>
-                <h3>create users</h3>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                />  
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                />
-                <select
-                    value={newRole}
-                    onChange={(e) => setNewRole(e.target.value)}
-                    >
-                    <option value={ROLES.USER}>User</option>
-                    <option value={ROLES.ADMIN}>Admin</option>
-                </select>
-                <button onClick={handleCreateUser}>
-                    Create User
-                </button>
-
-            {users.map((u) => (
-                <div key={u.uid} style={{ marginBottom: 10 }}>
-                    {u.email} - {u.role}
-
-                    <button
-                    onClick={() => handleChangeRole(u.uid, u.role)}
-                    style={{ marginLeft: 10 }}
-                    >
-                        Change Role
-                    </button>
-                    <button
-                        onClick={() => handleDeleteUser(u.uid)}
-                        style={{ marginLeft: 10, color: "red" }}
-                        >
-                        Delete
-                    </button>
+        <div className="settings-page">
+            <div className="settings-container">
+                {/* Page Header */}
+                <div className="settings-header">
+                    <h1 className="settings-title">Settings</h1>
+                    <p className="settings-subtitle">Manage your account and system preferences</p>
                 </div>
-            ))}
+
+                {/* Password Section */}
+                <div className="settings-section">
+                    <div className="settings-section-header">
+                        <span className="material-icons settings-section-icon">lock</span>
+                        <div>
+                            <h2 className="settings-section-title">Change Password</h2>
+                            <p className="settings-section-desc">Update your account password</p>
+                        </div>
+                    </div>
+                    <div className="settings-section-content">
+                        <div className="form-group">
+                            <label htmlFor="new-password" className="form-label">New Password</label>
+                            <input
+                                id="new-password"
+                                type="password"
+                                placeholder="Enter your new password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="settings-input"
+                            />
+                        </div>
+                        <button 
+                            onClick={() => setIsPasswordConfirmOpen(true)}
+                            className="ui-btn ui-btn--primary"
+                        >
+                            <span className="material-icons btn-icon">check</span>
+                            Update Password
+                        </button>
+                    </div>
+                </div>
+
+                {/* Admin Panel */}
+                {user?.role === ROLES.ADMIN && (
+                    <>
+                        {/* Create User Section */}
+                        <div className="settings-section">
+                            <div className="settings-section-header">
+                                <span className="material-icons settings-section-icon">person_add</span>
+                                <div>
+                                    <h2 className="settings-section-title">Create New User</h2>
+                                    <p className="settings-section-desc">Add a new user to the system</p>
+                                </div>
+                            </div>
+                            <div className="settings-section-content">
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="new-email" className="form-label">Email</label>
+                                        <input
+                                            id="new-email"
+                                            type="email"
+                                            placeholder="user@example.com"
+                                            value={newEmail}
+                                            onChange={(e) => setNewEmail(e.target.value)}
+                                            className="settings-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="new-user-password" className="form-label">Password</label>
+                                        <input
+                                            id="new-user-password"
+                                            type="password"
+                                            placeholder="Enter password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            className="settings-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="user-role" className="form-label">Role</label>
+                                        <select
+                                            id="user-role"
+                                            value={newRole}
+                                            onChange={(e) => setNewRole(e.target.value)}
+                                            className="settings-select"
+                                        >
+                                            <option value={ROLES.USER}>User</option>
+                                            <option value={ROLES.ADMIN}>Admin</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={handleCreateUser}
+                                    className="ui-btn ui-btn--primary"
+                                >
+                                    <span className="material-icons btn-icon">add</span>
+                                    Create User
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Users Management Section */}
+                        <div className="settings-section">
+                            <div className="settings-section-header">
+                                <span className="material-icons settings-section-icon">people</span>
+                                <div>
+                                    <h2 className="settings-section-title">Manage Users</h2>
+                                    <p className="settings-section-desc">View and manage system users</p>
+                                </div>
+                            </div>
+                            <div className="settings-section-content">
+                                {users.length === 0 ? (
+                                    <p className="settings-empty">No users found</p>
+                                ) : (
+                                    <div className="users-grid">
+                                        {users.map((u) => (
+                                            <div key={u.uid} className="user-card">
+                                                <div className="user-card-header">
+                                                    <div className="user-info">
+                                                        <p className="user-email">{u.email}</p>
+                                                        <span className={`user-role-badge user-role-${u.role}`}>
+                                                            {u.role}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="user-card-actions">
+                                                    <button
+                                                        onClick={() => handleChangeRole(u.uid, u.role)}
+                                                        className="ui-btn ui-btn--ghost"
+                                                        title={`Change role to ${u.role === ROLES.ADMIN ? ROLES.USER : ROLES.ADMIN}`}
+                                                    >
+                                                        <span className="material-icons btn-icon">edit</span>
+                                                        Change Role
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteUser(u.uid)}
+                                                        className="ui-btn btn-danger"
+                                                        title="Delete user"
+                                                    >
+                                                        <span className="material-icons btn-icon">delete</span>
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
-        )}
+
+            {/* Password Change Confirmation Modal */}
+            {isPasswordConfirmOpen && (
+                <div className="modal-overlay">
+                    <div className="modal-card modal-card--warning">
+                        <div className="modal-header modal-header--warning">
+                            <div className="modal-icon__circle">
+                                <span className="material-icons" style={{ fontSize: "32px", color: "white" }}>
+                                    lock
+                                </span>
+                            </div>
+                        </div>
+                        <div className="modal-body modal-body--warning">
+                            <p className="modal-message">
+                                Are you sure you want to change your password?
+                            </p>
+                        </div>
+                        <div className="modal-footer modal-footer--spacious">
+                            <button
+                                onClick={() => setIsPasswordConfirmOpen(false)}
+                                className="ui-btn ui-btn--ghost"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleChangePassword}
+                                className="ui-btn ui-btn--primary"
+                            >
+                                <span className="material-icons btn-icon">check</span>
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
     }

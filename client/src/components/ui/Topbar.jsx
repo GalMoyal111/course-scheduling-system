@@ -1,14 +1,13 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import logo from "../../assets/logo-small.png";
 import "./ui.css";
+import logo from "../../assets/logo-small.png";
 import { useState } from "react";
 import LoginModal from "../LoginModal";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase";
-import { ROLES } from "../../constants/roles";
 
-export default function Topbar( {user , onLogin , onLogout } ) {
+export default function Topbar({ user, onLogin, onLogout }) {
   const location = useLocation();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
@@ -16,7 +15,7 @@ export default function Topbar( {user , onLogin , onLogout } ) {
     await signOut(auth);
     onLogout();
   };
-  
+
   const map = {
     "/": "Dashboard",
     "/courses": "Courses",
@@ -30,28 +29,47 @@ export default function Topbar( {user , onLogin , onLogout } ) {
 
   const pageName = map[location.pathname] || "Dashboard";
 
+  // derive a friendly username from email if available
+  const username = user && user.email ? user.email.split("@")[0] : null;
+
   return (
     <div className="topbar">
       <div className="topbar-left">
-        <div style={{ marginLeft: "auto" }}>
-          {!user ? (
-            <button onClick={() => setIsLoginOpen(true)}>
-              Login
-            </button>) : (
-            <>
-              <span style={{ marginRight: 10 }}>
-                {user.email} ({user.role})
-              </span>
-              <button onClick={handleLogout}>Logout</button>
-            </>
-          )}
-        </div>
-        <div>
-          <div className="topbar-title">{pageName}</div>
-          <div className="topbar-sub">UniSched</div>
-        </div>
+        <img src={logo} alt="Unisched" className="topbar-logo" />
+        <div className="topbar-title">{pageName}</div>
       </div>
-      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onLogin={onLogin}/>
-    </div>        
+
+      <div className="topbar-right">
+        {user && (
+          <div className="topbar-greeting">
+            <span className="topbar-hello">Hello,</span>
+            <span className="topbar-username">{username}</span>
+          </div>
+        )}
+        {!user ? (
+          <button
+            className="icon-btn"
+            title="Login"
+            onClick={() => setIsLoginOpen(true)}
+            aria-label="Open login dialog"
+          >
+            <span className="material-icons">person</span>
+          </button>
+        ) : (
+          <>
+            <button
+              className="icon-btn icon-btn--logout"
+              title="Logout"
+              onClick={handleLogout}
+              aria-label="Logout"
+            >
+              <span className="material-icons">logout</span>
+            </button>
+          </>
+        )}
+      </div>
+
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onLogin={onLogin} />
+    </div>
   );
 }
