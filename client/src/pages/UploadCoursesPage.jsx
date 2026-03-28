@@ -97,7 +97,15 @@ export default function UploadCoursesPage() {
   const handleAddCourse = async (course) => {
     try {
       if (editingCourse) {
-        await updateCourse({ oldCourse: editingCourse, newCourse: course });
+        const oldCoursePayload = {
+          ...editingCourse,
+          courseId: String(editingCourse.courseId || "").trim(),
+        };
+        const newCoursePayload = {
+          ...course,
+          courseId: String(course.courseId || "").trim(),
+        };
+        await updateCourse({ oldCourse: oldCoursePayload, newCourse: newCoursePayload });
         alert("Course updated successfully");
       } else {
         await addCourse(course);
