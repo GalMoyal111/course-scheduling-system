@@ -6,6 +6,7 @@ import { useState } from "react";
 import LoginModal from "../LoginModal";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase";
+import { ROLES } from "../../constants/roles";
 
 export default function Topbar( {user , onLogin , onLogout } ) {
   const location = useLocation();
@@ -38,7 +39,9 @@ export default function Topbar( {user , onLogin , onLogout } ) {
               Login
             </button>) : (
             <>
-              <span style={{ marginRight: 10 }}>{user.email}</span>
+              <span style={{ marginRight: 10 }}>
+                {user.email} ({user.role})
+              </span>
               <button onClick={handleLogout}>Logout</button>
             </>
           )}

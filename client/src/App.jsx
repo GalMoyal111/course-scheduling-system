@@ -8,6 +8,7 @@ import UploadRoomsPage from "./pages/UploadRoomsPage";
 import UploadCoursesPage from "./pages/UploadCoursesPage";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
+import { getUserRole } from "./services/api";
 
 
 import Layout from "./components/ui/Layout";
@@ -16,6 +17,8 @@ import Footer from "./components/ui/Footer";
 function App() {
   const [user, setUser] = useState(null);
   const location = useLocation();
+  const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     let pageName = "Dashboard";
@@ -37,18 +40,31 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser({email: user.email,role: "USER", });
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const token = await firebaseUser.getIdToken();
+          const data = await getUserRole(token);
+
+          setUser({
+            email: firebaseUser.email,
+            role: data.role,
+          });
+        } catch (err) {
+          console.error("Failed to fetch user role", err);
+          setUser(null);
+        }
       } else {
         setUser(null);
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-
+  if (loading) return null;
+  
   return (
     <Layout user={user} onLogin={setUser} onLogout={() => setUser(null)}>
       <Routes>
