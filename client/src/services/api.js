@@ -294,7 +294,7 @@ export async function deleteLessons(lessons) {
 
 
 export async function getUserRole(token) {
-  const res = await fetch("http://localhost:8080/api/auth/me", {
+  const res = await fetch(`${BASE_URL}/auth/me`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -311,7 +311,7 @@ export async function getUserRole(token) {
 
 
 export async function getAllUsers(token) {
-  const res = await fetch("http://localhost:8080/api/auth/users", {
+  const res = await fetch(`${BASE_URL}/auth/users`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -327,7 +327,7 @@ export async function getAllUsers(token) {
 
 export async function updateUserRole(uid, role, token) {
   const res = await fetch(
-    `http://localhost:8080/api/auth/users/${uid}/role?role=${role}`,
+    `${BASE_URL}/auth/users/${uid}/role?role=${role}`,
     {
       method: "PUT",
       headers: {
@@ -344,7 +344,7 @@ export async function updateUserRole(uid, role, token) {
 
 export async function createUser(email, password, role, token) {
   const res = await fetch(
-    `http://localhost:8080/api/auth/users?email=${email}&password=${password}&role=${role}`,
+    `${BASE_URL}/auth/users?email=${email}&password=${password}&role=${role}`,
     {
       method: "POST",
       headers: {
@@ -362,7 +362,7 @@ export async function createUser(email, password, role, token) {
 
 export async function deleteUser(uid, token) {
   const res = await fetch(
-    `http://localhost:8080/api/auth/users/${uid}`,
+    `${BASE_URL}/auth/users/${uid}`,
     {
       method: "DELETE",
       headers: {
