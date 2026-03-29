@@ -22,6 +22,9 @@ export default function UploadCoursesPage() {
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [invalidCoursesModalOpen, setInvalidCoursesModalOpen] = useState(false);
+  const [invalidCourses, setInvalidCourses] = useState([]);
+  const [uploadSavedCount, setUploadSavedCount] = useState(0);
   const { courses, setCourses } = useData();
 
   
@@ -59,7 +62,16 @@ export default function UploadCoursesPage() {
 
     try {
       const result = await uploadCourses(fileToUpload);
-      alert(result || "Upload successful");
+      
+      // result is now a JSON object with savedCount and invalidCourses
+      if (result.invalidCourses && result.invalidCourses.length > 0) {
+        setUploadSavedCount(result.savedCount);
+        setInvalidCourses(result.invalidCourses);
+        setInvalidCoursesModalOpen(true);
+      } else {
+        alert("Courses uploaded successfully");
+      }
+      
       await loadCourses();
     } catch (err) {
       console.error(err);
@@ -292,6 +304,51 @@ export default function UploadCoursesPage() {
         confirmLabel="Yes, delete"
         cancelLabel="No, keep"
       />
+
+      <InvalidCoursesModal
+        isOpen={invalidCoursesModalOpen}
+        invalidCourses={invalidCourses}
+        savedCount={uploadSavedCount}
+        onClose={() => setInvalidCoursesModalOpen(false)}
+      />
+    </div>
+  );
+}
+
+function InvalidCoursesModal({ isOpen, invalidCourses, savedCount, onClose }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-card" role="dialog" aria-modal="true">
+        <div className="modal-header">
+          <h3>Upload Completed with Warnings</h3>
+        </div>
+
+        <div className="modal-body invalid-courses-modal-body">
+          <p className="invalid-courses-summary">
+            ✓ {savedCount} course(s) uploaded successfully
+          </p>
+          <p className="invalid-courses-warning">
+            ✗ {invalidCourses.length} course(s) skipped due to invalid course code (must be 5 or 6 digits):
+          </p>
+
+          <div className="invalid-courses-list">
+            {invalidCourses.map((course, index) => (
+              <div key={index} className="invalid-course-item">
+                <div className="invalid-course-item-name">{course.courseName || "(No name)"}</div>
+                <div className="invalid-course-item-code">Course Code: {course.courseId}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="modal-actions">
+          <Button variant="primary" onClick={onClose}>
+            OK
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

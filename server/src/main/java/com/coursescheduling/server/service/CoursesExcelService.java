@@ -30,13 +30,53 @@ public class CoursesExcelService {
     @Autowired
     private CourseService courseService;
 
+    private static final String COURSE_ID_PATTERN = "^\\d{5,6}$";
+    
+    
 
-    public void process(MultipartFile file) {
+    public static class InvalidCourse {
+        private final String courseId;
+        private final String courseName;
+
+        public InvalidCourse(String courseId, String courseName) {
+            this.courseId = courseId;
+            this.courseName = courseName;
+        }
+
+        public String getCourseId() {
+            return courseId;
+        }
+
+        public String getCourseName() {
+            return courseName;
+        }
+    }
+
+    public static class CourseUploadSummary {
+        private final int savedCount;
+        private final List<InvalidCourse> invalidCourses;
+
+        public CourseUploadSummary(int savedCount, List<InvalidCourse> invalidCourses) {
+            this.savedCount = savedCount;
+            this.invalidCourses = invalidCourses;
+        }
+
+        public int getSavedCount() {
+            return savedCount;
+        }
+
+        public List<InvalidCourse> getInvalidCourses() {
+            return invalidCourses;
+        }
+    }
+
+    public CourseUploadSummary process(MultipartFile file) {
         // Implement logic to process the courses Excel file, read data, and save it to the database
         try {
             List<Course> courses = readCoursesFromExcel(file.getInputStream());
-            courseService.saveCourseToFirebase(courses);
+            CourseUploadSummary summary = validateAndSaveCourses(courses);
             System.out.println("Finished processing courses Excel file");
+            return summary;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -44,7 +84,6 @@ public class CoursesExcelService {
         }
     }
     
-
     public List<Course> readCoursesFromExcel(InputStream inputStream) {
     List<Course> courses = new ArrayList<>();
     DataFormatter formatter = new DataFormatter();
@@ -145,41 +184,73 @@ public class CoursesExcelService {
         return courses;
     }*/
 
-    public void saveCoursesToDatabase(List<Course> courses) {
-        // Implement logic to save the list of courses to the database (e.g., Firestore)
-        Firestore db = FirestoreClient.getFirestore();
+    // public void saveCoursesToDatabase(List<Course> courses) {
+    //     // Implement logic to save the list of courses to the database (e.g., Firestore)
+    //     Firestore db = FirestoreClient.getFirestore();
+    //     for (Course course : courses) {
+    //         String courseId = course.getCourseId();
+    //         if (courseId == null || courseId.isBlank()) {
+    //             continue;
+    //         }
+    //         Map<String, Object> data = new HashMap<>();
+    //         String normalizedClusterName =
+    //             (course.getClusterName() == null || course.getClusterName().isBlank())
+    //                 ? (course.getCluster() >= 1 && course.getCluster() <= 8 ? "סמסטר " + course.getCluster() : "")
+    //                 : course.getClusterName().trim();    
+    //         data.put("cluster", course.getCluster()); 
+    //         data.put("courseId", course.getCourseId());        
+    //         data.put("courseName", course.getCourseName());
+    //         data.put("prerequisiteCourseNumber", course.getPrerequisiteCourseNumber());
+    //         data.put("lectureHours", course.getLectureHours());
+    //         data.put("tutorialHours", course.getTutorialHours());
+    //         data.put("labHours", course.getLabHours());
+    //         data.put("projectHours", course.getProjectHours());
+    //         data.put("credits", course.getCredits());
+    //         data.put("notes", course.getNotes());
+    //         data.put("clusterName", normalizedClusterName);
+    //         db.collection("courses").document(courseId).set(data, SetOptions.merge());
+    //         //db.collection("courses").document(course.getSemesterNumber()).set(Map.of(course.getCourseCode(), data), SetOptions.merge());
+    //     }
+    // }
+
+    //function to go through all of the courses and check if the courseId is 5,6 number, if not - do a list of all the courses that have invalid courseId and print them, and do not save them to the database.
+    public CourseUploadSummary validateAndSaveCourses(List<Course> courses) throws Exception {
+        List<Course> invalidCourses = new ArrayList<>();
+        List<Course> validCourses = new ArrayList<>();
+        List<Course> invalidPerequisiteCourses = new ArrayList<>();
+
         for (Course course : courses) {
-            String courseId = course.getCourseId();
-            if (courseId == null || courseId.isBlank()) {
-                continue;
+            String courseId = course.getCourseId() == null ? "" : course.getCourseId().trim();
+            String prerequisiteCourseId = course.getPrerequisiteCourseNumber() == null ? "" : course.getPrerequisiteCourseNumber().trim();
+
+            if (!courseId.matches(COURSE_ID_PATTERN)) {
+                invalidCourses.add(course);
+            } else {
+                course.setCourseId(courseId);
+                validCourses.add(course);
             }
-
-            Map<String, Object> data = new HashMap<>();
-            String normalizedClusterName =
-                (course.getClusterName() == null || course.getClusterName().isBlank())
-                    ? (course.getCluster() >= 1 && course.getCluster() <= 8 ? "סמסטר " + course.getCluster() : "")
-                    : course.getClusterName().trim();
-            
-            data.put("cluster", course.getCluster()); 
-            data.put("courseId", course.getCourseId());      
-            
-            
-            data.put("courseName", course.getCourseName());
-            data.put("prerequisiteCourseNumber", course.getPrerequisiteCourseNumber());
-            data.put("lectureHours", course.getLectureHours());
-            data.put("tutorialHours", course.getTutorialHours());
-            data.put("labHours", course.getLabHours());
-            data.put("projectHours", course.getProjectHours());
-            data.put("credits", course.getCredits());
-            data.put("notes", course.getNotes());
-            data.put("clusterName", normalizedClusterName);
-
-            db.collection("courses").document(courseId).set(data, SetOptions.merge());
-            //db.collection("courses").document(course.getSemesterNumber()).set(Map.of(course.getCourseCode(), data), SetOptions.merge());
-            
-
         }
+
+        // Keep upload behavior: overwrite existing courses with the validated list.
+        courseService.saveCourseToFirebase(validCourses);
+
+        List<InvalidCourse> invalidCourseDetails = new ArrayList<>();
+        if (!invalidCourses.isEmpty()) {
+            System.out.println("Invalid courses found:");
+            for (Course course : invalidCourses) {
+                String invalidId = course.getCourseId() == null ? "(empty)" : course.getCourseId().trim();
+                if (invalidId.isEmpty()) {
+                    invalidId = "(empty)";
+                }
+                String courseName = course.getCourseName() == null ? "" : course.getCourseName();
+                invalidCourseDetails.add(new InvalidCourse(invalidId, courseName));
+                System.out.println("- " + invalidId + ": " + courseName);
+            }
+        }
+
+        return new CourseUploadSummary(validCourses.size(), invalidCourseDetails);
     }
+
 
     public byte[] exportCoursesToExcel() {
         Firestore db = FirestoreClient.getFirestore();

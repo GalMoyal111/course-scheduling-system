@@ -66,17 +66,15 @@ public class FileUploadController {
     }
     
     @PostMapping("/courses/upload")
-    public String uploadCourses(@RequestParam("file") MultipartFile file) {
+    public CoursesExcelService.CourseUploadSummary uploadCourses(@RequestParam("file") MultipartFile file) {
 
         if (file.isEmpty()) {
-            return "File is empty!";
+            throw new RuntimeException("File is empty!");
         }
 
         System.out.println("Received courses file: " + file.getOriginalFilename());
 
-        coursesExcelService.process(file);
-
-        return "Courses uploaded successfully";
+        return coursesExcelService.process(file);
     }
     
     @PostMapping("/rooms/upload")

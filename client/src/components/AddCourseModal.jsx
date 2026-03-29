@@ -140,6 +140,7 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
   // Validates that the prerequisite course code is 5 or 6 digits (e.g., "12345").
   const validatePrerequisiteCode = (code) => /^\d{5,6}$/.test(code);
   const validateCourseCode = (code) => /^\d{5,6}$/.test(code);
+  const keepDigitsOnly = (value) => value.replace(/\D/g, "");
   // const validatePrerequisiteCode = (code) => /^\d{5}$/.test(code);
 
   const handleAddPrerequisite = () => {
@@ -367,7 +368,8 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
               <input
                 className="ui-input"
                 value={lectureHours}
-                onChange={(e) => setLectureHours(e.target.value)}
+                onChange={(e) => setLectureHours(keepDigitsOnly(e.target.value))}
+                inputMode="numeric"
                 required
               />
             </div>
@@ -377,7 +379,8 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
               <input
                 className="ui-input"
                 value={tutorialHours}
-                onChange={(e) => setTutorialHours(e.target.value)}
+                onChange={(e) => setTutorialHours(keepDigitsOnly(e.target.value))}
+                inputMode="numeric"
                 required
               />
             </div>
@@ -387,7 +390,8 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
               <input
                 className="ui-input"
                 value={labHours}
-                onChange={(e) => setLabHours(e.target.value)}
+                onChange={(e) => setLabHours(keepDigitsOnly(e.target.value))}
+                inputMode="numeric"
                 required
               />
             </div>
@@ -397,7 +401,8 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
               <input
                 className="ui-input"
                 value={projectHours}
-                onChange={(e) => setProjectHours(e.target.value)}
+                onChange={(e) => setProjectHours(keepDigitsOnly(e.target.value))}
+                inputMode="numeric"
                 required
               />
             </div>
@@ -407,7 +412,8 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
               <input
                 className="ui-input"
                 value={credits}
-                onChange={(e) => setCredits(e.target.value)}
+                onChange={(e) => setCredits(keepDigitsOnly(e.target.value))}
+                inputMode="numeric"
                 required
               />
             </div>
@@ -418,6 +424,7 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
                 className="ui-input"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
+                placeholder="Optional notes about the course"
               />
             </div>
             </div>
