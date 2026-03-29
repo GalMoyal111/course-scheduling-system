@@ -15,12 +15,20 @@ export default function SettingsPage({ user }) {
     const [newEmail, setNewEmail] = useState("");
     const [newRole, setNewRole] = useState(ROLES.USER);
     const [isPasswordConfirmOpen, setIsPasswordConfirmOpen] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showCreateUserPassword, setShowCreateUserPassword] = useState(false);
 
 
     const handleChangePassword = async () => {
         try {
             if (!auth.currentUser) {
                 alert("No user logged in");
+                return;
+            }
+
+            // Validate password length
+            if (newPassword.length < 6) {
+                alert("Password must be at least 6 characters long");
                 return;
             }
 
@@ -60,6 +68,12 @@ export default function SettingsPage({ user }) {
 
     const handleCreateUser = async () => {
         try {
+            // Validate password length
+            if (newPassword.length < 6) {
+                alert("Password must be at least 6 characters long");
+                return;
+            }
+
             const token = await auth.currentUser.getIdToken();
 
             const uid = await createUser(newEmail, newPassword, newRole, token);
@@ -127,18 +141,32 @@ export default function SettingsPage({ user }) {
                     <div className="settings-section-content">
                         <div className="form-group">
                             <label htmlFor="new-password" className="form-label">New Password</label>
-                            <input
-                                id="new-password"
-                                type="password"
-                                placeholder="Enter your new password"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                className="settings-input"
-                            />
+                            <div className="password-input-wrapper">
+                                <input
+                                    id="new-password"
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="Enter your new password (minimum 6 characters)"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="settings-input"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="password-toggle-btn icon-btn"
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                >
+                                    <span className="material-icons">
+                                        {showPassword ? "visibility_off" : "visibility"}
+                                    </span>
+                                </button>
+                            </div>
                         </div>
                         <button 
                             onClick={() => setIsPasswordConfirmOpen(true)}
                             className="ui-btn ui-btn--primary"
+                            disabled={newPassword.length < 6}
+                            title={newPassword.length < 6 ? "Password must be at least 6 characters" : ""}
                         >
                             <span className="material-icons btn-icon">check</span>
                             Update Password
@@ -173,14 +201,32 @@ export default function SettingsPage({ user }) {
                                     </div>
                                     <div className="form-group">
                                         <label htmlFor="new-user-password" className="form-label">Password</label>
-                                        <input
-                                            id="new-user-password"
-                                            type="password"
-                                            placeholder="Enter password"
-                                            value={newPassword}
-                                            onChange={(e) => setNewPassword(e.target.value)}
-                                            className="settings-input"
-                                        />
+                                        <div className="password-input-wrapper">
+                                            <input
+                                                id="new-user-password"
+                                                type={showCreateUserPassword ? "text" : "password"}
+                                                placeholder="Enter password (minimum 6 characters)"
+                                                value={newPassword}
+                                                onChange={(e) => setNewPassword(e.target.value)}
+                                                className="settings-input"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowCreateUserPassword(!showCreateUserPassword)}
+                                                className="password-toggle-btn"
+                                                aria-label={showCreateUserPassword ? "Hide password" : "Show password"}
+                                            >
+                                                {showCreateUserPassword ? (
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="currentColor"/>
+                                                    </svg>
+                                                ) : (
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M11.83 9L5.5 2.62C4.96 2.9 4.46 3.25 4 3.67v.02c-2.14 2.43-3.85 5.58-4.82 9.31.59 1.56 1.35 3.06 2.25 4.41l1.46-1.46C3.21 14.6 3 13.34 3 12c0-4.97 4-9 9-9c1.34 0 2.6.21 3.82.57l2.12-2.12c1.41-1.41 3.71-1.41 5.12 0s1.41 3.71 0 5.12L11.83 9zm9.08 4.93l-1.46 1.46C20.79 15.4 21 16.66 21 18c0 4.97-4 9-9 9c-1.34 0-2.6-.21-3.82-.57l-2.12 2.12c-1.41 1.41-3.71 1.41-5.12 0s-1.41-3.71 0-5.12L20.91 13.93zM12 18c2.76 0 5-2.24 5-5 0-.65-.13-1.26-.36-1.83l-6.47 6.47c.57.23 1.18.36 1.83.36z" fill="currentColor"/>
+                                                    </svg>
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
                                     <div className="form-group">
                                         <label htmlFor="user-role" className="form-label">Role</label>
@@ -198,6 +244,8 @@ export default function SettingsPage({ user }) {
                                 <button 
                                     onClick={handleCreateUser}
                                     className="ui-btn ui-btn--primary"
+                                    disabled={newPassword.length < 6}
+                                    title={newPassword.length < 6 ? "Password must be at least 6 characters" : ""}
                                 >
                                     <span className="material-icons btn-icon">add</span>
                                     Create User
