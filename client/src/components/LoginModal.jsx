@@ -11,6 +11,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
     const [password, setPassword] = useState("");
     const [isForgotOpen, setIsForgotOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const emailInputRef = useRef(null);
 
     useEffect(() => {
@@ -40,6 +41,13 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
 
     const handleSubmit = async(e) => {
         e.preventDefault();
+        
+        // Validate password length
+        if (password.length < 6) {
+            alert("Password must be at least 6 characters long");
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -100,15 +108,28 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
 
                             <div className="form-field">
                                 <label>Password</label>
-                                <input
-                                    type="password"
-                                    className="ui-input"
-                                    placeholder="Enter your password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    disabled={loading}
-                                />
+                                <div className="password-input-wrapper">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        className="ui-input"
+                                        placeholder="Enter your password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                        disabled={loading}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        disabled={loading}
+                                        className="password-toggle-btn icon-btn"
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
+                                    >
+                                        <span className="material-icons">
+                                            {showPassword ? "visibility_off" : "visibility"}
+                                        </span>
+                                    </button>
+                                </div>
                             </div>
 
                             <div style={{ textAlign: "right", marginTop: "8px", marginBottom: "16px" }}>
