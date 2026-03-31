@@ -55,6 +55,8 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
   const [clusterName, setClusterName] = useState("");
   const [invalidPrereqWarning, setInvalidPrereqWarning] = useState(null);
   const [pendingPrerequisite, setPendingPrerequisite] = useState(null);
+  const [duplicateCourseWarning, setDuplicateCourseWarning] = useState(null);
+  const [pendingCourse, setPendingCourse] = useState(null);
   // Disable semester selection if the cluster is between 9-14, otherwise disable cluster name selection. This ensures users can't select both a semester and a cluster name at the same time.
   const selectedClusterNumber =cluster.trim() !== "" ? Number(cluster) : CLUSTER_NAME_TO_NUMBER[clusterName.trim()];
   const isSemesterDisabled = Number.isInteger(selectedClusterNumber) && selectedClusterNumber >= 9 && selectedClusterNumber <= 14;
@@ -76,6 +78,8 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
     setClusterName("");
     setInvalidPrereqWarning(null);
     setPendingPrerequisite(null);
+    setDuplicateCourseWarning(null);
+    setPendingCourse(null);
   };
   
   // Initialize fields when modal opens or when initialCourse changes
@@ -187,6 +191,20 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
     setPendingPrerequisite(null);
   };
 
+  const confirmDuplicateCourse = () => {
+    if (pendingCourse) {
+      onSave(pendingCourse);
+      resetForm();
+    }
+    setDuplicateCourseWarning(null);
+    setPendingCourse(null);
+  };
+
+  const cancelDuplicateCourse = () => {
+    setDuplicateCourseWarning(null);
+    setPendingCourse(null);
+  };
+
   const handleRemovePrerequisite = (codeToRemove) => {
     setPrerequisiteCourseNumbers((prev) => prev.filter((code) => code !== codeToRemove));
   };
@@ -233,8 +251,26 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
         clusterName: clusterName.trim(),
       };
 
-      onSave(course);
-      resetForm();
+      // Check if course code already exists
+      const isEditing = Boolean(initialCourse);
+      const courseAlreadyExists = allCourses.some(course => course.courseId === normalizedCourseCode);
+
+      if (courseAlreadyExists) {
+        // If editing and it's the same course (same ID as original), allow it
+        if (isEditing && initialCourse.courseId === normalizedCourseCode) {
+          // It's the same course being edited, allow submission
+          onSave(course);
+          resetForm();
+        } else {
+          // It's a duplicate - show warning
+          setPendingCourse(course);
+          setDuplicateCourseWarning(normalizedCourseCode);
+        }
+      } else {
+        // No duplicate, proceed normally
+        onSave(course);
+        resetForm();
+      }
     } catch (err) {
       alert(err.message || "Please enter valid values.");
     }
@@ -244,6 +280,34 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
     resetForm();
     onClose();
   };
+
+  if (duplicateCourseWarning) {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-card" role="dialog" aria-modal="true">
+          <div className="modal-header">
+            <h3>⚠️ Course Code Already Exists</h3>
+          </div>
+
+          <div className="modal-body" style={{ paddingBottom: "1rem" }}>
+            <p style={{ marginBottom: "0.5rem" }}>
+              A course with code <strong>{duplicateCourseWarning}</strong> already exists in the system.
+            </p>
+            <p>Would you like to replace it with this new course information?</p>
+          </div>
+
+          <div className="modal-actions">
+            <Button variant="ghost" onClick={cancelDuplicateCourse}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={confirmDuplicateCourse}>
+              Replace
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (invalidPrereqWarning) {
     return (
