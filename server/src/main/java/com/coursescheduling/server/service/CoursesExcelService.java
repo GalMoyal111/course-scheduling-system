@@ -14,15 +14,15 @@ import org.springframework.stereotype.Service;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import org.springframework.web.multipart.MultipartFile;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import java.io.ByteArrayOutputStream;
 import java.util.concurrent.ExecutionException;
-
-
-// import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class CoursesExcelService {
@@ -31,8 +31,6 @@ public class CoursesExcelService {
     private CourseService courseService;
 
     private static final String COURSE_ID_PATTERN = "^\\d{5,6}$";
-    
-    
 
     public static class InvalidCourse {
         private final String courseId;
@@ -52,13 +50,39 @@ public class CoursesExcelService {
         }
     }
 
+    public static class AdjustedCourse {
+        private final String courseId;
+        private final String courseName;
+        private final List<String> removedPrerequisites;
+
+        public AdjustedCourse(String courseId, String courseName, List<String> removedPrerequisites) {
+            this.courseId = courseId;
+            this.courseName = courseName;
+            this.removedPrerequisites = removedPrerequisites;
+        }
+
+        public String getCourseId() {
+            return courseId;
+        }
+
+        public String getCourseName() {
+            return courseName;
+        }
+
+        public List<String> getRemovedPrerequisites() {
+            return removedPrerequisites;
+        }
+    }
+
     public static class CourseUploadSummary {
         private final int savedCount;
         private final List<InvalidCourse> invalidCourses;
+        private final List<AdjustedCourse> adjustedCourses;
 
-        public CourseUploadSummary(int savedCount, List<InvalidCourse> invalidCourses) {
+        public CourseUploadSummary(int savedCount, List<InvalidCourse> invalidCourses, List<AdjustedCourse> adjustedCourses) {
             this.savedCount = savedCount;
             this.invalidCourses = invalidCourses;
+            this.adjustedCourses = adjustedCourses;
         }
 
         public int getSavedCount() {
@@ -68,10 +92,13 @@ public class CoursesExcelService {
         public List<InvalidCourse> getInvalidCourses() {
             return invalidCourses;
         }
+
+        public List<AdjustedCourse> getAdjustedCourses() {
+            return adjustedCourses;
+        }
     }
 
     public CourseUploadSummary process(MultipartFile file) {
-        // Implement logic to process the courses Excel file, read data, and save it to the database
         try {
             List<Course> courses = readCoursesFromExcel(file.getInputStream());
             CourseUploadSummary summary = validateAndSaveCourses(courses);
@@ -83,59 +110,59 @@ public class CoursesExcelService {
             throw new RuntimeException("Failed to process courses file");
         }
     }
-    
+
     public List<Course> readCoursesFromExcel(InputStream inputStream) {
-    List<Course> courses = new ArrayList<>();
-    DataFormatter formatter = new DataFormatter();
-        
-    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
-        Sheet sheet = workbook.getSheetAt(0);
+        List<Course> courses = new ArrayList<>();
+        DataFormatter formatter = new DataFormatter();
 
-        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-            Row row = sheet.getRow(i);
-            if (row == null) continue;
+        try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+            Sheet sheet = workbook.getSheetAt(0);
 
-            int cluster = (int) Double.parseDouble(formatter.formatCellValue(row.getCell(0)));
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) continue;
 
-            String courseCode = formatter.formatCellValue(row.getCell(1)).trim();
-            String courseName = formatter.formatCellValue(row.getCell(2)).trim();
-            String prerequisiteCourseNumber = formatter.formatCellValue(row.getCell(3)).trim();
+                int cluster = (int) Double.parseDouble(formatter.formatCellValue(row.getCell(0)));
 
-            int lectureHours = parseIntCell(row.getCell(4), formatter);
-            int tutorialHours = parseIntCell(row.getCell(5), formatter);
-            int labHours = parseIntCell(row.getCell(6), formatter);
-            int projectHours = parseIntCell(row.getCell(7), formatter);
-            float credits = 0;
-            String creditStr = formatter.formatCellValue(row.getCell(8)).trim();
-            if (!creditStr.isEmpty()) {
-                credits = Float.parseFloat(creditStr);
+                String courseCode = formatter.formatCellValue(row.getCell(1)).trim();
+                String courseName = formatter.formatCellValue(row.getCell(2)).trim();
+                String prerequisiteCourseNumber = formatter.formatCellValue(row.getCell(3)).trim();
+
+                int lectureHours = parseIntCell(row.getCell(4), formatter);
+                int tutorialHours = parseIntCell(row.getCell(5), formatter);
+                int labHours = parseIntCell(row.getCell(6), formatter);
+                int projectHours = parseIntCell(row.getCell(7), formatter);
+                float credits = 0;
+                String creditStr = formatter.formatCellValue(row.getCell(8)).trim();
+                if (!creditStr.isEmpty()) {
+                    credits = Float.parseFloat(creditStr);
+                }
+
+                String notes = formatter.formatCellValue(row.getCell(9)).trim();
+                String clusterName = formatter.formatCellValue(row.getCell(10)).trim();
+
+                Course course = new Course(
+                        cluster,
+                        courseCode,
+                        courseName,
+                        prerequisiteCourseNumber,
+                        lectureHours,
+                        tutorialHours,
+                        labHours,
+                        projectHours,
+                        credits,
+                        notes,
+                        clusterName
+                );
+
+                courses.add(course);
             }
-
-            String notes = formatter.formatCellValue(row.getCell(9)).trim();
-            String clusterName = formatter.formatCellValue(row.getCell(10)).trim();
-
-            Course course = new Course(
-            		cluster,
-                    courseCode,
-                    courseName,
-                    prerequisiteCourseNumber,
-                    lectureHours,
-                    tutorialHours,
-                    labHours,
-                    projectHours,
-                    credits,
-                    notes,
-                    clusterName
-            );
-
-            courses.add(course);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to read courses from Excel file");
         }
-    } catch (Exception e) {
-        e.printStackTrace();
-        throw new RuntimeException("Failed to read courses from Excel file");
-    }
 
-    return courses;
+        return courses;
     }
 
     private int parseIntCell(Cell cell, DataFormatter formatter) {
@@ -151,104 +178,104 @@ public class CoursesExcelService {
         }
     }
 
-    /*public List<Course> readCoursesFromExcel(InputStream inputStream) {
-        List<Course> courses = new ArrayList<>();
-        try (Workbook workbook = new XSSFWorkbook(inputStream)) {
-            Sheet sheet = workbook.getSheetAt(0);
+    private List<String> parsePrerequisiteIds(String prerequisiteText) {
+        List<String> ids = new ArrayList<>();
 
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-                Row row = sheet.getRow(i);
-                if (row == null) continue;
-
-                String semesterNumber = String.valueOf((int) row.getCell(0).getNumericCellValue());
-                String courseCode = row.getCell(1).getStringCellValue();
-                String courseName = row.getCell(2).getStringCellValue();
-                String prerequisiteCourseNumber = row.getCell(3).getStringCellValue();
-                int lectureHours = (int) row.getCell(4).getNumericCellValue();
-                int tutorialHours = (int) row.getCell(5).getNumericCellValue();
-                int labHours = (int) row.getCell(6).getNumericCellValue();
-                int projectHours = (int) row.getCell(7).getNumericCellValue();
-                int credits = (int) row.getCell(8).getNumericCellValue();
-                String notes = row.getCell(9).getStringCellValue();
-
-                Course course = new Course(semesterNumber, courseCode, courseName, prerequisiteCourseNumber,
-                        lectureHours, tutorialHours, labHours, projectHours, credits, notes);
-
-                courses.add(course);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to read courses from Excel file");
+        if (prerequisiteText == null || prerequisiteText.trim().isEmpty()) {
+            return ids;
         }
 
-        return courses;
-    }*/
+        String[] parts = prerequisiteText.split(",");
 
-    // public void saveCoursesToDatabase(List<Course> courses) {
-    //     // Implement logic to save the list of courses to the database (e.g., Firestore)
-    //     Firestore db = FirestoreClient.getFirestore();
-    //     for (Course course : courses) {
-    //         String courseId = course.getCourseId();
-    //         if (courseId == null || courseId.isBlank()) {
-    //             continue;
-    //         }
-    //         Map<String, Object> data = new HashMap<>();
-    //         String normalizedClusterName =
-    //             (course.getClusterName() == null || course.getClusterName().isBlank())
-    //                 ? (course.getCluster() >= 1 && course.getCluster() <= 8 ? "סמסטר " + course.getCluster() : "")
-    //                 : course.getClusterName().trim();    
-    //         data.put("cluster", course.getCluster()); 
-    //         data.put("courseId", course.getCourseId());        
-    //         data.put("courseName", course.getCourseName());
-    //         data.put("prerequisiteCourseNumber", course.getPrerequisiteCourseNumber());
-    //         data.put("lectureHours", course.getLectureHours());
-    //         data.put("tutorialHours", course.getTutorialHours());
-    //         data.put("labHours", course.getLabHours());
-    //         data.put("projectHours", course.getProjectHours());
-    //         data.put("credits", course.getCredits());
-    //         data.put("notes", course.getNotes());
-    //         data.put("clusterName", normalizedClusterName);
-    //         db.collection("courses").document(courseId).set(data, SetOptions.merge());
-    //         //db.collection("courses").document(course.getSemesterNumber()).set(Map.of(course.getCourseCode(), data), SetOptions.merge());
-    //     }
-    // }
+        for (String part : parts) {
+            String trimmed = part.trim();
+            if (!trimmed.isEmpty()) {
+                ids.add(trimmed);
+            }
+        }
 
-    //function to go through all of the courses and check if the courseId is 5,6 number, if not - do a list of all the courses that have invalid courseId and print them, and do not save them to the database.
+        return ids;
+    }
+
+    private String buildPrerequisiteText(List<String> prerequisiteIds) {
+        return String.join(", ", prerequisiteIds);
+    }
+
+    private InvalidCourse toInvalidCourse(Course course) {
+        String invalidId = course.getCourseId() == null ? "(empty)" : course.getCourseId().trim();
+        if (invalidId.isEmpty()) {
+            invalidId = "(empty)";
+        }
+        String courseName = course.getCourseName() == null ? "" : course.getCourseName();
+        return new InvalidCourse(invalidId, courseName);
+    }
+
+    // Invalid course ID -> do not save the course.
+    // Invalid/non-existing prerequisite -> remove it, save the course, and report it in the summary.
     public CourseUploadSummary validateAndSaveCourses(List<Course> courses) throws Exception {
         List<Course> invalidCourses = new ArrayList<>();
         List<Course> validCourses = new ArrayList<>();
-        List<Course> invalidPerequisiteCourses = new ArrayList<>();
+        Set<String> validCourseIds = new HashSet<>();
 
         for (Course course : courses) {
             String courseId = course.getCourseId() == null ? "" : course.getCourseId().trim();
-            String prerequisiteCourseId = course.getPrerequisiteCourseNumber() == null ? "" : course.getPrerequisiteCourseNumber().trim();
 
             if (!courseId.matches(COURSE_ID_PATTERN)) {
                 invalidCourses.add(course);
             } else {
                 course.setCourseId(courseId);
                 validCourses.add(course);
+                validCourseIds.add(courseId);
             }
         }
 
-        // Keep upload behavior: overwrite existing courses with the validated list.
+        List<AdjustedCourse> adjustedCourses = new ArrayList<>();
+
+        for (Course course : validCourses) {
+            List<String> prerequisiteIds = parsePrerequisiteIds(course.getPrerequisiteCourseNumber());
+            List<String> validPrerequisites = new ArrayList<>();
+            List<String> removedPrerequisites = new ArrayList<>();
+
+            for (String prerequisiteId : prerequisiteIds) {
+                if (prerequisiteId.matches(COURSE_ID_PATTERN) && validCourseIds.contains(prerequisiteId)) {
+                    validPrerequisites.add(prerequisiteId);
+                } else {
+                    removedPrerequisites.add(prerequisiteId);
+                }
+            }
+
+            course.setPrerequisiteCourseNumber(buildPrerequisiteText(validPrerequisites));
+
+            if (!removedPrerequisites.isEmpty()) {
+                adjustedCourses.add(new AdjustedCourse(
+                        course.getCourseId(),
+                        course.getCourseName() == null ? "" : course.getCourseName(),
+                        removedPrerequisites
+                ));
+            }
+        }
+
         courseService.saveCourseToFirebase(validCourses);
 
         List<InvalidCourse> invalidCourseDetails = new ArrayList<>();
         if (!invalidCourses.isEmpty()) {
             System.out.println("Invalid courses found:");
             for (Course course : invalidCourses) {
-                String invalidId = course.getCourseId() == null ? "(empty)" : course.getCourseId().trim();
-                if (invalidId.isEmpty()) {
-                    invalidId = "(empty)";
-                }
-                String courseName = course.getCourseName() == null ? "" : course.getCourseName();
-                invalidCourseDetails.add(new InvalidCourse(invalidId, courseName));
-                System.out.println("- " + invalidId + ": " + courseName);
+                InvalidCourse invalidCourse = toInvalidCourse(course);
+                invalidCourseDetails.add(invalidCourse);
+                System.out.println("- " + invalidCourse.getCourseId() + ": " + invalidCourse.getCourseName());
             }
         }
 
-        return new CourseUploadSummary(validCourses.size(), invalidCourseDetails);
+        if (!adjustedCourses.isEmpty()) {
+            System.out.println("Courses saved after removing invalid/non-existing prerequisites:");
+            for (AdjustedCourse adjustedCourse : adjustedCourses) {
+                System.out.println("- " + adjustedCourse.getCourseId() + ": " + adjustedCourse.getCourseName()
+                        + " | removed prerequisites: " + adjustedCourse.getRemovedPrerequisites());
+            }
+        }
+
+        return new CourseUploadSummary(validCourses.size(), invalidCourseDetails, adjustedCourses);
     }
 
 
@@ -293,24 +320,6 @@ public class CoursesExcelService {
                 row.createCell(8).setCellValue(asDouble(data.get("credits")));
                 row.createCell(9).setCellValue(asString(data.get("notes")));
                 row.createCell(10).setCellValue(asString(data.get("clusterName")));
-                
-                
-                // for (String courseCode : coursesInSemester.keySet()) {
-                //     Map<String, Object> data = (Map<String, Object>) coursesInSemester.get(courseCode);
-                //     Row row = sheet.createRow(rowIndex++);
-
-                //     row.createCell(0).setCellValue(semesterNumber);
-                //     row.createCell(1).setCellValue(courseCode);
-                //     row.createCell(2).setCellValue(asString(data.get("courseName")));
-                //     row.createCell(3).setCellValue(asString(data.get("prerequisiteCourseNumber")));
-                //     row.createCell(4).setCellValue(asDouble(data.get("lectureHours")));
-                //     row.createCell(5).setCellValue(asDouble(data.get("tutorialHours")));
-                //     row.createCell(6).setCellValue(asDouble(data.get("labHours")));
-                //     row.createCell(7).setCellValue(asDouble(data.get("projectHours")));
-                //     row.createCell(8).setCellValue(asDouble(data.get("credits")));
-                //     row.createCell(9).setCellValue(asString(data.get("notes")));
-                //     row.createCell(10).setCellValue(asString(data.get("clusterName")));
-                // }
             }
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -326,41 +335,20 @@ public class CoursesExcelService {
         }
     }
 
-    public void printCourses(List<Course> courses) {
-        // Implement logic to print the list of courses for debugging purposes
-        for (Course course : courses) {
-            System.out.println("Course Code: " + course.getCourseId());
-            System.out.println("Course Name: " + course.getCourseName());
-            System.out.println("Prerequisites: " + course.getPrerequisiteCourseNumber());
-            System.out.println("Lecture Hours: " + course.getLectureHours());
-            System.out.println("Tutorial Hours: " + course.getTutorialHours());
-            System.out.println("Lab Hours: " + course.getLabHours());
-            System.out.println("Project Hours: " + course.getProjectHours());
-            System.out.println("Credits: " + course.getCredits());
-            System.out.println("Notes: " + course.getNotes());
-            System.out.println("-----------------------------------");
-        }
-
+    // public void printCourses(List<Course> courses) {
+    //     for (Course course : courses) {
+    //         System.out.println("Course Code: " + course.getCourseId());
+    //         System.out.println("Course Name: " + course.getCourseName());
+    //         System.out.println("Prerequisites: " + course.getPrerequisiteCourseNumber());
+    //         System.out.println("Lecture Hours: " + course.getLectureHours());
+    //         System.out.println("Tutorial Hours: " + course.getTutorialHours());
+    //         System.out.println("Lab Hours: " + course.getLabHours());
+    //         System.out.println("Project Hours: " + course.getProjectHours());
+    //         System.out.println("Credits: " + course.getCredits());
+    //         System.out.println("Notes: " + course.getNotes());
+    //         System.out.println("-----------------------------------");
+    //     }
     // }
-
-    // public void saveSingleCourseToDatabase(Course course) {
-    //     Firestore db = FirestoreClient.getFirestore();
-
-    //     Map<String, Object> data = new HashMap<>();
-    //     data.put("courseName", course.getCourseName());
-    //     data.put("prerequisiteCourseNumber", course.getPrerequisiteCourseNumber());
-    //     data.put("lectureHours", course.getLectureHours());
-    //     data.put("tutorialHours", course.getTutorialHours());
-    //     data.put("labHours", course.getLabHours());
-    //     data.put("projectHours", course.getProjectHours());
-    //     data.put("credits", course.getCredits());
-    //     data.put("notes", course.getNotes());
-    //     data.put("clusterName", course.getClusterName());
-
-        // db.collection("courses")
-        //   .document(course.getSemesterNumber())
-        //   .set(Map.of(course.getCourseId(), data), SetOptions.merge());
-    }
 
     private String asString(Object value) {
         return value == null ? "" : String.valueOf(value);
