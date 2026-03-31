@@ -120,9 +120,19 @@ public class CoursesExcelService {
 
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
-                if (row == null) continue;
+                if (row == null || isRowEmpty(row, formatter)) continue;
 
-                int cluster = (int) Double.parseDouble(formatter.formatCellValue(row.getCell(0)));
+                String clusterValue = formatter.formatCellValue(row.getCell(0)).trim();
+                if (clusterValue.isEmpty()) {
+                    throw new RuntimeException("Missing cluster value in Excel row " + (i + 1));
+                }
+
+                int cluster;
+                try {
+                    cluster = (int) Double.parseDouble(clusterValue);
+                } catch (NumberFormatException e) {
+                    throw new RuntimeException("Invalid cluster value '" + clusterValue + "' in Excel row " + (i + 1));
+                }
 
                 String courseCode = formatter.formatCellValue(row.getCell(1)).trim();
                 String courseName = formatter.formatCellValue(row.getCell(2)).trim();
@@ -163,6 +173,16 @@ public class CoursesExcelService {
         }
 
         return courses;
+    }
+
+    private boolean isRowEmpty(Row row, DataFormatter formatter) {
+        for (int cellIndex = 0; cellIndex <= 10; cellIndex++) {
+            String cellValue = formatter.formatCellValue(row.getCell(cellIndex)).trim();
+            if (!cellValue.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private int parseIntCell(Cell cell, DataFormatter formatter) {

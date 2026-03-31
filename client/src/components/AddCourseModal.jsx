@@ -51,12 +51,14 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
   const [labHours, setLabHours] = useState("");
   const [projectHours, setProjectHours] = useState("");
   const [credits, setCredits] = useState("");
+  const [isCreditsEditable, setIsCreditsEditable] = useState(false);
   const [notes, setNotes] = useState("");
   const [clusterName, setClusterName] = useState("");
   const [invalidPrereqWarning, setInvalidPrereqWarning] = useState(null);
   const [pendingPrerequisite, setPendingPrerequisite] = useState(null);
   const [duplicateCourseWarning, setDuplicateCourseWarning] = useState(null);
   const [pendingCourse, setPendingCourse] = useState(null);
+  const [creditsEditWarningOpen, setCreditsEditWarningOpen] = useState(false);
   // Disable semester selection if the cluster is between 9-14, otherwise disable cluster name selection. This ensures users can't select both a semester and a cluster name at the same time.
   const selectedClusterNumber =cluster.trim() !== "" ? Number(cluster) : CLUSTER_NAME_TO_NUMBER[clusterName.trim()];
   const isSemesterDisabled = Number.isInteger(selectedClusterNumber) && selectedClusterNumber >= 9 && selectedClusterNumber <= 14;
@@ -74,12 +76,14 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
     setLabHours("");
     setProjectHours("");
     setCredits("");
+    setIsCreditsEditable(false);
     setNotes("");
     setClusterName("");
     setInvalidPrereqWarning(null);
     setPendingPrerequisite(null);
     setDuplicateCourseWarning(null);
     setPendingCourse(null);
+    setCreditsEditWarningOpen(false);
   };
   
   // Initialize fields when modal opens or when initialCourse changes
@@ -127,11 +131,29 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
       setLabHours(initialCourse.labHours != null ? String(initialCourse.labHours) : "");
       setProjectHours(initialCourse.projectHours != null ? String(initialCourse.projectHours) : "");
       setCredits(initialCourse.credits != null ? String(initialCourse.credits) : "");
+      setIsCreditsEditable(false);
       setNotes(initialCourse.notes || "");
     } else {
       resetForm();
     }
   }, [isOpen, initialCourse]);
+
+  React.useEffect(() => {
+    if (isCreditsEditable) {
+      return;
+    }
+
+    const lecture = Number(lectureHours || 0);
+    const tutorial = Number(tutorialHours || 0);
+    const lab = Number(labHours || 0);
+    const project = Number(projectHours || 0);
+    const calculatedCredits = lecture + 0.5 * (tutorial + lab + project);
+    const formattedCredits = Number.isInteger(calculatedCredits)
+      ? String(calculatedCredits)
+      : calculatedCredits.toFixed(1);
+
+    setCredits(formattedCredits);
+  }, [lectureHours, tutorialHours, labHours, projectHours, isCreditsEditable]);
 
   if (!isOpen) return null;
 
@@ -139,6 +161,14 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
 
   const toNonNegativeInt = (value, fieldName) => {
     const parsed = parseInt(value, 10);
+    if (isNaN(parsed) || parsed < 0) {
+      throw new Error(`Please enter a valid non-negative number for ${fieldName}.`);
+    }
+    return parsed;
+  };
+
+  const toNonNegativeFloat = (value, fieldName) => {
+    const parsed = parseFloat(value);
     if (isNaN(parsed) || parsed < 0) {
       throw new Error(`Please enter a valid non-negative number for ${fieldName}.`);
     }
@@ -205,6 +235,19 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
     setPendingCourse(null);
   };
 
+  const enableManualCreditsEdit = () => {
+    setCreditsEditWarningOpen(true);
+  };
+
+  const confirmManualCreditsEdit = () => {
+    setIsCreditsEditable(true);
+    setCreditsEditWarningOpen(false);
+  };
+
+  const cancelManualCreditsEdit = () => {
+    setCreditsEditWarningOpen(false);
+  };
+
   const handleRemovePrerequisite = (codeToRemove) => {
     setPrerequisiteCourseNumbers((prev) => prev.filter((code) => code !== codeToRemove));
   };
@@ -246,7 +289,7 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
         tutorialHours: toNonNegativeInt(tutorialHours, "tutorial hours"),
         labHours: toNonNegativeInt(labHours, "lab hours"),
         projectHours: toNonNegativeInt(projectHours, "project hours"),
-        credits: toNonNegativeInt(credits, "credits"),
+        credits: toNonNegativeFloat(credits, "credits"),
         notes: notes.trim(),
         clusterName: clusterName.trim(),
       };
@@ -330,6 +373,34 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
             </Button>
             <Button variant="primary" onClick={confirmAddPrerequisiteWithWarning}>
               Add Anyway
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (creditsEditWarningOpen) {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-card" role="dialog" aria-modal="true">
+          <div className="modal-header">
+            <h3>⚠️ Edit Credits Manually?</h3>
+          </div>
+
+          <div className="modal-body" style={{ paddingBottom: "1rem" }}>
+            <p style={{ marginBottom: "0.5rem" }}>
+              Automatic credits calculation will be turned off for this course.
+            </p>
+            <p>Are you sure you want to continue to manual editing?</p>
+          </div>
+
+          <div className="modal-actions">
+            <Button variant="ghost" onClick={cancelManualCreditsEdit}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={confirmManualCreditsEdit}>
+              Yes, Edit Manually
             </Button>
           </div>
         </div>
@@ -528,12 +599,42 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
             </div>
 
             <div className="form-field">
-              <label>Credits</label>
+              <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                Credits
+                {!isCreditsEditable && (
+                  <button
+                    type="button"
+                    onClick={enableManualCreditsEdit}
+                    aria-label="Enable manual credits editing"
+                    title="Edit credits manually"
+                    style={{
+                      border: "none",
+                      background: "transparent",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      padding: 0,
+                      color: "#4f46e5",
+                    }}
+                  >
+                    <span className="material-icons" style={{ fontSize: 18 }} aria-hidden>
+                      edit
+                    </span>
+                  </button>
+                )}
+              </label>
               <input
                 className="ui-input"
                 value={credits}
-                onChange={(e) => setCredits(keepDigitsOnly(e.target.value))}
-                inputMode="numeric"
+                onChange={(e) => {
+                  const nextValue = e.target.value
+                    .replace(/[^\d.]/g, "")
+                    .replace(/(\..*)\./g, "$1");
+                  setCredits(nextValue);
+                }}
+                inputMode="decimal"
+                readOnly={!isCreditsEditable}
+                style={!isCreditsEditable ? { backgroundColor: "#f3f4f6", cursor: "not-allowed" } : undefined}
                 required
               />
             </div>
