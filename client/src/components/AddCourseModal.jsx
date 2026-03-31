@@ -40,7 +40,7 @@ const SemesterOptions = [
   "8"];
 
 // Simple modal for adding a single course (uses app UI styles).
-export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse = null }) {
+export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse = null, allCourses = [] }) {
   const [cluster, setCluster] = useState("");
   const [courseCode, setCourseCode] = useState("");
   const [courseName, setCourseName] = useState("");
@@ -53,6 +53,8 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
   const [credits, setCredits] = useState("");
   const [notes, setNotes] = useState("");
   const [clusterName, setClusterName] = useState("");
+  const [invalidPrereqWarning, setInvalidPrereqWarning] = useState(null);
+  const [pendingPrerequisite, setPendingPrerequisite] = useState(null);
   // Disable semester selection if the cluster is between 9-14, otherwise disable cluster name selection. This ensures users can't select both a semester and a cluster name at the same time.
   const selectedClusterNumber =cluster.trim() !== "" ? Number(cluster) : CLUSTER_NAME_TO_NUMBER[clusterName.trim()];
   const isSemesterDisabled = Number.isInteger(selectedClusterNumber) && selectedClusterNumber >= 9 && selectedClusterNumber <= 14;
@@ -72,6 +74,8 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
     setCredits("");
     setNotes("");
     setClusterName("");
+    setInvalidPrereqWarning(null);
+    setPendingPrerequisite(null);
   };
   
   // Initialize fields when modal opens or when initialCourse changes
@@ -155,8 +159,32 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
       throw new Error("This prerequisite course code is already added.");
     }
 
-    setPrerequisiteCourseNumbers((prev) => [...prev, nextCode]);
-    setPrerequisiteInput("");
+    // Check if the prerequisite course exists in the system
+    const courseExists = allCourses.some(course => course.courseId === nextCode);
+    
+    if (!courseExists) {
+      // Show warning modal
+      setPendingPrerequisite(nextCode);
+      setInvalidPrereqWarning(nextCode);
+    } else {
+      // Course exists, add it directly
+      setPrerequisiteCourseNumbers((prev) => [...prev, nextCode]);
+      setPrerequisiteInput("");
+    }
+  };
+
+  const confirmAddPrerequisiteWithWarning = () => {
+    if (pendingPrerequisite) {
+      setPrerequisiteCourseNumbers((prev) => [...prev, pendingPrerequisite]);
+      setPrerequisiteInput("");
+    }
+    setInvalidPrereqWarning(null);
+    setPendingPrerequisite(null);
+  };
+
+  const cancelAddPrerequisite = () => {
+    setInvalidPrereqWarning(null);
+    setPendingPrerequisite(null);
   };
 
   const handleRemovePrerequisite = (codeToRemove) => {
@@ -216,6 +244,34 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
     resetForm();
     onClose();
   };
+
+  if (invalidPrereqWarning) {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-card" role="dialog" aria-modal="true">
+          <div className="modal-header">
+            <h3>⚠️ Prerequisite Course Not Found</h3>
+          </div>
+
+          <div className="modal-body" style={{ paddingBottom: "1rem" }}>
+            <p style={{ marginBottom: "0.5rem" }}>
+              The prerequisite course <strong>{invalidPrereqWarning}</strong> does not exist in the system.
+            </p>
+            <p>Would you like to add it anyway?</p>
+          </div>
+
+          <div className="modal-actions">
+            <Button variant="ghost" onClick={cancelAddPrerequisite}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={confirmAddPrerequisiteWithWarning}>
+              Add Anyway
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="modal-overlay">

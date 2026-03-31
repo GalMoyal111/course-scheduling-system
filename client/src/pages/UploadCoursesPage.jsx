@@ -4,7 +4,7 @@ import ConfirmModal from "../components/ConfirmModal";
 import CourseList from "../components/CourseList";
 import Button from "../components/ui/Button";
 import { uploadCourses, exportCourses, addCourse, getAllCourses, deleteCourses, updateCourse } from "../services/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useData } from "../context/DataContext";
 
 import "./UploadPage.css"; // reuse the Upload page styles
@@ -24,12 +24,13 @@ export default function UploadCoursesPage() {
   const [pendingDelete, setPendingDelete] = useState(null);
   const [invalidCoursesModalOpen, setInvalidCoursesModalOpen] = useState(false);
   const [invalidCourses, setInvalidCourses] = useState([]);
+  const [adjustedCourses, setAdjustedCourses] = useState([]);
   const [uploadSavedCount, setUploadSavedCount] = useState(0);
+  const [modalContext, setModalContext] = useState("upload"); // "upload" or "add"
+  const [pendingCourse, setPendingCourse] = useState(null);
   const { courses, setCourses } = useData();
 
-  
-
-  const loadCourses = async () => {
+  const loadCourses = useCallback(async () => {
     try {
       const data = await getAllCourses();
       if (Array.isArray(data)) {
@@ -41,13 +42,11 @@ export default function UploadCoursesPage() {
       console.error("Failed to load courses:", err);
       setCourses([]);
     }
-  };
+  }, [setCourses]);
 
   useEffect(() => {
-    if (courses.length === 0) {
-      loadCourses();
-    }
-  }, []);
+    loadCourses();
+  }, [loadCourses]);
 
   const handleUpload = async (file) => {
     setPendingFile(file);
@@ -63,10 +62,17 @@ export default function UploadCoursesPage() {
     try {
       const result = await uploadCourses(fileToUpload);
       
-      // result is now a JSON object with savedCount and invalidCourses
+      // result is now a JSON object with savedCount, invalidCourses, and adjustedCourses
       if (result.invalidCourses && result.invalidCourses.length > 0) {
         setUploadSavedCount(result.savedCount);
         setInvalidCourses(result.invalidCourses);
+        setAdjustedCourses(result.adjustedCourses || []);
+        setInvalidCoursesModalOpen(true);
+      } else if (result.adjustedCourses && result.adjustedCourses.length > 0) {
+        // Show adjusted courses even if no invalid courses
+        setUploadSavedCount(result.savedCount);
+        setInvalidCourses([]);
+        setAdjustedCourses(result.adjustedCourses);
         setInvalidCoursesModalOpen(true);
       } else {
         alert("Courses uploaded successfully");
@@ -120,6 +126,34 @@ export default function UploadCoursesPage() {
         await updateCourse({ oldCourse: oldCoursePayload, newCourse: newCoursePayload });
         alert("Course updated successfully");
       } else {
+        // Check for invalid prerequisites before adding
+        const coursePrerequisites = (course.prerequisiteCourseNumber || "")
+          .split(",")
+          .map((id) => id.trim())
+          .filter((id) => id !== "");
+
+        const validCourseIds = new Set(courses.map((c) => c.courseId));
+        const invalidPrereqs = coursePrerequisites.filter(
+          (prereqId) => !validCourseIds.has(prereqId)
+        );
+
+        if (invalidPrereqs.length > 0) {
+          // Show warning modal for adding course with missing prerequisites
+          setModalContext("add");
+          setInvalidCourses([]);
+          setAdjustedCourses([
+            {
+              courseId: course.courseId,
+              courseName: course.courseName,
+              removedPrerequisites: invalidPrereqs,
+            },
+          ]);
+          setUploadSavedCount(0);
+          setPendingCourse(course);
+          setInvalidCoursesModalOpen(true);
+          return;
+        }
+
         await addCourse(course);
         alert("Course added successfully");
       }
@@ -272,6 +306,7 @@ export default function UploadCoursesPage() {
         onClose={() => { setIsModalOpen(false); setEditingCourse(null); }}
         onSave={handleAddCourse}
         initialCourse={editingCourse}
+        allCourses={courses}
       />
 
       <ConfirmModal
@@ -308,45 +343,112 @@ export default function UploadCoursesPage() {
       <InvalidCoursesModal
         isOpen={invalidCoursesModalOpen}
         invalidCourses={invalidCourses}
+        adjustedCourses={adjustedCourses}
         savedCount={uploadSavedCount}
-        onClose={() => setInvalidCoursesModalOpen(false)}
+        context={modalContext}
+        onClose={() => {
+          setInvalidCoursesModalOpen(false);
+          setInvalidCourses([]);
+          setAdjustedCourses([]);
+          setPendingCourse(null);
+        }}
+        onContinueAnyway={async () => {
+          if (pendingCourse && modalContext === "add") {
+            try {
+              await addCourse(pendingCourse);
+              alert("Course added successfully (with non-existing prerequisites)");
+              await loadCourses();
+              setIsModalOpen(false);
+              setEditingCourse(null);
+            } catch (err) {
+              console.error(err);
+              alert("Failed to add course");
+            }
+            setInvalidCoursesModalOpen(false);
+            setInvalidCourses([]);
+            setAdjustedCourses([]);
+            setPendingCourse(null);
+          }
+        }}
       />
     </div>
   );
 }
 
-function InvalidCoursesModal({ isOpen, invalidCourses, savedCount, onClose }) {
+function InvalidCoursesModal({ isOpen, invalidCourses, adjustedCourses, savedCount, context = "upload", onClose, onContinueAnyway }) {
   if (!isOpen) return null;
+
+  const hasInvalidCourses = invalidCourses && invalidCourses.length > 0;
+  const hasAdjustedCourses = adjustedCourses && adjustedCourses.length > 0;
+  const isAddContext = context === "add";
 
   return (
     <div className="modal-overlay">
       <div className="modal-card" role="dialog" aria-modal="true">
         <div className="modal-header">
-          <h3>Upload Completed with Warnings</h3>
+          <h3>{isAddContext ? "Missing Prerequisites Warning" : "Upload Completed with Warnings"}</h3>
         </div>
 
         <div className="modal-body invalid-courses-modal-body">
-          <p className="invalid-courses-summary">
-            ✓ {savedCount} course(s) uploaded successfully
-          </p>
-          <p className="invalid-courses-warning">
-            ✗ {invalidCourses.length} course(s) skipped due to invalid course code (must be 5 or 6 digits):
-          </p>
+          {!isAddContext && (
+            <p className="invalid-courses-summary">
+              ✓ {savedCount} course(s) uploaded successfully
+            </p>
+          )}
 
-          <div className="invalid-courses-list">
-            {invalidCourses.map((course, index) => (
-              <div key={index} className="invalid-course-item">
-                <div className="invalid-course-item-name">{course.courseName || "(No name)"}</div>
-                <div className="invalid-course-item-code">Course Code: {course.courseId}</div>
+          {hasInvalidCourses && (
+            <>
+              <p className="invalid-courses-warning">
+                ✗ {invalidCourses.length} course(s) skipped due to invalid course code (must be 5 or 6 digits):
+              </p>
+
+              <div className="invalid-courses-list">
+                {invalidCourses.map((course, index) => (
+                  <div key={index} className="invalid-course-item">
+                    <div className="invalid-course-item-name">{course.courseName || "(No name)"}</div>
+                    <div className="invalid-course-item-code">Course Code: {course.courseId}</div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
+
+          {hasAdjustedCourses && (
+            <>
+              <p className="adjusted-courses-warning" style={{ marginTop: hasInvalidCourses ? 20 : 0, color: "#ff9800" }}>
+                ⚠️ {adjustedCourses.length} course(s) {isAddContext ? "will be added, but some prerequisites do not exist in the system:" : "were saved, but some prerequisites were removed:"}
+              </p>
+
+              <div className="invalid-courses-list">
+                {adjustedCourses.map((course, index) => (
+                  <div key={index} className="invalid-course-item">
+                    <div className="invalid-course-item-name">{course.courseName || "(No name)"}</div>
+                    <div className="invalid-course-item-code">Course Code: {course.courseId}</div>
+                    <div className="adjusted-course-item-prerequisites" style={{ color: "#ff9800", marginTop: 4, fontSize: "0.9em" }}>
+                      Missing Prerequisites: {course.removedPrerequisites.join(", ")}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         <div className="modal-actions">
-          <Button variant="primary" onClick={onClose}>
-            OK
-          </Button>
+          {isAddContext ? (
+            <>
+              <Button variant="ghost" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={onContinueAnyway}>
+                Continue Anyway
+              </Button>
+            </>
+          ) : (
+            <Button variant="primary" onClick={onClose}>
+              OK
+            </Button>
+          )}
         </div>
       </div>
     </div>
