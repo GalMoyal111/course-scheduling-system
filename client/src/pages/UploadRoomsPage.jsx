@@ -18,7 +18,7 @@ function UploadRoomsPage() {
   };
 
   const [exporting, setExporting] = useState(false);
-  const { classrooms, setClassrooms } = useData();
+  const { classrooms, setClassrooms, invalidateClassroomsCache } = useData();
 
   const handleExport = async () => {
     try {
@@ -139,6 +139,8 @@ function UploadRoomsPage() {
     try {
       const data = await getAllClassrooms();
       setClassrooms(Array.isArray(data) ? data : []);
+      // Invalidate dashboard cache to refresh stats
+      invalidateClassroomsCache();
     } catch (err) {
       console.error(err);
     }

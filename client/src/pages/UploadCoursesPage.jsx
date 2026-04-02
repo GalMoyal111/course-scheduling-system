@@ -28,7 +28,7 @@ export default function UploadCoursesPage() {
   const [uploadSavedCount, setUploadSavedCount] = useState(0);
   const [modalContext, setModalContext] = useState("upload"); // "upload" or "add"
   const [pendingCourse, setPendingCourse] = useState(null);
-  const { courses, setCourses } = useData();
+  const { courses, setCourses, invalidateCoursesCache } = useData();
 
   const loadCourses = useCallback(async () => {
     try {
@@ -38,11 +38,13 @@ export default function UploadCoursesPage() {
       } else {
         setCourses([]);
       }
+      // Invalidate dashboard cache to refresh stats
+      invalidateCoursesCache();
     } catch (err) {
       console.error("Failed to load courses:", err);
       setCourses([]);
     }
-  }, [setCourses]);
+  }, [setCourses, invalidateCoursesCache]);
 
   useEffect(() => {
     loadCourses();

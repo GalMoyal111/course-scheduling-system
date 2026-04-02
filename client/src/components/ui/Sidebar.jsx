@@ -12,6 +12,7 @@ export default function Sidebar() {
     { path: "/classrooms", label: "Classrooms", icon: "meeting_room" },
     { path: "/courses", label: "Courses", icon: "menu_book" },
     { path: "/lessons", label: "Lessons", icon: "school" },
+    { path: "/lecturers", label: "Lecturers", icon: "person" },
     { path: "/generate", label: "Generate", icon: "auto_awesome" },
     { path: "/timetable", label: "Timetable", icon: "calendar_month" },
     { path: "/history", label: "History", icon: "history" },

@@ -20,7 +20,7 @@ function UploadPage() {
   const [editingLesson, setEditingLesson] = useState(null);
   const [selectedLessons, setSelectedLessons] = useState([]);
   const [exporting, setExporting] = useState(false);
-  const { lessons, setLessons } = useData();
+  const { lessons, setLessons, invalidateLessonsCache } = useData();
   // delete confirmation state
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
@@ -41,6 +41,8 @@ function UploadPage() {
         console.debug && console.debug("getAllLessons returned non-array", data);
         setLessons([]);
       }
+      // Invalidate dashboard cache to refresh stats
+      invalidateLessonsCache();
     } catch (err) {
       console.error("Failed to load lessons:", err);
       setLessons([]);

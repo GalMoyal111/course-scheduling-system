@@ -6,10 +6,12 @@ import { useState } from "react";
 import UploadPage from "./pages/UploadPage";
 import UploadRoomsPage from "./pages/UploadRoomsPage";
 import UploadCoursesPage from "./pages/UploadCoursesPage";
+import DashboardPage from "./pages/DashboardPage";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 import { getUserRole } from "./services/api";
 import SettingsPage from "./pages/SettingsPage";
+import LecturersPage from "./pages/LecturersPage";
 
 
 import Layout from "./components/ui/Layout";
@@ -27,6 +29,7 @@ function App() {
     if (location.pathname === "/courses") pageName = "Courses";
     else if (location.pathname === "/classrooms") pageName = "Classrooms";
     else if (location.pathname === "/lessons") pageName = "Lessons";
+    else if (location.pathname === "/lecturers") pageName = "Lecturers";
     else if (location.pathname === "/generate") pageName = "Generate";
     else if (location.pathname === "/timetable") pageName = "Timetable";
     else if (location.pathname === "/history") pageName = "History";
@@ -69,11 +72,11 @@ function App() {
   return (
     <Layout user={user} onLogin={setUser} onLogout={() => setUser(null)}>
       <Routes>
-        <Route path="/" element={<h2>Dashboard</h2>} />
+        <Route path="/" element={<DashboardPage />} />
         <Route path="/classrooms" element={<UploadRoomsPage />} />
         <Route path="/courses" element={<UploadCoursesPage />} />
         <Route path="/lessons" element={<UploadPage />} />
-
+        <Route path="/lecturers" element={<LecturersPage />} />
         <Route path="/generate" element={<h2>Generate AI</h2>} />
         <Route path="/timetable" element={<h2>Timetable</h2>} />
         <Route path="/history" element={<h2>History</h2>} />
