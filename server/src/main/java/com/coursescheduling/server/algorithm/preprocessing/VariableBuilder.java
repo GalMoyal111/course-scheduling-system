@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import com.coursescheduling.server.algorithm.model.Domain;
 import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
 import com.coursescheduling.server.model.Lesson;
+import com.coursescheduling.server.model.LessonType;
 import com.coursescheduling.server.model.Semester;
 import com.coursescheduling.server.service.LessonService;
 
@@ -26,8 +28,13 @@ public class VariableBuilder {
 	
 	public List<Variable> createVariables(Semester semester){
 		
-		List<Lesson> lessons = lessonService.getLessonsBySemester(semester);
-				
+		// the original
+		//List<Lesson> lessons = lessonService.getLessonsBySemester(semester);
+		
+		//temp
+		List<Lesson> lessons = createTestLessons();
+		
+		
 		List <Variable> variables = new ArrayList<>();
 		
 		for (Lesson lesson : lessons) {
@@ -149,6 +156,61 @@ public class VariableBuilder {
 	    }
 	}
 	
+	
+	private List<Lesson> createTestLessons() {
+
+	    List<Lesson> lessons = new ArrayList<>();
+
+	    lessons.add(createLesson("111", "משה", 2, LessonType.LECTURE, null));
+	    lessons.add(createLesson("111", "משה", 2, LessonType.LECTURE, null));
+	    lessons.add(createLesson("111", "משה", 2, LessonType.TUTORIAL, null));
+	    lessons.add(createLesson("111", "משה", 2, LessonType.TUTORIAL, null));
+
+	    lessons.add(createLesson("222", "דנה", 2, LessonType.LECTURE, null));
+	    lessons.add(createLesson("222", "דנה", 2, LessonType.TUTORIAL, null));
+	    lessons.add(createLesson("222", "דנה", 2, LessonType.LAB, null));
+
+	    String splitId1 = UUID.randomUUID().toString();
+	    lessons.add(createLesson("333", "יוסי", 2, LessonType.LECTURE, splitId1));
+	    lessons.add(createLesson("333", "יוסי", 2, LessonType.LECTURE, splitId1));
+
+	    lessons.add(createLesson("333", "יוסי", 2, LessonType.TUTORIAL, null));
+
+	    lessons.add(createLesson("444", "שרה", 2, LessonType.LECTURE, null));
+	    lessons.add(createLesson("444", "שרה", 2, LessonType.LECTURE, null));
+	    lessons.add(createLesson("444", "שרה", 2, LessonType.TUTORIAL, null));
+	    lessons.add(createLesson("444", "שרה", 2, LessonType.LAB, null));
+
+	    lessons.add(createLesson("555", "אבי", 2, LessonType.LECTURE, null));
+	    lessons.add(createLesson("555", "אבי", 2, LessonType.TUTORIAL, null));
+
+	    String splitId2 = UUID.randomUUID().toString();
+	    lessons.add(createLesson("666", "רון", 2, LessonType.LECTURE, splitId2));
+	    lessons.add(createLesson("666", "רון", 2, LessonType.LECTURE, splitId2));
+
+	    lessons.add(createLesson("666", "רון", 2, LessonType.LAB, null));
+	    lessons.add(createLesson("666", "רון", 2, LessonType.TUTORIAL, null));
+
+	    return lessons;
+	}
+	
+
+
+	private Lesson createLesson(String courseId, String lecturer, int duration, LessonType type, String splitId) {
+	    Lesson l = new Lesson();
+
+	    l.setLessonId(UUID.randomUUID().toString());
+	    l.setCourseId(courseId);
+	    l.setLecturer(lecturer);
+	    l.setDuration(duration);
+	    l.setType(type);
+	    l.setSplitGroupId(splitId); 
+	    l.setCluster(1);
+	    l.setCredits(3);
+	    l.setSemester(Semester.A);
+
+	    return l;
+	}
 	
 	
 	
