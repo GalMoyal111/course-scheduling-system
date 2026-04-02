@@ -11,8 +11,7 @@ import com.coursescheduling.server.model.Semester;
 public class ServerApplication {
 
     public static void main(String[] args) {
-    	var context = SpringApplication.run(ServerApplication.class, args);
+    	SpringApplication.run(ServerApplication.class, args);
     	
-    	context.getBean(VariableBuilder.class).createVariables(Semester.A);
     }
 }

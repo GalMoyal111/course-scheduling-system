@@ -13,7 +13,6 @@ import com.coursescheduling.server.algorithm.model.Domain;
 import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
 import com.coursescheduling.server.model.Lesson;
-import com.coursescheduling.server.model.LessonType;
 import com.coursescheduling.server.model.Semester;
 import com.coursescheduling.server.service.LessonService;
 
