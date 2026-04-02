@@ -14,9 +14,17 @@ public class Variable {
 	private int index;
 	private float credits;
 	private Boolean isHardCourse;
+	private Domain domain;
 	
 	
 	
+	
+	public Domain getDomain() {
+		return domain;
+	}
+	public void setDomain(Domain domain) {
+		this.domain = domain;
+	}
 	public String getLessonId() {
 		return lessonId;
 	}

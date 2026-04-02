@@ -373,6 +373,30 @@ public class LessonService {
 	
 	
 	
+	public List<Lesson> getLessonsBySemester(Semester semester) {
+
+	    Firestore db = FirestoreClient.getFirestore();
+	    List<Lesson> lessons = new ArrayList<>();
+
+	    try {
+	        ApiFuture<QuerySnapshot> future = db.collection("lessons").whereEqualTo("semester", semester.name()).get();
+
+	        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+	        for (QueryDocumentSnapshot doc : documents) {
+	            Lesson lesson = doc.toObject(Lesson.class);
+	            lessons.add(lesson);
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return lessons;
+	}
+	
+	
+	
 	
 	
 	
