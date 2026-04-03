@@ -138,14 +138,7 @@ public class VariableBuilder {
 
 	            for (int frame = 1; frame <= maxFrame; frame++) {
 
-	                if (day == 3 && (frame == 5 || frame == 6)) {
-	                    continue;
-	                }
-
-	                DomainValue dv = new DomainValue();
-	                dv.setDay(day);
-	                dv.setStartFrame(frame);
-	                dv.setRoomId(null); 
+	                DomainValue dv = new DomainValue(day, frame);
 
 	                domain.addValue(dv);
 	                

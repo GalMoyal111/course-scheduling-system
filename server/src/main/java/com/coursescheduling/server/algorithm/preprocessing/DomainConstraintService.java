@@ -7,18 +7,17 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.coursescheduling.server.algorithm.model.DomainValue;
-import com.coursescheduling.server.algorithm.model.UnavailableSlot;
 import com.coursescheduling.server.algorithm.model.Variable;
 
 @Service
 public class DomainConstraintService {
 
     public void applyLecturerConstraints(List<Variable> variables) {
-        Map<String, List<UnavailableSlot>> constraints = getLecturerConstraints();
+        Map<String, List<DomainValue>> constraints = getLecturerConstraints();
 
         for (Variable v : variables) {
 
-            List<UnavailableSlot> unavailable = constraints.get(v.getLecturer());
+            List<DomainValue> unavailable = constraints.get(v.getLecturer());
 
             if (unavailable == null)
                 continue;
@@ -28,7 +27,7 @@ public class DomainConstraintService {
             values.removeIf(dv ->
                 unavailable.stream().anyMatch(slot ->
                     slot.getDay() == dv.getDay() &&
-                    slot.getFrame() == dv.getStartFrame()
+                    slot.getStartFrame() == dv.getStartFrame()
                 )
             );
         }
@@ -36,14 +35,51 @@ public class DomainConstraintService {
 
     
     
-    private Map<String, List<UnavailableSlot>> getLecturerConstraints() {
-        Map<String, List<UnavailableSlot>> map = new HashMap<>();
+    private Map<String, List<DomainValue>> getLecturerConstraints() {
+        Map<String, List<DomainValue>> map = new HashMap<>();
 
         map.put("משה כהן", List.of(
-                new UnavailableSlot(1, 3),
-                new UnavailableSlot(2, 5)
+                new DomainValue(1, 3),
+                new DomainValue(2, 5)
         ));
 
         return map;
     }
+    
+    
+    public void applyGlobalConstraints(List<Variable> variables, List<DomainValue> blockedSlots) {
+
+        for (Variable v : variables) {
+
+            List<DomainValue> values = v.getDomain().getValues();
+
+            values.removeIf(dv -> blockedSlots.stream().anyMatch(slot -> slot.getDay() == dv.getDay() &&
+                    slot.getStartFrame() == dv.getStartFrame()));
+            
+            
+        }
+    }
+    
+    
+    public void applyDurationConstraints(List<Variable> variables) {
+
+        for (Variable v : variables) {
+
+            int duration = v.getDuration();
+
+            List<DomainValue> values = v.getDomain().getValues();
+
+            values.removeIf(dv -> {
+                int day = dv.getDay();
+                int start = dv.getStartFrame();
+
+                int maxFrame = (day == 6) ? 4 : 12;
+
+                return start + duration - 1 > maxFrame;
+            });
+        }
+    }
+    
+    
+    
 }

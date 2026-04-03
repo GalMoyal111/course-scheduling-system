@@ -17,8 +17,6 @@ public class Domain {
 	
 	public void addValue(DomainValue value) {
         values.add(value);
-    }
-	
-	
+    }	
 
 }
