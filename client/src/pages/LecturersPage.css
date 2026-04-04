@@ -1,417 +1,182 @@
-/* Lecturers Page Styles */
+/* Lecturers Page Styles - Modern & Clean Version */
 
 .lecturers-page {
   display: flex;
   flex-direction: column;
   height: 100%;
   padding: 0;
+  background-color: #fcfcfd;
 }
 
 .lecturers-container {
   display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 1rem;
+  grid-template-columns: 240px 1fr;
+  gap: 1.5rem;
   height: 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
-/* Sidebar - Lecturers List */
+/* Sidebar */
 .lecturers-sidebar {
-  background: var(--card);
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 6px 24px rgba(16, 24, 40, 0.06);
+  background: white;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
   height: 100%;
-  overflow: hidden;
-}
-
-.lecturers-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+  border: 1px solid #f2f4f7;
 }
 
 .lecturers-header h2 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: var(--text);
+  color: #101828;
 }
 
 .add-lecturer-btn {
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  background: #6366f1;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 0.5rem;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+  transition: all 0.2s;
 }
 
 .add-lecturer-btn:hover {
+  background: #4f46e5;
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.2);
 }
 
-.add-lecturer-btn:active {
-  transform: translateY(0);
-}
-
-.add-lecturer-btn .material-icons {
-  font-size: 1.25rem;
-}
-
-/* Lecturers List */
-.lecturers-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-}
-
-.lecturer-item {
-  padding: 0.75rem;
-  background: transparent;
-  border: 1px solid rgba(99, 102, 241, 0.1);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.lecturer-item:hover {
-  background: rgba(99, 102, 241, 0.03);
-  border-color: rgba(99, 102, 241, 0.2);
-}
-
-.lecturer-item.active {
-  background: rgba(99, 102, 241, 0.08);
-  border-color: #6366f1;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
-}
-
-.lecturer-name {
-  margin: 0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.lecturer-hours {
-  margin: 0.15rem 0 0 0;
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-/* Right Panel - Lecturer Details */
+/* Lecturer Details Panel */
 .lecturer-details-panel {
-  background: var(--card);
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 6px 24px rgba(16, 24, 40, 0.06);
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  overflow: hidden;
+  gap: 1.5rem;
   height: 100%;
-}
-
-.details-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+  border: 1px solid #f2f4f7;
 }
 
 .details-header h1 {
+  font-size: 1.5rem;
+  color: #101828;
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text);
 }
 
-.edit-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: transparent;
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  border-radius: 8px;
-  padding: 0.4rem 0.75rem;
-  cursor: pointer;
-  color: #6366f1;
-  font-weight: 600;
-  font-size: 0.8rem;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.edit-btn:hover {
-  background: rgba(99, 102, 241, 0.05);
-  border-color: #6366f1;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
-}
-
-.edit-btn .material-icons {
-  font-size: 1rem;
-}
-
-/* Lecturer Info */
-.lecturer-info {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  padding: 0.75rem;
-  background: rgba(99, 102, 241, 0.02);
-  border-radius: 8px;
-}
-
-.info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.info-label {
-  margin: 0;
-  font-size: 0.75rem;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.info-value {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #6366f1;
-}
-
-/* Availability Section */
-.availability-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  flex: 1;
-  overflow: hidden;
-}
-
-.availability-section h3 {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--text);
-}
-
-/* Availability Table */
+/* Availability Table Styles */
 .availability-table-wrapper {
   overflow-x: auto;
-  flex: 1;
-  overflow-y: auto;
-  border-radius: 8px;
-  background: white;
+  border-radius: 12px;
+  border: 1px solid #eaecf0;
+  background: #ffffff;
 }
 
 .availability-table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 0.75rem;
-  direction: rtl;
-  text-align: right;
+  border-collapse: separate;
+  border-spacing: 4px; /* יוצר מרווח עדין בין הקוביות */
+  font-size: 0.8rem;
+  direction: ltr;
+  /* תכונה קריטית לרוחב זהה */
+  table-layout: fixed; 
+  min-width: 850px;
 }
 
 .availability-table thead {
-  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
-  border-bottom: 2px solid rgba(99, 102, 241, 0.3);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.time-column {
-  width: 80px;
-  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
-  text-align: center;
-  padding: 0.75rem 0.35rem;
-  font-weight: 700;
-  color: white;
-  border-right: 2px solid rgba(255, 255, 255, 0.2);
+  background: #f9fafb;
 }
 
 .availability-table th {
-  padding: 0.75rem 0.5rem;
-  font-weight: 700;
-  color: white;
-  border-right: 1px solid rgba(255, 255, 255, 0.2);
-  text-align: center;
-  direction: ltr;
+  padding: 1rem 0.5rem;
+  font-weight: 600;
+  color: #475467;
+  border-bottom: 1px solid #eaecf0;
 }
 
-.availability-table th:last-child {
-  border-right: none;
-}
-
-.day-column {
-  min-width: 110px;
+/* הגדרת רוחב עמודת הזמן */
+.time-column {
+  width: 90px;
   text-align: center;
 }
 
-.day-header-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.day-hebrew {
-  font-weight: 700;
-  font-size: 0.85rem;
-}
-
-.day-english {
-  font-size: 0.65rem;
-  opacity: 0.9;
-}
-
-.availability-table tbody tr {
-  border-bottom: 1px solid #e5e7eb;
-  transition: background-color 0.2s ease;
-}
-
-.availability-table tbody tr:hover {
-  background-color: #f9fafb;
-}
-
-.availability-table tbody tr.break-row {
-  background-color: #f3f4f6;
-}
-
-.availability-table tbody tr.break-row:hover {
-  background-color: #f3f4f6;
-}
-
-.availability-table td {
-  padding: 0.35rem;
-  border-right: 1px solid rgba(99, 102, 241, 0.1);
-  text-align: center;
-  direction: ltr;
-}
+/* כל שאר העמודות יתחלקו שווה בשווה בגלל ה-table-layout: fixed */
 
 .time-cell {
   font-weight: 600;
-  color: #6366f1;
-  background: linear-gradient(90deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.04) 100%);
-  border-right: 2px solid rgba(99, 102, 241, 0.2);
+  color: #667085;
+  background: #f9fafb;
   text-align: center;
-  width: 80px;
-  padding: 0.5rem 0.35rem;
-  white-space: nowrap;
-  font-size: 0.7rem;
+  border-radius: 8px;
 }
 
-.break-row .break-time {
-  background: linear-gradient(90deg, #f3f4f6 0%, #f3f4f6 100%);
-  color: #6b7280;
-  font-weight: 600;
-}
-
-.break-cell {
-  background: #f3f4f6 !important;
-  border-color: #d1d5db !important;
-  cursor: not-allowed !important;
-  color: #9ca3af;
-  font-size: 0.7rem;
-  font-weight: 500;
-  box-shadow: none !important;
-}
-
-.break-cell:hover {
-  background: #f3f4f6 !important;
-  border-color: #d1d5db !important;
-  transform: none !important;
-}
-
+/* עיצוב הקוביות (התאים) */
 .availability-cell {
-  padding: 0.35rem;
+  height: 44px;
   cursor: pointer;
-  transition: all 0.15s ease;
-  border-radius: 4px;
-  margin: 2px;
-  min-width: 110px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid;
+  border-radius: 10px; /* עיגול פינות משמעותי יותר */
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+  position: relative;
 }
 
+/* צבע פנוי - ירוק עדין */
 .availability-cell.available {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  border-color: #6ee7b7;
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+  background-color: #dbfde5;
+  border-color: #72f6a0;
+}
+
+/* צבע חסום - אדום/ורוד עדין */
+.availability-cell.unavailable {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
+/* אפקט המעבר מעל הקובייה */
+.availability-cell:hover:not(.break-cell) {
+  transform: scale(1.08);
+  z-index: 10;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-color: #6366f1; /* מסגרת בולטת יותר ב-hover */
 }
 
 .availability-cell.available:hover {
-  background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
-  border-color: #5eead4;
-  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.2);
-  transform: scale(1.05);
-}
-
-.availability-cell.unavailable {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  border-color: #fca5a5;
-  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
+  background-color: #adffca;
 }
 
 .availability-cell.unavailable:hover {
-  background: linear-gradient(135deg, #fecaca 0%, #f87171 100%);
-  border-color: #f87171;
-  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.2);
-  transform: scale(1.05);
+  background-color: #fee2e2;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-  .lecturers-container {
-    grid-template-columns: 280px 1fr;
-  }
+/* תאי הפסקה */
+.break-cell {
+  background-color: #f2f4f7 !important;
+  border-color: #d0d5dd !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.day-hebrew {
+  font-size: 0.9rem;
+  color: #101828;
+  margin-bottom: 2px;
+}
+
+.day-english {
+  font-size: 0.7rem;
+  color: #667085;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 @media (max-width: 768px) {
   .lecturers-container {
     grid-template-columns: 1fr;
-  }
-
-  .lecturers-sidebar {
-    height: auto;
-  }
-
-  .lecturer-info {
-    grid-template-columns: 1fr;
-  }
-
-  .availability-table {
-    font-size: 0.75rem;
-  }
-
-  .day-column,
-  .availability-cell {
-    min-width: 80px;
-  }
-
-  .time-column,
-  .time-cell {
-    width: 50px;
   }
 }

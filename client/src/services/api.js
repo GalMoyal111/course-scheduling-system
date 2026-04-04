@@ -381,3 +381,19 @@ export async function deleteUser(uid, token) {
     throw new Error("Failed to delete user");
   }
 }
+
+export async function generateTimetable() {
+  const res = await fetch(`${BASE_URL}/timetable/generate`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Generation failed: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}

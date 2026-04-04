@@ -1,5 +1,6 @@
 package com.coursescheduling.server.algorithm;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.coursescheduling.server.algorithm.model.AssignedValue;
 import com.coursescheduling.server.algorithm.solver.CSP;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.coursescheduling.server.algorithm.model.DomainValue;
+import com.coursescheduling.server.algorithm.model.ScheduledLessonDTO;
 import com.coursescheduling.server.algorithm.model.Variable;
 import com.coursescheduling.server.algorithm.preprocessing.DomainConstraintService;
 import com.coursescheduling.server.algorithm.preprocessing.VariableBuilder;
@@ -42,7 +44,7 @@ public class TimetableAlgorithmService {
     
     
 
-    public void run(Semester semester) {
+    public List<ScheduledLessonDTO> run(Semester semester) {
     	
     	
 
@@ -69,31 +71,29 @@ public class TimetableAlgorithmService {
         Map<Variable, AssignedValue> solution = csp.solve(variables);
         
         
-        
+        List<ScheduledLessonDTO> results = new ArrayList<>();
 
         if (solution != null) {
-            System.out.println("✅ Solution Found! Printing Timetable:");
-            System.out.println("--------------------------------------------------");
-            
             for (Map.Entry<Variable, AssignedValue> entry : solution.entrySet()) {
                 Variable var = entry.getKey();
                 AssignedValue val = entry.getValue();
-                Classroom room = val.getRoom();
                 
-                System.out.println(
-                    "Course: " + var.getCourseId() + 
-                    " | Type: " + var.getType() + 
-                    " | Lecturer: " + var.getLecturer() +
-                    " => Day: " + val.getDay() +
-                    ", Hour: " + val.getStartFrame() +
-                    ", Room: " + room.getBuilding() + "-" + room.getClassroomName()
+                ScheduledLessonDTO dto = new ScheduledLessonDTO(
+                    var.getCourseId(),
+                    var.getType().name(), 
+                    var.getLecturer(),
+                    val.getDay(),
+                    val.getStartFrame(),
+                    var.getDuration(),
+                    val.getRoom()
                 );
+                results.add(dto);
             }
-            System.out.println("--------------------------------------------------");
+            System.out.println("✅ Solution Found and returning to client!");
         } else {
-            System.out.println("❌ No solution could be found with the current constraints and rooms.");
+            System.out.println("❌ No solution could be found.");
         }
 
-        System.out.println("✅ Algorithm finished");
+        return results;
     }
 }

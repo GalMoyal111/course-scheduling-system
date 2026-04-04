@@ -1,0 +1,97 @@
+package com.coursescheduling.server.algorithm.model;
+import com.coursescheduling.server.model.Classroom;
+
+
+public class ScheduledLessonDTO {
+	
+	private String courseId;
+    private String type;
+    private String lecturer;
+    private int day;
+    private int startFrame;
+    private int duration;
+    private Classroom room;
+    
+    
+    public ScheduledLessonDTO(String courseId, String type, String lecturer, int day, int startFrame, int duration, Classroom room) {
+        this.courseId = courseId;
+        this.type = type;
+        this.lecturer = lecturer;
+        this.day = day;
+        this.startFrame = startFrame;
+        this.duration = duration;
+        this.room = room;
+    }
+
+
+	public String getCourseId() {
+		return courseId;
+	}
+
+
+	public void setCourseId(String courseId) {
+		this.courseId = courseId;
+	}
+
+
+	public String getType() {
+		return type;
+	}
+
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+
+	public String getLecturer() {
+		return lecturer;
+	}
+
+
+	public void setLecturer(String lecturer) {
+		this.lecturer = lecturer;
+	}
+
+
+	public int getDay() {
+		return day;
+	}
+
+
+	public void setDay(int day) {
+		this.day = day;
+	}
+
+
+	public int getStartFrame() {
+		return startFrame;
+	}
+
+
+	public void setStartFrame(int startFrame) {
+		this.startFrame = startFrame;
+	}
+
+
+	public int getDuration() {
+		return duration;
+	}
+
+
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
+
+
+	public Classroom getRoom() {
+		return room;
+	}
+
+
+	public void setRoom(Classroom room) {
+		this.room = room;
+	}
+
+
+}

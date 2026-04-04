@@ -238,20 +238,19 @@ function AvailabilityTable({ lecturer, onToggle }) {
 
   const times = [
     { range: "08:30-09:20", isBreak: false },
-    { range: "09:20-10:10", isBreak: false },
-    { range: "10:10-11:00", isBreak: false },
-    { range: "11:00-11:50", isBreak: false },
-    { range: "11:50-12:20", isBreak: true }, // Break
-    { range: "12:20-13:10", isBreak: false },
-    { range: "13:10-14:00", isBreak: false },
-    { range: "14:00-14:50", isBreak: false },
+    { range: "09:30-10:20", isBreak: false },
+    { range: "10:30-11:20", isBreak: false },
+    { range: "11:30-12:20", isBreak: false },
+    { range: "12:20-12:50", isBreak: true }, // Break
+    { range: "12:50-13:40", isBreak: false },
+    { range: "13:50-14:40", isBreak: false },
     { range: "14:50-15:40", isBreak: false },
-    { range: "15:40-16:30", isBreak: false },
-    { range: "16:30-17:20", isBreak: false },
-    { range: "17:20-18:10", isBreak: false },
-    { range: "18:10-19:00", isBreak: false },
-    { range: "19:00-19:50", isBreak: false },
+    { range: "15:50-16:40", isBreak: false },
+    { range: "16:50-17:40", isBreak: false },
+    { range: "17:50-18:40", isBreak: false },
+    { range: "18:50-19:40", isBreak: false },
     { range: "19:50-20:40", isBreak: false },
+
   ];
 
   return (
