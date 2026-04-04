@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
+import com.coursescheduling.server.model.Classroom;
+import com.coursescheduling.server.model.LessonType;
 
 @Service
 public class DomainConstraintService {
@@ -77,6 +79,34 @@ public class DomainConstraintService {
 
                 return start + duration - 1 > maxFrame;
             });
+        }
+    }
+    
+    
+    
+    public boolean isRoomTypeSuitable(Variable var, Classroom room) {
+        LessonType lessonType = var.getType();
+        String roomType = room.getType(); // מגיע מה-DB (למשל "NORMAL", "PHYSICS_LAB")
+
+        if (roomType == null) return false;
+
+        switch (lessonType) {
+            case PHYSICS_LAB:
+                return roomType.equals("PHYSICS_LAB");
+            
+            case NETWORKING_LAB:
+                return roomType.equals("NETWORKING_LAB");
+            
+            case LAB:
+                return roomType.equals("LAB");
+            
+            case LECTURE:
+            case TUTORIAL:
+            case PBL:
+                return roomType.equals("NORMAL");
+            
+            default:
+                return roomType.equals("NORMAL");
         }
     }
     

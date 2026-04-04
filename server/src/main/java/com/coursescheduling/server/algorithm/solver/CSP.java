@@ -6,6 +6,7 @@ import java.util.Set;
 import com.coursescheduling.server.algorithm.model.AssignedValue;
 import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
+import com.coursescheduling.server.algorithm.preprocessing.DomainConstraintService;
 import com.coursescheduling.server.model.Classroom;
 import java.util.HashSet;
 import java.util.ArrayList;
@@ -16,9 +17,11 @@ import java.util.List;
 public class CSP {
 
 	private RoomManager roomManager;
+	private final DomainConstraintService constraintService;
 	
-	public CSP(RoomManager roomManager) {
-        this.roomManager = roomManager;
+	public CSP(RoomManager roomManager, DomainConstraintService constraintService) {        
+		this.roomManager = roomManager;
+        this.constraintService = constraintService;
     }
 	
 	
@@ -120,6 +123,8 @@ public class CSP {
         }
 
         Set<Classroom> availableRooms = new HashSet<>(roomManager.getAvailableRooms(value.getDay(), start1));
+        
+        availableRooms.removeIf(room -> !constraintService.isRoomTypeSuitable(var, room));
         
         for (int t = 1; t < var.getDuration(); t++) {
             Set<Classroom> nextFrameRooms = roomManager.getAvailableRooms(value.getDay(), start1 + t);
