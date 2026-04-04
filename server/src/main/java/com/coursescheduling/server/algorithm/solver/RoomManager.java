@@ -38,4 +38,25 @@ public class RoomManager {
     public Set<Classroom> getAvailableRooms(int day, int frame) {
         return roomAvailability.get(buildKey(day, frame));
     }
+    
+    
+    public boolean bookRoom(int day, int frame, Classroom classroom) {
+        Set<Classroom> available = roomAvailability.get(buildKey(day, frame));
+        if (available != null && available.contains(classroom)) {
+            available.remove(classroom);
+            return true; 
+        }
+        return false; 
+    }
+    
+    
+    public void releaseRoom(int day, int frame, Classroom classroom) {
+        Set<Classroom> available = roomAvailability.get(buildKey(day, frame));
+        if (available != null) {
+            available.add(classroom);
+        }
+    }
+    
+    
+    
 }
