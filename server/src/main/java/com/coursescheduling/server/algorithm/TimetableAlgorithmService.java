@@ -1,6 +1,8 @@
 package com.coursescheduling.server.algorithm;
 
 import java.util.List;
+import com.coursescheduling.server.algorithm.model.AssignedValue;
+import com.coursescheduling.server.algorithm.solver.CSP;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,7 @@ import com.coursescheduling.server.algorithm.preprocessing.VariableBuilder;
 import com.coursescheduling.server.algorithm.solver.RoomManager;
 import com.coursescheduling.server.model.Classroom;
 import com.coursescheduling.server.model.Semester;
+import java.util.Map;
 
 @Service
 public class TimetableAlgorithmService {
@@ -57,13 +60,38 @@ public class TimetableAlgorithmService {
         constraintService.applyLecturerConstraints(variables);
         
         constraintService.applyDurationConstraints(variables);
+        
+        
+        // CSP run
+        
+        System.out.println("⏳ Running CSP Solver...");
+        CSP csp = new CSP(roomManager);
+        Map<Variable, AssignedValue> solution = csp.solve(variables);
+        
+        
+        
 
-        for (Variable v : variables) {
-            System.out.println(
-                v.getCourseId() +
-                " | " + v.getType() +
-                " | domain size = " + v.getDomain().getValues().size()
-            );
+        if (solution != null) {
+            System.out.println("✅ Solution Found! Printing Timetable:");
+            System.out.println("--------------------------------------------------");
+            
+            for (Map.Entry<Variable, AssignedValue> entry : solution.entrySet()) {
+                Variable var = entry.getKey();
+                AssignedValue val = entry.getValue();
+                Classroom room = val.getRoom();
+                
+                System.out.println(
+                    "Course: " + var.getCourseId() + 
+                    " | Type: " + var.getType() + 
+                    " | Lecturer: " + var.getLecturer() +
+                    " => Day: " + val.getDay() +
+                    ", Hour: " + val.getStartFrame() +
+                    ", Room: " + room.getBuilding() + "-" + room.getClassroomName()
+                );
+            }
+            System.out.println("--------------------------------------------------");
+        } else {
+            System.out.println("❌ No solution could be found with the current constraints and rooms.");
         }
 
         System.out.println("✅ Algorithm finished");

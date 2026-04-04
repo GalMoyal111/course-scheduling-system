@@ -7,7 +7,7 @@ import com.coursescheduling.server.algorithm.model.AssignedValue;
 import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
 import com.coursescheduling.server.model.Classroom;
-
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,10 +47,11 @@ public class CSP {
             if (bookedRoom != null) {
             	
             	AssignedValue assignedValue = new AssignedValue(value.getDay(), value.getStartFrame(), bookedRoom);
-            	
             	assignment.put(var, assignedValue);
                 
-                roomManager.bookRoom(value.getDay(), value.getStartFrame(), bookedRoom);
+            	for (int t = 0; t < var.getDuration(); t++) 
+                    roomManager.bookRoom(value.getDay(), value.getStartFrame() + t, bookedRoom);
+                
                 
                 Map<Variable, DomainValue> removedValues = forwardCheck(var, value, assignment, variables);
                 
@@ -63,7 +64,11 @@ public class CSP {
                     }
                 }
                 undoForwardCheck(removedValues, variables);
-                roomManager.releaseRoom(value.getDay(), value.getStartFrame(), bookedRoom);
+                
+                for (int t = 0; t < var.getDuration(); t++) 
+                    roomManager.releaseRoom(value.getDay(), value.getStartFrame() + t, bookedRoom);
+                
+                
                 assignment.remove(var); // Backtrack
                 
             }
@@ -94,22 +99,38 @@ public class CSP {
     
     // Placeholder for consistency check: In a real implementation, this would check the constraints of the problem
     private Classroom isConsistent(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment) {
+    	
+    	int start1 = value.getStartFrame();
+        int end1 = start1 + var.getDuration() - 1;
+        
         
         for (Map.Entry<Variable, AssignedValue> entry : assignment.entrySet()) {
             Variable assignedVar = entry.getKey();
             AssignedValue assignedTime = entry.getValue();
 
-            if (assignedVar.getLecturer().equals(var.getLecturer()) &&
-                assignedTime.getDay() == value.getDay() &&
-                assignedTime.getStartFrame() == value.getStartFrame()) {
+            if (assignedVar.getLecturer().equals(var.getLecturer()) && assignedTime.getDay() == value.getDay()) {
                 
-                return null; 
+                int start2 = assignedTime.getStartFrame();
+                int end2 = start2 + assignedVar.getDuration() - 1; 
+                
+                if (Math.max(start1, start2) <= Math.min(end1, end2)) {
+                    return null; 
+                }
             }
         }
 
-        Set<Classroom> availableRooms = roomManager.getAvailableRooms(value.getDay(), value.getStartFrame());
-        if (availableRooms != null && !availableRooms.isEmpty()) {
-            
+        Set<Classroom> availableRooms = new HashSet<>(roomManager.getAvailableRooms(value.getDay(), start1));
+        
+        for (int t = 1; t < var.getDuration(); t++) {
+            Set<Classroom> nextFrameRooms = roomManager.getAvailableRooms(value.getDay(), start1 + t);
+            if (nextFrameRooms != null) {
+                availableRooms.retainAll(nextFrameRooms); 
+            } else {
+                availableRooms.clear();
+            }
+        }
+        
+        if (!availableRooms.isEmpty()) {
             return availableRooms.iterator().next(); 
         }
 
