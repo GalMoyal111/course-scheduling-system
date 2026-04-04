@@ -101,11 +101,18 @@ function UploadPage() {
       const clusterDiff = (a.cluster || 0) - (b.cluster || 0);
       if (clusterDiff !== 0) return clusterDiff;
 
+      const idA = String(a.courseId || "");
+      const idB = String(b.courseId || "");
+      const idCompare = idA.localeCompare(idB, undefined, { numeric: true });
+      if (idCompare !== 0) return idCompare;
+
       // type (priority)
       const typePriority = {
         LECTURE: 1,
         TUTORIAL: 2,
         LAB: 3,
+        PHYSICS_LAB: 3,
+        NETWORKING_LAB: 3,
         PBL: 4,
         PROJECT: 5,
       };
