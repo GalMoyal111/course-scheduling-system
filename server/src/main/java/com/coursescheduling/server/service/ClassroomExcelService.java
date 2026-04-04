@@ -1,6 +1,8 @@
 package com.coursescheduling.server.service;
 
 import com.coursescheduling.server.model.Classroom;
+import com.coursescheduling.server.model.RoomType;
+
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.google.cloud.firestore.Firestore;
@@ -53,12 +55,11 @@ public class ClassroomExcelService {
 	        String classroomName = row.getCell(1).getStringCellValue();
 	        int capacity = (int) row.getCell(2).getNumericCellValue();
 	        Cell typeCell = row.getCell(3);
-
-	        String type = "normal";
-	        if (typeCell != null) {
-	            type = typeCell.getStringCellValue();
-	        }
-
+	        
+	        String typeStr = (typeCell != null) ? typeCell.getStringCellValue() : "NORMAL";
+	        
+	        RoomType type = parseRoomType(typeStr);
+	        
 	        Classroom classroom = new Classroom(building, classroomName, capacity, type);
 
 	        classrooms.add(classroom);
@@ -116,7 +117,20 @@ public class ClassroomExcelService {
 	    return out.toByteArray();
 	}
 
-	
+	private RoomType parseRoomType(String text) {
+		
+	    if (text == null) return RoomType.NORMAL;
+	    String normalized = text.trim().toUpperCase();
+	    
+	    try {
+	        return RoomType.valueOf(normalized);
+	    } catch (IllegalArgumentException e) {
+	        
+	        if (normalized.contains("PBL")) return RoomType.PBL;
+	        
+	        return RoomType.NORMAL; 
+	    }
+	}
 	
 	
 	

@@ -2,6 +2,7 @@ package com.coursescheduling.server.service;
 
 import com.coursescheduling.server.model.Classroom;
 import com.coursescheduling.server.model.ClassroomDeleteRequest;
+import com.coursescheduling.server.model.RoomType;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import com.google.api.core.ApiFuture;
@@ -33,7 +34,7 @@ public class ClassroomService {
 
             Map<String, Object> data = new HashMap<>();
             data.put("capacity", classroom.getCapacity());
-            data.put("type", classroom.getType());
+            data.put("type", classroom.getType().name());
 
             DocumentReference docRef =
                     db.collection("classrooms")
@@ -106,13 +107,32 @@ public class ClassroomService {
                 Map<String, Object> classroomData = (Map<String, Object>) data.get(classroomName);
 
                 int capacity = ((Number) classroomData.get("capacity")).intValue();
-                String type = (String) classroomData.get("type");
-
+                String typeStr = (String) classroomData.get("type");
+                
                 Classroom classroom = new Classroom();
 
                 classroom.setBuilding(building);
                 classroom.setClassroomName(classroomName);
                 classroom.setCapacity(capacity);
+
+
+                RoomType type;
+
+                try {
+                    if (typeStr != null && !typeStr.isEmpty()) {
+                        String normalized = typeStr.trim().toUpperCase().replace(" ", "_");
+                        type = RoomType.valueOf(normalized);
+                    } else {
+                        type = RoomType.NORMAL;
+                    }
+                } catch (IllegalArgumentException e) {
+                    String t = typeStr.toLowerCase();
+                    if (t.contains("physics")) type = RoomType.PHYSICS_LAB;
+                    else if (t.contains("network")) type = RoomType.NETWORKING_LAB;
+                    else if (t.contains("auditorium")) type = RoomType.AUDITORIUM;
+                    else if (t.contains("lab")) type = RoomType.LAB;
+                    else type = RoomType.NORMAL;
+                }
                 classroom.setType(type);
 
                 classrooms.add(classroom);

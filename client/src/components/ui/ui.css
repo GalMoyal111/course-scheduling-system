@@ -199,6 +199,7 @@
 .type-lab{background:rgba(59,130,246,0.08);color:#1e3a8a}
 .type-network{background:rgba(168,85,247,0.08);color:#5b21b6}
 .type-physics{background:rgba(250,204,21,0.08);color:#92400e}
+.type-auditorium{background:rgba(71, 13, 148, 0.08);color:#43074f}
 
 /* Lesson-specific badge types */
 .type-lecture{background:rgba(99,102,241,0.08);color:#3730a3}

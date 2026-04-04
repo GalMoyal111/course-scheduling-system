@@ -80,6 +80,7 @@ export default function AddRoomModal({ isOpen, onClose, onSave, initialClassroom
                 <option value="LAB">General Laboratory</option>
                 <option value="NETWORKING_LAB">Networking Laboratory</option>
                 <option value="PHYSICS_LAB">Physics Laboratory</option>
+                <option value="AUDITORIUM">Auditorium</option>
               </select>
             </div>
 

@@ -10,6 +10,7 @@ import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
 import com.coursescheduling.server.model.Classroom;
 import com.coursescheduling.server.model.LessonType;
+import com.coursescheduling.server.model.RoomType;
 
 @Service
 public class DomainConstraintService {
@@ -86,27 +87,22 @@ public class DomainConstraintService {
     
     public boolean isRoomTypeSuitable(Variable var, Classroom room) {
         LessonType lessonType = var.getType();
-        String roomType = room.getType(); 
+        RoomType roomType = room.getType(); 
 
         if (roomType == null) return false;
 
         switch (lessonType) {
-            case PHYSICS_LAB:
-                return roomType.equals("physics lab");
-            
-            case NETWORKING_LAB:
-                return roomType.equals("networks lab");
-            
-            case LAB:
-                return roomType.equals("lab");
-            
-            case LECTURE:
-            case TUTORIAL:
-            case PBL:
-                return roomType.equals("normal");
-            
-            default:
-                return roomType.equals("normal");
+        case PHYSICS_LAB:
+            return roomType == RoomType.PHYSICS_LAB;
+        case NETWORKING_LAB:
+            return roomType == RoomType.NETWORKING_LAB;
+        case LAB:
+            return roomType == RoomType.LAB;
+        case LECTURE:
+        case TUTORIAL:
+            return roomType == RoomType.NORMAL;
+        default:
+            return roomType == RoomType.NORMAL;
         }
     }
     

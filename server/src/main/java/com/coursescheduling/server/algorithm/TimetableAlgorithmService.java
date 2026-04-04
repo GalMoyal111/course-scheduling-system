@@ -15,6 +15,7 @@ import com.coursescheduling.server.algorithm.preprocessing.DomainConstraintServi
 import com.coursescheduling.server.algorithm.preprocessing.VariableBuilder;
 import com.coursescheduling.server.algorithm.solver.RoomManager;
 import com.coursescheduling.server.model.Classroom;
+import com.coursescheduling.server.model.RoomType;
 import com.coursescheduling.server.model.Semester;
 import java.util.Map;
 
@@ -38,9 +39,9 @@ public class TimetableAlgorithmService {
     
     private List<Classroom> getClassrooms() {
         return List.of(
-            new Classroom("A", "101", 60, "normal"),
-            new Classroom("A", "102", 40, "normal"),
-            new Classroom("B", "201", 25, "lab")
+            new Classroom("A", "101", 60, RoomType.NORMAL),
+            new Classroom("A", "102", 40, RoomType.NORMAL),
+            new Classroom("B", "201", 25, RoomType.LAB)
         );
     }
     

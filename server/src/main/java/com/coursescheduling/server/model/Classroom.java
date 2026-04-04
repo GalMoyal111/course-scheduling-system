@@ -5,11 +5,11 @@ public class Classroom {
 	private String building;
     private String classroomName;
     private int capacity;
-    private String type;
+    private RoomType type;
 
     public Classroom() {}
 
-    public Classroom(String building, String classroomName, int capacity, String type) {
+    public Classroom(String building, String classroomName, int capacity, RoomType type) {
         this.building = building;
         this.classroomName = classroomName;
         this.capacity = capacity;
@@ -40,11 +40,11 @@ public class Classroom {
 		this.capacity = capacity;
 	}
 
-	public String getType() {
+	public RoomType getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(RoomType type) {
 		this.type = type;
 	}
 
