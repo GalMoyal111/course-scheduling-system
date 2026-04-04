@@ -50,7 +50,11 @@ export default function AddLessonModal({
       setCluster(clusterObj ? clusterObj.clusterName : "");
       setCourseName(initialLesson.courseName || "");
       setLecturer(initialLesson.lecturer || "");
-      setType(initialLesson.type?.toLowerCase() || "lecture");
+      const rawType = initialLesson.type;
+      if (rawType === "PHYSICS_LAB") setType("physics_laboratory");
+      else if (rawType === "NETWORKING_LAB") setType("networking_laboratory");
+      else if (rawType === "LAB") setType("laboratory");
+      else setType(rawType?.toLowerCase() || "lecture");
       setSemester(initialLesson.semester || "");
     }
 
@@ -64,6 +68,7 @@ export default function AddLessonModal({
   }, [isOpen, isEdit, initialLesson, groupedCourses]);
 
   const allCourses = groupedCourses.flatMap((c) => c.courses);
+  
 
   const clusterOptions = groupedCourses.map((c) => c.clusterName).filter(Boolean).sort((a, b) => {
     const getSemesterNumber = (str) => {
@@ -96,6 +101,16 @@ export default function AddLessonModal({
     allCourses.find((c) => c.courseId === initialLesson?.courseId) ||
     allCourses.find((c) => c.courseName === courseName);
 
+  useEffect(() => {
+    if (selectedCourse && !isEdit) {
+      if (selectedCourse.courseId === "61181") {
+        setType("physics_laboratory");
+      } else if (selectedCourse.courseId === "61765") {
+        setType("networking_laboratory");
+      }
+    }
+  }, [selectedCourse, isEdit]);
+
   const computedDuration = (() => {
     if (!selectedCourse) return "";
     let duration;
@@ -107,6 +122,8 @@ export default function AddLessonModal({
         duration = selectedCourse.tutorialHours || 0;
         break;
       case "laboratory":
+      case "physics_laboratory":
+      case "networking_laboratory":
         duration = selectedCourse.labHours || 0;
         break;
       case "pbl":
@@ -122,21 +139,20 @@ export default function AddLessonModal({
   return duration;
   })();
 
+
+
   if (!isOpen) return null;
 
   const mapType = (type) => {
     switch (type) {
-      case "lecture":
-        return "LECTURE";
-      case "practice":
-        return "TUTORIAL";
-      case "laboratory":
-        return "LAB";
-      case "pbl":
-        return "PBL";
-      default:
-        return "LECTURE";
-    }
+    case "lecture": return "LECTURE";
+    case "practice": return "TUTORIAL";
+    case "laboratory": return "LAB";
+    case "physics_laboratory": return "PHYSICS_LAB"; 
+    case "networking_laboratory": return "NETWORKING_LAB";  
+    case "pbl": return "PBL";
+    default: return "LECTURE";
+  }
   };
 
   const handleSubmit = (e) => {
@@ -242,6 +258,8 @@ export default function AddLessonModal({
                   <option value="lecture">Lecture</option>
                   <option value="practice">Practice</option>
                   <option value="laboratory">Laboratory</option>
+                  <option value="physics_laboratory">Physics Laboratory</option>
+                  <option value="networking_laboratory">Networking Laboratory</option>
                   <option value="pbl">PBL</option>
                 </select>
               </div>

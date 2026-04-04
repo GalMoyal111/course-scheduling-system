@@ -8,6 +8,8 @@ export function typeBadge(type) {
 
   if (!t) return <span className="type-badge type-normal">Unknown</span>;
 
+
+
   // Normalize to four canonical English types: Lecture, Practice, Laboratory, PBL
   // Map common synonyms/casing variants to these canonical labels.
   if (t === "lecture" || t === "lec" || t === "lect") {
@@ -22,9 +24,19 @@ export function typeBadge(type) {
     return <span className="type-badge type-lab">Laboratory</span>;
   }
 
+    if (t === "physics_lab" || t === "physics_laboratory") {
+    return <span className="type-badge type-physics">Physics Lab</span>;
+  }
+
+  if (t === "networking_lab" || t === "networking_laboratory") {
+    return <span className="type-badge type-network">Networking Lab</span>;
+  }
+
+
   if (t === "pbl" || t === "project" || t === "project-based" || t === "project-based learning" || t === "project-based-learning") {
     return <span className="type-badge type-pbl">PBL</span>;
   }
+
 
   // Additional domain-specific fallbacks
   if (t.includes("project")) return <span className="type-badge type-pbl">PBL</span>;

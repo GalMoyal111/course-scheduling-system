@@ -76,10 +76,10 @@ export default function AddRoomModal({ isOpen, onClose, onSave, initialClassroom
             <div className="form-field">
               <label>Type</label>
               <select className="ui-select" value={type} onChange={(e) => setType(e.target.value)}>
-                <option>Normal</option>
-                <option>Laboratory</option>
-                <option>Networking Laboratory</option>
-                <option>Physics Laboratory</option>
+                <option value="NORMAL">Normal Classroom</option>
+                <option value="LAB">General Laboratory</option>
+                <option value="NETWORKING_LAB">Networking Laboratory</option>
+                <option value="PHYSICS_LAB">Physics Laboratory</option>
               </select>
             </div>
 

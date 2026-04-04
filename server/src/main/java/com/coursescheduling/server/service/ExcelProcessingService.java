@@ -131,16 +131,26 @@ public class ExcelProcessingService {
 	    String courseName = row.getCell(1).toString();
 	    String typeText = row.getCell(2).toString();
 	    LessonType type = parseType(typeText);
+	     
+	    if (type == LessonType.LAB) {
+	        if (courseId.equals("61181")) {
+	            type = LessonType.PHYSICS_LAB;
+	        } else if (courseId.equals("61765")) {
+	            type = LessonType.NETWORKING_LAB;
+	        }
+	    }
 	    
 	    if (type == null) {
 	        System.out.println("Skipping row: unknown type " + typeText);
 	        return;
 	    }
 	    
-	    if (type != LessonType.LECTURE && type != LessonType.TUTORIAL && type != LessonType.LAB && type != LessonType.PBL && type != LessonType.PROJECT) {
+	    if (type != LessonType.LECTURE && type != LessonType.TUTORIAL && type != LessonType.LAB && type != LessonType.PHYSICS_LAB && type != LessonType.NETWORKING_LAB && type != LessonType.PBL && type != LessonType.PROJECT) {
 	        System.out.println("Skipping row: unsupported type " + typeText);
 	        return;
 	    }
+	    
+	    
 	    
 	    String lecturer = row.getCell(3).toString();
 

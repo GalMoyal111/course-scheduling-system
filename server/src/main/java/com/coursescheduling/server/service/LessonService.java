@@ -127,6 +127,15 @@ public class LessonService {
 	    if (course == null)
 	        throw new RuntimeException("Course not found");
 
+	    if (lesson.getType() == LessonType.LAB) {
+	        if (lesson.getCourseId().equals("61181")) {
+	            lesson.setType(LessonType.PHYSICS_LAB);
+	        } else if (lesson.getCourseId().equals("61765")) {
+	            lesson.setType(LessonType.NETWORKING_LAB);
+	        }
+	    }
+	    
+	    
 	    lesson.setCourseName(course.getCourseName());
 	    lesson.setCluster(course.getCluster());
 	    lesson.setCredits(course.getCredits());
@@ -360,8 +369,12 @@ public class LessonService {
 	            return "הרצאה";
 	        case TUTORIAL:
 	            return "תרגול";
-	        case LAB:
+	        case LAB:    
 	            return "מעבדה";
+	        case PHYSICS_LAB:  
+	            return "מעבדת פיזיקה";
+	        case NETWORKING_LAB: 
+	            return "מעבדת רשתות";
 	        case PBL:
 	            return "PBL";
 	        case PROJECT:
