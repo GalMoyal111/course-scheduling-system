@@ -86,27 +86,27 @@ public class DomainConstraintService {
     
     public boolean isRoomTypeSuitable(Variable var, Classroom room) {
         LessonType lessonType = var.getType();
-        String roomType = room.getType(); // מגיע מה-DB (למשל "NORMAL", "PHYSICS_LAB")
+        String roomType = room.getType(); 
 
         if (roomType == null) return false;
 
         switch (lessonType) {
             case PHYSICS_LAB:
-                return roomType.equals("PHYSICS_LAB");
+                return roomType.equals("physics lab");
             
             case NETWORKING_LAB:
-                return roomType.equals("NETWORKING_LAB");
+                return roomType.equals("networks lab");
             
             case LAB:
-                return roomType.equals("LAB");
+                return roomType.equals("lab");
             
             case LECTURE:
             case TUTORIAL:
             case PBL:
-                return roomType.equals("NORMAL");
+                return roomType.equals("normal");
             
             default:
-                return roomType.equals("NORMAL");
+                return roomType.equals("normal");
         }
     }
     

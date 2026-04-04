@@ -38,9 +38,9 @@ public class TimetableAlgorithmService {
     
     private List<Classroom> getClassrooms() {
         return List.of(
-            new Classroom("A", "101", 60, "LECTURE"),
-            new Classroom("A", "102", 40, "TUTORIAL"),
-            new Classroom("B", "201", 25, "LAB")
+            new Classroom("A", "101", 60, "normal"),
+            new Classroom("A", "102", 40, "normal"),
+            new Classroom("B", "201", 25, "lab")
         );
     }
     
