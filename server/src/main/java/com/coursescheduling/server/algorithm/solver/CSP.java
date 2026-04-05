@@ -3,6 +3,10 @@ package com.coursescheduling.server.algorithm.solver;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.coursescheduling.server.algorithm.constraints.RoomConstraint;
 import com.coursescheduling.server.algorithm.model.AssignedValue;
 import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
@@ -13,28 +17,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-
+@Component
 public class CSP {
+	
+	@Autowired
+    private RoomConstraint roomConstraint;
+	
+	@Autowired
+    private DomainConstraintService constraintService;
+	
+	public CSP() {}
 
-	private RoomManager roomManager;
-	private final DomainConstraintService constraintService;
-	
-	public CSP(RoomManager roomManager, DomainConstraintService constraintService) {        
-		this.roomManager = roomManager;
-        this.constraintService = constraintService;
-    }
-	
-	
-	
     // Main method to solve the CSP
-    public Map<Variable, AssignedValue> solve(List<Variable> variables) {
-    	Map<Variable, AssignedValue> assignment = new HashMap<>();
-        return backtrack(assignment, variables);
+	public Map<Variable, AssignedValue> solve(List<Variable> variables, RoomManager roomManager) {
+        Map<Variable, AssignedValue> assignment = new HashMap<>();
+        return backtrack(assignment, variables, roomManager);
     }
+	
 
 
     // Backtracking search algorithm
-    private Map<Variable, AssignedValue> backtrack(Map<Variable, AssignedValue> assignment, List<Variable> variables) {
+    private Map<Variable, AssignedValue> backtrack(Map<Variable, AssignedValue> assignment, List<Variable> variables, RoomManager roomManager) {
         
     	if (assignment.size() == variables.size()) {
             return new HashMap<>(assignment); // Return a copy of the solution
@@ -45,7 +48,7 @@ public class CSP {
         
         for (DomainValue value : orderedValues) {
         	
-        	Classroom bookedRoom = isConsistent(var, value, assignment);
+        	Classroom bookedRoom = isConsistent(var, value, assignment , roomManager);
         	
             if (bookedRoom != null) {
             	
@@ -56,11 +59,11 @@ public class CSP {
                     roomManager.bookRoom(value.getDay(), value.getStartFrame() + t, bookedRoom);
                 
                 
-                Map<Variable, DomainValue> removedValues = forwardCheck(var, value, assignment, variables);
+                Map<Variable, DomainValue> removedValues = forwardCheck(var, value, assignment, variables, roomManager);
                 
                 if(removedValues != null) {
                 	
-                    Map<Variable, AssignedValue> result = backtrack(assignment, variables);
+                    Map<Variable, AssignedValue> result = backtrack(assignment, variables , roomManager);
                     
                     if (result != null) {
                         return result; // Solution found
@@ -101,7 +104,7 @@ public class CSP {
     
     
     // Placeholder for consistency check: In a real implementation, this would check the constraints of the problem
-    private Classroom isConsistent(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment) {
+    private Classroom isConsistent(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment , RoomManager roomManager) {
     	
     	int start1 = value.getStartFrame();
         int end1 = start1 + var.getDuration() - 1;
@@ -124,7 +127,7 @@ public class CSP {
 
         Set<Classroom> availableRooms = new HashSet<>(roomManager.getAvailableRooms(value.getDay(), start1));
         
-        availableRooms.removeIf(room -> !constraintService.isRoomTypeSuitable(var, room));
+        availableRooms.removeIf(room -> !roomConstraint.isRoomSuitable(var, room));
         
         for (int t = 1; t < var.getDuration(); t++) {
             Set<Classroom> nextFrameRooms = roomManager.getAvailableRooms(value.getDay(), start1 + t);
@@ -146,7 +149,7 @@ public class CSP {
     
     
     // Placeholder for forward checking: In a real implementation, this would prune the domains of unassigned variables based on the current assignment
-    private Map<Variable, DomainValue> forwardCheck(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment, List<Variable> variables) {
+    private Map<Variable, DomainValue> forwardCheck(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment, List<Variable> variables ,RoomManager roomManager ) {
         // Implement forward checking to prune the domains of unassigned variables
         return new HashMap<>(); // Placeholder: Return an empty map of removed values
     }

@@ -28,6 +28,9 @@ public class TimetableAlgorithmService {
     @Autowired
     private DomainConstraintService constraintService;
     
+    @Autowired
+    private CSP csp;
+    
 
     
     private List<DomainValue> getGlobalBlockedSlots() {
@@ -70,8 +73,7 @@ public class TimetableAlgorithmService {
         // CSP run
         
         System.out.println("⏳ Running CSP Solver...");
-        CSP csp = new CSP(roomManager, constraintService);
-        Map<Variable, AssignedValue> solution = csp.solve(variables);
+        Map<Variable, AssignedValue> solution = csp.solve(variables, roomManager);
         
         
         List<ScheduledLessonDTO> results = new ArrayList<>();
