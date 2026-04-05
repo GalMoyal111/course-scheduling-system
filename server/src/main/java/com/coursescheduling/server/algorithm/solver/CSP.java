@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.coursescheduling.server.algorithm.constraints.LecturerConstraint;
 import com.coursescheduling.server.algorithm.constraints.RoomConstraint;
 import com.coursescheduling.server.algorithm.model.AssignedValue;
 import com.coursescheduling.server.algorithm.model.DomainValue;
@@ -25,6 +26,10 @@ public class CSP {
 	
 	@Autowired
     private DomainConstraintService constraintService;
+	
+	@Autowired
+    private LecturerConstraint lecturerConstraint;
+	
 	
 	public CSP() {}
 
@@ -124,6 +129,14 @@ public class CSP {
                 }
             }
         }
+        
+        
+        if (lecturerConstraint.isConsecutiveLimitExceeded(var, value, assignment)) {
+            System.out.println("⚠️ Lecturer " + var.getLecturer() + " exceeded max consecutive hours. Skipping slot.");
+            return null;
+        }
+        
+        
 
         Set<Classroom> availableRooms = new HashSet<>(roomManager.getAvailableRooms(value.getDay(), start1));
         
