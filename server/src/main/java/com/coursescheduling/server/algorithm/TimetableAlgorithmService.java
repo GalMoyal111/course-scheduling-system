@@ -19,6 +19,13 @@ import com.coursescheduling.server.model.RoomType;
 import com.coursescheduling.server.model.Semester;
 import java.util.Map;
 
+
+/*
+    * This service orchestrates the entire timetable generation process. It:
+    * 1. Builds variables based on the semester data.
+    * 2. Applies global and specific constraints to the variables.
+    * 3. Invokes the CSP solver to find a valid timetable
+*/
 @Service
 public class TimetableAlgorithmService {
 
@@ -40,6 +47,8 @@ public class TimetableAlgorithmService {
 	    );
 	}
     
+
+    // temp - TODO: replace with DB call
     private List<Classroom> getClassrooms() {
         return List.of(
             new Classroom("A", "101", 60, RoomType.NORMAL),
@@ -49,35 +58,42 @@ public class TimetableAlgorithmService {
     }
     
     
-
+    // Main method to run the algorithm
     public List<ScheduledLessonDTO> run(Semester semester) {
     	
     	
 
         System.out.println("🚀 Starting algorithm...");
 
+
+        // Step 1: Build variables from semester data
         List<Variable> variables = variableBuilder.createVariables(semester);
         
+
+        // Step 2: Apply constraints to variables
         List<Classroom> rooms = getClassrooms();
         RoomManager roomManager = new RoomManager(rooms);
         
-        
+        // Global constraints (e.g., blocked time slots)
         List<DomainValue> globalSlots = getGlobalBlockedSlots();
         constraintService.applyGlobalConstraints(variables, globalSlots);     
 
+        
         constraintService.applyLecturerConstraints(variables);
         
         constraintService.applyDurationConstraints(variables);
         
         
-        // CSP run
-        
+        // Additional constraints can be applied here (e.g., course-specific, room-specific)
+
+        // Step 3: Run the CSP solver
         System.out.println("⏳ Running CSP Solver...");
         Map<Variable, AssignedValue> solution = csp.solve(variables, roomManager);
         
-        
+        // Step 4: Convert solution to DTOs for client response
         List<ScheduledLessonDTO> results = new ArrayList<>();
 
+        // If a solution is found, convert it to DTOs. Otherwise, return an empty list.
         if (solution != null) {
             for (Map.Entry<Variable, AssignedValue> entry : solution.entrySet()) {
                 Variable var = entry.getKey();

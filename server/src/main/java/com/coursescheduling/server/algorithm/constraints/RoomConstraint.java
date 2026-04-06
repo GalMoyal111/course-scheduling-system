@@ -14,7 +14,7 @@ public class RoomConstraint {
         return isTypeMatch(var.getType(), room.getType()) &&  isCapacityEnough(var.getType(), room.getCapacity());
     }
 	
-	
+	// returns true if the room type matches the lesson type requirements
 	private boolean isTypeMatch(LessonType lessonType, RoomType roomType) {
         if (roomType == null) return false;
 
@@ -32,11 +32,13 @@ public class RoomConstraint {
         }
     }
 	
-	
+	// returns true if the room capacity is sufficient for the lesson type
 	private boolean isCapacityEnough(LessonType type, int roomCapacity) {
         return roomCapacity >= getRequiredCapacity(type);
     }
 
+
+    // returns the required capacity for a given lesson type
     private int getRequiredCapacity(LessonType type) {
         switch (type) {
             case LECTURE:

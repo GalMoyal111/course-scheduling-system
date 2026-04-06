@@ -15,6 +15,7 @@ import com.coursescheduling.server.model.RoomType;
 @Service
 public class DomainConstraintService {
 
+    // This method applies lecturer-specific constraints to the variables' domains.
     public void applyLecturerConstraints(List<Variable> variables) {
         Map<String, List<DomainValue>> constraints = getLecturerConstraints();
 
@@ -27,6 +28,7 @@ public class DomainConstraintService {
 
             List<DomainValue> values = v.getDomain().getValues();
 
+            // Remove any domain values that match the lecturer's unavailable slots
             values.removeIf(dv ->
                 unavailable.stream().anyMatch(slot ->
                     slot.getDay() == dv.getDay() &&
@@ -37,10 +39,11 @@ public class DomainConstraintService {
     }
 
     
-    
+    // This method defines constraints for specific lecturers
     private Map<String, List<DomainValue>> getLecturerConstraints() {
         Map<String, List<DomainValue>> map = new HashMap<>();
 
+        // Example constraints for lecturers (these should be based on real data)
         map.put("משה כהן", List.of(
                 new DomainValue(1, 3),
                 new DomainValue(2, 5)
@@ -49,7 +52,7 @@ public class DomainConstraintService {
         return map;
     }
     
-    
+    // This method applies global constraints to the variables' domains, such as blocked time slots.
     public void applyGlobalConstraints(List<Variable> variables, List<DomainValue> blockedSlots) {
 
         for (Variable v : variables) {
@@ -63,7 +66,7 @@ public class DomainConstraintService {
         }
     }
     
-    
+    // This method applies duration constraints to the variables' domains, ensuring that the scheduled time slots can accommodate the lesson duration.
     public void applyDurationConstraints(List<Variable> variables) {
 
         for (Variable v : variables) {
@@ -72,6 +75,7 @@ public class DomainConstraintService {
 
             List<DomainValue> values = v.getDomain().getValues();
 
+            // Remove any domain values that cannot accommodate the lesson duration
             values.removeIf(dv -> {
                 int day = dv.getDay();
                 int start = dv.getStartFrame();
