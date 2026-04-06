@@ -168,6 +168,11 @@ public class VariableBuilder {
 	    String splitId1 = UUID.randomUUID().toString();
 	    lessons.add(createLesson("333", "יוסי", 2, LessonType.LECTURE, splitId1));
 	    lessons.add(createLesson("333", "יוסי", 2, LessonType.LECTURE, splitId1));
+	    
+	    String splitId3 = UUID.randomUUID().toString();
+	    lessons.add(createLesson("333", "אליס", 2, LessonType.LECTURE, splitId3));
+	    lessons.add(createLesson("333", "אליס", 2, LessonType.LECTURE, splitId3));
+	    
 
 	    lessons.add(createLesson("333", "יוסי", 2, LessonType.TUTORIAL, null));
 
@@ -186,6 +191,14 @@ public class VariableBuilder {
 
 	    lessons.add(createLesson("666", "רון", 2, LessonType.LAB, null));
 	    lessons.add(createLesson("666", "רון", 2, LessonType.TUTORIAL, null));
+	    
+	    
+	    lessons.add(createLesson("777", "בוב", 3, LessonType.LECTURE, null));
+	    lessons.add(createLesson("777", "בוב", 3, LessonType.LECTURE, null));
+	    lessons.add(createLesson("777", "בוב", 2, LessonType.TUTORIAL, null));
+	    lessons.add(createLesson("777", "בוב", 2, LessonType.TUTORIAL, null));
+	    lessons.add(createLesson("777", "בוב", 2, LessonType.LAB, null));
+	    
 
 	    return lessons;
 	}

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.coursescheduling.server.algorithm.constraints.LecturerConstraint;
 import com.coursescheduling.server.algorithm.constraints.RoomConstraint;
+import com.coursescheduling.server.algorithm.constraints.SplitLessonConstraint;
 import com.coursescheduling.server.algorithm.model.AssignedValue;
 import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
@@ -29,6 +30,9 @@ public class CSP {
 	
 	@Autowired
     private LecturerConstraint lecturerConstraint;
+	
+	@Autowired
+    private SplitLessonConstraint splitLessonConstraint;
 	
 	
 	public CSP() {}
@@ -128,6 +132,12 @@ public class CSP {
                     return null; 
                 }
             }
+        }
+        
+        
+        if (splitLessonConstraint.isSplitPartAlreadyScheduledToday(var, value, assignment)) {
+            // System.out.println("⚠️ Split lesson part for " + var.getCourseId() + " already scheduled today.");
+            return null;
         }
         
         
