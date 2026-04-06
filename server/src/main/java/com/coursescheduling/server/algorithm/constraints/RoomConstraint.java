@@ -46,9 +46,11 @@ public class RoomConstraint {
             case TUTORIAL:
                 return 40;
             case LAB:
-            case PHYSICS_LAB:
-            case NETWORKING_LAB:
                 return 20;
+            case PHYSICS_LAB:
+            	return 15;
+            case NETWORKING_LAB:
+            	return 12;
             default:
                 return 0;
         }

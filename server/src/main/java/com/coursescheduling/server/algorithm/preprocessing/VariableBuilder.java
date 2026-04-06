@@ -29,7 +29,7 @@ public class VariableBuilder {
 	public List<Variable> createVariables(Semester semester){
 		
 		// the original
-		//List<Lesson> lessons = lessonService.getLessonsBySemester(semester);
+		//List<Lesson> lessons = getSupportedLessonsFromDB(semester);
 		
 		//temp
 		List<Lesson> lessons = createTestLessons();
@@ -148,6 +148,25 @@ public class VariableBuilder {
 	        v.setDomain(domain);
 	    }
 	}
+	
+	
+	private List<Lesson> getSupportedLessonsFromDB(Semester semester) {
+        List<Lesson> allLessons = lessonService.getLessonsBySemester(semester);
+        
+        List<Lesson> filtered = new ArrayList<>();
+        for (Lesson l : allLessons) {
+            LessonType type = l.getType();
+            if (type == LessonType.LECTURE || 
+                type == LessonType.TUTORIAL || 
+                type == LessonType.LAB || 
+                type == LessonType.PHYSICS_LAB || 
+                type == LessonType.NETWORKING_LAB) {
+                filtered.add(l);
+            }
+        }
+        return filtered;
+    }
+	
 	
 	
 	private List<Lesson> createTestLessons() {

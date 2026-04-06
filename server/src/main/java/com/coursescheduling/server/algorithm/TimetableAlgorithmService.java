@@ -17,6 +17,8 @@ import com.coursescheduling.server.algorithm.solver.RoomManager;
 import com.coursescheduling.server.model.Classroom;
 import com.coursescheduling.server.model.RoomType;
 import com.coursescheduling.server.model.Semester;
+import com.coursescheduling.server.service.ClassroomService;
+
 import java.util.Map;
 
 
@@ -38,6 +40,9 @@ public class TimetableAlgorithmService {
     @Autowired
     private CSP csp;
     
+    @Autowired
+    private ClassroomService classroomService;
+    
 
     
     private List<DomainValue> getGlobalBlockedSlots() {
@@ -58,6 +63,16 @@ public class TimetableAlgorithmService {
     }
     
     
+    private List<Classroom> getRealClassroomsFromDB() {
+        try {
+            return classroomService.getAllClassrooms();
+        } catch (Exception e) {
+            System.err.println("❌ Error fetching classrooms from Firestore: " + e.getMessage());
+            return new ArrayList<>(); 
+        }
+    }
+    
+    
     // Main method to run the algorithm
     public List<ScheduledLessonDTO> run(Semester semester) {
     	
@@ -71,7 +86,18 @@ public class TimetableAlgorithmService {
         
 
         // Step 2: Apply constraints to variables
+        
+        // temp for testing
         List<Classroom> rooms = getClassrooms();
+        
+        // from DB
+        //List<Classroom> rooms = getRealClassroomsFromDB();
+        
+        if (rooms.isEmpty()) {
+            System.out.println("❌ No classrooms found. Algorithm cannot run.");
+            return new ArrayList<>();
+        }
+        
         RoomManager roomManager = new RoomManager(rooms);
         
         // Global constraints (e.g., blocked time slots)
