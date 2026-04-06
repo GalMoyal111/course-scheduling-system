@@ -13,6 +13,7 @@ import com.coursescheduling.server.algorithm.model.Variable;
 @Component
 public class LecturerConstraint {
 	private static final int MAX_CONSECUTIVE_FRAMES = 6;
+	private static final int MAX_DAILY_FRAMES = 8;
 	
 	public boolean isConsecutiveLimitExceeded(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment) {
         
@@ -57,6 +58,26 @@ public class LecturerConstraint {
         }
 
         return maxConsecutive > MAX_CONSECUTIVE_FRAMES;
+    }
+    
+    
+    public boolean isDailyLimitExceeded(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment) {
+        String lecturer = var.getLecturer();
+        int day = value.getDay();
+        int totalFrames = 0;
+
+        for (Map.Entry<Variable, AssignedValue> entry : assignment.entrySet()) {
+            Variable assignedVar = entry.getKey();
+            AssignedValue assignedVal = entry.getValue();
+
+            if (assignedVar.getLecturer().equals(lecturer) && assignedVal.getDay() == day) {
+                totalFrames += assignedVar.getDuration();
+            }
+        }
+
+        totalFrames += var.getDuration();
+
+        return totalFrames > MAX_DAILY_FRAMES;
     }
     
     

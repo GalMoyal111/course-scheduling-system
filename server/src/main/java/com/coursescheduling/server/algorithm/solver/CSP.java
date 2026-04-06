@@ -136,6 +136,11 @@ public class CSP {
             return null;
         }
         
+        if (lecturerConstraint.isDailyLimitExceeded(var, value, assignment)) {
+            System.out.println("⚠️ Lecturer " + var.getLecturer() + " exceeded total daily hours (8). Skipping slot.");
+            return null;
+        }
+        
         
 
         Set<Classroom> availableRooms = new HashSet<>(roomManager.getAvailableRooms(value.getDay(), start1));
