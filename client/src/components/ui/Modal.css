@@ -1,92 +1,182 @@
+:root {
+    --modal-radius: 24px; /* פינות מעוגלות יותר למראה מודרני */
+    --modal-shadow-deep: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+    
+    /* הגדרת פלטת צבעים למודאלים */
+    --modal-primary-base: #4f46e5;    /* כחול אינדיגו */
+    --modal-primary-tint: #f5f3ff;    /* כחול בהיר מאוד לרקע */
+    
+    --modal-warning-base: #f59e0b;    /* כתום ענבר */
+    --modal-warning-tint: #fffbeb;    /* כתום בהיר מאוד לרקע */
+    
+    --modal-danger-base: #ef4444;     /* אדום סכנה */
+    --modal-danger-tint: #fef2f2;     /* אדום בהיר מאוד לרקע */
+}
+
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(4px);
+    background: rgba(15, 23, 42, 0.5); /* כהות בינונית */
+    backdrop-filter: blur(8px);       /* טשטוש חזק */
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    padding: 1rem;
-    animation: fade-in 0.2s ease-out;
+    padding: 1.5rem;
+    animation: fade-in 0.3s ease;
 }
 
 .modal-card {
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border-radius: var(--modal-radius);
+    box-shadow: var(--modal-shadow-deep);
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-height: 90vh;
+    max-height: 85vh;
     overflow: hidden;
-    animation: modal-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    
+    /* הגדרת המסגרת הבסיסית */
+    border: 1px solid #e2e8f0; 
+    
+    animation: modal-appear 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.modal-card--normal { max-width: 500px; }
-.modal-card--wide { max-width: 900px; }
+/* הגדרת גדלים */
+.modal-card--normal { max-width: 480px; }
+.modal-card--wide { max-width: 800px; }
 
+/* לוגיקה למסגרת צבעונית לפי ה-Variant */
+.modal-header--primary ~ .modal-body,
+.modal-header--primary ~ .modal-footer {
+    /* (אופציונלי) אפשר לצבוע גם את המסגרות הפנימיות */
+}
+
+.modal-header--primary,
+.modal-card:has(.modal-header--primary) {
+    border-color: rgba(79, 70, 229, 0.2);
+}
+
+.modal-header--warning,
+.modal-card:has(.modal-header--warning) {
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.modal-header--danger,
+.modal-card:has(.modal-header--danger) {
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Header סליק עם צבע רקע עדין */
 .modal-header {
-    padding: 1.25rem 1.5rem;
+    padding: 1.5rem 2rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: white;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-.modal-header--primary { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
-.modal-header--warning { background: linear-gradient(135deg, #f59e0b, #ef4444); }
-.modal-header--danger { background: #dc2626; }
+/* צביעת ה-Header לפי Variant */
+.modal-header--primary {
+    background: var(--modal-primary-tint);
+    border-color: rgba(79, 70, 229, 0.1);
+}
+
+.modal-header--warning {
+    background: var(--modal-warning-tint);
+    border-color: rgba(245, 158, 11, 0.15);
+}
+
+.modal-header--danger {
+    background: var(--modal-danger-tint);
+    border-color: rgba(239, 68, 68, 0.15);
+}
 
 .modal-header h3 {
     margin: 0;
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.025em;
 }
 
+/* צביעת הטקסט בכותרת */
+.modal-header--primary h3 { color: var(--modal-primary-base); }
+.modal-header--warning h3 { color: #b45309; } /* כתום כהה יותר לקריאות */
+.modal-header--danger h3 { color: var(--modal-danger-base); }
+
 .modal-close {
-    background: rgba(255, 255, 255, 0.2);
     border: none;
-    color: white;
     width: 32px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s ease;
 }
 
-.modal-close:hover { background: rgba(255, 255, 255, 0.3); }
+/* צביעת כפתור הסגירה לפי Variant */
+.modal-header--primary .modal-close {
+    background: rgba(79, 70, 229, 0.08);
+    color: var(--modal-primary-base);
+}
+.modal-header--primary .modal-close:hover {
+    background: rgba(79, 70, 229, 0.15);
+}
+
+.modal-header--warning .modal-close {
+    background: rgba(245, 158, 11, 0.1);
+    color: #b45309;
+}
+.modal-header--warning .modal-close:hover {
+    background: rgba(245, 158, 11, 0.2);
+}
+
+.modal-header--danger .modal-close {
+    background: rgba(239, 68, 68, 0.08);
+    color: var(--modal-danger-base);
+}
+.modal-header--danger .modal-close:hover {
+    background: rgba(239, 68, 68, 0.15);
+}
 
 .modal-body {
-    padding: 1.5rem;
+    padding: 2.5rem 2rem; /* יותר ריווח אנכי */
     overflow-y: auto;
     flex: 1;
     display: flex;
     flex-direction: column;
+    color: #334155;
+    line-height: 1.6;
 }
 
-/* התיקון למרכוז התוכן */
 .modal-body--center {
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 2.5rem 1.5rem;
 }
 
 .modal-footer {
-    padding: 1rem 1.5rem;
+    padding: 1.25rem 2rem;
     border-top: 1px solid #f1f5f9;
     display: flex;
     justify-content: flex-end;
-    gap: 0.75rem;
-    background: #f8fafc;
+    gap: 1rem;
+    background: #ffffff;
 }
 
+/* אנימציות */
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes modal-slide-up {
-    from { opacity: 0; transform: translateY(20px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+
+@keyframes modal-appear {
+    from { 
+        opacity: 0; 
+        transform: translateY(30px) scale(0.95); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
 }

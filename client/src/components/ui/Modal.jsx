@@ -47,7 +47,7 @@ export default function Modal({
                 <div className={`modal-header modal-header--${variant}`}>
                     <h3>{title}</h3>
                     <button className="modal-close" onClick={onClose} aria-label="Close">
-                        <span className="material-icons">close</span>
+                        <span className="material-icons" style={{ fontSize: '18px' }}>close</span>
                     </button>
                 </div>
 
