@@ -7,7 +7,7 @@ export default function AddRoomModal({ isOpen, onClose, onSave, initialClassroom
   const [building, setBuilding] = useState("");
   const [classroomName, setClassroomName] = useState("");
   const [capacity, setCapacity] = useState("");
-  const [type, setType] = useState("Normal");
+  const [type, setType] = useState("NORMAL");
 
   // Initialize fields when modal opens. If initialClassroom provided, pre-fill for edit.
   useEffect(() => {
@@ -16,12 +16,12 @@ export default function AddRoomModal({ isOpen, onClose, onSave, initialClassroom
         setBuilding(initialClassroom.building || "");
         setClassroomName(initialClassroom.classroomName || "");
         setCapacity(initialClassroom.capacity != null ? String(initialClassroom.capacity) : "");
-        setType(initialClassroom.type || "Normal");
+        setType(initialClassroom.type || "NORMAL");
       } else {
         setBuilding("");
         setClassroomName("");
         setCapacity("");
-        setType("Normal");
+        setType("NORMAL");
       }
     }
   }, [isOpen, initialClassroom]);
