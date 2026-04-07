@@ -6,7 +6,7 @@ import { useData } from "../context/DataContext";
 import ImportExportModal from "../components/ImportExportModal";
 import "./DashboardPage.css";
 
-const LECTURERS_COUNT = 15; // Fixed number for now
+const LECTURERS_COUNT = 15; 
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -17,125 +17,42 @@ export default function DashboardPage() {
     setLessons,
     classrooms,
     setClassrooms,
-    isCacheValid,
-    coursesTimestamp,
-    setCoursesTimestamp,
-    lessonsTimestamp,
-    setLessonsTimestamp,
-    classroomsTimestamp,
-    setClassroomsTimestamp,
   } = useData();
 
-  const [stats, setStats] = useState({
-    courses: courses.length,
-    lessons: lessons.length,
-    classrooms: classrooms.length,
-  });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchInitialData = async () => {
+      if (courses.length > 0 && lessons.length > 0 && classrooms.length > 0) {
+        return; 
+      }
+
+      setLoading(true);
       try {
-        // Check cache for each data type
-        const coursesFromCache = isCacheValid(coursesTimestamp);
-        const lessonsFromCache = isCacheValid(lessonsTimestamp);
-        const classroomsFromCache = isCacheValid(classroomsTimestamp);
-
         const promises = [];
+        
+        if (courses.length === 0) promises.push(getAllCourses().then(data => setCourses(Array.isArray(data) ? data : [])));
+        if (lessons.length === 0) promises.push(getAllLessons().then(data => setLessons(Array.isArray(data) ? data : [])));
+        if (classrooms.length === 0) promises.push(getAllClassrooms().then(data => setClassrooms(Array.isArray(data) ? data : [])));
 
-        // Only fetch if cache is invalid
-        if (!coursesFromCache) {
-          promises.push(
-            getAllCourses().then((data) => {
-              const coursesArray = Array.isArray(data) ? data : [];
-              setCourses(coursesArray);
-              setCoursesTimestamp(Date.now());
-              return coursesArray;
-            })
-          );
-        } else {
-          promises.push(Promise.resolve(courses));
-        }
-
-        if (!lessonsFromCache) {
-          promises.push(
-            getAllLessons().then((data) => {
-              const lessonsArray = Array.isArray(data) ? data : [];
-              setLessons(lessonsArray);
-              setLessonsTimestamp(Date.now());
-              return lessonsArray;
-            })
-          );
-        } else {
-          promises.push(Promise.resolve(lessons));
-        }
-
-        if (!classroomsFromCache) {
-          promises.push(
-            getAllClassrooms().then((data) => {
-              const classroomsArray = Array.isArray(data) ? data : [];
-              setClassrooms(classroomsArray);
-              setClassroomsTimestamp(Date.now());
-              return classroomsArray;
-            })
-          );
-        } else {
-          promises.push(Promise.resolve(classrooms));
-        }
-
-        const [coursesData, lessonsData, classroomsData] = await Promise.all(promises);
-
-        setStats({
-          courses: coursesData.length,
-          lessons: lessonsData.length,
-          classrooms: classroomsData.length,
-        });
+        await Promise.all(promises);
       } catch (error) {
-        console.error("Failed to fetch statistics:", error);
-        setStats({
-          courses: courses.length,
-          lessons: lessons.length,
-          classrooms: classrooms.length,
-        });
+        console.error("Failed to fetch dashboard data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    // Only fetch if we have at least one invalid cache
-    const needsFetch =
-      !isCacheValid(coursesTimestamp) ||
-      !isCacheValid(lessonsTimestamp) ||
-      !isCacheValid(classroomsTimestamp);
+    fetchInitialData();
+  }, []); // Empty dependency array prevents infinite loops
 
-    if (needsFetch || loading) {
-      fetchStats();
-    } else {
-      // Update stats from cached data
-      setStats({
-        courses: courses.length,
-        lessons: lessons.length,
-        classrooms: classrooms.length,
-      });
-      setLoading(false);
-    }
-  }, [
-    isCacheValid,
-    coursesTimestamp,
-    lessonsTimestamp,
-    classroomsTimestamp,
-    setCourses,
-    setLessons,
-    setClassrooms,
-    setCoursesTimestamp,
-    setLessonsTimestamp,
-    setClassroomsTimestamp,
-    courses,
-    lessons,
-    classrooms,
-  ]);
+  const stats = {
+    courses: courses.length,
+    lessons: lessons.length,
+    classrooms: classrooms.length,
+  };
 
   const handleStatClick = (path) => {
     navigate(path);
@@ -143,7 +60,6 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard-page">
-      {/* Statistics Section */}
       <section className="dashboard-section">
         <h2 className="dashboard-section-title">Overview</h2>
         <div className="stats-grid">
@@ -174,7 +90,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Primary Actions Section */}
       <section className="dashboard-section">
         <h2 className="dashboard-section-title">Primary Actions</h2>
         <div className="actions-grid">
@@ -240,7 +155,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Import/Export Modals */}
       <ImportExportModal
         isOpen={importModalOpen}
         onClose={() => setImportModalOpen(false)}
@@ -255,7 +169,6 @@ export default function DashboardPage() {
   );
 }
 
-// Reusable StatCard component
 function StatCard({ title, count, icon, onClick }) {
   return (
     <div className="stat-card" onClick={onClick}>
