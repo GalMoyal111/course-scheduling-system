@@ -57,12 +57,7 @@
 }
 
 /* Modal & form styles (bright, matching app tokens) */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.62);display:flex;align-items:center;justify-content:center;z-index:1000;padding:12px}
-.modal-card{width:460px;max-width:94%;max-height:92vh;border-radius:12px;overflow:hidden;background:var(--card);box-shadow:0 18px 40px rgba(15,23,36,0.18);display:flex;flex-direction:column}
-.modal-header{background:linear-gradient(90deg,var(--accent-start),var(--accent-end));padding:16px 20px;color:white;position:relative;display:flex;align-items:center;justify-content:space-between}
-.modal-header h3{margin:0;font-size:1.05rem;font-weight:600}
-.modal-body{padding:18px 20px;overflow-y:auto}
-.modal-footer{padding:12px 20px;border-top:1px solid rgba(15,23,36,0.04);display:flex;justify-content:flex-end;gap:8px}
+
 .form-field{display:flex;flex-direction:column;margin-bottom:12px}
 .form-field label{font-size:0.86rem;color:var(--muted);margin-bottom:6px}
 .ui-input{padding:10px 12px;border-radius:8px;border:1px solid rgba(15,23,36,0.08);background:var(--card);font-size:0.95rem;color:var(--text);transition:border-color .2s ease,box-shadow .2s ease,background-color .2s ease}
@@ -76,34 +71,8 @@
 .ui-select::-ms-expand{display:none}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px}
 
-/* Warning modal variants */
-.modal-card--warning{border:1px solid rgba(220,38,38,0.08);box-shadow:0 28px 68px rgba(220,38,38,0.12)}
-.modal-card--warning .modal-header--warning{background:var(--danger-color);padding:18px 20px;color:white;display:flex;align-items:center;justify-content:center;position:relative}
-.modal-card--warning .modal-body--warning{padding:22px 20px;text-align:center;color:var(--danger-text);font-weight:600;display:flex;flex-direction:column;align-items:center;gap:8px}
-.modal-card--warning .modal-body--warning strong{color:var(--danger-end)}
-.modal-card--warning .ui-btn--primary{background:var(--danger-color);box-shadow:0 12px 30px rgba(220,38,38,0.12)}
-
-.modal-close{position:absolute;top:10px;right:10px;background:transparent;border:0;padding:6px;border-radius:8px;cursor:pointer;transition:background-color .15s ease,transform .1s ease;color:white;display:inline-flex;align-items:center;justify-content:center}
-.modal-close:hover:not(:disabled){background:rgba(255,255,255,0.15);transform:translateY(-1px)}
-.modal-close:active:not(:disabled){transform:translateY(0)}
-.modal-close:disabled{opacity:.5;cursor:not-allowed}
-.modal-close svg{display:block}
-
-.modal-icon__circle{width:64px;height:64px;border-radius:999px;background:var(--danger-color);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(220,38,38,0.12)}
-.modal-message{color:rgba(127,29,29,0.95);font-size:1rem}
-.confirm-file-badge{margin-top:6px;padding:8px 12px;border-radius:999px;border:1px solid rgba(220,38,38,0.14);background:rgba(255,240,240,0.6);color:var(--danger-end);font-weight:700}
-.modal-footer--spacious{padding:14px 20px;border-top:1px solid rgba(15,23,36,0.04);display:flex;justify-content:flex-end;gap:8px}
-
-/* Modal animations and icon */
-.modal-overlay{animation:overlay-fade .18s ease both}
-.modal-card{transform-origin:center center;animation:card-pop .2s cubic-bezier(.2,.9,.22,1) both}
-.modal-icon{display:flex;align-items:center;justify-content:center;margin-bottom:10px}
-
-@keyframes overlay-fade{from{opacity:0}to{opacity:1}}
-@keyframes card-pop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 
 /* Courses modal uses a wider two-column layout for faster full-form visibility */
-.modal-card--wide{width:min(920px, 96vw)}
 .add-course-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
 
 .prereq-input-row{display:flex;gap:8px;align-items:center}

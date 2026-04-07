@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Button from "./ui/Button";
-import "./AddLecturerModal.css";
 
 export default function AddLecturerModal({
   isOpen,

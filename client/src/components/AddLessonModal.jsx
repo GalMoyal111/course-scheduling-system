@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Button from "./ui/Button";
 import "./ui/ui.css";
 import { getAllCoursesGrouped } from "../services/api";
+import Modal from "./ui/Modal";
 
 export default function AddLessonModal({
   isOpen,
@@ -181,126 +182,140 @@ export default function AddLessonModal({
     onSave(initialLesson, payload);
   };
 
-  return (
-    <div className="modal-overlay">
-      <div className="modal-card modal-card--wide">
-        <div className="modal-header">
-          <h3>{isEdit ? "Edit Lesson" : "Add Lesson"}</h3>
+
+const footerContent = (
+    <>
+      <Button type="button" variant="ghost" onClick={onClose}>
+        Cancel
+      </Button>
+      <Button type="submit" variant="primary" onClick={handleSubmit}>
+        {isEdit ? "Update Lesson" : "Add Lesson"}
+      </Button>
+    </>
+  );
+
+return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isEdit ? "Edit Lesson" : "Add New Lesson"}
+      size="wide"
+      footer={
+        <>
+          <Button type="button" variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" variant="primary" onClick={handleSubmit}>
+            {isEdit ? "Update Lesson" : "Add Lesson"}
+          </Button>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit}>
+        <div className="add-course-grid">
+          {/* Cluster Selection */}
+          <div className="form-field">
+            <label>Cluster</label>
+            <select
+              className="ui-select"
+              value={cluster}
+              disabled={isEdit}
+              onChange={(e) => {
+                if (isEdit) return;
+                setCluster(e.target.value);
+                setCourseName("");
+              }}
+            >
+              <option value="">(none)</option>
+              {isEdit && cluster && <option value={cluster}>{cluster}</option>}
+              {clusterOptions.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Course Selection */}
+          <div className="form-field">
+            <label>Course</label>
+            <select
+              className="ui-select"
+              value={courseName}
+              disabled={isEdit}
+              onChange={(e) => {
+                if (isEdit) return;
+                setCourseName(e.target.value);
+              }}
+            >
+              <option value="">(select)</option>
+              {isEdit && courseName && <option value={courseName}>{courseName}</option>}
+              {courseOptions.map((c) => (
+                <option key={c.courseId} value={c.courseName}>
+                  {c.courseName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Lecturer Input */}
+          <div className="form-field">
+            <label>Lecturer</label>
+            <input
+              className="ui-input"
+              value={lecturer}
+              onChange={(e) => setLecturer(e.target.value)}
+              placeholder="Enter lecturer name"
+              required
+            />
+          </div>
+
+          {/* Lesson Type Selection */}
+          <div className="form-field">
+            <label>Type</label>
+            <select
+              className="ui-select"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+            >
+              <option value="lecture">Lecture</option>
+              <option value="practice">Practice</option>
+              <option value="laboratory">Laboratory</option>
+              <option value="physics_laboratory">Physics Laboratory</option>
+              <option value="networking_laboratory">Networking Laboratory</option>
+              <option value="pbl">PBL</option>
+            </select>
+          </div>
+
+          {/* Duration (Read Only) */}
+          <div className="form-field">
+            <label>Duration (Hours)</label>
+            <input
+              className="ui-input"
+              type="number"
+              value={computedDuration}
+              readOnly
+              style={{ background: "#f1f5f9", cursor: "not-allowed" }}
+            />
+          </div>
+
+          {/* Semester Selection */}
+          <div className="form-field">
+            <label>Semester</label>
+            <select
+              className="ui-select"
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+              required
+            >
+              <option value="">(select)</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="Summer">Summer</option>
+            </select>
+          </div>
         </div>
-
-        <div className="modal-body">
-          <form className="add-course-form" onSubmit={handleSubmit}>
-            <div className="add-course-grid">
-
-              <div className="form-field">
-                <label>Cluster</label>
-                <select
-                  className="ui-select"
-                  value={cluster}
-                  disabled={isEdit}
-                  onChange={(e) => {
-                    if (isEdit) return;
-                    setCluster(e.target.value);
-                    setCourseName("");
-                  }}
-                >
-                  <option value="">(none)</option>         
-                    {isEdit && cluster && (
-                      <option value={cluster}>{cluster}</option>
-                    )}
-
-                    {clusterOptions.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-field">
-                <label>Course</label>
-                <select
-                  className="ui-select"
-                  value={courseName}
-                  disabled={isEdit}
-                  onChange={(e) => {
-                    if (isEdit) return;
-                    setCourseName(e.target.value);
-                  }}
-                >
-                <option value="">(select)</option>
-                  {isEdit && courseName && (
-                  <option value={courseName}>{courseName}</option>
-                    )}
-
-                    {courseOptions.map((c) => (
-                    <option key={c.courseId} value={c.courseName}>
-                      {c.courseName}
-                  </option>
-                ))}
-                </select>
-              </div>
-
-              <div className="form-field">
-                <label>Lecturer</label>
-                <input
-                  className="ui-input"
-                  value={lecturer}
-                  onChange={(e) => setLecturer(e.target.value)}
-                />
-              </div>
-
-              <div className="form-field">
-                <label>Type</label>
-                <select
-                  className="ui-select"
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                >
-                  <option value="lecture">Lecture</option>
-                  <option value="practice">Practice</option>
-                  <option value="laboratory">Laboratory</option>
-                  <option value="physics_laboratory">Physics Laboratory</option>
-                  <option value="networking_laboratory">Networking Laboratory</option>
-                  <option value="pbl">PBL</option>
-                </select>
-              </div>
-
-              <div className="form-field">
-                <label>Duration</label>
-                <input
-                  className="ui-input"
-                  type="number"
-                  value={computedDuration}
-                  readOnly
-                />
-              </div>
-
-              <div className="form-field">
-                <label>Semester</label>
-                <select
-                  className="ui-select"
-                  value={semester}
-                  onChange={(e) => setSemester(e.target.value)}
-                >
-                  <option value="">(select)</option>
-                  <option value="A">A</option>
-                  <option value="B">B</option>
-                  <option value="Summer">Summer</option>
-                </select>
-              </div>
-
-            </div>
-
-            <div className="modal-actions">
-              <Button type="button" variant="ghost" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit" variant="primary">
-                Save
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 }

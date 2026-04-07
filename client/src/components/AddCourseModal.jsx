@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Button from "./ui/Button";
 import "./ui/ui.css";
-
+import Modal from "./ui/Modal";
 const CLUSTER_NAME_OPTIONS = [
   "מדעים",
   "עיבוד אותות ורשתות תקשורת",
@@ -324,341 +324,147 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
     onClose();
   };
 
+  if (!isOpen) return null;
+
   if (duplicateCourseWarning) {
     return (
-      <div className="modal-overlay">
-        <div className="modal-card" role="dialog" aria-modal="true">
-          <div className="modal-header">
-            <h3>⚠️ Course Code Already Exists</h3>
-          </div>
-
-          <div className="modal-body" style={{ paddingBottom: "1rem" }}>
-            <p style={{ marginBottom: "0.5rem" }}>
-              A course with code <strong>{duplicateCourseWarning}</strong> already exists in the system.
-            </p>
-            <p>Would you like to replace it with this new course information?</p>
-          </div>
-
-          <div className="modal-actions">
-            <Button variant="ghost" onClick={cancelDuplicateCourse}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={confirmDuplicateCourse}>
-              Replace
-            </Button>
-          </div>
-        </div>
-      </div>
+      <Modal isOpen={true} onClose={cancelDuplicateCourse} title="⚠️ Course Code Already Exists" variant="warning"
+        footer={<><Button variant="ghost" onClick={cancelDuplicateCourse}>Cancel</Button><Button variant="primary" onClick={confirmDuplicateCourse}>Replace</Button></>}>
+        <p>A course with code <strong>{duplicateCourseWarning}</strong> already exists. Replace it?</p>
+      </Modal>
     );
   }
 
   if (invalidPrereqWarning) {
     return (
-      <div className="modal-overlay">
-        <div className="modal-card" role="dialog" aria-modal="true">
-          <div className="modal-header">
-            <h3>⚠️ Prerequisite Course Not Found</h3>
-          </div>
-
-          <div className="modal-body" style={{ paddingBottom: "1rem" }}>
-            <p style={{ marginBottom: "0.5rem" }}>
-              The prerequisite course <strong>{invalidPrereqWarning}</strong> does not exist in the system.
-            </p>
-            <p>Would you like to add it anyway?</p>
-          </div>
-
-          <div className="modal-actions">
-            <Button variant="ghost" onClick={cancelAddPrerequisite}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={confirmAddPrerequisiteWithWarning}>
-              Add Anyway
-            </Button>
-          </div>
-        </div>
-      </div>
+      <Modal isOpen={true} onClose={cancelAddPrerequisite} title="⚠️ Prerequisite Not Found" variant="warning"
+        footer={<><Button variant="ghost" onClick={cancelAddPrerequisite}>Cancel</Button><Button variant="primary" onClick={confirmAddPrerequisiteWithWarning}>Add Anyway</Button></>}>
+        <p>The prerequisite course <strong>{invalidPrereqWarning}</strong> doesn't exist. Add anyway?</p>
+      </Modal>
     );
   }
 
   if (creditsEditWarningOpen) {
     return (
-      <div className="modal-overlay">
-        <div className="modal-card" role="dialog" aria-modal="true">
-          <div className="modal-header">
-            <h3>⚠️ Edit Credits Manually?</h3>
-          </div>
-
-          <div className="modal-body" style={{ paddingBottom: "1rem" }}>
-            <p style={{ marginBottom: "0.5rem" }}>
-              Automatic credits calculation will be turned off for this course.
-            </p>
-            <p>Are you sure you want to continue to manual editing?</p>
-          </div>
-
-          <div className="modal-actions">
-            <Button variant="ghost" onClick={cancelManualCreditsEdit}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={confirmManualCreditsEdit}>
-              Yes, Edit Manually
-            </Button>
-          </div>
-        </div>
-      </div>
+      <Modal isOpen={true} onClose={cancelManualCreditsEdit} title="⚠️ Edit Credits Manually?" variant="warning"
+        footer={<><Button variant="ghost" onClick={cancelManualCreditsEdit}>Cancel</Button><Button variant="primary" onClick={confirmManualCreditsEdit}>Yes, Edit Manually</Button></>}>
+        <p>Automatic credits calculation will be turned off. Are you sure?</p>
+      </Modal>
     );
   }
 
-  return (
-    <div className="modal-overlay">
-      <div className="modal-card modal-card--wide" role="dialog" aria-modal="true">
-        <div className="modal-header">
-          <h3>{isEditing ? "Edit Course" : "Add Course"}</h3>
-        </div>
+const footerContent = (
+    <>
+      <Button type="button" variant="ghost" onClick={onClose}>
+        Cancel
+      </Button>
+      <Button type="submit" variant="primary" onClick={handleSubmit}>
+        Save Course
+      </Button>
+    </>
+  );
 
-        <div className="modal-body">
-          <form className="add-course-form" onSubmit={handleSubmit}>
-            <div className="add-course-grid">
-            <div className="form-field">
-              <label>Semester</label>
-                <select
-                  className="ui-input"
-                  value={cluster}
-                  onChange={(e) => {
-                    const selectedCluster = e.target.value;
-                    setCluster(selectedCluster);
-                    if (selectedCluster !== "") {
-                      setClusterName("");
-                    }
-                  }}
-                  disabled={isSemesterDisabled}
-              >
-                {isSemesterDisabled ? (
-                  <option value="">NOT AVAILABLE - CHOSE CLUSTER NAME</option>
-                ) : (
-                  <>
-                    <option value="">Select a semester</option>
-                    {SemesterOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </>
-                )}
-              </select>
-            </div>
 
-            <div className="form-field">
-              <label>Cluster Name</label>
-              <select
-                className="ui-input"
-                value={clusterName}
-                onChange={(e) => {
-                  const selectedClusterName = e.target.value;
-                  setClusterName(selectedClusterName);
-                  if (selectedClusterName !== "") {
-                    setCluster("");
-                  }
-                }}
-                disabled={isClusterNameDisabled}
-              >
-                {isClusterNameDisabled ? (
-                  <option value="">NOT AVAILABLE - CHOSE SEMSTER NUMBER</option>
-                ) : (
-                  <>
-                    <option value="">Select cluster name</option>
-                    {CLUSTER_NAME_OPTIONS.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </>
-                )}
-              </select>
-            </div>
+return (
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={initialCourse ? "Edit Course" : "Add Course"}
+      size="wide"
+      footer={footerContent}
+    >
+      <form className="add-course-form" onSubmit={handleSubmit}>
+        <div className="add-course-grid">
+          <div className="form-field">
+            <label>Semester</label>
+            <select className="ui-input" value={cluster} onChange={(e) => { const val = e.target.value; setCluster(val); if (val !== "") setClusterName(""); }} disabled={isSemesterDisabled}>
+              <option value="">{isSemesterDisabled ? "NOT AVAILABLE" : "Select a semester"}</option>
+              {SemesterOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+          </div>
 
-            <div className="form-field">
-              <label>Course Code</label>
+          <div className="form-field">
+            <label>Cluster Name</label>
+            <select className="ui-input" value={clusterName} onChange={(e) => { const val = e.target.value; setClusterName(val); if (val !== "") setCluster(""); }} disabled={isClusterNameDisabled}>
+              <option value="">{isClusterNameDisabled ? "NOT AVAILABLE" : "Select cluster name"}</option>
+              {CLUSTER_NAME_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+          </div>
+
+          <div className="form-field">
+            <label>Course Code</label>
+            <input className="ui-input" value={courseCode} onChange={(e) => setCourseCode(e.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" pattern="[0-9]{5,6}" required />
+          </div>
+
+          <div className="form-field">
+            <label>Course Name</label>
+            <input className="ui-input" value={courseName} onChange={(e) => setCourseName(e.target.value)} required />
+          </div>
+
+          <div className="form-field">
+            <label>Prerequisites</label>
+            <div className="prereq-input-row">
               <input
                 className="ui-input"
-                value={courseCode}
-                onChange={(e) => setCourseCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                inputMode="numeric"
-                pattern="[0-9]{5,6}"
-                minLength={5}
-                maxLength={6}
-                title="Course code must contain exactly 5 or 6 digits"
-                placeholder="5 or 6-digit course code"
-                required
+                value={prerequisiteInput}
+                onChange={(e) => setPrerequisiteInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); try { handleAddPrerequisite(); } catch (err) { alert(err.message); } } }}
+                placeholder="5 or 6-digit code"
               />
-            </div>
-
-            <div className="form-field">
-              <label>Course Name</label>
-              <input
-                className="ui-input"
-                value={courseName}
-                onChange={(e) => setCourseName(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Prerequisites</label>
-              <div className="prereq-input-row">
-                <input
-                  className="ui-input"
-                  value={prerequisiteInput}
-                  onChange={(e) => setPrerequisiteInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      try {
-                        handleAddPrerequisite();
-                      } catch (err) {
-                        alert(err.message || "Invalid prerequisite course code.");
-                      }
-                    }
-                  }}
-                  placeholder="5 or 6-digit course code"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => {
-                    try {
-                      handleAddPrerequisite();
-                    } catch (err) {
-                      alert(err.message || "Invalid prerequisite course code.");
-                    }
-                  }}
-                >
-                  +
-                </Button>
-              </div>
-              {prerequisiteCourseNumbers.length > 0 && (
-                <div className="prereq-chips">
-                  {prerequisiteCourseNumbers.map((code) => (
-                    <div key={code} className="prereq-chip">
-                      <span>{code}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemovePrerequisite(code)}
-                        className="prereq-chip-remove"
-                        aria-label={`Remove prerequisite ${code}`}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="form-field">
-              <label>Lecture Hours</label>
-              <input
-                className="ui-input"
-                value={lectureHours}
-                onChange={(e) => setLectureHours(keepDigitsOnly(e.target.value))}
-                inputMode="numeric"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Tutorial Hours</label>
-              <input
-                className="ui-input"
-                value={tutorialHours}
-                onChange={(e) => setTutorialHours(keepDigitsOnly(e.target.value))}
-                inputMode="numeric"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Lab Hours</label>
-              <input
-                className="ui-input"
-                value={labHours}
-                onChange={(e) => setLabHours(keepDigitsOnly(e.target.value))}
-                inputMode="numeric"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Project Hours</label>
-              <input
-                className="ui-input"
-                value={projectHours}
-                onChange={(e) => setProjectHours(keepDigitsOnly(e.target.value))}
-                inputMode="numeric"
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                Credits
-                {!isCreditsEditable && (
-                  <button
-                    type="button"
-                    onClick={enableManualCreditsEdit}
-                    aria-label="Enable manual credits editing"
-                    title="Edit credits manually"
-                    style={{
-                      border: "none",
-                      background: "transparent",
-                      cursor: "pointer",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      padding: 0,
-                      color: "#4f46e5",
-                    }}
-                  >
-                    <span className="material-icons" style={{ fontSize: 18 }} aria-hidden>
-                      edit
-                    </span>
-                  </button>
-                )}
-              </label>
-              <input
-                className="ui-input"
-                value={credits}
-                onChange={(e) => {
-                  const nextValue = e.target.value
-                    .replace(/[^\d.]/g, "")
-                    .replace(/(\..*)\./g, "$1");
-                  setCredits(nextValue);
-                }}
-                inputMode="decimal"
-                readOnly={!isCreditsEditable}
-                style={!isCreditsEditable ? { backgroundColor: "#f3f4f6", cursor: "not-allowed" } : undefined}
-                required
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Notes</label>
-              <input
-                className="ui-input"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Optional notes about the course"
-              />
-            </div>
-            </div>
-
-            <div className="modal-actions">
-              <Button type="button" variant="ghost" onClick={handleClose}>
-                Cancel
+              <Button type="button" variant="ghost" onClick={() => { try { handleAddPrerequisite(); } catch (err) { alert(err.message); } }}>
+                +
               </Button>
-              <Button type="submit" variant="primary">Save</Button>
             </div>
-          </form>
+            {prerequisiteCourseNumbers.length > 0 && (
+              <div className="prereq-chips">
+                {prerequisiteCourseNumbers.map((code) => (
+                  <div key={code} className="prereq-chip">
+                    <span>{code}</span>
+                    <button type="button" onClick={() => handleRemovePrerequisite(code)} className="prereq-chip-remove">×</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="form-field">
+            <label>Lecture Hours</label>
+            <input className="ui-input" value={lectureHours} onChange={(e) => setLectureHours(keepDigitsOnly(e.target.value))} required />
+          </div>
+
+          <div className="form-field">
+            <label>Tutorial Hours</label>
+            <input className="ui-input" value={tutorialHours} onChange={(e) => setTutorialHours(keepDigitsOnly(e.target.value))} required />
+          </div>
+
+          <div className="form-field">
+            <label>Lab Hours</label>
+            <input className="ui-input" value={labHours} onChange={(e) => setLabHours(keepDigitsOnly(e.target.value))} required />
+          </div>
+
+          <div className="form-field">
+            <label>Project Hours</label>
+            <input className="ui-input" value={projectHours} onChange={(e) => setProjectHours(keepDigitsOnly(e.target.value))} required />
+          </div>
+
+          <div className="form-field">
+            <label style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+              Credits
+              {!isCreditsEditable && (
+                <button type="button" onClick={enableManualCreditsEdit} style={{ border: "none", background: "transparent", cursor: "pointer", color: "#4f46e5", display: "inline-flex", padding: 0 }}>
+                  <span className="material-icons" style={{ fontSize: 18 }}>edit</span>
+                </button>
+              )}
+            </label>
+            <input className="ui-input" value={credits} readOnly={!isCreditsEditable} onChange={(e) => setCredits(e.target.value.replace(/[^\d.]/g, ""))} required />
+          </div>
+
+          <div className="form-field" style={{ gridColumn: 'span 2' }}>
+            <label>Notes</label>
+            <input className="ui-input" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional notes" />
+          </div>
         </div>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 }

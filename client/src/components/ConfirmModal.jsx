@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 import Button from "./ui/Button";
 import Modal from "./ui/Modal";
 
-// Reusable confirmation modal with keyboard handlers and filename display
 export default function ConfirmModal({
   isOpen,
   title = "Are you sure?",
@@ -41,33 +40,31 @@ export default function ConfirmModal({
       isOpen={isOpen}
       onClose={onCancel}
       title={title}
-      variant="warning" // משתמשים בעיצוב הכתום/אדום שהגדרנו ב-CSS
+      variant="warning" 
       footer={footerContent}
     >
-      {/* זה ה-children של המודאל */}
-      <div className="confirm-modal-body">
-        <div className="modal-icon" style={{ textAlign: 'center', marginBottom: '1rem' }}>
+      <div className="confirm-modal-body" style={{ textAlign: 'center' }}>
+        <div className="modal-icon" style={{ marginBottom: '1rem' }}>
            <span className="material-icons" style={{ fontSize: '48px', color: '#f59e0b' }}>
              report_problem
            </span>
         </div>
         
-        <p className="modal-message" style={{ textAlign: 'center', fontSize: '1.1rem' }}>
+        <p className="modal-message" style={{ fontSize: '1.1rem', margin: '0 0 1rem 0' }}>
           {message}
         </p>
 
         {fileName && (
           <div className="confirm-file-badge" style={{ 
-            marginTop: '1rem', 
             padding: '8px', 
             background: '#fff7ed', 
             borderRadius: '8px', 
             border: '1px solid #ffedd5',
             color: '#9a3412',
             fontSize: '0.9rem',
-            textAlign: 'center'
+            display: 'inline-block'
           }}>
-            <strong>File:</strong> {fileName}
+            <strong>Target:</strong> {fileName}
           </div>
         )}
       </div>

@@ -2,13 +2,15 @@ import React, { useEffect } from "react";
 import "./Modal.css";
 
 /**
- * @param {boolean} isOpen
- * @param {function} onClose 
- * @param {string} title
- * @param {string} size 
- * @param {string} variant 
- * @param {ReactNode} children
- * @param {ReactNode} footer 
+ * מודל אחיד לכל המערכת
+ * @param {boolean} isOpen - האם המודל פתוח
+ * @param {function} onClose - פונקציה לסגירה
+ * @param {string} title - כותרת המודל
+ * @param {string} size - 'normal' | 'wide'
+ * @param {string} variant - 'primary' | 'warning' | 'danger'
+ * @param {boolean} centerContent - האם למרכז את התוכן (מעולה להודעות הצלחה)
+ * @param {ReactNode} children - תוכן המודל
+ * @param {ReactNode} footer - כפתורי פעולה בתחתית
  */
 export default function Modal({ 
     isOpen, 
@@ -16,6 +18,7 @@ export default function Modal({
     title, 
     size = "normal", 
     variant = "primary", 
+    centerContent = false,
     children, 
     footer 
 }) {
@@ -35,11 +38,12 @@ export default function Modal({
     return (
         <div className="modal-overlay" onClick={onClose} role="presentation">
             <div 
-                className={`modal-card modal-card--${size} modal-card--${variant}`} 
+                className={`modal-card modal-card--${size}`} 
                 onClick={handleCardClick}
                 role="dialog" 
                 aria-modal="true"
             >
+                {/* Header */}
                 <div className={`modal-header modal-header--${variant}`}>
                     <h3>{title}</h3>
                     <button className="modal-close" onClick={onClose} aria-label="Close">
@@ -47,10 +51,12 @@ export default function Modal({
                     </button>
                 </div>
 
-                <div className="modal-body">
+                {/* Body */}
+                <div className={`modal-body ${centerContent ? "modal-body--center" : ""}`}>
                     {children}
                 </div>
 
+                {/* Footer */}
                 {footer && (
                     <div className="modal-footer">
                         {footer}

@@ -7,6 +7,7 @@ import { getAllUsers } from "../services/api";
 import { updateUserRole } from "../services/api";
 import { createUser } from "../services/api";
 import { deleteUser } from "../services/api";
+import ConfirmModal from "../components/ConfirmModal";
 
 
 export default function SettingsPage({ user }) {
@@ -17,6 +18,8 @@ export default function SettingsPage({ user }) {
     const [isPasswordConfirmOpen, setIsPasswordConfirmOpen] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showCreateUserPassword, setShowCreateUserPassword] = useState(false);
+    const [isDeleteUserConfirmOpen, setIsDeleteUserConfirmOpen] = useState(false);
+    const [pendingCourse, setPendingCourse] = useState(null);
 
 
     const handleChangePassword = async () => {
@@ -287,7 +290,10 @@ export default function SettingsPage({ user }) {
                                                         Change Role
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDeleteUser(u.uid)}
+                                                        onClick={() => {
+                                                            setPendingCourse(u);
+                                                            setIsDeleteUserConfirmOpen(true); 
+                                                        }}
                                                         className="ui-btn btn-danger"
                                                         title="Delete user"
                                                     >
@@ -305,40 +311,31 @@ export default function SettingsPage({ user }) {
                 )}
             </div>
 
-            {/* Password Change Confirmation Modal */}
-            {isPasswordConfirmOpen && (
-                <div className="modal-overlay">
-                    <div className="modal-card modal-card--warning">
-                        <div className="modal-header modal-header--warning">
-                            <div className="modal-icon__circle">
-                                <span className="material-icons" style={{ fontSize: "32px", color: "white" }}>
-                                    lock
-                                </span>
-                            </div>
-                        </div>
-                        <div className="modal-body modal-body--warning">
-                            <p className="modal-message">
-                                Are you sure you want to change your password?
-                            </p>
-                        </div>
-                        <div className="modal-footer modal-footer--spacious">
-                            <button
-                                onClick={() => setIsPasswordConfirmOpen(false)}
-                                className="ui-btn ui-btn--ghost"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleChangePassword}
-                                className="ui-btn ui-btn--primary"
-                            >
-                                <span className="material-icons btn-icon">check</span>
-                                Confirm
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ConfirmModal
+                isOpen={isPasswordConfirmOpen}
+                title="Change Password"
+                message="Are you sure you want to change your password? This will update your login credentials immediately."
+                onConfirm={handleChangePassword}
+                onCancel={() => setIsPasswordConfirmOpen(false)}
+                confirmLabel="Confirm"
+                cancelLabel="Cancel"
+            />
+
+            <ConfirmModal
+                isOpen={isDeleteUserConfirmOpen}
+                title="Delete User"
+                message={`Are you sure you want to delete the user ${pendingCourse?.email}?`}
+                onConfirm={() => {
+                    handleDeleteUser(pendingCourse.uid);
+                    setIsDeleteUserConfirmOpen(false);
+                }}
+                onCancel={() => {
+                    setIsDeleteUserConfirmOpen(false);
+                    setPendingCourse(null);
+                }}
+                confirmLabel="Yes, Delete"
+                cancelLabel="Cancel"
+            />
         </div>
     );
     }
