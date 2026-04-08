@@ -68,7 +68,7 @@ public class CSP {
                     roomManager.bookRoom(value.getDay(), value.getStartFrame() + t, bookedRoom);
                 
                 
-                Map<Variable, DomainValue> removedValues = forwardCheck(var, value, assignment, variables, roomManager);
+                Map<Variable, List<DomainValue>> removedValues = forwardCheck(var, value, assignment, variables, roomManager);
                 
                 if(removedValues != null) {
                 	
@@ -78,7 +78,7 @@ public class CSP {
                         return result; // Solution found
                     }
                 }
-                undoForwardCheck(removedValues, variables);
+                undoForwardCheck(removedValues);
                 
                 for (int t = 0; t < var.getDuration(); t++) 
                     roomManager.releaseRoom(value.getDay(), value.getStartFrame() + t, bookedRoom);
@@ -177,17 +177,43 @@ public class CSP {
     
     
     // Placeholder for forward checking: In a real implementation, this would prune the domains of unassigned variables based on the current assignment
-    private Map<Variable, DomainValue> forwardCheck(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment, List<Variable> variables ,RoomManager roomManager ) {
-        // Implement forward checking to prune the domains of unassigned variables
-        return new HashMap<>(); // Placeholder: Return an empty map of removed values
+    private Map<Variable, List<DomainValue>> forwardCheck(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment, List<Variable> variables ,RoomManager roomManager ) {
+        Map<Variable, List<DomainValue>> removedValues = new HashMap<>();
+        
+        for (Variable futureVar : variables) {
+            if (!assignment.containsKey(futureVar)) {
+                List<DomainValue> toRemove = new ArrayList<>();
+                for (DomainValue futureValue : new ArrayList<>(futureVar.getDomain().getValues())) {
+                    if (isConsistent(futureVar, futureValue, assignment, roomManager) == null) {
+                        toRemove.add(futureValue);
+                    }
+                }
+                if (!toRemove.isEmpty()) {
+                    removedValues.put(futureVar, toRemove);
+                    futureVar.getDomain().getValues().removeAll(toRemove);
+                    
+                    if (futureVar.getDomain().getValues().isEmpty()) {
+                        undoForwardCheck(removedValues); // Restore domains before backtracking
+                        return null; // Failure: Domain wiped out
+                    }
+                }
+            }
+        }
+        return removedValues;
     }
 
     
     
 
     // Placeholder for undoing forward checking: In a real implementation, this would restore the domains of variables after backtracking
-    private void undoForwardCheck(Map<Variable, DomainValue> removedValues, List<Variable> variables) {
-        // Implement logic to restore the domains of variables after backtracking
+    private void undoForwardCheck(Map<Variable, List<DomainValue>> removedValues) {
+        if (removedValues != null) {
+            for (Map.Entry<Variable, List<DomainValue>> entry : removedValues.entrySet()) {
+                Variable var = entry.getKey();
+                List<DomainValue> valuesToRestore = entry.getValue();
+                var.getDomain().getValues().addAll(valuesToRestore);
+            }
+        }
     }
 
 
