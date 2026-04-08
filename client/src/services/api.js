@@ -397,3 +397,71 @@ export async function generateTimetable() {
 
   return res.json();
 }
+
+
+export async function getAllLecturers() {
+  const res = await fetch(`${BASE_URL}/getAllLecturers`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Fetch lecturers failed: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}
+
+export async function addLecturer(lecturer) {
+  const res = await fetch(`${BASE_URL}/addSingleLecturer`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(lecturer),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Add lecturer failed: ${res.status} ${text}`);
+  }
+
+  return res.text();
+}
+
+export async function updateLecturer(lecturer) {
+  const res = await fetch(`${BASE_URL}/updateLecturer`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(lecturer),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Update lecturer failed: ${res.status} ${text}`);
+  }
+
+  return res.text();
+}
+
+export async function deleteLecturers(lecturers) {
+  const res = await fetch(`${BASE_URL}/deleteLecturers`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(lecturers),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Delete lecturers failed: ${res.status} ${text}`);
+  }
+
+  return res.text();
+}

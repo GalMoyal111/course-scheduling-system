@@ -6,11 +6,13 @@ import com.coursescheduling.server.model.Classroom;
 import com.coursescheduling.server.service.ClassroomExcelService;
 import com.coursescheduling.server.service.CoursesExcelService;
 import com.coursescheduling.server.service.ExcelProcessingService;
+import com.coursescheduling.server.service.LecturerService;
 import com.coursescheduling.server.service.LessonService;
 import com.coursescheduling.server.model.ClassroomDeleteRequest;
 import com.coursescheduling.server.model.ClassroomUpdateRequest;
 import com.coursescheduling.server.model.CourseDeleteRequest;
 import com.coursescheduling.server.model.CourseUpdateRequest;
+import com.coursescheduling.server.model.Lecturer;
 import com.coursescheduling.server.model.ClusterCoursesList;
 import com.coursescheduling.server.service.ClassroomService;
 import com.coursescheduling.server.service.CourseService;
@@ -43,6 +45,9 @@ public class FileUploadController {
     
     @Autowired
     private LessonService lessonService;
+    
+    @Autowired
+    private LecturerService lecturerService;
     
     // @Autowired
     // private ClusterCoursesList clusterCoursesList;
@@ -228,6 +233,29 @@ public class FileUploadController {
             throw new RuntimeException("Failed to export lessons", e);
         }
     }
+    
+    @GetMapping("/getAllLecturers")
+    public List<Lecturer> getAllLecturers() throws Exception {
+        return lecturerService.getAllLecturers();
+    }
+
+    @PostMapping("/addSingleLecturer")
+    public String addLecturer(@RequestBody Lecturer lecturer) throws Exception {
+        lecturerService.addLecturer(lecturer);
+        return "Lecturer added successfully";
+    }
+
+    @PostMapping("/updateLecturer")
+    public String updateLecturer(@RequestBody Lecturer lecturer) throws Exception {
+        lecturerService.updateLecturer(lecturer);
+        return "Lecturer updated successfully";
+    }
+
+    @DeleteMapping("/deleteLecturers")
+    public void deleteLecturers(@RequestBody List<Lecturer> lecturers) throws Exception {
+        lecturerService.deleteLecturers(lecturers);
+    }
+    
     
 
     

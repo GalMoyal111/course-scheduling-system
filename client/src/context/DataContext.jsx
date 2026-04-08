@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useMemo } from "react";
 
 const DataContext = createContext();
 
@@ -48,38 +48,46 @@ export function DataProvider({ children }) {
     setLecturersTimestamp(null);
   }, []);
 
+  // הפתרון: שימוש ב-useMemo כדי למנוע יצירת אובייקט חדש בכל רינדור
+  const contextValue = useMemo(() => ({
+    // Data
+    lessons,
+    setLessons,
+    courses,
+    setCourses,
+    classrooms,
+    setClassrooms,
+    lecturers,
+    setLecturers,
+    
+    // Cache validation
+    isCacheValid,
+    lessonsTimestamp,
+    setLessonsTimestamp,
+    coursesTimestamp,
+    setCoursesTimestamp,
+    classroomsTimestamp,
+    setClassroomsTimestamp,
+    lecturersTimestamp,
+    setLecturersTimestamp,
+    
+    // Cache invalidation
+    invalidateLessonsCache,
+    invalidateCoursesCache,
+    invalidateClassroomsCache,
+    invalidateLecturersCache,
+    invalidateAllCache,
+  }), [
+    // רשימת התלויות: האובייקט ייווצר מחדש רק כשאחד מאלה ישתנה
+    lessons, courses, classrooms, lecturers,
+    lessonsTimestamp, coursesTimestamp, classroomsTimestamp, lecturersTimestamp,
+    isCacheValid, 
+    invalidateLessonsCache, invalidateCoursesCache, 
+    invalidateClassroomsCache, invalidateLecturersCache, invalidateAllCache
+  ]);
+
   return (
-    <DataContext.Provider
-      value={{
-        // Data
-        lessons,
-        setLessons,
-        courses,
-        setCourses,
-        classrooms,
-        setClassrooms,
-        lecturers,
-        setLecturers,
-        
-        // Cache validation
-        isCacheValid,
-        lessonsTimestamp,
-        setLessonsTimestamp,
-        coursesTimestamp,
-        setCoursesTimestamp,
-        classroomsTimestamp,
-        setClassroomsTimestamp,
-        lecturersTimestamp,
-        setLecturersTimestamp,
-        
-        // Cache invalidation
-        invalidateLessonsCache,
-        invalidateCoursesCache,
-        invalidateClassroomsCache,
-        invalidateLecturersCache,
-        invalidateAllCache,
-      }}
-    >
+    <DataContext.Provider value={contextValue}>
       {children}
     </DataContext.Provider>
   );

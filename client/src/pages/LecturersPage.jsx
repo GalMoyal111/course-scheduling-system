@@ -3,80 +3,34 @@ import Button from "../components/ui/Button";
 import AddLecturerModal from "../components/AddLecturerModal";
 import "./LecturersPage.css";
 
-// Sample lecturer data
+// Sample lecturer data with unavailableSlots structure
 const SAMPLE_LECTURERS = [
   {
     id: 1,
-    name: "Dr. Sarah Cohen",
-    maxDailyHours: 6,
-    maxConsecutiveHours: 3,
-    availability: generateDefaultAvailability(),
+    name: "ד״ר שרה כהן",
+    unavailableSlots: [
+      { day: 1, startFrame: 1 }, // יום ראשון, שעת בוקר מוקדמת
+      { day: 1, startFrame: 2 },
+    ],
   },
   {
     id: 2,
-    name: "Prof. David Levi",
-    maxDailyHours: 8,
-    maxConsecutiveHours: 4,
-    availability: generateDefaultAvailability(),
+    name: "פרופ׳ דוד לוי",
+    unavailableSlots: [], // זמין תמיד כברירת מחדל
   },
   {
     id: 3,
-    name: "Dr. Rachel Mizrahi",
-    maxDailyHours: 7,
-    maxConsecutiveHours: 5,
-    availability: generateDefaultAvailability(),
-  },
-  {
-    id: 4,
-    name: "Prof. Michael Roth",
-    maxDailyHours: 6,
-    maxConsecutiveHours: 3,
-    availability: generateDefaultAvailability(),
-  },
-  {
-    id: 5,
-    name: "Dr. Hannah Goldman",
-    maxDailyHours: 7,
-    maxConsecutiveHours: 4,
-    availability: generateDefaultAvailability(),
+    name: "ד״ר רחל מזרחי",
+    unavailableSlots: [
+      { day: 3, startFrame: 10 },
+      { day: 3, startFrame: 11 },
+    ],
   },
 ];
 
-// Generate default availability (all available)
-function generateDefaultAvailability() {
-  const availability = {};
-  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-  const times = [
-    "08:30-09:20",
-    "09:20-10:10",
-    "10:10-11:00",
-    "11:00-11:50",
-    "11:50-12:20", // Break
-    "12:20-13:10",
-    "13:10-14:00",
-    "14:00-14:50",
-    "14:50-15:40",
-    "15:40-16:30",
-    "16:30-17:20",
-    "17:20-18:10",
-    "18:10-19:00",
-    "19:00-19:50",
-    "19:50-20:40",
-  ];
-
-  days.forEach((day) => {
-    availability[day] = {};
-    times.forEach((time) => {
-      availability[day][time] = true; // true = available
-    });
-  });
-
-  return availability;
-}
-
 export default function LecturersPage() {
   const [lecturers, setLecturers] = useState(SAMPLE_LECTURERS);
-  const [selectedLecturerId, setSelectedLecturerId] = useState(lecturers[0].id);
+  const [selectedLecturerId, setSelectedLecturerId] = useState(lecturers[0]?.id);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLecturer, setEditingLecturer] = useState(null);
 
@@ -86,7 +40,7 @@ export default function LecturersPage() {
     const lecturer = {
       id: Math.max(...lecturers.map((l) => l.id), 0) + 1,
       ...newLecturer,
-      availability: generateDefaultAvailability(),
+      unavailableSlots: newLecturer.unavailableSlots || [], // Initialize if missing
     };
     setLecturers([...lecturers, lecturer]);
     setSelectedLecturerId(lecturer.id);
@@ -95,30 +49,38 @@ export default function LecturersPage() {
 
   const handleEditLecturer = (updatedLecturer) => {
     setLecturers(
-      lecturers.map((l) =>
-        l.id === updatedLecturer.id ? updatedLecturer : l
-      )
+      lecturers.map((l) => (l.id === updatedLecturer.id ? updatedLecturer : l))
     );
     setIsModalOpen(false);
     setEditingLecturer(null);
   };
 
-  const handleToggleAvailability = (day, time) => {
+  const handleToggleAvailability = (dayIndex, startFrame) => {
     setLecturers(
-      lecturers.map((l) => {
-        if (l.id === selectedLecturerId) {
-          return {
-            ...l,
-            availability: {
-              ...l.availability,
-              [day]: {
-                ...l.availability[day],
-                [time]: !l.availability[day][time],
-              },
-            },
-          };
+      lecturers.map((lecturer) => {
+        if (lecturer.id === selectedLecturerId) {
+          // Check if slot exists in unavailable array
+          const slotExists = lecturer.unavailableSlots.some(
+            (slot) => slot.day === dayIndex && slot.startFrame === startFrame
+          );
+
+          let updatedSlots;
+          if (slotExists) {
+            // If exists, remove it (make available)
+            updatedSlots = lecturer.unavailableSlots.filter(
+              (slot) => !(slot.day === dayIndex && slot.startFrame === startFrame)
+            );
+          } else {
+            // If doesn't exist, add it (make unavailable)
+            updatedSlots = [
+              ...lecturer.unavailableSlots,
+              { day: dayIndex, startFrame: startFrame },
+            ];
+          }
+
+          return { ...lecturer, unavailableSlots: updatedSlots };
         }
-        return l;
+        return lecturer;
       })
     );
   };
@@ -134,20 +96,20 @@ export default function LecturersPage() {
   };
 
   return (
-    <div className="lecturers-page">
+    <div className="lecturers-page" dir="rtl">
       <div className="lecturers-container">
-        {/* Left Sidebar - Lecturers List */}
+        {/* Right Sidebar - Lecturers List (RTL aligns right) */}
         <div className="lecturers-sidebar">
           <div className="lecturers-header">
-            <h2>Lecturers</h2>
+            <h2>מרצים</h2>
             <button
               className="add-lecturer-btn"
               onClick={() => {
                 setEditingLecturer(null);
                 setIsModalOpen(true);
               }}
-              title="Add lecturer"
-              aria-label="Add lecturer"
+              title="הוספת מרצה"
+              aria-label="הוספת מרצה"
             >
               <span className="material-icons">add</span>
             </button>
@@ -163,13 +125,12 @@ export default function LecturersPage() {
                 onClick={() => setSelectedLecturerId(lecturer.id)}
               >
                 <p className="lecturer-name">{lecturer.name}</p>
-                <p className="lecturer-hours">Max {lecturer.maxDailyHours}h/day</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Right Panel - Lecturer Details and Availability */}
+        {/* Main Panel - Lecturer Details and Availability */}
         {selectedLecturer && (
           <div className="lecturer-details-panel">
             {/* Header with lecturer name and edit button */}
@@ -177,27 +138,16 @@ export default function LecturersPage() {
               <h1>{selectedLecturer.name}</h1>
               <button className="edit-btn" onClick={openEditModal}>
                 <span className="material-icons">edit</span>
-                Edit
+                עריכה
               </button>
-            </div>
-
-            {/* Lecturer Info */}
-            <div className="lecturer-info">
-              <div className="info-item">
-                <p className="info-label">Max Daily Hours</p>
-                <p className="info-value">{selectedLecturer.maxDailyHours}h</p>
-              </div>
-              <div className="info-item">
-                <p className="info-label">Max Consecutive Hours</p>
-                <p className="info-value">
-                  {selectedLecturer.maxConsecutiveHours}h
-                </p>
-              </div>
             </div>
 
             {/* Weekly Availability Timetable */}
             <div className="availability-section">
-              <h3>Weekly Availability</h3>
+              <h3> Weekly availability </h3>
+              <p className="availability-hint">
+                 click on a cell to toggle availability (green = available, red = unavailable)
+              </p>
               <AvailabilityTable
                 lecturer={selectedLecturer}
                 onToggle={handleToggleAvailability}
@@ -219,38 +169,31 @@ export default function LecturersPage() {
 }
 
 function AvailabilityTable({ lecturer, onToggle }) {
+  // Mapping days to indices matching DomainValue (1 = Sunday, 6 = Friday)
   const hebrewDays = [
-    "ראשון",
-    "שני",
-    "שלישי",
-    "רביעי",
-    "חמישי",
-    "שישי",
-  ];
-  const englishDays = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
+    { name: "ראשון", index: 1 },
+    { name: "שני", index: 2 },
+    { name: "שלישי", index: 3 },
+    { name: "רביעי", index: 4 },
+    { name: "חמישי", index: 5 },
+    { name: "שישי", index: 6 },
   ];
 
+  // Defining the time frames (frames 1 to 15, matching DomainValue)
   const times = [
-    { range: "08:30-09:20", isBreak: false },
-    { range: "09:30-10:20", isBreak: false },
-    { range: "10:30-11:20", isBreak: false },
-    { range: "11:30-12:20", isBreak: false },
-    { range: "12:20-12:50", isBreak: true }, // Break
-    { range: "12:50-13:40", isBreak: false },
-    { range: "13:50-14:40", isBreak: false },
-    { range: "14:50-15:40", isBreak: false },
-    { range: "15:50-16:40", isBreak: false },
-    { range: "16:50-17:40", isBreak: false },
-    { range: "17:50-18:40", isBreak: false },
-    { range: "18:50-19:40", isBreak: false },
-    { range: "19:50-20:40", isBreak: false },
-
+    { range: "08:30-09:20", frame: 1, isBreak: false },
+    { range: "09:30-10:20", frame: 2, isBreak: false },
+    { range: "10:30-11:20", frame: 3, isBreak: false },
+    { range: "11:30-12:20", frame: 4, isBreak: false },
+    { range: "12:20-12:50", frame: null, isBreak: true }, // Break has no frame
+    { range: "12:50-13:40", frame: 5, isBreak: false },
+    { range: "13:50-14:40", frame: 6, isBreak: false },
+    { range: "14:50-15:40", frame: 7, isBreak: false },
+    { range: "15:50-16:40", frame: 8, isBreak: false },
+    { range: "16:50-17:40", frame: 9, isBreak: false },
+    { range: "17:50-18:40", frame: 10, isBreak: false },
+    { range: "18:50-19:40", frame: 11, isBreak: false },
+    { range: "19:50-20:40", frame: 12, isBreak: false },
   ];
 
   return (
@@ -258,12 +201,11 @@ function AvailabilityTable({ lecturer, onToggle }) {
       <table className="availability-table">
         <thead>
           <tr>
-            <th className="time-column">Time</th>
-            {hebrewDays.map((day, index) => (
-              <th key={day} className="day-column">
+            <th className="time-column">שעות</th>
+            {hebrewDays.map((day) => (
+              <th key={day.index} className="day-column">
                 <div className="day-header-content">
-                  <div className="day-hebrew">{day}</div>
-                  <div className="day-english">{englishDays[index]}</div>
+                  <div className="day-hebrew">{day.name}</div>
                 </div>
               </th>
             ))}
@@ -275,30 +217,39 @@ function AvailabilityTable({ lecturer, onToggle }) {
               <td className={`time-cell ${timeItem.isBreak ? "break-time" : ""}`}>
                 {timeItem.range}
               </td>
-              {englishDays.map((day) => {
-                if (timeItem.isBreak) {
+              {hebrewDays.map((day) => {
+                const isTuesdayAfternoon = day.index === 6 && timeItem.frame >= 5;
+                if (timeItem.isBreak || isTuesdayAfternoon) {
                   return (
                     <td
-                      key={`${day}-${timeItem.range}`}
+                      key={`${day.index}-break-${timeItem.range}`}
                       className="availability-cell break-cell"
                     >
-                      Break
+                      {timeItem.isBreak ? "Break" : "No classes"}
                     </td>
                   );
                 }
 
-                const isAvailable = lecturer.availability[day][timeItem.range];
+                // Check if this specific day and frame is in the unavailableSlots array
+                const isUnavailable = lecturer.unavailableSlots.some(
+                  (slot) =>
+                    slot.day === day.index && slot.startFrame === timeItem.frame
+                );
+                
+                // If it is NOT in unavailable slots, then the lecturer is Available
+                const isAvailable = !isUnavailable;
+
                 return (
                   <td
-                    key={`${day}-${timeItem.range}`}
+                    key={`${day.index}-${timeItem.frame}`}
                     className={`availability-cell ${
                       isAvailable ? "available" : "unavailable"
                     }`}
-                    onClick={() => onToggle(day, timeItem.range)}
+                    onClick={() => onToggle(day.index, timeItem.frame)}
                     title={
                       isAvailable
-                        ? "Click to mark unavailable"
-                        : "Click to mark available"
+                        ? "available - click to block"
+                        : "unavailable - click to unblock"
                     }
                   />
                 );
