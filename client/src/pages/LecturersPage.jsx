@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Button from "../components/ui/Button";
 import AddLecturerModal from "../components/AddLecturerModal";
 import { useData } from "../context/DataContext";
-import { getAllLecturers, addLecturer, updateLecturer, deleteLecturers } from "../services/api";
+import { getAllLecturers, addLecturer, updateLecturer, deleteLecturers, uploadLecturersExcel, exportLecturersExcel } from "../services/api";
 import "./LecturersPage.css";
 import ConfirmModal from "../components/ConfirmModal";
 
@@ -16,7 +16,6 @@ export default function LecturersPage() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // States למודל המחיקה
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [lecturerToPendingDelete, setLecturerToPendingDelete] = useState(null);
 
@@ -167,6 +166,36 @@ export default function LecturersPage() {
     setSelectedLecturerId(id);
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      await uploadLecturersExcel(file);
+      alert("Lecturers uploaded successfully!");
+      invalidateLecturersCache();
+      loadLecturers();
+    } catch (err) {
+      console.error("Detailed upload error:", err);
+      alert("Error uploading file");
+    
+    } finally {
+      e.target.value = null; // מנקה את ה-input כמו שדיברנו
+    }
+};
+
+const handleExport = async () => {
+    try {
+      const blob = await exportLecturersExcel();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'lecturers_availability.xlsx';
+      a.click();
+    } catch (err) {
+      alert("Error exporting file");
+    }
+  };
+
   return (
     <div className="lecturers-page">
       <div className="lecturers-container">
@@ -174,10 +203,22 @@ export default function LecturersPage() {
         {/* Sidebar */}
         <div className="lecturers-sidebar">
           <div className="lecturers-header">
-            <h2>Lecturers</h2>
-            <button className="add-lecturer-btn" onClick={() => { setEditingLecturer(null); setIsModalOpen(true); }} title="Add Lecturer">
-              <span className="material-icons">add</span>
-            </button>
+            <div style={{ display: "flex", gap: "5px" }}>
+              {/* כפתור ייצוא */}
+              <button className="icon-btn" onClick={handleExport} title="Export to Excel">
+                <span className="material-icons">download</span>
+              </button>
+              
+              {/* כפתור ייבוא (נסתר מאחורי אייקון) */}
+              <label className="icon-btn" style={{ cursor: "pointer" }} title="Import from Excel">
+                <span className="material-icons">upload</span>
+                <input type="file" onChange={handleFileUpload} style={{ display: "none" }} accept=".xlsx, .xls" />
+              </label>
+
+              <button className="add-lecturer-btn" onClick={() => { setEditingLecturer(null); setIsModalOpen(true); }} title="Add Lecturer">
+                <span className="material-icons">add</span>
+              </button>
+            </div>
           </div>
 
           <div className="lecturers-list">

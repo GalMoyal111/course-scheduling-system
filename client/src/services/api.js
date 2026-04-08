@@ -465,3 +465,25 @@ export async function deleteLecturers(lecturers) {
 
   return res.text();
 }
+
+
+export async function uploadLecturersExcel(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`${BASE_URL}/lecturers/upload`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) throw new Error("Upload failed");
+  return res.text();
+}
+
+export async function exportLecturersExcel() {
+  const res = await fetch(`${BASE_URL}/lecturers/export`, {
+    method: "GET",
+    headers: { Accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+  });
+  if (!res.ok) throw new Error("Export failed");
+  return res.blob();
+}
+

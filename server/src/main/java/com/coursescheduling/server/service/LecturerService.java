@@ -69,5 +69,23 @@ public class LecturerService {
         batch.commit().get(); 
     }
 	
+	
+	public void saveLecturersBatch(List<Lecturer> lecturers) throws Exception {
+	    Firestore db = FirestoreClient.getFirestore();
+	    WriteBatch batch = db.batch();
+
+	    for (Lecturer lecturer : lecturers) {
+	        String id = (lecturer.getId() != null && !lecturer.getId().isEmpty()) 
+	                    ? lecturer.getId() 
+	                    : db.collection(COLLECTION_NAME).document().getId();
+	        
+	        DocumentReference docRef = db.collection(COLLECTION_NAME).document(id);
+	        
+	        lecturer.setId(id);
+	        batch.set(docRef, lecturer);
+	    }
+
+	    batch.commit().get();
+	}
 
 }

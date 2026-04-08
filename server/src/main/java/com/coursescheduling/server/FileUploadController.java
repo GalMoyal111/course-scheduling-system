@@ -6,6 +6,7 @@ import com.coursescheduling.server.model.Classroom;
 import com.coursescheduling.server.service.ClassroomExcelService;
 import com.coursescheduling.server.service.CoursesExcelService;
 import com.coursescheduling.server.service.ExcelProcessingService;
+import com.coursescheduling.server.service.LecturerExcelService;
 import com.coursescheduling.server.service.LecturerService;
 import com.coursescheduling.server.service.LessonService;
 import com.coursescheduling.server.model.ClassroomDeleteRequest;
@@ -48,6 +49,11 @@ public class FileUploadController {
     
     @Autowired
     private LecturerService lecturerService;
+    
+    
+    @Autowired
+    private LecturerExcelService lecturerExcelService;
+    
     
     // @Autowired
     // private ClusterCoursesList clusterCoursesList;
@@ -257,6 +263,38 @@ public class FileUploadController {
     }
     
     
+    @PostMapping("/lecturers/upload")
+    public String uploadLecturers(@RequestParam("file") MultipartFile file) {
+
+        if (file.isEmpty()) {
+            return "File is empty!"; // או לזרוק Exception, תלוי איך את מעדיפה
+        }
+
+        System.out.println("Received lecturers file: " + file.getOriginalFilename());
+
+        // כאן קוראים לסרוויס שיודע לפענח את קובץ האקסל של המרצים
+        lecturerExcelService.process(file); 
+
+        return "Lecturers uploaded successfully";
+    }
+
+    @GetMapping("/lecturers/export")
+    public ResponseEntity<byte[]> exportLecturers() {
+
+        try {
+            // כאן קוראים לסרוויס שיודע לייצר את קובץ האקסל של המרצים
+            byte[] excelData = lecturerExcelService.exportLecturersToExcel();
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=lecturers.xlsx")
+                    .header("Content-Type",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    .body(excelData);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export lecturers", e);
+        }
+    }
 
     
 }
