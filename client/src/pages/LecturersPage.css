@@ -13,7 +13,8 @@
   grid-template-columns: 240px 1fr;
   gap: 1.5rem;
   height: 100%;
-  overflow: visible;
+  /* שינוי קריטי 1: כדי למנוע גלישה, אנחנו נותנים לקונטיינר להגביל את הילדים */
+  overflow: hidden; 
 }
 
 /* Sidebar */
@@ -27,6 +28,13 @@
   gap: 1rem;
   height: 100%;
   border: 1px solid #f2f4f7;
+  overflow-y: auto;
+}
+
+.lecturers-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .lecturers-header h2 {
@@ -43,12 +51,45 @@
   border-radius: 10px;
   padding: 0.5rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s;
 }
 
 .add-lecturer-btn:hover {
   background: #4f46e5;
   transform: translateY(-1px);
+}
+
+.lecturers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lecturer-item {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.lecturer-item:hover {
+  background-color: #f8fafc;
+}
+
+.lecturer-item.active {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.lecturer-name {
+  margin: 0;
+  font-size: 0.95rem;
 }
 
 /* Lecturer Details Panel */
@@ -62,6 +103,8 @@
   gap: 1.5rem;
   height: 100%;
   border: 1px solid #f2f4f7;
+  /* שינוי קריטי 2: לאפשר לפאנל הפנימי להיגלל אם הטבלה גדולה מדי */
+  overflow-y: auto; 
 }
 
 .details-header h1 {
@@ -70,9 +113,60 @@
   margin: 0;
 }
 
+/* עיצוב כפתור העריכה החדש (אייקון בלבד) */
+.edit-icon-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.edit-icon-btn:hover {
+  background: #f1f5f9;
+  color: #3b82f6;
+}
+
+.edit-icon-btn .material-icons {
+  font-size: 20px;
+}
+
+/* Section holding the table */
+.availability-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  /* שינוי קריטי 3: מונע גלישה בלתי נשלטת של Flexbox */
+  min-height: 0; 
+}
+
+.availability-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.availability-header-row h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.1rem;
+}
+
+.availability-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
 /* Availability Table Styles */
 .availability-table-wrapper {
-  overflow-x: auto;
+  flex: 1;
+  overflow: auto; /* מאפשר לטבלה להיגלל לצדדים ולמטה בלי לדחוף את השאר */
   border-radius: 12px;
   border: 1px solid #eaecf0;
   background: #ffffff;
@@ -81,10 +175,9 @@
 .availability-table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 4px; /* יוצר מרווח עדין בין הקוביות */
+  border-spacing: 4px;
   font-size: 0.8rem;
   direction: ltr;
-  /* תכונה קריטית לרוחב זהה */
   table-layout: fixed; 
   min-width: 850px;
 }
@@ -100,13 +193,10 @@
   border-bottom: 1px solid #eaecf0;
 }
 
-/* הגדרת רוחב עמודת הזמן */
 .time-column {
   width: 90px;
   text-align: center;
 }
-
-/* כל שאר העמודות יתחלקו שווה בשווה בגלל ה-table-layout: fixed */
 
 .time-cell {
   font-weight: 600;
@@ -116,34 +206,31 @@
   border-radius: 8px;
 }
 
-/* עיצוב הקוביות (התאים) */
 .availability-cell {
   height: 44px;
   cursor: pointer;
-  border-radius: 10px; /* עיגול פינות משמעותי יותר */
+  border-radius: 10px; 
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid transparent;
   position: relative;
+  text-align: center;
 }
 
-/* צבע פנוי - ירוק עדין */
 .availability-cell.available {
   background-color: #dbfde5;
   border-color: #72f6a0;
 }
 
-/* צבע חסום - אדום/ורוד עדין */
 .availability-cell.unavailable {
   background-color: #fef2f2;
   border-color: #fecaca;
 }
 
-/* אפקט המעבר מעל הקובייה */
 .availability-cell:hover:not(.break-cell) {
   transform: scale(1.08);
   z-index: 10;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-color: #6366f1; /* מסגרת בולטת יותר ב-hover */
+  border-color: #6366f1; 
 }
 
 .availability-cell.available:hover {
@@ -154,29 +241,24 @@
   background-color: #fee2e2;
 }
 
-/* תאי הפסקה */
 .break-cell {
   background-color: #f2f4f7 !important;
   border-color: #d0d5dd !important;
   cursor: not-allowed;
   opacity: 0.6;
+  font-weight: 500;
+  color: #64748b;
 }
 
 .day-hebrew {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #101828;
-  margin-bottom: 2px;
-}
-
-.day-english {
-  font-size: 0.7rem;
-  color: #667085;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 700;
 }
 
 @media (max-width: 768px) {
   .lecturers-container {
     grid-template-columns: 1fr;
+    overflow: auto;
   }
 }

@@ -4,6 +4,8 @@ public class DomainValue {
 	private int day;
 	private int startFrame;
 
+	public DomainValue() {
+    }
 	
 	public DomainValue(int day, int startFrame) {
         this.day = day;
