@@ -18,6 +18,7 @@ export default function Topbar({ user, onLogin, onLogout }) {
 
   const map = {
     "/": "Dashboard",
+    "/lecturers": "Lecturers",
     "/courses": "Courses",
     "/classrooms": "Classrooms",
     "/lessons": "Lessons",

@@ -183,7 +183,6 @@ function UploadPage() {
 
   return (
     <div>
-      <h2>Upload Lessons Excel</h2>
       <div className="toolbar">
         <div className="left">
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

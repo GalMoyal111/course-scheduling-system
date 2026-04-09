@@ -164,7 +164,6 @@ function UploadRoomsPage() {
 
   return (
     <div>
-      <h2>Upload Rooms Excel</h2>
       <div className="toolbar">
         <div className="left">
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

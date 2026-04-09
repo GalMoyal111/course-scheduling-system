@@ -235,7 +235,6 @@ export default function UploadCoursesPage() {
 
   return (
     <div>
-      <h2>Upload Courses Excel</h2>
 
       <div className="toolbar">
         <div className="left">

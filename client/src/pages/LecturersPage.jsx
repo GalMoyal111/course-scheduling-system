@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Button from "../components/ui/Button";
 import AddLecturerModal from "../components/AddLecturerModal";
+import UploadForm from "../components/UploadForm";
 import { useData } from "../context/DataContext";
 import { getAllLecturers, addLecturer, updateLecturer, deleteLecturers, uploadLecturersExcel, exportLecturersExcel } from "../services/api";
 import "./LecturersPage.css";
@@ -18,6 +19,8 @@ export default function LecturersPage() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [lecturerToPendingDelete, setLecturerToPendingDelete] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingFile, setPendingFile] = useState(null);
 
   const loadLecturers = async () => {
     try {
@@ -166,22 +169,34 @@ export default function LecturersPage() {
     setSelectedLecturerId(id);
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
+  const handleUpload = async (file) => {
+    // Show confirmation before performing an upload that overwrites data
     if (!file) return;
+    setPendingFile(file);
+    setConfirmOpen(true);
+  };
+
+  const performUpload = async () => {
+    if (!pendingFile) return;
+    setConfirmOpen(false);
+    const fileToUpload = pendingFile;
+    setPendingFile(null);
+
     try {
-      await uploadLecturersExcel(file);
+      await uploadLecturersExcel(fileToUpload);
       alert("Lecturers uploaded successfully!");
       invalidateLecturersCache();
-      loadLecturers();
+      await loadLecturers();
     } catch (err) {
       console.error("Detailed upload error:", err);
       alert("Error uploading file");
-    
-    } finally {
-      e.target.value = null; // מנקה את ה-input כמו שדיברנו
     }
-};
+  };
+
+  const cancelUpload = () => {
+    setConfirmOpen(false);
+    setPendingFile(null);
+  };
 
 const handleExport = async () => {
     try {
@@ -198,28 +213,32 @@ const handleExport = async () => {
 
   return (
     <div className="lecturers-page">
+      {/* Top upload + actions section */}
+      <div className="lecturers-top-section" style={{ marginBottom: 12 }}>
+        <div className="toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div />
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button onClick={() => { setIsModalOpen(true); setEditingLecturer(null); }} variant="secondary">
+              <span className="material-icons" style={{ fontSize: 18, marginRight: 8 }}>add</span>
+              Add a lecturer
+            </Button>
+            <Button onClick={handleExport} variant="primary">
+              <span className="material-icons" style={{ fontSize: 18, marginRight: 8 }}>download</span>
+              Export
+            </Button>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <UploadForm onUpload={handleUpload} />
+        </div>
+      </div>
+
       <div className="lecturers-container">
         
         {/* Sidebar */}
         <div className="lecturers-sidebar">
-          <div className="lecturers-header">
-            <div style={{ display: "flex", gap: "5px" }}>
-              {/* כפתור ייצוא */}
-              <button className="icon-btn" onClick={handleExport} title="Export to Excel">
-                <span className="material-icons">download</span>
-              </button>
-              
-              {/* כפתור ייבוא (נסתר מאחורי אייקון) */}
-              <label className="icon-btn" style={{ cursor: "pointer" }} title="Import from Excel">
-                <span className="material-icons">upload</span>
-                <input type="file" onChange={handleFileUpload} style={{ display: "none" }} accept=".xlsx, .xls" />
-              </label>
-
-              <button className="add-lecturer-btn" onClick={() => { setEditingLecturer(null); setIsModalOpen(true); }} title="Add Lecturer">
-                <span className="material-icons">add</span>
-              </button>
-            </div>
-          </div>
+          <div className="lecturers-header" />
 
           <div className="lecturers-list">
             {lecturers.length === 0 ? (
@@ -322,6 +341,16 @@ const handleExport = async () => {
         }}
         confirmLabel="Yes, Delete"
         cancelLabel="No, Keep"
+      />
+      <ConfirmModal
+        isOpen={confirmOpen}
+        title="Upload will overwrite existing data"
+        message={"Note: uploading a new file will completely delete everything that existed in the system."}
+        fileName={pendingFile ? pendingFile.name : ""}
+        onConfirm={performUpload}
+        onCancel={cancelUpload}
+        confirmLabel="Yes, upload"
+        cancelLabel="No, cancel"
       />
     </div>
   );
