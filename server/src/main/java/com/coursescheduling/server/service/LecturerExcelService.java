@@ -23,42 +23,36 @@ public class LecturerExcelService {
 	    try (InputStream is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
 	        Sheet sheet = workbook.getSheetAt(0);
 	        Iterator<Row> rows = sheet.iterator();
-
 	        Map<String, Lecturer> lecturerMap = new HashMap<>();
 
-	        if (rows.hasNext()) rows.next();
+	        if (rows.hasNext()) rows.next(); // Skip header
 
 	        DataFormatter formatter = new DataFormatter();
-
 	        while (rows.hasNext()) {
 	            Row currentRow = rows.next();
-	            
 	            if (currentRow == null) continue;
 
 	            String name = formatter.formatCellValue(currentRow.getCell(0)).trim();
 	            String dayStr = formatter.formatCellValue(currentRow.getCell(1)).trim();
 	            String startFrameStr = formatter.formatCellValue(currentRow.getCell(2)).trim();
-	           
 
-	            if (name.isEmpty() || startFrameStr.isEmpty() || dayStr.isEmpty()) {
-	                continue;
-	            }
+	            if (name.isEmpty() || startFrameStr.isEmpty() || dayStr.isEmpty()) continue;
 
 	            try {
 	                int startFrame = Integer.parseInt(startFrameStr);
 	                int day = Integer.parseInt(dayStr);
 
-	                // מוסיפים למפה
 	                lecturerMap.putIfAbsent(name, new Lecturer(null, name, new ArrayList<>()));
 	                lecturerMap.get(name).getUnavailableSlots().add(new DomainValue(day, startFrame));
-	                
 	            } catch (NumberFormatException e) {
-	                System.out.println("Skipping invalid row for lecturer '" + name + "': Expected numbers for day/frame but got text.");
 	            }
 	        }
 
 	        List<Lecturer> lecturersToSave = new ArrayList<>(lecturerMap.values());
+	        
 	        if (!lecturersToSave.isEmpty()) {
+	            lecturerService.deleteAllLecturers();
+	            
 	            lecturerService.saveLecturersBatch(lecturersToSave);
 	        }
 
@@ -66,6 +60,8 @@ public class LecturerExcelService {
 	        throw new RuntimeException("fail to store excel data: " + e.getMessage(), e);
 	    }
 	}
+	
+	
 
     public byte[] exportLecturersToExcel() throws Exception {
         List<Lecturer> lecturers = lecturerService.getAllLecturers();

@@ -87,5 +87,26 @@ public class LecturerService {
 
 	    batch.commit().get();
 	}
+	
+	
+	public void deleteAllLecturers() throws Exception {
+	    Firestore db = FirestoreClient.getFirestore();
+	    Iterable<DocumentReference> docRefs = db.collection(COLLECTION_NAME).listDocuments();
+	    
+	    WriteBatch batch = db.batch();
+	    boolean hasOperations = false;
+
+	    for (DocumentReference docRef : docRefs) {
+	        batch.delete(docRef);
+	        hasOperations = true;
+	    }
+
+	    if (hasOperations) {
+	        batch.commit().get();
+	    }
+	}
+	
+	
+	
 
 }
