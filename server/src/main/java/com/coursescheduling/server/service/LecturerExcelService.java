@@ -36,15 +36,21 @@ public class LecturerExcelService {
 	            String dayStr = formatter.formatCellValue(currentRow.getCell(1)).trim();
 	            String startFrameStr = formatter.formatCellValue(currentRow.getCell(2)).trim();
 
-	            if (name.isEmpty() || startFrameStr.isEmpty() || dayStr.isEmpty()) continue;
-
-	            try {
-	                int startFrame = Integer.parseInt(startFrameStr);
-	                int day = Integer.parseInt(dayStr);
-
-	                lecturerMap.putIfAbsent(name, new Lecturer(null, name, new ArrayList<>()));
-	                lecturerMap.get(name).getUnavailableSlots().add(new DomainValue(day, startFrame));
-	            } catch (NumberFormatException e) {
+	            if (name.isEmpty()) {
+	                continue;
+	            }
+	            
+	            lecturerMap.putIfAbsent(name, new Lecturer(null, name, new ArrayList<>()));
+	            
+	            
+	            if (!dayStr.isEmpty() && !startFrameStr.isEmpty()) {
+	                try {
+	                    int startFrame = Integer.parseInt(startFrameStr);
+	                    int day = Integer.parseInt(dayStr);
+	                    lecturerMap.get(name).getUnavailableSlots().add(new DomainValue(day, startFrame));
+	                } catch (NumberFormatException e) {
+	                    System.out.println("Skipping invalid slot for: " + name);
+	                }
 	            }
 	        }
 
