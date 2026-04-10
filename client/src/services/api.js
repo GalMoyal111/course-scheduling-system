@@ -14,7 +14,12 @@ export async function uploadLessons(file) {
     body: formData,
   });
 
-  return res.text();
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Upload failed: ${res.status} ${text}`);
+  }
+
+  return res.json(); // Assuming the server returns JSON with details about the upload
 }
 
 export async function uploadCourses(file) {

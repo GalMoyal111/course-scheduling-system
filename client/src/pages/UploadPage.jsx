@@ -25,6 +25,10 @@ function UploadPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
 
+  const [summaryModalOpen, setSummaryModalOpen] = useState(false);
+  const [uploadSummary, setUploadSummary] = useState({savedCount: 0, missingCourses: [],missingLecturers: [], totalRows: 0});
+
+
   useEffect(() => {
     if (lessons.length === 0) {
       loadLessons();
@@ -58,13 +62,15 @@ function UploadPage() {
   const performUpload = async () => {
     if (!pendingFile) return;
     setConfirmOpen(false);
+    const fileToUpload = pendingFile;
     setPendingFile(null);
 
     try {
-      const result = await uploadLessons(pendingFile);
-      alert(result || "Upload successful");
-      // refresh list after successful upload
-      try { await loadLessons(); } catch (e) { /* ignore */ }
+      const result = await uploadLessons(fileToUpload);
+      setUploadSummary(result);
+      setSummaryModalOpen(true);
+      await loadLessons();
+
     } catch (err) {
       console.error(err);
       alert("Upload failed. Check console for details.");
@@ -296,8 +302,103 @@ function UploadPage() {
         confirmLabel="Yes, delete"
         cancelLabel="No, keep"
       />
+
+      <LessonUploadSummaryModal 
+        isOpen={summaryModalOpen} 
+        summary={uploadSummary} 
+        onClose={() => setSummaryModalOpen(false)} 
+      />
     </div>
   );
 }
 
 export default UploadPage;
+
+
+function LessonUploadSummaryModal({ isOpen, summary, onClose }) {
+  if (!isOpen) return null;
+
+  // פונקציית עזר להצגת קטגוריית שגיאה בצורה נקייה
+  const renderIssueSection = (title, issues) => {
+    if (!issues || issues.length === 0) return null;
+    
+    return (
+      <div className="summary-section" style={{ marginBottom: '20px' }}>
+        <h4 style={{ 
+          fontSize: '14px', 
+          color: '#b45309', 
+          textTransform: 'uppercase', 
+          borderBottom: '1px solid #fde68a',
+          paddingBottom: '4px',
+          marginBottom: '8px'
+        }}>
+          {title}
+        </h4>
+        <div style={{ maxHeight: '120px', overflowY: 'auto', paddingLeft: '5px' }}>
+          {issues.map((issue, idx) => (
+            <div key={idx} style={{ fontSize: '13px', marginBottom: '4px', color: '#4b5563' }}>
+              <span style={{ fontWeight: '600' }}>{issue.identifier}</span>
+              <span style={{ color: '#9ca3af', marginLeft: '6px' }}>
+                (Lines: {issue.rows.join(', ')})
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="modal-overlay">
+      {/* עיצוב צר ואלגנטי */}
+      <div className="modal-card" style={{ maxWidth: '450px', width: '100%', borderRadius: '12px' }}>
+        <div className="modal-header">
+          <h3 style={{ fontSize: '20px', fontWeight: '600' }}>Upload Summary</h3>
+        </div>
+
+        <div className="modal-body" style={{ padding: '24px' }}>
+          {/* שורת סיכום הצלחה */}
+          <div style={{ 
+            textAlign: 'center', 
+            backgroundColor: '#f0fdf4', 
+            padding: '15px', 
+            borderRadius: '8px', 
+            marginBottom: '24px',
+            border: '1px solid #dcfce7'
+          }}>
+            <div style={{ color: '#166534', fontWeight: '700', fontSize: '18px' }}>
+              ✓ {summary.savedCount} Lessons Saved
+            </div>
+            <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+              Out of {summary.totalRows} rows processed
+            </div>
+          </div>
+
+          {/* הצגת כל סוגי השגיאות באנגלית */}
+          {renderIssueSection("Missing Courses", summary.missingCourses)}
+          {renderIssueSection("Missing Lecturers", summary.missingLecturers)}
+          {renderIssueSection("Invalid Lesson Types", summary.invalidTypes)}
+          {renderIssueSection("Invalid Semesters", summary.invalidSemesters)}
+          {renderIssueSection("Invalid Durations", summary.invalidDurations)}
+
+          {/* הודעה למקרה ששום דבר לא נשמר */}
+          {summary.savedCount === 0 && (
+            <p style={{ color: '#ef4444', textAlign: 'center', fontSize: '14px', fontWeight: '500' }}>
+              No lessons were imported. Please fix the errors above.
+            </p>
+          )}
+        </div>
+
+        <div className="modal-actions" style={{ padding: '16px 24px' }}>
+          <Button 
+            variant="primary" 
+            onClick={onClose} 
+            style={{ width: '100%', padding: '10px', fontWeight: '600' }}
+          >
+            Close Summary
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

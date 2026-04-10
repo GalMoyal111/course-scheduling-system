@@ -65,15 +65,13 @@ public class FileUploadController {
     }
     // Endpoint to handle POST requests for file uploads. It expects a multipart form-data request with a file parameter named "file".
     @PostMapping("/upload")
-    public String uploadFile(@RequestParam("file") MultipartFile file) {
+    public ExcelProcessingService.LessonUploadSummary uploadFile(@RequestParam("file") MultipartFile file) {
 
         if (file.isEmpty()) {
-            return "File is empty!";
+            throw new RuntimeException("File is empty!");
         }
 
-        excelProcessingService.process(file);
-
-        return "File uploaded successfully!";
+        return excelProcessingService.process(file);
     }
     
     @PostMapping("/courses/upload")

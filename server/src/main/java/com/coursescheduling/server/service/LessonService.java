@@ -64,6 +64,7 @@ public class LessonService {
 	    deleteAllLessons();
 
 	    WriteBatch batch = db.batch();
+	    int count = 0;
 
 	    for (Lesson lesson : lessons) {
 
@@ -72,13 +73,28 @@ public class LessonService {
 	        }
 
 	        DocumentReference docRef = db.collection("lessons").document(lesson.getLessonId());
+	        batch.set(docRef, convertLessonToMap(lesson));
+	        count++;
+	        
+	        if (count == 500) {
+	            try {
+	                batch.commit().get();
+	                batch = db.batch(); 
+	                count = 0;
+	            } catch (Exception e) {
+	                throw new RuntimeException("Failed to commit batch of 500", e);
+	            }
+	        }
 
-	        Map<String, Object> lessonMap = convertLessonToMap(lesson);
-
-	        batch.set(docRef, lessonMap);
 	    }
 
-	    batch.commit();
+	    if (count > 0) {
+	        try {
+	            batch.commit().get();
+	        } catch (Exception e) {
+	            throw new RuntimeException("Failed to commit final batch", e);
+	        }
+	    }
 	}
 	
 	
@@ -368,13 +384,13 @@ public class LessonService {
 	        case LECTURE:
 	            return "הרצאה";
 	        case TUTORIAL:
-	            return "תרגול";
+	            return "תרגיל";
 	        case LAB:    
 	            return "מעבדה";
 	        case PHYSICS_LAB:  
-	            return "מעבדת פיזיקה";
+	            return "מעבדה";
 	        case NETWORKING_LAB: 
-	            return "מעבדת רשתות";
+	            return "מעבדה";
 	        case PBL:
 	            return "PBL";
 	        case PROJECT:

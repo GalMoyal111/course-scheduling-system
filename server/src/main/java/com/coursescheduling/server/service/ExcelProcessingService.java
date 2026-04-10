@@ -1,6 +1,7 @@
 package com.coursescheduling.server.service;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Row;
@@ -8,6 +9,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.google.cloud.firestore.Firestore;
 import com.coursescheduling.server.model.Course;
+import com.coursescheduling.server.model.Lecturer;
 import com.coursescheduling.server.model.Lesson;
 import com.coursescheduling.server.model.LessonType;
 import com.coursescheduling.server.model.Semester;
@@ -30,52 +33,179 @@ public class ExcelProcessingService {
 	
 	private final LessonService lessonService;
 	private final CourseService courseService;
+	private final LecturerService lecturerService;
 		
-	public ExcelProcessingService(Firestore firestore, LessonService lessonService, CourseService courseService) {
+	public ExcelProcessingService(Firestore firestore, LessonService lessonService, CourseService courseService, LecturerService lecturerService) {
 	    this.firestore = firestore;
 	    this.lessonService = lessonService;
 	    this.courseService = courseService;
+	    this.lecturerService = lecturerService;
 	}
 	
 	
-	
-	public void process(MultipartFile file) {
-		
-	    List<Lesson> lessons = new ArrayList<>();
-	    
-	    Map<String, Course> courseMap = new HashMap<>();
+	public static class ValidationIssue {
+	    public String identifier;
+	    public List<Integer> rows = new ArrayList<>(); 
 
-	    try {
-	        List<Course> courses = courseService.getAllCourses();
-
-	        for (Course c : courses) {
-	            courseMap.put(c.getCourseId(), c);
-	        }
-
-	    } catch (Exception e) {
-	        throw new RuntimeException("Failed to load courses", e);
+	    public ValidationIssue(String identifier, int row) {
+	        this.identifier = identifier;
+	        this.rows.add(row);
 	    }
-	    
-	    
-	    try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
-	        Sheet sheet = workbook.getSheetAt(0);
-	        
-	        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-	            Row row = sheet.getRow(i);
+	}
 
-	            if (row == null)
-	                continue;
+	public static class LessonUploadSummary {
+	    public int savedCount = 0;
+	    public List<ValidationIssue> missingCourses = new ArrayList<>();
+	    public List<ValidationIssue> missingLecturers = new ArrayList<>();
+	    public List<ValidationIssue> invalidTypes = new ArrayList<>();
+	    public List<ValidationIssue> invalidSemesters = new ArrayList<>();
+	    public List<ValidationIssue> invalidDurations = new ArrayList<>();
+	    public int totalRows = 0;
+	}
+	
+	
+	public LessonUploadSummary process(MultipartFile file) {
+	    LessonUploadSummary summary = new LessonUploadSummary();
+	    Set<String> existingLecturers = new HashSet<>();
+	    
+	    try {
+	        lecturerService.getAllLecturers().forEach(l -> existingLecturers.add(l.getName().trim()));
+	        List<Course> courses = courseService.getAllCourses();
+	        Map<String, Course> courseMap = new HashMap<>();
+	        for (Course c : courses) courseMap.put(c.getCourseId(), c);
 
-	            addLessonFromRow(row, lessons, courseMap);
+	        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+	            Sheet sheet = workbook.getSheetAt(0);
+	            summary.totalRows = sheet.getLastRowNum();
+	            List<Lesson> lessons = new ArrayList<>();
+
+	            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+	                Row row = sheet.getRow(i);
+	                if (row == null || isRowEmpty(row)) continue;
+
+	                int currentRowNum = i + 1;
+	                String courseId = getCourseIdFromCell(row.getCell(0));
+	                String lecturerName = row.getCell(3).toString().trim();
+	                
+
+	                if (!courseMap.containsKey(courseId)) {
+	                    addValidationIssue(summary.missingCourses, courseId, currentRowNum);
+	                    continue;
+	                }
+	                if (!existingLecturers.contains(lecturerName)) {
+	                    addValidationIssue(summary.missingLecturers, lecturerName, currentRowNum);
+	                    continue;
+	                }
+
+	                String typeText = row.getCell(2).toString();
+	                LessonType type = parseType(typeText);
+	                if (type == null) {
+	                    addValidationIssue(summary.invalidTypes, typeText, currentRowNum);
+	                    continue;
+	                }
+
+	                String semesterText = row.getCell(5).toString();
+	                Semester semester;
+	                try {
+	                    semester = parseSemester(semesterText);
+	                } catch (Exception e) {
+	                    addValidationIssue(summary.invalidSemesters, semesterText, currentRowNum);
+	                    continue;
+	                }
+
+	                int duration;
+	                try {
+	                    if (row.getCell(7).getCellType() == org.apache.poi.ss.usermodel.CellType.NUMERIC) {
+	                        duration = (int) row.getCell(7).getNumericCellValue();
+	                    } else {
+	                        duration = Integer.parseInt(row.getCell(7).toString().trim());
+	                    }
+	                    if (duration <= 0) throw new Exception();
+	                } catch (Exception e) {
+	                    addValidationIssue(summary.invalidDurations, row.getCell(7).toString(), currentRowNum);
+	                    continue;
+	                }
+
+	                addLessonToList(courseId, row.getCell(1).toString(), type, lecturerName, semester, duration, lessons, courseMap);
+	                summary.savedCount++;
+	            }
+
+	            if (!lessons.isEmpty()) {
+	                lessonService.saveLessons(lessons);
+	            }
 	        }
-	        lessonService.saveLessons(lessons);
-	        
-
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
-	  
+	    return summary;
 	}
+	
+	
+	
+	
+	
+	
+	
+	private void addLessonToList(String courseId, String courseName, LessonType type, String lecturer, Semester semester, int duration, List<Lesson> lessons, Map<String, Course> courseMap) {
+	    
+	    if (type == LessonType.LAB) {
+	        if (courseId.equals("61181")) type = LessonType.PHYSICS_LAB;
+	        else if (courseId.equals("61765")) type = LessonType.NETWORKING_LAB;
+	    }
+
+	    if (duration >= 4) {
+	        String splitGroupId = UUID.randomUUID().toString();
+	        int halfDuration = duration / 2;
+	        
+	        Lesson lesson1 = createLesson(courseId, courseName, type, lecturer, semester, halfDuration, splitGroupId, courseMap);
+	        Lesson lesson2 = createLesson(courseId, courseName, type, lecturer, semester, halfDuration, splitGroupId, courseMap);
+	        
+	        if (lesson1 != null) lessons.add(lesson1);
+	        if (lesson2 != null) lessons.add(lesson2);
+	    } else {
+	        Lesson lesson = createLesson(courseId, courseName, type, lecturer, semester, duration, null, courseMap);
+	        if (lesson != null) lessons.add(lesson);
+	    }
+	}
+
+	private Lesson createLesson(String courseId, String courseName, LessonType type, String lecturer, Semester semester, int duration, String splitGroupId, Map<String, Course> courseMap) {
+	    Lesson lesson = new Lesson();
+	    lesson.setLessonId(UUID.randomUUID().toString());
+	    lesson.setCourseId(courseId);
+	    lesson.setCourseName(courseName);
+	    lesson.setType(type);
+	    lesson.setLecturer(lecturer);
+	    lesson.setSemester(semester);
+	    lesson.setDuration(duration);
+	    lesson.setSplitGroupId(splitGroupId);
+
+	    Course course = courseMap.get(courseId);
+	    if (course != null) {
+	        lesson.setCluster(course.getCluster());
+	        lesson.setCredits(course.getCredits());
+	    }
+	    return lesson;
+	}
+	
+	
+	
+	
+	private String getCourseIdFromCell(org.apache.poi.ss.usermodel.Cell cell) {
+	    if (cell == null) return "";
+	    if (cell.getCellType() == org.apache.poi.ss.usermodel.CellType.NUMERIC) {
+	        return String.valueOf((int) cell.getNumericCellValue());
+	    }
+	    return cell.toString().trim();
+	}
+
+	private boolean isRowEmpty(Row row) {
+	    if (row == null) return true;
+	    org.apache.poi.ss.usermodel.Cell cell = row.getCell(0);
+	    return cell == null || cell.getCellType() == org.apache.poi.ss.usermodel.CellType.BLANK;
+	}
+	
+	
+	
 	
 	// Parse the lesson type text (in Hebrew/English) to the LessonType enum.
 	private LessonType parseType(String typeText) {
@@ -93,6 +223,18 @@ public class ExcelProcessingService {
 	    return null;
 	}
 	
+	private void addValidationIssue(List<ValidationIssue> issues, String identifier, int row) {
+	    ValidationIssue existing = issues.stream().filter(i -> i.identifier.equals(identifier)).findFirst().orElse(null);
+
+	    if (existing != null) {
+	        existing.rows.add(row); 
+	    } else {
+	        issues.add(new ValidationIssue(identifier, row)); 
+	    }
+	}
+	
+	
+	
 	
 	// Parse the semester text into the Semester enum.
 	private Semester parseSemester(String semesterText) {
@@ -106,16 +248,18 @@ public class ExcelProcessingService {
 	}
 	
 	
+	
+	/*
 	// Convert a single sheet row into one or more Lesson objects.
 	private void addLessonFromRow(Row row, List<Lesson> lessons, Map<String, Course> courseMap) {
 
-		if (row.getCell(0) == null)
-		    return;
+		String courseId = getCourseIdFromCell(row.getCell(0));
+		
+		if (courseId == null || courseId.trim().isEmpty()) {
+	        System.out.println("DEBUG: Skipping row - empty courseId");
+	        return;
+	    }
 
-		if (row.getCell(0).getCellType() != org.apache.poi.ss.usermodel.CellType.NUMERIC)
-		    return;
-
-		String courseId = String.valueOf((int) row.getCell(0).getNumericCellValue());
 		
 		if (courseId.contains("/")) {
 		    System.out.println("Skipping row: invalid courseId " + courseId);
@@ -187,33 +331,7 @@ public class ExcelProcessingService {
 	    }
 	}
 	
-	// Helper method to create a Lesson object with the given properties.
-	private Lesson createLesson(String courseId, String courseName, LessonType type, String lecturer, Semester semester, int duration, String splitGroupId, Map<String, Course> courseMap) {
-		// Create and populate the Lesson object
-		Lesson lesson = new Lesson();
-		
-		lesson.setLessonId(UUID.randomUUID().toString());
-		lesson.setCourseId(courseId);
-		lesson.setCourseName(courseName);
-		lesson.setType(type);
-		lesson.setLecturer(lecturer);
-		lesson.setSemester(semester);
-		lesson.setDuration(duration);
-		
-		Course course = courseMap.get(courseId);
 
-		if (course == null) {
-		    System.out.println("Skipping row: course not found in DB for courseId " + courseId);
-		    return null;
-		}
-
-		lesson.setCluster(course.getCluster());
-		lesson.setCredits(course.getCredits());
-		
-		lesson.setSplitGroupId(splitGroupId);
-		
-		return lesson;
-		}
 	
 	// Sort lessons by courseId, semester and type priority.
 	private void sortLessons(List<Lesson> lessons) {
@@ -231,7 +349,7 @@ public class ExcelProcessingService {
 	    });
 	}
 	
-
+*/
 	
 	
 	
