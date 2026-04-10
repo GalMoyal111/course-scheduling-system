@@ -143,6 +143,12 @@ public class LessonService {
 	    if (course == null)
 	        throw new RuntimeException("Course not found");
 
+	    String lecturerName = lesson.getLecturer() != null ? lesson.getLecturer().trim() : "";
+	    if (lecturerName.isEmpty())
+	        throw new RuntimeException("Lecturer name is required");
+	    
+	    lesson.setLecturer(lecturerName);
+	    
 	    if (lesson.getType() == LessonType.LAB) {
 	        if (lesson.getCourseId().equals("61181")) {
 	            lesson.setType(LessonType.PHYSICS_LAB);

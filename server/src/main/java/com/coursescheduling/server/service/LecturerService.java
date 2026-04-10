@@ -36,6 +36,10 @@ public class LecturerService {
 	public void addLecturer(Lecturer lecturer) throws Exception {
         Firestore db = FirestoreClient.getFirestore();
         
+        if (lecturer.getName() != null) {
+            lecturer.setName(lecturer.getName().trim());
+        }
+        
         if (lecturer.getId() != null && !String.valueOf(lecturer.getId()).isEmpty()) {
             db.collection(COLLECTION_NAME).document(String.valueOf(lecturer.getId())).set(lecturer).get(); 
         } else {
