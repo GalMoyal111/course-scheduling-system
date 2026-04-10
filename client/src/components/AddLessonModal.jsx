@@ -146,7 +146,22 @@ export default function AddLessonModal({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!selectedCourse) { alert("Course not found"); return; }
+    if (!selectedCourse) {
+      alert("Please select a course.");
+      return;
+    }
+    if (!lecturer || lecturer.trim() === "") {
+      alert("Please select a lecturer.");
+      return;
+    }
+    if (!semester) {
+      alert("Please select a semester.");
+      return;
+    }
+    if (!type) {
+      alert("Please select a lesson type.");
+      return;
+    }
 
     const payload = {
       ...(initialLesson || {}), 
