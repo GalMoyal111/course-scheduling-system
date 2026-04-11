@@ -134,7 +134,7 @@ function UploadRoomsPage() {
 
         alert("Classroom updated successfully");
       } else {
-        await addRoom(classroom);setClassrooms(prev => [...prev, classroom]);
+        await addRoom(classroom);
         setClassrooms(prev => [...prev, classroom]);
         alert("Classroom added successfully");
       }
