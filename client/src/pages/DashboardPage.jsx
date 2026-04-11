@@ -25,19 +25,34 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchInitialData = async () => {
+
       if (courses.length > 0 && lessons.length > 0 && classrooms.length > 0) {
         return; 
       }
-
       setLoading(true);
+
       try {
         const promises = [];
-        
-        if (courses.length === 0) promises.push(getAllCourses().then(data => setCourses(Array.isArray(data) ? data : [])));
-        if (lessons.length === 0) promises.push(getAllLessons().then(data => setLessons(Array.isArray(data) ? data : [])));
-        if (classrooms.length === 0) promises.push(getAllClassrooms().then(data => setClassrooms(Array.isArray(data) ? data : [])));
 
-        await Promise.all(promises);
+        if (courses.length === 0) {
+          console.log("Dashboard: Fetching courses...");
+          promises.push(getAllCourses("Dashboard").then(data => setCourses(Array.isArray(data) ? data : [])));
+        }
+        
+        if (lessons.length === 0) {
+          console.log("Dashboard: Fetching lessons...");
+          promises.push(getAllLessons("Dashboard").then(data => setLessons(Array.isArray(data) ? data : [])));
+        }
+        
+        if (classrooms.length === 0) {
+          console.log("Dashboard: Fetching classrooms...");
+          promises.push(getAllClassrooms("Dashboard").then(data => setClassrooms(Array.isArray(data) ? data : [])));
+        }
+
+        if (promises.length > 0) {
+          await Promise.all(promises);
+        }
+
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
       } finally {

@@ -2,8 +2,8 @@ import { createContext, useContext, useState, useCallback, useMemo } from "react
 
 const DataContext = createContext();
 
-// Cache duration in milliseconds (5 minutes)
-const CACHE_DURATION = 5 * 60 * 1000;
+// Cache duration in milliseconds (30 minutes)
+const CACHE_DURATION = 30 * 60 * 1000;
 
 export function DataProvider({ children }) {
   const [lessons, setLessons] = useState([]);
@@ -17,6 +17,11 @@ export function DataProvider({ children }) {
   const [classroomsTimestamp, setClassroomsTimestamp] = useState(null);
   const [lecturersTimestamp, setLecturersTimestamp] = useState(null);
 
+  const updateCoursesLocally = useCallback((newCourses) => {
+    setCourses(newCourses);
+    setCoursesTimestamp(Date.now()); // מעדכן גם את החותמת כדי שה-Cache ייחשב טרי
+  }, []);
+  
   // Check if cache is still valid
   const isCacheValid = useCallback((timestamp) => {
     if (!timestamp) return false;

@@ -31,8 +31,14 @@ export default function UploadCoursesPage() {
   const { courses, setCourses, invalidateCoursesCache } = useData();
 
   const loadCourses = useCallback(async () => {
+    if (courses.length > 0) {
+      console.log("UploadCoursesPage: Data already exists in context, skipping fetch.");
+      return;
+    }
+
     try {
-      const data = await getAllCourses();
+      const data = await getAllCourses("UploadCoursesPage");
+      
       if (Array.isArray(data)) {
         setCourses(data || []);
       } else {
@@ -44,7 +50,7 @@ export default function UploadCoursesPage() {
       console.error("Failed to load courses:", err);
       setCourses([]);
     }
-  }, [setCourses, invalidateCoursesCache]);
+  }, [courses.length, setCourses, invalidateCoursesCache]);
 
   useEffect(() => {
     loadCourses();
@@ -116,17 +122,32 @@ export default function UploadCoursesPage() {
 
   const handleAddCourse = async (course) => {
     try {
+      const formattedCourse = {
+        ...course,
+        clusterName: (course.cluster >= 1 && course.cluster <= 8) 
+          ? `סמסטר ${course.cluster}` 
+          : course.clusterName
+      };
+      
       if (editingCourse) {
         const oldCoursePayload = {
           ...editingCourse,
           courseId: String(editingCourse.courseId || "").trim(),
         };
         const newCoursePayload = {
-          ...course,
+          ...formattedCourse,
           courseId: String(course.courseId || "").trim(),
         };
         await updateCourse({ oldCourse: oldCoursePayload, newCourse: newCoursePayload });
+
+        setCourses(prevCourses => prevCourses.map(c => 
+          (c.courseId === oldCoursePayload.courseId && c.cluster === oldCoursePayload.cluster) 
+          ? newCoursePayload 
+          : c
+        ));
+
         alert("Course updated successfully");
+
       } else {
         // Check for invalid prerequisites before adding
         const coursePrerequisites = (course.prerequisiteCourseNumber || "")
@@ -155,13 +176,15 @@ export default function UploadCoursesPage() {
           setInvalidCoursesModalOpen(true);
           return;
         }
-
+        
         await addCourse(course);
+        setCourses(prevCourses => [...prevCourses, formattedCourse]);
         alert("Course added successfully");
       }
-      await loadCourses();
+      
       setIsModalOpen(false);
       setEditingCourse(null);
+    
     } catch (err) {
       console.error(err);
       alert(editingCourse ? "Failed to update course" : "Failed to add course");
@@ -192,8 +215,12 @@ export default function UploadCoursesPage() {
 
     try {
       await deleteCourses(payload);
+
+      const deletedIds = new Set(toDelete.map(c => c.courseId));
+      setCourses(prevCourses => prevCourses.filter(c => !deletedIds.has(c.courseId)));
+
       setSelectedCourses([]);
-      await loadCourses();
+
     } catch (err) {
       console.error(err);
       alert("Failed to delete course(s). Check console for details.");
@@ -357,8 +384,18 @@ export default function UploadCoursesPage() {
           if (pendingCourse && modalContext === "add") {
             try {
               await addCourse(pendingCourse);
+
+              const formattedPending = {
+                ...pendingCourse,
+                clusterName: (pendingCourse.cluster >= 1 && pendingCourse.cluster <= 8) 
+                  ? `סמסטר ${pendingCourse.cluster}` 
+                  : pendingCourse.clusterName
+              };
+
+              setCourses(prev => [...prev, formattedPending]);
+
               alert("Course added successfully (with non-existing prerequisites)");
-              await loadCourses();
+
               setIsModalOpen(false);
               setEditingCourse(null);
             } catch (err) {

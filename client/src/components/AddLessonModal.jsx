@@ -31,20 +31,22 @@ export default function AddLessonModal({
   useEffect(() => {
     if (!isOpen) return;
 
-    if (courses.length === 0 || !isCacheValid(coursesTimestamp)) {
-      getAllCourses().then(data => {
+    if (courses.length === 0) {
+      console.log("Context courses empty, fetching...");
+      getAllCourses("AddLessonModal").then(data => {
         setCourses(data || []);
         setCoursesTimestamp(Date.now());
       });
     }
 
-    if (lecturers.length === 0 || !isCacheValid(lecturersTimestamp)) {
-      getAllLecturers().then(data => {
+    if (lecturers.length === 0) {
+      console.log("Context lecturers empty, fetching...");
+      getAllLecturers("AddLessonModal").then(data => {
         setLecturers(data || []);
         setLecturersTimestamp(Date.now());
       });
     }
-  }, [isOpen]);
+  }, [isOpen, courses.length, lecturers.length]);
 
   // 2. קיבוץ הקורסים לפי אשכולות (Grouping) - מתבצע מקומית מה-Context
   const groupedCourses = useMemo(() => {

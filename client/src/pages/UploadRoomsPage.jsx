@@ -91,6 +91,7 @@ function UploadRoomsPage() {
 
   const performDelete = async () => {
     if (!pendingDelete) return;
+    
     try {
       if (Array.isArray(pendingDelete)) {
         const payload = pendingDelete.map((c) => ({ building: c.building, classroomName: c.classroomName }));
@@ -99,10 +100,15 @@ function UploadRoomsPage() {
         await deleteClassrooms([{ building: pendingDelete.building, classroomName: pendingDelete.classroomName }]);
       }
 
+      const toDeleteArray = Array.isArray(pendingDelete) ? pendingDelete : [pendingDelete];
+      const deletedNames = new Set(toDeleteArray.map(c => c.classroomName));
+
+      setClassrooms(prev => prev.filter(c => !deletedNames.has(c.classroomName)));
+
       setDeleteConfirmOpen(false);
       setPendingDelete(null);
       setSelectedClassrooms([]);
-      await loadClassrooms();
+
     } catch (err) {
       console.error(err);
       alert("Failed to delete classroom(s)");
@@ -117,16 +123,24 @@ function UploadRoomsPage() {
           oldClassroom: editingClassroom,
           newClassroom: classroom,
         };
+
         await updateClassroom(req);
+
+        setClassrooms(prev => 
+          prev.map(c => 
+            c.classroomName === editingClassroom.classroomName ? classroom : c
+          )
+        );
+
         alert("Classroom updated successfully");
       } else {
-        await addRoom(classroom);
+        await addRoom(classroom);setClassrooms(prev => [...prev, classroom]);
+        setClassrooms(prev => [...prev, classroom]);
         alert("Classroom added successfully");
       }
 
       setIsModalOpen(false);
       setEditingClassroom(null);
-      await loadClassrooms();
     } catch (err) {
       console.error(err);
       alert(editingClassroom ? "Failed to update classroom" : "Failed to add classroom");
@@ -136,8 +150,13 @@ function UploadRoomsPage() {
   const [query, setQuery] = useState("");
 
   const loadClassrooms = async () => {
+    if (classrooms.length > 0) {
+      console.log("UploadRoomsPage: Classrooms already in context, skipping fetch.");
+      return;
+    }
+
     try {
-      const data = await getAllClassrooms();
+      const data = await getAllClassrooms("UploadRoomsPage");
       setClassrooms(Array.isArray(data) ? data : []);
       // Invalidate dashboard cache to refresh stats
       invalidateClassroomsCache();

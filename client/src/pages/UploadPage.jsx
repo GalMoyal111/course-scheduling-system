@@ -36,8 +36,12 @@ function UploadPage() {
   }, []);
 
   const loadLessons = async () => {
+    if (lessons.length > 0) {
+      console.log("UploadPage: Lessons already in context, skipping fetch.");
+      return;
+    }
     try {
-      const data = await getAllLessons();
+      const data = await getAllLessons("UploadPage");
       if (Array.isArray(data)) {
         setLessons(data || []);
       } else {
@@ -176,7 +180,14 @@ function UploadPage() {
 
     await addLessonApi(newLesson);
 
-    await loadLessons();
+    if (oldLesson) {
+        setLessons(prev => 
+          prev.map(l => l.lessonId === oldLesson.lessonId ? newLesson : l)
+        );
+      } else {
+        setLessons(prev => [...prev, newLesson]);
+      }
+    alert("Lesson saved successfully");
 
   } catch (err) {
     console.error("Failed to save lesson:", err);

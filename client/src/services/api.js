@@ -73,7 +73,8 @@ export async function addCourse(course) {
   return res.text();
 }
 
-export async function getAllCourses() {
+export async function getAllCourses(caller = "Unknown") {
+  console.warn(`%c [API GET] getAllCourses | Called by: ${caller}`, "color: white; background: #4f46e5; padding: 4px; border-radius: 4px;");
   const res = await fetch(`${BASE_URL}/getAllCourses`, {
     method: "GET",
     headers: {
@@ -89,7 +90,8 @@ export async function getAllCourses() {
   return res.json();
 }
 
-export async function getAllCoursesGrouped() {
+export async function getAllCoursesGrouped(caller = "Unknown") {
+  console.warn(`%c [API GET] getAllCoursesGrouped | Called by: ${caller}`, "color: white; background: #6366f1; padding: 4px; border-radius: 4px;");
   const res = await fetch(`${BASE_URL}/getAllCoursesGrouped`, {
     method: "GET",
     headers: {
@@ -208,7 +210,8 @@ export async function addRoom(classroom) {
   return res.text();
 }
 
-export async function getAllClassrooms() {
+export async function getAllClassrooms(caller = "Unknown") {
+  console.warn(`%c [API GET] getAllClassrooms | Called by: ${caller}`, "color: white; background: #059669; padding: 4px; border-radius: 4px;");
   const res = await fetch(`${BASE_URL}/getAllClassrooms`, {
     method: "GET",
     headers: {
@@ -256,7 +259,8 @@ export async function updateClassroom(request) {
   return res.text();
 }
 
-export async function getAllLessons() {
+export async function getAllLessons(caller = "Unknown") {
+  console.warn(`%c [API GET] getAllLessons | Called by: ${caller}`, "color: white; background: #0891b2; padding: 4px; border-radius: 4px;");
   const res = await fetch(`${BASE_URL}/getAlllessons`, {
     method: "GET",
     headers: {
@@ -404,7 +408,8 @@ export async function generateTimetable() {
 }
 
 
-export async function getAllLecturers() {
+export async function getAllLecturers(caller = "Unknown") {
+  console.warn(`%c [API GET] getAllLecturers | Called by: ${caller}`, "color: white; background: #d97706; padding: 4px; border-radius: 4px;");
   const res = await fetch(`${BASE_URL}/getAllLecturers`, {
     method: "GET",
     headers: {

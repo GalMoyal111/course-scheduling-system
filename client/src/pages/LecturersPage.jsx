@@ -23,8 +23,13 @@ export default function LecturersPage() {
   const [pendingFile, setPendingFile] = useState(null);
 
   const loadLecturers = async () => {
+    if (lecturers.length > 0) {
+      console.log("LecturersPage: Lecturers already in context, skipping fetch.");
+      return;
+    }
+
     try {
-      const data = await getAllLecturers();
+      const data = await getAllLecturers("LecturersPage");
       const lecturersList = Array.isArray(data) ? data : [];
       setLecturers(lecturersList);
       
@@ -59,8 +64,8 @@ export default function LecturersPage() {
     try {
       await addLecturer(newLecturer);
       alert("Lecturer added successfully!");
-      invalidateLecturersCache();
-      await loadLecturers();
+
+      setLecturers(prev => [...prev, newLecturer]);
       setIsModalOpen(false);
     } catch (err) {
       console.error(err);
@@ -72,10 +77,14 @@ export default function LecturersPage() {
     try {
       await updateLecturer(updatedLecturer);
       alert("Lecturer updated successfully!");
-      invalidateLecturersCache();
-      await loadLecturers();
+
+      setLecturers(prev => 
+        prev.map(l => l.id === updatedLecturer.id ? updatedLecturer : l)
+      );
+
       setIsModalOpen(false);
       setEditingLecturer(null);
+      
     } catch (err) {
       console.error(err);
       alert("Error updating lecturer");
