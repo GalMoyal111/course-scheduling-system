@@ -5,6 +5,15 @@ import { useData } from "../context/DataContext"; // שימוש ב-Context
 import { getAllLecturers, getAllCourses } from "../services/api"; // רק לגיבוי
 import Modal from "./ui/Modal";
 
+const TYPE_TO_HOUR_FIELD = {
+    lecture: "lectureHours",
+    practice: "tutorialHours",
+    laboratory: "labHours",
+    physics_laboratory: "labHours",
+    networking_laboratory: "labHours",
+    pbl: "projectHours",
+  };
+
 export default function AddLessonModal({
   isOpen,
   onClose,
@@ -14,11 +23,11 @@ export default function AddLessonModal({
 }) {
   const isEdit = mode === "edit";
 
-  // שימוש ב-Context לביצועים
   const { 
     courses, setCourses, coursesTimestamp,
     lecturers, setLecturers, lecturersTimestamp, 
-    isCacheValid, setCoursesTimestamp, setLecturersTimestamp 
+    isCacheValid,
+    setCoursesTimestamp, setLecturersTimestamp
   } = useData();
 
   const [courseName, setCourseName] = useState("");
@@ -27,28 +36,7 @@ export default function AddLessonModal({
   const [type, setType] = useState("lecture");
   const [semester, setSemester] = useState("");
 
-  // 1. טעינת נתונים ל-Context (במקום טעינה מקומית כל פעם)
-  useEffect(() => {
-    if (!isOpen) return;
 
-    if (courses.length === 0) {
-      console.log("Context courses empty, fetching...");
-      getAllCourses("AddLessonModal").then(data => {
-        setCourses(data || []);
-        setCoursesTimestamp(Date.now());
-      });
-    }
-
-    if (lecturers.length === 0) {
-      console.log("Context lecturers empty, fetching...");
-      getAllLecturers("AddLessonModal").then(data => {
-        setLecturers(data || []);
-        setLecturersTimestamp(Date.now());
-      });
-    }
-  }, [isOpen, courses.length, lecturers.length]);
-
-  // 2. קיבוץ הקורסים לפי אשכולות (Grouping) - מתבצע מקומית מה-Context
   const groupedCourses = useMemo(() => {
     const groups = {};
     courses.forEach(course => {
@@ -61,12 +49,54 @@ export default function AddLessonModal({
     return Object.values(groups);
   }, [courses]);
 
-  // איתחול הסטייט (כמו בקוד המקורי שלך)
+  const allCourses = useMemo(() => groupedCourses.flatMap((c) => c.courses), [groupedCourses]);
+
+  const selectedCourse = useMemo(() => {
+    return allCourses.find((c) => c.courseId === initialLesson?.courseId) ||
+           allCourses.find((c) => c.courseName === courseName);
+  }, [allCourses, initialLesson, courseName]);
+
+
+  const availableTypes = useMemo(() => {
+    if (!selectedCourse) return [];
+
+    const types = [
+      { value: "lecture", label: "Lecture" },
+      { value: "practice", label: "Practice" },
+      { value: "laboratory", label: "Laboratory" },
+      { value: "physics_laboratory", label: "Physics Laboratory" },
+      { value: "networking_laboratory", label: "Networking Laboratory" },
+      { value: "pbl", label: "PBL" },
+    ];
+
+    return types.filter(t => {
+      const hourField = TYPE_TO_HOUR_FIELD[t.value];
+      return (selectedCourse[hourField] || 0) > 0;
+    });
+  }, [selectedCourse]);
+
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (courses.length === 0 || !isCacheValid(coursesTimestamp)) {
+      getAllCourses("AddLessonModal").then(data => {
+        setCourses(data || []);
+        setCoursesTimestamp(Date.now());
+      });
+    }
+    if (lecturers.length === 0 || !isCacheValid(lecturersTimestamp)) {
+      getAllLecturers("AddLessonModal").then(data => {
+        setLecturers(data || []);
+        setLecturersTimestamp(Date.now());
+      });
+    }
+  }, [isOpen, courses.length, lecturers.length])
+
+
   useEffect(() => {
     if (!isOpen) return;
 
     if (isEdit && initialLesson && groupedCourses.length > 0) {
-      const allCourses = groupedCourses.flatMap(c => c.courses);
       const course = allCourses.find(c => c.courseId === initialLesson.courseId);
       const clusterObj = groupedCourses.find(c => c.courses.some(item => item.courseId === course?.courseId));
 
@@ -90,33 +120,19 @@ export default function AddLessonModal({
       setType("lecture");
       setSemester("");
     }
-  }, [isOpen, isEdit, initialLesson, groupedCourses]);
+  }, [isOpen, isEdit, initialLesson, groupedCourses, allCourses]);
 
-  const allCourses = groupedCourses.flatMap((c) => c.courses);
 
-  // מיון האשכולות לפי סדר סמסטרים (כמו שביקשת)
-  const clusterOptions = useMemo(() => {
-    const getSemesterNumber = (str) => {
-      const match = str.match(/סמסטר\s*(\d+)/);
-      return match ? parseInt(match[1], 10) : null;
-    };
+  useEffect(() => {
+    if (selectedCourse && !isEdit) {
+      const isCurrentTypeValid = availableTypes.some(t => t.value === type);
+      if (!isCurrentTypeValid && availableTypes.length > 0) {
+        setType(availableTypes[0].value);
+      }
+    }
+  }, [selectedCourse, availableTypes, type, isEdit]);
 
-    return groupedCourses.map((c) => c.clusterName).filter(Boolean).sort((a, b) => {
-      const aSem = getSemesterNumber(a);
-      const bSem = getSemesterNumber(b);
-      if (aSem !== null && bSem !== null) return aSem - bSem;
-      if (aSem !== null) return -1;
-      if (bSem !== null) return 1;
-      return a.localeCompare(b);
-    });
-  }, [groupedCourses]);
 
-  const selectedClusterObj = groupedCourses.find((c) => c.clusterName === cluster);
-  const courseOptions = selectedClusterObj ? selectedClusterObj.courses : [];
-  const selectedCourse = allCourses.find((c) => c.courseId === initialLesson?.courseId) ||
-                         allCourses.find((c) => c.courseName === courseName);
-
-  // לוגיקת מעבדות אוטומטית (כמו במקור)
   useEffect(() => {
     if (selectedCourse && !isEdit) {
       if (selectedCourse.courseId === "61181") setType("physics_laboratory");
@@ -124,8 +140,26 @@ export default function AddLessonModal({
     }
   }, [selectedCourse, isEdit]);
 
-  // חישוב שעות (כמו במקור)
-  const computedDuration = (() => {
+  const clusterOptions = useMemo(() => {
+    const getSemesterNum = (str) => {
+      if (!str) return 999;
+      const cleanStr = String(str).replace("סמסטר", "").trim();
+      const num = parseInt(cleanStr, 10);
+      return isNaN(num) ? 999 : num; 
+    };
+
+    return groupedCourses.map(c => c.clusterName).filter(Boolean).sort((a, b) => {
+      const numA = getSemesterNum(a);
+      const numB = getSemesterNum(getSemesterNum(b));
+      if (numA !== numB) return numA - numB;
+      return a.localeCompare(b);
+    });
+  }, [groupedCourses]);
+
+  const selectedClusterObj = groupedCourses.find((c) => c.clusterName === cluster);
+  const courseOptions = selectedClusterObj ? selectedClusterObj.courses : [];
+
+  const computedDuration = useMemo(() => {
     if (!selectedCourse) return "";
     let duration;
     switch (type) {
@@ -139,29 +173,20 @@ export default function AddLessonModal({
     }
     if (isEdit && duration === 4) return 2;
     return duration;
-  })();
+  }, [selectedCourse, type, isEdit]);
 
-  const mapType = (type) => {
-    const types = { lecture: "LECTURE", practice: "TUTORIAL", laboratory: "LAB", physics_laboratory: "PHYSICS_LAB", networking_laboratory: "NETWORKING_LAB", pbl: "PBL" };
-    return types[type] || "LECTURE";
-  };
+  const computedCredits = useMemo(() => {
+    if (!computedDuration) return 0;
+    const durationNum = parseFloat(computedDuration);
+    // הרצאה = 1 ל-1, כל השאר = חצי
+    return type === "lecture" ? durationNum : durationNum * 0.5;
+  }, [computedDuration, type]);
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!selectedCourse) {
-      alert("Please select a course.");
-      return;
-    }
-    if (!lecturer || lecturer.trim() === "") {
-      alert("Please select a lecturer.");
-      return;
-    }
-    if (!semester) {
-      alert("Please select a semester.");
-      return;
-    }
-    if (!type) {
-      alert("Please select a lesson type.");
+    if (!selectedCourse || !lecturer || !semester || !type) {
+      alert("Please fill all required fields.");
       return;
     }
 
@@ -171,16 +196,18 @@ export default function AddLessonModal({
       courseName: selectedCourse.courseName,
       lecturer: lecturer.trim(),
       cluster: selectedClusterObj?.clusterId ?? initialLesson?.cluster ?? 0,
-      type: mapType(type),
+      type: { lecture: "LECTURE", practice: "TUTORIAL", laboratory: "LAB", physics_laboratory: "PHYSICS_LAB", networking_laboratory: "NETWORKING_LAB", pbl: "PBL" }[type] || "LECTURE",
       duration: parseInt(computedDuration || 1, 10),
       semester: semester === "Summer" ? "SUMMER" : semester,
+      credits: computedCredits,
     };
     onSave(initialLesson, payload);
   };
 
   if (!isOpen) return null;
 
-  return (
+
+return (
     <Modal isOpen={isOpen} onClose={onClose} title={isEdit ? "Edit Lesson" : "Add New Lesson"} size="wide"
       footer={<><Button variant="ghost" onClick={onClose}>Cancel</Button>
                 <Button variant="primary" onClick={handleSubmit}>{isEdit ? "Update Lesson" : "Add Lesson"}</Button></>}>
@@ -216,13 +243,16 @@ export default function AddLessonModal({
 
           <div className="form-field">
             <label>Type</label>
-            <select className="ui-select" value={type} onChange={(e) => setType(e.target.value)}>
-              <option value="lecture">Lecture</option>
-              <option value="practice">Practice</option>
-              <option value="laboratory">Laboratory</option>
-              <option value="physics_laboratory">Physics Laboratory</option>
-              <option value="networking_laboratory">Networking Laboratory</option>
-              <option value="pbl">PBL</option>
+            <select 
+              className="ui-select" 
+              value={type} 
+              onChange={(e) => setType(e.target.value)}
+              disabled={availableTypes.length === 0}
+            >
+              {availableTypes.length === 0 && <option value="">No valid types for this course</option>}
+              {availableTypes.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
             </select>
           </div>
 
