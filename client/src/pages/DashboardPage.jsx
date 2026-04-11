@@ -6,7 +6,6 @@ import { useData } from "../context/DataContext";
 import ImportExportModal from "../components/ImportExportModal";
 import "./DashboardPage.css";
 
-const LECTURERS_COUNT = 15; 
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -17,6 +16,7 @@ export default function DashboardPage() {
     setLessons,
     classrooms,
     setClassrooms,
+    lecturers, setLecturers
   } = useData();
 
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchInitialData = async () => {
 
-      if (courses.length > 0 && lessons.length > 0 && classrooms.length > 0) {
+      if (courses.length > 0 && lessons.length > 0 && classrooms.length > 0 && lecturers.length > 0) {
         return; 
       }
       setLoading(true);
@@ -49,6 +49,11 @@ export default function DashboardPage() {
           promises.push(getAllClassrooms("Dashboard").then(data => setClassrooms(Array.isArray(data) ? data : [])));
         }
 
+        if (lecturers.length === 0) {
+          console.log("Dashboard: Fetching lecturers...");
+          promises.push(getAllLecturers("Dashboard").then(data => setLecturers(Array.isArray(data) ? data : [])));
+        }
+
         if (promises.length > 0) {
           await Promise.all(promises);
         }
@@ -67,6 +72,7 @@ export default function DashboardPage() {
     courses: courses.length,
     lessons: lessons.length,
     classrooms: classrooms.length,
+    lecturers: lecturers.length,
   };
 
   const handleStatClick = (path) => {
@@ -98,7 +104,7 @@ export default function DashboardPage() {
           />
           <StatCard
             title="Lecturers"
-            count={LECTURERS_COUNT}
+            count={stats.lecturers}
             icon="person"
             onClick={() => handleStatClick("/lecturers")}
           />
