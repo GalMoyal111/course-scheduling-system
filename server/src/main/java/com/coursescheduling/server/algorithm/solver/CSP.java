@@ -14,6 +14,8 @@ import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
 import com.coursescheduling.server.algorithm.preprocessing.DomainConstraintService;
 import com.coursescheduling.server.model.Classroom;
+import com.coursescheduling.server.algorithm.cost.SoftConstraintEvaluator;
+import com.coursescheduling.server.algorithm.cost.SoftConstraintFactory;
 import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,9 +35,13 @@ public class CSP {
 	
 	@Autowired
     private SplitLessonConstraint splitLessonConstraint;
+
+    private final SoftConstraintEvaluator softConstraintEvaluator;
 	
 	
-	public CSP() {}
+	public CSP() {
+        this.softConstraintEvaluator = new SoftConstraintEvaluator(SoftConstraintFactory.createSoftConstraints());
+    }
 
     // Main method to solve the CSP
 	public Map<Variable, AssignedValue> solve(List<Variable> variables, RoomManager roomManager) {
