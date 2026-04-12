@@ -3,7 +3,7 @@ import Button from "../components/ui/Button";
 import AddLecturerModal from "../components/AddLecturerModal";
 import UploadForm from "../components/UploadForm";
 import { useData } from "../context/DataContext";
-import { addLecturer, deleteLecturers, updateLecturer } from "../services/api";
+import { addLecturer, deleteLecturers, updateLecturer, uploadLecturersExcel, exportLecturersExcel } from "../services/api";
 import "./LecturersPage.css";
 import ConfirmModal from "../components/ConfirmModal";
 
@@ -12,7 +12,8 @@ export default function LecturersPage() {
     lecturers, 
     setLecturers, 
     fetchLecturersIfNeeded, 
-    setLecturersTimestamp 
+    setLecturersTimestamp ,
+    invalidateLecturersCache
   } = useData();
   
   const [selectedLecturerId, setSelectedLecturerId] = useState(null);
@@ -154,7 +155,6 @@ export default function LecturersPage() {
       setHasUnsavedChanges(false);
       alert("Availability saved successfully!");
       setLecturersTimestamp(Date.now());
-      invalidateLecturersCache();
     } catch (err) {
       console.error(err);
       alert("Error saving availability");
