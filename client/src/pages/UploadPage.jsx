@@ -108,8 +108,14 @@ function UploadPage() {
       if (semDiff !== 0) return semDiff;
 
       // cluster
-      const clusterDiff = (a.cluster || 0) - (b.cluster || 0);
-      if (clusterDiff !== 0) return clusterDiff;
+      const clusterA = parseInt(a.cluster, 10) || 999;
+      const clusterB = parseInt(b.cluster, 10) || 999;
+      if (clusterA !== clusterB) return clusterA - clusterB;
+
+      const creditDiff = (b.credits || 0) - (a.credits || 0);
+      if (creditDiff !== 0) return creditDiff;
+
+      
 
       const idA = String(a.courseId || "");
       const idB = String(b.courseId || "");
