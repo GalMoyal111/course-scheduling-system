@@ -22,7 +22,8 @@ function UploadRoomsPage() {
   setClassrooms, 
   fetchClassroomsIfNeeded, 
   setClassroomsTimestamp,  
-  invalidateClassroomsCache 
+  invalidateClassroomsCache,
+  invalidateCoursesCache
 } = useData();
 
   const handleExport = async () => {
@@ -190,7 +191,7 @@ function UploadRoomsPage() {
         </div>
 
         <div className="right">
-          <button className="icon-btn" title="Refresh list" onClick={(e) => { e.currentTarget.blur(); loadClassrooms(); }} aria-label="Refresh">
+          <button className="icon-btn" title="Refresh list" onClick={(e) => { e.currentTarget.blur(); invalidateCoursesCache(); loadClassrooms(); }} aria-label="Refresh">
             <span className="material-icons" aria-hidden>refresh</span>
           </button>
           <Button onClick={() => { setEditingClassroom(null); setIsModalOpen(true); }} variant="secondary">

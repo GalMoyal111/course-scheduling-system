@@ -31,7 +31,8 @@ function UploadPage() {
     fetchCoursesIfNeeded,
     fetchLecturersIfNeeded,
     fetchClassroomsIfNeeded,
-    invalidateLessonsCache
+    invalidateLessonsCache,
+    invalidateAllCache
   } = useData();
 
   // delete confirmation state
@@ -224,7 +225,7 @@ const handleAddLesson = async (oldLesson, newLesson) => {
         </div>
 
         <div className="right">
-          <button className="icon-btn" title="Refresh list" onClick={(e) => { e.currentTarget.blur(); loadInitialData(); }} aria-label="Refresh">
+          <button className="icon-btn" title="Refresh list" onClick={(e) => { e.currentTarget.blur(); invalidateAllCache(); loadInitialData(); }} aria-label="Refresh">
             <span className="material-icons" aria-hidden>refresh</span>
           </button>
           <Button onClick={() => { setEditingLesson(null); setIsModalOpen(true); }} variant="secondary">

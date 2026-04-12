@@ -265,7 +265,7 @@ export default function UploadCoursesPage() {
         </div>
 
         <div className="right">
-          <button className="icon-btn" title="Refresh list" onClick={(e) => { e.currentTarget.blur(); loadCourses(); }} aria-label="Refresh">
+          <button className="icon-btn" title="Refresh list" onClick={(e) => { e.currentTarget.blur(); invalidateCoursesCache(); loadCourses(); }} aria-label="Refresh">
             <span className="material-icons" aria-hidden>refresh</span>
           </button>
           <Button onClick={() => setIsModalOpen(true)} variant="secondary">
