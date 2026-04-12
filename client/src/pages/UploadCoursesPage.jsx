@@ -3,7 +3,7 @@ import AddCourseModal from "../components/AddCourseModal";
 import ConfirmModal from "../components/ConfirmModal";
 import CourseList from "../components/CourseList";
 import Button from "../components/ui/Button";
-import { uploadCourses, exportCourses, addCourse, getAllCourses, deleteCourses, updateCourse } from "../services/api";
+import { uploadCourses, exportCourses, addCourse, deleteCourses, updateCourse } from "../services/api";
 import { useEffect, useState, useCallback } from "react";
 import { useData } from "../context/DataContext";
 
@@ -28,29 +28,11 @@ export default function UploadCoursesPage() {
   const [uploadSavedCount, setUploadSavedCount] = useState(0);
   const [modalContext, setModalContext] = useState("upload"); // "upload" or "add"
   const [pendingCourse, setPendingCourse] = useState(null);
-  const { courses, setCourses, invalidateCoursesCache } = useData();
+  const { courses, setCourses, fetchCoursesIfNeeded, setCoursesTimestamp, invalidateCoursesCache } = useData();
 
   const loadCourses = useCallback(async () => {
-    if (courses.length > 0) {
-      console.log("UploadCoursesPage: Data already exists in context, skipping fetch.");
-      return;
-    }
-
-    try {
-      const data = await getAllCourses("UploadCoursesPage");
-      
-      if (Array.isArray(data)) {
-        setCourses(data || []);
-      } else {
-        setCourses([]);
-      }
-      // Invalidate dashboard cache to refresh stats
-      invalidateCoursesCache();
-    } catch (err) {
-      console.error("Failed to load courses:", err);
-      setCourses([]);
-    }
-  }, [courses.length, setCourses, invalidateCoursesCache]);
+    await fetchCoursesIfNeeded("UploadCoursesPage");
+  }, [fetchCoursesIfNeeded]);
 
   useEffect(() => {
     loadCourses();
@@ -86,6 +68,7 @@ export default function UploadCoursesPage() {
         alert("Courses uploaded successfully");
       }
       
+      invalidateCoursesCache();
       await loadCourses();
     } catch (err) {
       console.error(err);
@@ -182,6 +165,7 @@ export default function UploadCoursesPage() {
         alert("Course added successfully");
       }
       
+      setCoursesTimestamp(Date.now());
       setIsModalOpen(false);
       setEditingCourse(null);
     
@@ -219,6 +203,7 @@ export default function UploadCoursesPage() {
       const deletedIds = new Set(toDelete.map(c => c.courseId));
       setCourses(prevCourses => prevCourses.filter(c => !deletedIds.has(c.courseId)));
 
+      setCoursesTimestamp(Date.now());
       setSelectedCourses([]);
 
     } catch (err) {
@@ -394,6 +379,7 @@ export default function UploadCoursesPage() {
 
               setCourses(prev => [...prev, formattedPending]);
 
+              setCoursesTimestamp(Date.now());
               alert("Course added successfully (with non-existing prerequisites)");
 
               setIsModalOpen(false);

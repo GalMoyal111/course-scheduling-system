@@ -1,10 +1,10 @@
 import UploadForm from "../components/UploadForm";
-import { uploadLessons, getAllLessons, addLesson as addLessonApi, deleteLessons as deleteLessonsApi, exportLessons } from "../services/api";
+import { uploadLessons, exportLessons, addLesson, deleteLessons } from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
 import LessonList from "../components/LessonList";
 import AddLessonModal from "../components/AddLessonModal";
 import Button from "../components/ui/Button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useData } from "../context/DataContext";
 
 
@@ -20,7 +20,20 @@ function UploadPage() {
   const [editingLesson, setEditingLesson] = useState(null);
   const [selectedLessons, setSelectedLessons] = useState([]);
   const [exporting, setExporting] = useState(false);
-  const { lessons, setLessons, invalidateLessonsCache } = useData();
+
+  const {
+    lessons, setLessons,
+    setLessonsTimestamp,
+    courses, 
+    classrooms, 
+    lecturers,
+    fetchLessonsIfNeeded,
+    fetchCoursesIfNeeded,
+    fetchLecturersIfNeeded,
+    fetchClassroomsIfNeeded,
+    invalidateLessonsCache
+  } = useData();
+
   // delete confirmation state
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
@@ -29,33 +42,24 @@ function UploadPage() {
   const [uploadSummary, setUploadSummary] = useState({savedCount: 0, missingCourses: [],missingLecturers: [], totalRows: 0});
 
 
-  useEffect(() => {
-    if (lessons.length === 0) {
-      loadLessons();
-    }
-  }, []);
+  
 
-  const loadLessons = async () => {
-    if (lessons.length > 0) {
-      console.log("UploadPage: Lessons already in context, skipping fetch.");
-      return;
-    }
+  const loadInitialData = useCallback(async (caller = "UploadPage") => {
     try {
-      const data = await getAllLessons("UploadPage");
-      if (Array.isArray(data)) {
-        setLessons(data || []);
-      } else {
-        // If server returned a wrapper or text, attempt best-effort handling
-        console.debug && console.debug("getAllLessons returned non-array", data);
-        setLessons([]);
-      }
-      // Invalidate dashboard cache to refresh stats
-      invalidateLessonsCache();
+      await Promise.all([
+        fetchLessonsIfNeeded(caller),
+        fetchCoursesIfNeeded(caller),
+        fetchLecturersIfNeeded(caller),
+        fetchClassroomsIfNeeded(caller),
+      ]);
     } catch (err) {
-      console.error("Failed to load lessons:", err);
-      setLessons([]);
+      console.error("Failed to load page data:", err);
     }
-  };
+  }, [fetchLessonsIfNeeded, fetchCoursesIfNeeded, fetchLecturersIfNeeded, fetchClassroomsIfNeeded]);
+
+  useEffect(() => {
+    loadInitialData();
+  }, [loadInitialData]);
 
   const handleUpload = async (file) => {
     // show confirmation before performing destructive upload
@@ -73,7 +77,9 @@ function UploadPage() {
       const result = await uploadLessons(fileToUpload);
       setUploadSummary(result);
       setSummaryModalOpen(true);
-      await loadLessons();
+
+      invalidateLessonsCache();
+      await loadInitialData();
 
     } catch (err) {
       console.error(err);
@@ -167,9 +173,9 @@ function UploadPage() {
 
     try {
       // call server delete endpoint
-      await deleteLessonsApi(toDelete);
-      // Success: keep optimistic UI. Avoid immediate reload to prevent
-      // showing stale server data if deletion hasn't fully propagated.
+      await deleteLessons(toDelete);
+      setLessonsTimestamp(Date.now());
+
     } catch (err) {
       console.error(err);
       alert("Failed to delete lesson(s). Reverting UI and check console for details.");
@@ -178,31 +184,31 @@ function UploadPage() {
     }
   };
 
-  const handleAddLesson = async (oldLesson, newLesson) => {
-  try {
-    if (oldLesson) {
-      await deleteLessonsApi([oldLesson]);
-    }
-
-    await addLessonApi(newLesson);
-
-    if (oldLesson) {
+const handleAddLesson = async (oldLesson, newLesson) => {
+    try {
+      if (oldLesson) {
+        await deleteLessons([oldLesson]); 
+        await addLesson(newLesson);
+        
         setLessons(prev => 
           prev.map(l => l.lessonId === oldLesson.lessonId ? newLesson : l)
         );
       } else {
+        await addLesson(newLesson);
         setLessons(prev => [...prev, newLesson]);
       }
-    alert("Lesson saved successfully");
+      
+      setLessonsTimestamp(Date.now());
 
-  } catch (err) {
-    console.error("Failed to save lesson:", err);
-    alert("Failed to save lesson. See console for details.");
-  } finally {
-    setIsModalOpen(false);
-    setEditingLesson(null);
-  }
-};
+      alert("Lesson saved successfully");
+    } catch (err) {
+      console.error("Failed to save lesson:", err);
+      alert("Failed to save lesson. See console for details.");
+    } finally {
+      setIsModalOpen(false);
+      setEditingLesson(null);
+    }
+  };
 
   return (
     <div>
@@ -218,7 +224,7 @@ function UploadPage() {
         </div>
 
         <div className="right">
-          <button className="icon-btn" title="Refresh list" onClick={(e) => { e.currentTarget.blur(); loadLessons(); }} aria-label="Refresh">
+          <button className="icon-btn" title="Refresh list" onClick={(e) => { e.currentTarget.blur(); loadInitialData(); }} aria-label="Refresh">
             <span className="material-icons" aria-hidden>refresh</span>
           </button>
           <Button onClick={() => { setEditingLesson(null); setIsModalOpen(true); }} variant="secondary">

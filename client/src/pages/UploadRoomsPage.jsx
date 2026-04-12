@@ -3,9 +3,8 @@ import AddRoomModal from "../components/AddRoomModal";
 import ConfirmModal from "../components/ConfirmModal";
 import ClassroomList from "../components/ClassroomList";
 import Button from "../components/ui/Button";
-import { uploadRooms, exportRooms, addRoom, getAllClassrooms, deleteClassrooms, updateClassroom } from "../services/api";
-import { useState } from "react";
-import { useEffect } from "react";
+import { uploadRooms, exportRooms, addRoom, deleteClassrooms, updateClassroom } from "../services/api";
+import React, { useState, useEffect, useCallback } from "react";
 import { useData } from "../context/DataContext";
 
 
@@ -18,7 +17,13 @@ function UploadRoomsPage() {
   };
 
   const [exporting, setExporting] = useState(false);
-  const { classrooms, setClassrooms, invalidateClassroomsCache } = useData();
+  const { 
+  classrooms, 
+  setClassrooms, 
+  fetchClassroomsIfNeeded, 
+  setClassroomsTimestamp,  
+  invalidateClassroomsCache 
+} = useData();
 
   const handleExport = async () => {
     try {
@@ -57,6 +62,8 @@ function UploadRoomsPage() {
     try {
       await uploadRooms(pendingFile);
       alert("Rooms file uploaded successfully");
+
+      invalidateClassroomsCache();
       await loadClassrooms();
     } catch (err) {
       console.error(err);
@@ -105,6 +112,7 @@ function UploadRoomsPage() {
 
       setClassrooms(prev => prev.filter(c => !deletedNames.has(c.classroomName)));
 
+      setClassroomsTimestamp(Date.now());
       setDeleteConfirmOpen(false);
       setPendingDelete(null);
       setSelectedClassrooms([]);
@@ -139,6 +147,7 @@ function UploadRoomsPage() {
         alert("Classroom added successfully");
       }
 
+      setClassroomsTimestamp(Date.now());
       setIsModalOpen(false);
       setEditingClassroom(null);
     } catch (err) {
@@ -149,27 +158,13 @@ function UploadRoomsPage() {
 
   const [query, setQuery] = useState("");
 
-  const loadClassrooms = async () => {
-    if (classrooms.length > 0) {
-      console.log("UploadRoomsPage: Classrooms already in context, skipping fetch.");
-      return;
-    }
-
-    try {
-      const data = await getAllClassrooms("UploadRoomsPage");
-      setClassrooms(Array.isArray(data) ? data : []);
-      // Invalidate dashboard cache to refresh stats
-      invalidateClassroomsCache();
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const loadClassrooms = useCallback(async () => {
+    await fetchClassroomsIfNeeded("UploadRoomsPage");
+  }, [fetchClassroomsIfNeeded]);
 
   useEffect(() => {
-    if (classrooms.length === 0) {
-      loadClassrooms();
-    }
-  }, []);
+    loadClassrooms();
+  }, [loadClassrooms]);
 
   const filteredClassrooms = classrooms.filter((c) => {
     if (!query) return true;

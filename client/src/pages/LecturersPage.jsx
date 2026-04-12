@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Button from "../components/ui/Button";
 import AddLecturerModal from "../components/AddLecturerModal";
 import UploadForm from "../components/UploadForm";
 import { useData } from "../context/DataContext";
-import { getAllLecturers, addLecturer, updateLecturer, deleteLecturers, uploadLecturersExcel, exportLecturersExcel } from "../services/api";
+import { addLecturer, deleteLecturers, updateLecturer } from "../services/api";
 import "./LecturersPage.css";
 import ConfirmModal from "../components/ConfirmModal";
 
 export default function LecturersPage() {
-  const { lecturers, setLecturers, invalidateLecturersCache } = useData();
+  const { 
+    lecturers, 
+    setLecturers, 
+    fetchLecturersIfNeeded, 
+    setLecturersTimestamp 
+  } = useData();
   
   const [selectedLecturerId, setSelectedLecturerId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,32 +27,19 @@ export default function LecturersPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState(null);
 
-  const loadLecturers = async () => {
-    if (lecturers.length > 0) {
-      console.log("LecturersPage: Lecturers already in context, skipping fetch.");
-      return;
-    }
 
-    try {
-      const data = await getAllLecturers("LecturersPage");
-      const lecturersList = Array.isArray(data) ? data : [];
-      setLecturers(lecturersList);
-      
-      if (!selectedLecturerId && lecturersList.length > 0) {
-        setSelectedLecturerId(lecturersList[0].id);
-      }
-    } catch (err) {
-      console.error("Failed to load lecturers:", err);
-    }
-  };
-
-  useEffect(() => {
-    if (lecturers.length === 0) {
-      loadLecturers();
-    } else if (!selectedLecturerId && lecturers.length > 0) {
+  const loadLecturers = useCallback(async () => {
+    await fetchLecturersIfNeeded("LecturersPage");
+    
+    if (!selectedLecturerId && lecturers.length > 0) {
       setSelectedLecturerId(lecturers[0].id);
     }
-  }, [lecturers.length]);
+  }, [fetchLecturersIfNeeded, lecturers, selectedLecturerId]);
+
+
+  useEffect(() => {
+    loadLecturers();
+  }, [loadLecturers]);
 
   const selectedLecturer = lecturers.find((l) => l.id === selectedLecturerId);
 
@@ -64,8 +56,9 @@ export default function LecturersPage() {
     try {
       await addLecturer(newLecturer);
       alert("Lecturer added successfully!");
-
       setLecturers(prev => [...prev, newLecturer]);
+      setLecturersTimestamp(Date.now());
+
       setIsModalOpen(false);
     } catch (err) {
       console.error(err);
@@ -84,6 +77,7 @@ export default function LecturersPage() {
 
       setIsModalOpen(false);
       setEditingLecturer(null);
+      setLecturersTimestamp(Date.now());
       
     } catch (err) {
       console.error(err);
@@ -98,7 +92,6 @@ export default function LecturersPage() {
     setIsDeleteModalOpen(true);
   };
 
-  // ביצוע המחיקה בפועל
   const performDelete = async () => {
     if (!lecturerToPendingDelete) return;
 
@@ -109,6 +102,7 @@ export default function LecturersPage() {
       
       const updatedList = lecturers.filter(l => l.id !== lecturerToPendingDelete.id);
       setLecturers(updatedList);
+      setLecturersTimestamp(Date.now());
 
       if (selectedLecturerId === lecturerToPendingDelete.id) {
         setHasUnsavedChanges(false);
@@ -159,10 +153,12 @@ export default function LecturersPage() {
       await updateLecturer(selectedLecturer);
       setHasUnsavedChanges(false);
       alert("Availability saved successfully!");
+      setLecturersTimestamp(Date.now());
       invalidateLecturersCache();
     } catch (err) {
       console.error(err);
       alert("Error saving availability");
+
     } finally {
       setIsSaving(false);
     }

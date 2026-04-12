@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
-import { getAllCourses, getAllLessons, getAllClassrooms } from "../services/api";
 import { useData } from "../context/DataContext";
 import ImportExportModal from "../components/ImportExportModal";
 import "./DashboardPage.css";
@@ -11,12 +10,13 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const {
     courses,
-    setCourses,
     lessons,
-    setLessons,
     classrooms,
-    setClassrooms,
-    lecturers, setLecturers
+    lecturers,
+    fetchCoursesIfNeeded,
+    fetchLessonsIfNeeded,
+    fetchClassroomsIfNeeded,
+    fetchLecturersIfNeeded
   } = useData();
 
   const [loading, setLoading] = useState(false);
@@ -24,49 +24,24 @@ export default function DashboardPage() {
   const [exportModalOpen, setExportModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-
-      if (courses.length > 0 && lessons.length > 0 && classrooms.length > 0 && lecturers.length > 0) {
-        return; 
-      }
+    const loadAllData = async () => {
       setLoading(true);
-
       try {
-        const promises = [];
-
-        if (courses.length === 0) {
-          console.log("Dashboard: Fetching courses...");
-          promises.push(getAllCourses("Dashboard").then(data => setCourses(Array.isArray(data) ? data : [])));
-        }
-        
-        if (lessons.length === 0) {
-          console.log("Dashboard: Fetching lessons...");
-          promises.push(getAllLessons("Dashboard").then(data => setLessons(Array.isArray(data) ? data : [])));
-        }
-        
-        if (classrooms.length === 0) {
-          console.log("Dashboard: Fetching classrooms...");
-          promises.push(getAllClassrooms("Dashboard").then(data => setClassrooms(Array.isArray(data) ? data : [])));
-        }
-
-        if (lecturers.length === 0) {
-          console.log("Dashboard: Fetching lecturers...");
-          promises.push(getAllLecturers("Dashboard").then(data => setLecturers(Array.isArray(data) ? data : [])));
-        }
-
-        if (promises.length > 0) {
-          await Promise.all(promises);
-        }
-
+        await Promise.all([
+          fetchCoursesIfNeeded("Dashboard"),
+          fetchLessonsIfNeeded("Dashboard"),
+          fetchClassroomsIfNeeded("Dashboard"),
+          fetchLecturersIfNeeded("Dashboard")
+        ]);
       } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
+        console.error("Failed to load dashboard data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchInitialData();
-  }, []); // Empty dependency array prevents infinite loops
+    loadAllData();
+  }, [fetchCoursesIfNeeded, fetchLessonsIfNeeded, fetchClassroomsIfNeeded, fetchLecturersIfNeeded]);
 
   const stats = {
     courses: courses.length,

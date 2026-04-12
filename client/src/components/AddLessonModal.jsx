@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import Button from "./ui/Button";
 import "./ui/ui.css";
 import { useData } from "../context/DataContext"; // שימוש ב-Context
-import { getAllLecturers, getAllCourses } from "../services/api"; // רק לגיבוי
 import Modal from "./ui/Modal";
 
 const TYPE_TO_HOUR_FIELD = {
@@ -24,11 +23,11 @@ export default function AddLessonModal({
   const isEdit = mode === "edit";
 
   const { 
-    courses, setCourses, coursesTimestamp,
-    lecturers, setLecturers, lecturersTimestamp, 
-    isCacheValid,
-    setCoursesTimestamp, setLecturersTimestamp
-  } = useData();
+  courses, 
+  lecturers, 
+  fetchCoursesIfNeeded,
+  fetchLecturersIfNeeded 
+} = useData();
 
   const [courseName, setCourseName] = useState("");
   const [lecturer, setLecturer] = useState("");
@@ -77,20 +76,11 @@ export default function AddLessonModal({
 
 
   useEffect(() => {
-    if (!isOpen) return;
-    if (courses.length === 0 || !isCacheValid(coursesTimestamp)) {
-      getAllCourses("AddLessonModal").then(data => {
-        setCourses(data || []);
-        setCoursesTimestamp(Date.now());
-      });
+    if (isOpen) {
+      fetchCoursesIfNeeded("AddLessonModal");
+      fetchLecturersIfNeeded("AddLessonModal");
     }
-    if (lecturers.length === 0 || !isCacheValid(lecturersTimestamp)) {
-      getAllLecturers("AddLessonModal").then(data => {
-        setLecturers(data || []);
-        setLecturersTimestamp(Date.now());
-      });
-    }
-  }, [isOpen, courses.length, lecturers.length])
+  }, [isOpen, fetchCoursesIfNeeded, fetchLecturersIfNeeded]);
 
 
   useEffect(() => {
