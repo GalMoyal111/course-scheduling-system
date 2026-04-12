@@ -11,9 +11,16 @@ import java.util.*;
 
 @Service
 public class ClassroomService {
+	
+	private List<Classroom> cachedClassrooms = null;
+	private long lastFetchTime = 0;
+	private static final long CACHE_DURATION = 300000;
+	
 
     public void saveClassroomsToFirebase(List<Classroom> classrooms) throws Exception {
 
+    	this.cachedClassrooms = null;
+    	
         Firestore db = FirestoreClient.getFirestore();
 
         ApiFuture<QuerySnapshot> future = db.collection("classrooms").get();
@@ -53,6 +60,8 @@ public class ClassroomService {
 
     public void saveSingleClassroom(Classroom classroom) {
 
+    	this.cachedClassrooms = null;
+    	
         Firestore db = FirestoreClient.getFirestore();
 
         Map<String, Object> data = new HashMap<>();
@@ -67,6 +76,8 @@ public class ClassroomService {
 
     public void deleteClassrooms(List<ClassroomDeleteRequest> classrooms) throws Exception {
 
+    	this.cachedClassrooms = null;
+    	
         Firestore db = FirestoreClient.getFirestore();
         WriteBatch batch = db.batch();
 
@@ -89,6 +100,11 @@ public class ClassroomService {
     
     
     public List<Classroom> getAllClassrooms() throws Exception {
+    	
+    	if (cachedClassrooms != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
+            System.out.println("Returning Classrooms from Server Cache");
+            return cachedClassrooms;
+        }
 
         Firestore db = FirestoreClient.getFirestore();
 
@@ -139,12 +155,17 @@ public class ClassroomService {
             }
         }
 
+        this.cachedClassrooms = classrooms;
+        this.lastFetchTime = System.currentTimeMillis();
+        
         return classrooms;
     }
     
     
     public void updateClassroom(Classroom oldClassroom, Classroom newClassroom) throws Exception {
 
+    	this.cachedClassrooms = null;
+    	
         Firestore db = FirestoreClient.getFirestore();
         WriteBatch batch = db.batch();
 

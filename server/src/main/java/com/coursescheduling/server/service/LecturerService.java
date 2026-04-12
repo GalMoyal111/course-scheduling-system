@@ -19,7 +19,19 @@ public class LecturerService {
 	
 	private static final String COLLECTION_NAME = "lecturers";
 	
+	private List<Lecturer> cachedLecturers = null;
+	private long lastFetchTime = 0;
+	private static final long CACHE_DURATION = 300000; 
+	
+	
 	public List<Lecturer> getAllLecturers() throws Exception {
+		
+		if (cachedLecturers != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
+	        System.out.println("Returning Lecturers from Server Cache");
+	        return cachedLecturers;
+	    }
+		
+		
         Firestore db = FirestoreClient.getFirestore();
         ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME).get();
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
@@ -30,10 +42,17 @@ public class LecturerService {
             lecturer.setId(document.getId()); 
             lecturers.add(lecturer);
         }
+        
+        this.cachedLecturers = lecturers;
+        this.lastFetchTime = System.currentTimeMillis();
+        
         return lecturers;
     }
 	
 	public void addLecturer(Lecturer lecturer) throws Exception {
+		
+		this.cachedLecturers = null;
+		
         Firestore db = FirestoreClient.getFirestore();
         
         if (lecturer.getName() != null) {
@@ -50,6 +69,9 @@ public class LecturerService {
 
 
 	public void updateLecturer(Lecturer lecturer) throws Exception {
+		
+		this.cachedLecturers = null;
+		
         Firestore db = FirestoreClient.getFirestore();
         
         if (lecturer.getId() != null) {
@@ -60,6 +82,9 @@ public class LecturerService {
     }
 
 	public void deleteLecturers(List<Lecturer> lecturers) throws Exception {
+		
+		this.cachedLecturers = null;
+		
         Firestore db = FirestoreClient.getFirestore();
         WriteBatch batch = db.batch(); 
 
@@ -73,8 +98,11 @@ public class LecturerService {
         batch.commit().get(); 
     }
 	
-	
+
 	public void saveLecturersBatch(List<Lecturer> lecturers) throws Exception {
+		
+		this.cachedLecturers = null;
+		
 	    Firestore db = FirestoreClient.getFirestore();
 	    WriteBatch batch = db.batch();
 
@@ -94,6 +122,9 @@ public class LecturerService {
 	
 	
 	public void deleteAllLecturers() throws Exception {
+		
+		this.cachedLecturers = null;
+		
 	    Firestore db = FirestoreClient.getFirestore();
 	    Iterable<DocumentReference> docRefs = db.collection(COLLECTION_NAME).listDocuments();
 	    
@@ -109,7 +140,6 @@ public class LecturerService {
 	        batch.commit().get();
 	    }
 	}
-	
 	
 	
 

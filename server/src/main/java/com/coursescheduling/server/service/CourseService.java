@@ -11,6 +11,9 @@ import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import com.coursescheduling.server.model.Course;
 import com.coursescheduling.server.model.CourseDeleteRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 
@@ -20,6 +23,17 @@ public class CourseService {
     private static final int SEMESTER_MIN = 1;
     private static final int SEMESTER_MAX = 8;
     private static final String COURSE_ID_PATTERN = "^\\d{5,6}$";
+    
+    private List<Course> cachedCourses = null;
+    private long lastFetchTime = 0;
+    private static final long CACHE_DURATION = 300000; // 5 minutes
+    
+
+    @Autowired
+    @Lazy   
+    private LessonService lessonService;
+    
+    
 
     private String normalizeAndValidateCourseId(String rawCourseId) {
         String normalized = rawCourseId == null ? "" : rawCourseId.trim();
@@ -62,6 +76,13 @@ public class CourseService {
     } */
     
     public void saveCourseToFirebase(List<Course> courses) throws Exception {
+    	
+    	this.cachedCourses = null;
+    	
+    	if (lessonService != null) 
+    	    lessonService.invalidateGroupedCache();
+    	
+    	
         Firestore db = FirestoreClient.getFirestore();
 
         ApiFuture<QuerySnapshot> future = db.collection("courses").get();
@@ -98,6 +119,11 @@ public class CourseService {
 
 
     public void saveSingleCourse(Course course) {
+    	
+    	this.cachedCourses = null;
+    	if (lessonService != null) 
+    	    lessonService.invalidateGroupedCache();
+    	
         Firestore db = FirestoreClient.getFirestore();
         String normalizedCourseId = normalizeAndValidateCourseId(course.getCourseId());
 
@@ -121,6 +147,11 @@ public class CourseService {
     
 
     public void deleteCourses(List<CourseDeleteRequest> courses) throws Exception {
+    	
+    	this.cachedCourses = null;
+    	if (lessonService != null) 
+    	    lessonService.invalidateGroupedCache();
+    	
         Firestore db = FirestoreClient.getFirestore();
         WriteBatch batch = db.batch();
 
@@ -133,6 +164,13 @@ public class CourseService {
     }
 
     public List<Course> getAllCourses() throws Exception {
+    	
+    	if (cachedCourses != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
+            System.out.println("Returning Courses from Server Cache (0 Firebase Reads)");
+            return cachedCourses;
+        }
+    	
+    	
         Firestore db = FirestoreClient.getFirestore();
 
         List<Course> courses = new ArrayList<>();
@@ -175,12 +213,20 @@ public class CourseService {
 
             courses.add(course);
         }
+        
+        this.cachedCourses = courses;
+        this.lastFetchTime = System.currentTimeMillis();
 
         return courses;
     }
 
 
     public void updateCourse(Course oldCourse, Course newCourse) throws Exception {
+    	
+    	this.cachedCourses = null;
+    	if (lessonService != null) 
+    	    lessonService.invalidateGroupedCache();
+    	
         Firestore db = FirestoreClient.getFirestore();
         WriteBatch batch = db.batch();
 

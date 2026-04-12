@@ -32,12 +32,23 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class LessonService {
 
 	private final CourseService courseService;
+	
+	private List<Lesson> cachedLessons = null;
+	private long lastFetchTime = 0;
+	private static final long CACHE_DURATION = 300000;
+	
+	private List<ClusterCoursesList> cachedGroupedCourses = null;
+	private long lastGroupedFetchTime = 0;
+	
 
     public LessonService(CourseService courseService) {
         this.courseService = courseService;
     }
 	
     public void deleteAllLessons() {
+    	
+    	this.cachedLessons = null;
+    	
         Firestore db = FirestoreClient.getFirestore();
 
         try {
@@ -59,6 +70,10 @@ public class LessonService {
 	
 	
 	public void saveLessons(List<Lesson> lessons) {
+		
+		this.cachedLessons = null;
+		
+		
 	    Firestore db = FirestoreClient.getFirestore();
 	    
 	    deleteAllLessons();
@@ -101,6 +116,12 @@ public class LessonService {
 	
 	
 	public List<Lesson> getAllLessons() {
+		
+		if (cachedLessons != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
+	        System.out.println("Returning Lessons from Server Cache (Big Save!)");
+	        return cachedLessons;
+	    }
+		
 	    Firestore db = FirestoreClient.getFirestore();
 	    List<Lesson> lessons = new ArrayList<>();
 
@@ -117,11 +138,15 @@ public class LessonService {
 	        e.printStackTrace();
 	    }
 
+	    this.cachedLessons = lessons;
+	    this.lastFetchTime = System.currentTimeMillis();
+	    
 	    return lessons;
 	}
 	
 	
 	private Lesson copyLesson(Lesson original) {
+				
 	    Lesson l = new Lesson();
 
 	    l.setCourseId(original.getCourseId());
@@ -136,6 +161,10 @@ public class LessonService {
 	}
 	
 	public void addLesson(Lesson lesson) {
+		
+		this.cachedLessons = null;
+		
+		
 	    Firestore db = FirestoreClient.getFirestore();
 
 	    Course course = courseService.getCourseById(lesson.getCourseId());
@@ -231,6 +260,9 @@ public class LessonService {
 	
 	
 	public void deleteLessons(List<Lesson> lessons) throws Exception {
+		
+		this.cachedLessons = null;
+		
 	    Firestore db = FirestoreClient.getFirestore();
 	    WriteBatch batch = db.batch();
 
@@ -249,21 +281,24 @@ public class LessonService {
 	
 	
 	public List<ClusterCoursesList> getAllCoursesGroupedByCluster() {
+		
+		if (cachedGroupedCourses != null && (System.currentTimeMillis() - lastGroupedFetchTime < CACHE_DURATION)) {
+	        System.out.println("Returning Grouped Courses from Server Cache");
+	        return cachedGroupedCourses;
+	    }
+		
 	    Firestore db = FirestoreClient.getFirestore();
 
 	    try {
+	    	
 	        ApiFuture<QuerySnapshot> future = db.collection("courses").get();
 	        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
 
 	        List<Course> allCourses = new ArrayList<>();
 
 	        for (QueryDocumentSnapshot doc : documents) {
-	        	
-	        	
 	            Course course = doc.toObject(Course.class);
-
 	            course.setCourseId(doc.getId());
-
 	            allCourses.add(course);
 	        }
 
@@ -275,6 +310,9 @@ public class LessonService {
 	            result.add(new ClusterCoursesList(entry.getKey(), entry.getValue()));
 	        }
 
+	        this.cachedGroupedCourses = result;
+	        this.lastGroupedFetchTime = System.currentTimeMillis();
+	        
 	        return result;
 
 	    } catch (Exception e) {
@@ -430,6 +468,12 @@ public class LessonService {
 	    return lessons;
 	}
 	
+	
+	public void invalidateGroupedCache() {
+	    this.cachedGroupedCourses = null;
+	    this.lastGroupedFetchTime = 0;
+	    System.out.println("LessonService: Grouped courses cache cleared.");
+	}
 	
 	
 	
