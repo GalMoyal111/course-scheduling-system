@@ -485,7 +485,7 @@ export async function uploadLecturersExcel(file) {
     body: formData,
   });
   if (!res.ok) throw new Error("Upload failed");
-  return res.text();
+  return res.json();
 }
 
 export async function exportLecturersExcel() {

@@ -261,18 +261,12 @@ public class FileUploadController {
     
     
     @PostMapping("/lecturers/upload")
-    public String uploadLecturers(@RequestParam("file") MultipartFile file) {
-
-        if (file.isEmpty()) {
-            return "File is empty!"; // או לזרוק Exception, תלוי איך את מעדיפה
+    public LecturerExcelService.LecturerUploadSummary uploadLecturers(@RequestParam("file") MultipartFile file) {
+    	if (file.isEmpty()) {
+            throw new RuntimeException("File is empty!");
         }
-
         System.out.println("Received lecturers file: " + file.getOriginalFilename());
-
-        // כאן קוראים לסרוויס שיודע לפענח את קובץ האקסל של המרצים
-        lecturerExcelService.process(file); 
-
-        return "Lecturers uploaded successfully";
+        return lecturerExcelService.process(file);      
     }
 
     @GetMapping("/lecturers/export")

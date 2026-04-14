@@ -31,6 +31,11 @@ export default function LecturersPage() {
   const [selectedLecturers, setSelectedLecturers] = useState([]);
   const [isMultiDeleteModalOpen, setIsMultiDeleteModalOpen] = useState(false);
 
+  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
+  const [uploadSummary, setUploadSummary] = useState({ totalRows: 0, savedLecturers: 0, invalidSlots: [] });
+
+
+
   const keyFor = (lecturer) => lecturer.id || lecturer.name;
 
   const loadLecturers = useCallback(async () => {
@@ -60,7 +65,7 @@ export default function LecturersPage() {
     );
   }, [lecturers, searchQuery]);
 
-  
+
   const handleAddLecturer = async (newLecturer) => {
     const isDuplicate = lecturers.some(
       (l) => l.name.trim() === newLecturer.name.trim()
@@ -253,10 +258,13 @@ export default function LecturersPage() {
     setPendingFile(null);
 
     try {
-      await uploadLecturersExcel(fileToUpload);
-      alert("Lecturers uploaded successfully!");
+      const result = await uploadLecturersExcel(fileToUpload);
+      setUploadSummary(result);
+      setIsSummaryModalOpen(true);
+
       invalidateLecturersCache();
       await loadLecturers();
+
     } catch (err) {
       console.error("Detailed upload error:", err);
       alert("Error uploading file");
@@ -499,10 +507,91 @@ const handleExport = async () => {
         cancelLabel="No, Cancel"
       />
 
+      <LecturerUploadSummaryModal 
+        isOpen={isSummaryModalOpen} 
+        summary={uploadSummary} 
+        onClose={() => setIsSummaryModalOpen(false)} 
+      />
+
 
     </div>
   );
 }
+
+function LecturerUploadSummaryModal({ isOpen, summary, onClose }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-card" style={{ maxWidth: '450px', width: '100%', borderRadius: '12px' }}>
+        <div className="modal-header">
+          <h3 style={{ fontSize: '20px', fontWeight: '600' }}>Upload Summary</h3>
+        </div>
+
+        <div className="modal-body" style={{ padding: '24px' }}>
+          {/* שורת סיכום הצלחה */}
+          <div style={{ 
+            textAlign: 'center', 
+            backgroundColor: '#f0fdf4', 
+            padding: '15px', 
+            borderRadius: '8px', 
+            marginBottom: '24px',
+            border: '1px solid #dcfce7'
+          }}>
+            <div style={{ color: '#166534', fontWeight: '700', fontSize: '18px' }}>
+              ✓ {summary.savedLecturers} Lecturers Saved
+            </div>
+            <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+              Out of {summary.totalRows} rows processed
+            </div>
+          </div>
+
+          {/* הצגת שגיאות פורמט (אם יש) */}
+          {summary.invalidSlots && summary.invalidSlots.length > 0 && (
+            <div className="summary-section" style={{ marginBottom: '20px' }}>
+              <h4 style={{ 
+                fontSize: '14px', 
+                color: '#b45309', 
+                textTransform: 'uppercase', 
+                borderBottom: '1px solid #fde68a',
+                paddingBottom: '4px',
+                marginBottom: '8px'
+              }}>
+                Format Errors (Skipped)
+              </h4>
+              <div style={{ maxHeight: '120px', overflowY: 'auto', paddingLeft: '5px' }}>
+                {summary.invalidSlots.map((issue, idx) => (
+                  <div key={idx} style={{ fontSize: '13px', marginBottom: '4px', color: '#4b5563' }}>
+                    • {issue}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* הודעה למקרה ששום דבר לא נשמר */}
+          {summary.savedLecturers === 0 && (
+            <p style={{ color: '#ef4444', textAlign: 'center', fontSize: '14px', fontWeight: '500' }}>
+              No lecturers were imported. Please fix the errors above.
+            </p>
+          )}
+        </div>
+
+        <div className="modal-actions" style={{ padding: '16px 24px' }}>
+          <Button 
+            variant="primary" 
+            onClick={onClose} 
+            style={{ width: '100%', padding: '10px', fontWeight: '600' }}
+          >
+            Close Summary
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 
 function AvailabilityTable({ lecturer, onToggle }) {
   const hebrewDays = [
