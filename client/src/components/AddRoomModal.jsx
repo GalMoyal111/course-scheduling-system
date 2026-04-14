@@ -34,16 +34,10 @@ export default function AddRoomModal({ isOpen, onClose, onSave, initialClassroom
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const cap = parseInt(capacity, 10);
-    if (isNaN(cap) || cap < 0) {
-      alert("Please enter a valid non-negative number for capacity.");
-      return;
-    }
-
     const classroom = {
       building: building.trim(),
       classroomName: classroomName.trim(),
-      capacity: cap,
+      capacity: parseInt(capacity, 10),
       type,
     };
 
@@ -55,7 +49,7 @@ export default function AddRoomModal({ isOpen, onClose, onSave, initialClassroom
       <Button type="button" variant="ghost" onClick={onClose}>
         Cancel
       </Button>
-      <Button type="submit" variant="primary" onClick={handleSubmit}>
+      <Button type="submit" form="add-room-form" variant="primary">
         Save
       </Button>
     </>
@@ -69,7 +63,8 @@ return (
       title={initialClassroom ? "Edit Classroom" : "Add Classroom"}
       footer={footerContent}
     >
-      <form onSubmit={handleSubmit}>
+      {/* נתנו לטופס id כדי שהכפתור בחוץ יוכל לדבר איתו */}
+      <form id="add-room-form" onSubmit={handleSubmit}>
         <div className="form-field">
           <label>Building name</label>
           <input className="ui-input" value={building} onChange={(e) => setBuilding(e.target.value)} required />
@@ -82,7 +77,15 @@ return (
 
         <div className="form-field">
           <label>Capacity</label>
-          <input className="ui-input" value={capacity} onChange={(e) => setCapacity(e.target.value)} required />
+          {/* הוספנו type="number" ו-min="1" כדי שהדפדפן ימנע אוטומטית שגיאות */}
+          <input 
+            className="ui-input" 
+            type="number" 
+            min="1" 
+            value={capacity} 
+            onChange={(e) => setCapacity(e.target.value)} 
+            required 
+          />
         </div>
 
         <div className="form-field">

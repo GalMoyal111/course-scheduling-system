@@ -4,7 +4,7 @@ import ConfirmModal from "../components/ConfirmModal";
 import ClassroomList from "../components/ClassroomList";
 import Button from "../components/ui/Button";
 import { uploadRooms, exportRooms, addRoom, deleteClassrooms, updateClassroom } from "../services/api";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useData } from "../context/DataContext";
 
 
@@ -167,15 +167,33 @@ function UploadRoomsPage() {
     loadClassrooms();
   }, [loadClassrooms]);
 
-  const filteredClassrooms = classrooms.filter((c) => {
-    if (!query) return true;
-    const q = query.toLowerCase();
-    return (
-      (c.building && c.building.toLowerCase().includes(q)) ||
-      (c.classroomName && c.classroomName.toLowerCase().includes(q)) ||
-      (c.type && c.type.toLowerCase().includes(q))
-    );
-  });
+  const filteredClassrooms = useMemo(() => {
+    let listToRender = classrooms;
+    
+    if (query) {
+      const q = query.toLowerCase();
+      listToRender = listToRender.filter((c) =>
+        (c.building && c.building.toLowerCase().includes(q)) ||
+        (c.classroomName && c.classroomName.toLowerCase().includes(q)) ||
+        (c.type && c.type.toLowerCase().includes(q))
+      );
+    }
+
+    return [...listToRender].sort((a, b) => {
+      const buildingA = a.building || "";
+      const buildingB = b.building || "";
+      
+      const buildingCompare = buildingA.localeCompare(buildingB, 'he');
+      
+      if (buildingCompare !== 0) {
+        return buildingCompare;
+      }
+      
+      const nameA = a.classroomName || "";
+      const nameB = b.classroomName || "";
+      return nameA.localeCompare(nameB, 'he');
+    });
+  }, [classrooms, query]);
 
   return (
     <div>
