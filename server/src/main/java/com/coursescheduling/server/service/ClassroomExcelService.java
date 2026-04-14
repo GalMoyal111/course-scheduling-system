@@ -24,19 +24,72 @@ public class ClassroomExcelService {
 	@Autowired
     private ClassroomService classroomService;
 
-    public void process(MultipartFile file) {
+	
+	public static class ClassroomUploadSummary {
+	    public int totalRows = 0;
+	    public int savedClassrooms = 0;
+	    public List<String> invalidRows = new ArrayList<>();
+	    
+	    public int getTotalRows() { return totalRows; }
+	    public int getSavedClassrooms() { return savedClassrooms; }
+	    public List<String> getInvalidRows() { return invalidRows; }
+	}
+	
+	
+	public ClassroomUploadSummary process(MultipartFile file) {
+		ClassroomUploadSummary summary = new ClassroomUploadSummary();
 
-    	try {
+	    try (InputStream is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
+	        Sheet sheet = workbook.getSheetAt(0);
+	        List<Classroom> classrooms = new ArrayList<>();
 
-            List<Classroom> classrooms =
-                    readClassroomsFromExcel(file.getInputStream());
+	        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+	            Row row = sheet.getRow(i);
+	            if (row == null) continue;
+	            
+	            summary.totalRows++;
 
-            classroomService.saveClassroomsToFirebase(classrooms);
+	            try {
+	                String building = row.getCell(0) != null ? row.getCell(0).getStringCellValue().trim() : "";
+	                String classroomName = row.getCell(1) != null ? row.getCell(1).getStringCellValue().trim() : "";
 
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to process classrooms file", e);
-        }
-    }
+	                if (building.isEmpty() || classroomName.isEmpty()) {
+	                    summary.invalidRows.add("Row " + (i + 1) + ": Missing building name or classroom name");
+	                    continue;
+	                }
+
+	                int capacity = 0;
+	                if (row.getCell(2) != null) {
+	                    capacity = (int) row.getCell(2).getNumericCellValue();
+	                } else {
+	                	summary.invalidRows.add("Row " + (i + 1) + " (" + building + " " + classroomName + "): Lack of capacity");
+	                	continue;
+	                }
+
+	                Cell typeCell = row.getCell(3);
+	                String typeStr = (typeCell != null) ? typeCell.getStringCellValue() : "NORMAL";
+	                RoomType type = parseRoomType(typeStr);
+
+	                Classroom classroom = new Classroom(building, classroomName, capacity, type);
+	                classrooms.add(classroom);
+	                
+	            } catch (Exception e) {
+	                summary.invalidRows.add("Row " + (i + 1) + ": Invalid data format (make sure the capacity is a number)");
+	            }
+	        }
+
+	        summary.savedClassrooms = classrooms.size();
+
+	        if (!classrooms.isEmpty()) {
+	            classroomService.saveClassroomsToFirebase(classrooms);
+	        }
+
+	        return summary;
+	        
+	    } catch (Exception e) {
+	        throw new RuntimeException("Failed to process classrooms file", e);
+	    }
+	}
 	
 
 	public List<Classroom> readClassroomsFromExcel(InputStream inputStream) throws Exception {

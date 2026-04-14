@@ -10,6 +10,8 @@ import { useData } from "../context/DataContext";
 
 function UploadRoomsPage() {
 
+
+
   const handleUpload = async (file) => {
     // show confirmation before performing destructive upload
     setPendingFile(file);
@@ -55,14 +57,20 @@ function UploadRoomsPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState(null);
 
+  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
+  const [uploadSummary, setUploadSummary] = useState({ totalRows: 0, savedClassrooms: 0, invalidRows: [] });
+
   const performUpload = async () => {
     if (!pendingFile) return;
     setConfirmOpen(false);
+    const fileToUpload = pendingFile;
     setPendingFile(null);
 
     try {
-      await uploadRooms(pendingFile);
-      alert("Rooms file uploaded successfully");
+      const result = await uploadRooms(fileToUpload);
+      
+      setUploadSummary(result);
+      setIsSummaryModalOpen(true);
 
       invalidateClassroomsCache();
       await loadClassrooms();
@@ -279,8 +287,89 @@ function UploadRoomsPage() {
         confirmLabel="Yes, delete"
         cancelLabel="No, keep"
       />
+
+      <RoomUploadSummaryModal 
+        isOpen={isSummaryModalOpen} 
+        summary={uploadSummary} 
+        onClose={() => setIsSummaryModalOpen(false)} 
+      />
     </div>
   );
 }
 
 export default UploadRoomsPage;
+
+function RoomUploadSummaryModal({ isOpen, summary, onClose }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-card" style={{ maxWidth: '450px', width: '100%', borderRadius: '12px' }}>
+        <div className="modal-header">
+          <h3 style={{ fontSize: '20px', fontWeight: '600' }}>Upload Summary</h3>
+        </div>
+
+        <div className="modal-body" style={{ padding: '24px' }}>
+          <div style={{ 
+            textAlign: 'center', 
+            backgroundColor: '#f0fdf4', 
+            padding: '15px', 
+            borderRadius: '8px', 
+            marginBottom: '24px',
+            border: '1px solid #dcfce7'
+          }}>
+            <div style={{ color: '#166534', fontWeight: '700', fontSize: '18px' }}>
+              ✓ {summary.savedClassrooms} Classrooms Saved
+            </div>
+            <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+              Out of {summary.totalRows} rows processed
+            </div>
+          </div>
+
+          {summary.invalidRows && summary.invalidRows.length > 0 && (
+            <div className="summary-section" style={{ marginBottom: '20px' }}>
+              <h4 style={{ 
+                fontSize: '14px', 
+                color: '#b45309', 
+                textTransform: 'uppercase', 
+                borderBottom: '1px solid #fde68a',
+                paddingBottom: '4px',
+                marginBottom: '8px'
+              }}>
+                Format Errors (Skipped)
+              </h4>
+              <div style={{ maxHeight: '120px', overflowY: 'auto', paddingLeft: '5px' }}>
+                {summary.invalidRows.map((issue, idx) => (
+                  <div 
+                    key={idx} 
+                    style={{ 
+                      fontSize: '13px', 
+                      marginBottom: '4px', 
+                      color: '#4b5563', 
+                      direction: 'ltr', 
+                      textAlign: 'left' 
+                    }}
+                  >
+                    • {issue}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {summary.savedClassrooms === 0 && (
+            <p style={{ color: '#ef4444', textAlign: 'center', fontSize: '14px', fontWeight: '500' }}>
+              No classrooms were imported. Please fix the errors above.
+            </p>
+          )}
+        </div>
+
+        <div className="modal-actions" style={{ padding: '16px 24px' }}>
+          <Button variant="primary" onClick={onClose} style={{ width: '100%', padding: '10px', fontWeight: '600' }}>
+            Close Summary
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -87,17 +87,15 @@ public class FileUploadController {
     }
     
     @PostMapping("/rooms/upload")
-    public String uploadRooms(@RequestParam("file") MultipartFile file) {
+    public ClassroomExcelService.ClassroomUploadSummary uploadRooms(@RequestParam("file") MultipartFile file) {
 
         if (file.isEmpty()) {
-            return "File is empty!";
+        	throw new RuntimeException("File is empty!");
         }
 
         System.out.println("Received rooms file: " + file.getOriginalFilename());
 
-        classroomExcelService.process(file);
-
-        return "Rooms uploaded successfully";
+        return classroomExcelService.process(file);
     }
     
     

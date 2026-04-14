@@ -148,7 +148,7 @@ export async function uploadRooms(file) {
     body: formData,
   });
 
-  return res.text();
+  return res.json();
 }
 
 // Download rooms data as an Excel file (returns the Blob).
