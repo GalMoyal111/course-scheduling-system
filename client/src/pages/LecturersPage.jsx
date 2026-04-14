@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Button from "../components/ui/Button";
 import AddLecturerModal from "../components/AddLecturerModal";
 import UploadForm from "../components/UploadForm";
@@ -27,6 +27,7 @@ export default function LecturersPage() {
   const [lecturerToPendingDelete, setLecturerToPendingDelete] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
 
   const loadLecturers = useCallback(async () => {
@@ -43,6 +44,12 @@ export default function LecturersPage() {
   }, [loadLecturers]);
 
   const selectedLecturer = lecturers.find((l) => l.id === selectedLecturerId);
+
+  const filteredLecturers = useMemo(() => {
+    const q = (searchQuery || "").trim().toLowerCase();
+    if (!q) return lecturers;
+    return lecturers.filter((l) => (l.name || "").toLowerCase().includes(q));
+  }, [lecturers, searchQuery]);
 
   const handleAddLecturer = async (newLecturer) => {
     const isDuplicate = lecturers.some(
@@ -246,6 +253,27 @@ const handleExport = async () => {
           <div className="lecturers-header" />
 
           <div className="lecturers-list">
+            {/* Search input */}
+            <div style={{ padding: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input
+                type="text"
+                placeholder="Search lecturers..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid #cbd5e1' }}
+              />
+              {searchQuery && (
+                <button
+                  className="icon-btn"
+                  onClick={() => setSearchQuery("")}
+                  title="Clear"
+                  style={{ padding: '6px 8px' }}
+                >
+                  <span className="material-icons">close</span>
+                </button>
+              )}
+            </div>
+
             {lecturers.length === 0 ? (
               <div className="empty-state-sidebar" style={{ textAlign: "center", padding: "20px", color: "#64748b" }}>
                 <span className="material-icons" style={{ fontSize: "48px", color: "#e2e8f0", marginBottom: "12px" }}>
@@ -254,22 +282,31 @@ const handleExport = async () => {
                 <p style={{ fontSize: "0.9rem", fontWeight: "600", margin: "0" }}>No lecturers yet</p>
                 <p style={{ fontSize: "0.8rem", marginTop: "4px" }}>Add your first lecturer to start.</p>
               </div>
+            ) : filteredLecturers.length === 0 ? (
+              <div className="empty-state-sidebar" style={{ textAlign: "center", padding: "20px", color: "#64748b" }}>
+                <span className="material-icons" style={{ fontSize: "48px", color: "#e2e8f0", marginBottom: "12px" }}>
+                  search_off
+                </span>
+                <p style={{ fontSize: "0.9rem", fontWeight: "600", margin: "0" }}>No results</p>
+                <p style={{ fontSize: "0.8rem", marginTop: "4px" }}>Try a different search term.</p>
+              </div>
             ) : (
-              lecturers.map((lecturer) => (
+              filteredLecturers.map((lecturer) => (
                 <div
                   key={lecturer.id}
                   className={`lecturer-item ${selectedLecturerId === lecturer.id ? "active" : ""}`}
                   onClick={() => handleSelectLecturer(lecturer.id)}
-                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexDirection: 'row-reverse', direction: 'rtl' }}
                 >
-                  <p className="lecturer-name" dir="rtl" style={{ margin: 0 }}>{lecturer.name}</p>
                   <button
                     className="icon-btn icon-btn--delete"
                     onClick={(e) => handleDeleteClick(e, lecturer)}
                     title="Delete"
+                    style={{ marginLeft: 8 }}
                   >
                     <span className="material-icons" style={{ fontSize: '18px' }}>delete</span>
                   </button>
+                  <p className="lecturer-name" style={{ margin: 0, textAlign: 'right' }}>{lecturer.name}</p>
                 </div>
               ))
             )}
