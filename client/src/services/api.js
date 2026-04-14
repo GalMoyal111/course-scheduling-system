@@ -439,7 +439,7 @@ export async function addLecturer(lecturer) {
     throw new Error(`Add lecturer failed: ${res.status} ${text}`);
   }
 
-  return res.text();
+  return res.json();
 }
 
 export async function updateLecturer(lecturer) {

@@ -244,9 +244,8 @@ public class FileUploadController {
     }
 
     @PostMapping("/addSingleLecturer")
-    public String addLecturer(@RequestBody Lecturer lecturer) throws Exception {
-        lecturerService.addLecturer(lecturer);
-        return "Lecturer added successfully";
+    public Lecturer addLecturer(@RequestBody Lecturer lecturer) throws Exception {
+    	return lecturerService.addLecturer(lecturer);
     }
 
     @PostMapping("/updateLecturer")

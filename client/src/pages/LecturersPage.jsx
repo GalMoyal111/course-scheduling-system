@@ -65,9 +65,10 @@ export default function LecturersPage() {
     }
 
     try {
-      await addLecturer(newLecturer);
+      const addedLecturerFromServer = await addLecturer(newLecturer);
       alert("Lecturer added successfully!");
-      setLecturers(prev => [...prev, newLecturer]);
+
+      setLecturers(prev => [...prev, addedLecturerFromServer]);
       setLecturersTimestamp(Date.now());
 
       setIsModalOpen(false);

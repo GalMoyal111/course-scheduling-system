@@ -49,7 +49,7 @@ public class LecturerService {
         return lecturers;
     }
 	
-	public void addLecturer(Lecturer lecturer) throws Exception {
+	public Lecturer addLecturer(Lecturer lecturer) throws Exception {
 		
 		this.cachedLecturers = null;
 		
@@ -59,11 +59,16 @@ public class LecturerService {
             lecturer.setName(lecturer.getName().trim());
         }
         
-        if (lecturer.getId() != null && !String.valueOf(lecturer.getId()).isEmpty()) {
-            db.collection(COLLECTION_NAME).document(String.valueOf(lecturer.getId())).set(lecturer).get(); 
-        } else {
-            db.collection(COLLECTION_NAME).add(lecturer).get();
-        }
+        String id = (lecturer.getId() != null && !String.valueOf(lecturer.getId()).isEmpty()) 
+                ? String.valueOf(lecturer.getId()) 
+                : db.collection(COLLECTION_NAME).document().getId();
+    
+	    DocumentReference docRef = db.collection(COLLECTION_NAME).document(id);
+	    lecturer.setId(id); 
+	    
+	    docRef.set(lecturer).get(); 
+	    
+	    return lecturer; 
     }
 
 
