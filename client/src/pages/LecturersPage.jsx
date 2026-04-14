@@ -50,10 +50,17 @@ export default function LecturersPage() {
 
   const filteredLecturers = useMemo(() => {
     const q = (searchQuery || "").trim().toLowerCase();
-    if (!q) return lecturers;
-    return lecturers.filter((l) => (l.name || "").toLowerCase().includes(q));
+
+    let listToRender = !q 
+      ? lecturers 
+      : lecturers.filter((l) => (l.name || "").toLowerCase().includes(q));
+
+    return [...listToRender].sort((a, b) => 
+      (a.name || "").localeCompare(b.name || "", 'he')
+    );
   }, [lecturers, searchQuery]);
 
+  
   const handleAddLecturer = async (newLecturer) => {
     const isDuplicate = lecturers.some(
       (l) => l.name.trim() === newLecturer.name.trim()

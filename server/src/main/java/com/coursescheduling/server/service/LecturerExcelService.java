@@ -56,6 +56,8 @@ public class LecturerExcelService {
 
 	        List<Lecturer> lecturersToSave = new ArrayList<>(lecturerMap.values());
 	        
+	        System.out.println("Extracted " + lecturersToSave.size() + " valid lecturers from the Excel file.");
+	        
 	        if (!lecturersToSave.isEmpty()) {
 	            lecturerService.deleteAllLecturers();
 	            
