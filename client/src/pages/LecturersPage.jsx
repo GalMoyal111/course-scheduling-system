@@ -28,7 +28,10 @@ export default function LecturersPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLecturers, setSelectedLecturers] = useState([]);
+  const [isMultiDeleteModalOpen, setIsMultiDeleteModalOpen] = useState(false);
 
+  const keyFor = (lecturer) => lecturer.id || lecturer.name;
 
   const loadLecturers = useCallback(async () => {
     await fetchLecturersIfNeeded("LecturersPage");
@@ -108,11 +111,13 @@ export default function LecturersPage() {
       alert("Lecturer deleted successfully!");
       invalidateLecturersCache();
       
-      const updatedList = lecturers.filter(l => l.id !== lecturerToPendingDelete.id);
+      const keyToDelete = keyFor(lecturerToPendingDelete);
+      const updatedList = lecturers.filter(l => keyFor(l) !== keyToDelete);
+      
       setLecturers(updatedList);
       setLecturersTimestamp(Date.now());
 
-      if (selectedLecturerId === lecturerToPendingDelete.id) {
+      if (keyFor(selectedLecturer) === keyToDelete) {
         setHasUnsavedChanges(false);
         setSelectedLecturerId(updatedList.length > 0 ? updatedList[0].id : null);
       }
@@ -124,6 +129,36 @@ export default function LecturersPage() {
       setLecturerToPendingDelete(null);
     }
   };
+
+
+  const performMultiDelete = async () => {
+    if (selectedLecturers.length === 0) return;
+
+    try {
+      await deleteLecturers(selectedLecturers);
+      alert("Selected lecturers deleted successfully!");
+      invalidateLecturersCache();
+      
+      const deletedKeys = new Set(selectedLecturers.map(keyFor));
+      const updatedList = lecturers.filter(l => !deletedKeys.has(keyFor(l)));
+      
+      setLecturers(updatedList);
+      setLecturersTimestamp(Date.now());
+      setSelectedLecturers([]);
+      
+      if (selectedLecturer && deletedKeys.has(keyFor(selectedLecturer))) {
+        setHasUnsavedChanges(false);
+        setSelectedLecturerId(updatedList.length > 0 ? updatedList[0].id : null);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting selected lecturers");
+    } finally {
+      setIsMultiDeleteModalOpen(false);
+    }
+  };
+
+
 
   const handleToggleAvailability = (dayIndex, startFrame) => {
     setLecturers(
@@ -179,6 +214,21 @@ export default function LecturersPage() {
       loadLecturers();
     }
     setSelectedLecturerId(id);
+  };
+
+
+  const toggleLecturerSelection = (e, lecturer) => {
+    e.stopPropagation();
+    const key = keyFor(lecturer);
+    
+    setSelectedLecturers(prev => {
+      const isSelected = prev.some(l => keyFor(l) === key);
+      if (isSelected) {
+        return prev.filter(l => keyFor(l) !== key); 
+      } else {
+        return [...prev, lecturer]; 
+      }
+    });
   };
 
   const handleUpload = async (file) => {
@@ -274,6 +324,8 @@ const handleExport = async () => {
               )}
             </div>
 
+            
+
             {lecturers.length === 0 ? (
               <div className="empty-state-sidebar" style={{ textAlign: "center", padding: "20px", color: "#64748b" }}>
                 <span className="material-icons" style={{ fontSize: "48px", color: "#e2e8f0", marginBottom: "12px" }}>
@@ -291,25 +343,58 @@ const handleExport = async () => {
                 <p style={{ fontSize: "0.8rem", marginTop: "4px" }}>Try a different search term.</p>
               </div>
             ) : (
-              filteredLecturers.map((lecturer) => (
+              filteredLecturers.map((lecturer) => {
+                const key = keyFor(lecturer);
+                const isChecked = selectedLecturers.some(l => keyFor(l) === key);
+                
+                return (
                 <div
                   key={lecturer.id}
                   className={`lecturer-item ${selectedLecturerId === lecturer.id ? "active" : ""}`}
                   onClick={() => handleSelectLecturer(lecturer.id)}
-                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexDirection: 'row-reverse', direction: 'rtl' }}
+                  style={{ 
+                    display: "flex", 
+                    justifyContent: "space-between", 
+                    alignItems: "center", 
+                    direction: "rtl" // קובע שהכל זורם מימין לשמאל טבעי
+                  }}
                 >
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={(e) => toggleLecturerSelection(e, lecturer)}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ cursor: "pointer", width: "16px", height: "16px", margin: 0 }}
+                    />
+                    <p className="lecturer-name" style={{ margin: 0 }}>{lecturer.name}</p>
+                  </div>
+
                   <button
                     className="icon-btn icon-btn--delete"
                     onClick={(e) => handleDeleteClick(e, lecturer)}
                     title="Delete"
-                    style={{ marginLeft: 8 }}
+                    style={{ padding: "4px" }}
                   >
                     <span className="material-icons" style={{ fontSize: '18px' }}>delete</span>
                   </button>
-                  <p className="lecturer-name" style={{ margin: 0, textAlign: 'right' }}>{lecturer.name}</p>
                 </div>
-              ))
-            )}
+              );
+              }))
+            } 
+
+            <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-start", gap: 8, paddingBottom: 8, borderTop: "1px solid #f1f5f9", paddingTop: 16 }}>
+              <Button
+                variant="ghost"
+                onClick={() => setIsMultiDeleteModalOpen(true)}
+                disabled={!selectedLecturers || selectedLecturers.length === 0}
+                style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+              >
+                <span className="material-icons">delete</span>
+                Delete selected ({selectedLecturers?.length || 0})
+              </Button>
+            </div>
+
           </div>
         </div>
 
@@ -394,6 +479,19 @@ const handleExport = async () => {
         confirmLabel="Yes, upload"
         cancelLabel="No, cancel"
       />
+
+      <ConfirmModal
+        isOpen={isMultiDeleteModalOpen}
+        title="Delete Selected Lecturers"
+        message={`Are you sure you want to delete ${selectedLecturers.length} lecturers? This action cannot be undone.`}
+        fileName=""
+        onConfirm={performMultiDelete}
+        onCancel={() => setIsMultiDeleteModalOpen(false)}
+        confirmLabel="Yes, Delete All"
+        cancelLabel="No, Cancel"
+      />
+
+
     </div>
   );
 }
