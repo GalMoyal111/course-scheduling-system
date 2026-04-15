@@ -112,7 +112,7 @@ public class CSP {
         orderedValues.sort((av1, av2) -> {
             double score1 = softConstraintEvaluator.calculateTotalPenalty(var, av1, assignment);
             double score2 = softConstraintEvaluator.calculateTotalPenalty(var, av2, assignment);
-            return Double.compare(score2, score1); // Higher score first
+            return Double.compare(score1, score2); // Sort in ascending order of penalty (lower penalty first)
         });
         return orderedValues;
     }
