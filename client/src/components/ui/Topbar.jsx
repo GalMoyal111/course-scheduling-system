@@ -26,6 +26,7 @@ export default function Topbar({ user, onLogin, onLogout }) {
     "/timetable": "Timetable",
     "/history": "History",
     "/settings": "Settings",
+    "/help": "Help & Information",
   };
 
   const pageName = map[location.pathname] || "Dashboard";
