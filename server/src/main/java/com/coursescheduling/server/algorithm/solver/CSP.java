@@ -114,6 +114,18 @@ public class CSP {
             double score2 = softConstraintEvaluator.calculateTotalPenalty(var, av2, assignment);
             return Double.compare(score1, score2); // Sort in ascending order of penalty (lower penalty first)
         });
+        System.out.println("----- Ordered values for lesson " + var.getLessonId() + " -----");
+        for (AssignedValue av : orderedValues) {
+        double score = softConstraintEvaluator.calculateTotalPenalty(var, av, assignment);
+        System.out.println(
+            "day=" + av.getDay()
+            + ", frame=" + av.getStartFrame()
+            + ", room=" + av.getRoom().getClassroomName()
+            + ", capacity=" + av.getRoom().getCapacity()
+            + ", penalty=" + score
+            );
+        }
+        System.out.println("--------------------------------------------");
         return orderedValues;
     }
 
