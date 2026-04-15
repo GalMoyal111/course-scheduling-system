@@ -20,6 +20,7 @@ function UploadPage() {
   const [editingLesson, setEditingLesson] = useState(null);
   const [selectedLessons, setSelectedLessons] = useState([]);
   const [exporting, setExporting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const {
     lessons, setLessons,
@@ -74,6 +75,9 @@ function UploadPage() {
     const fileToUpload = pendingFile;
     setPendingFile(null);
 
+    setIsUploading(true);
+
+    
     try {
       const result = await uploadLessons(fileToUpload);
       setUploadSummary(result);
@@ -85,7 +89,9 @@ function UploadPage() {
     } catch (err) {
       console.error(err);
       alert("Upload failed. Check console for details.");
-    }
+    } finally {
+      setIsUploading(false);
+  }
   };
 
   const cancelUpload = () => {
@@ -332,6 +338,16 @@ const handleAddLesson = async (oldLesson, newLesson) => {
         summary={uploadSummary} 
         onClose={() => setSummaryModalOpen(false)} 
       />
+
+      {isUploading && (
+        <div className="uploading-overlay">
+          <div className="spinner"></div>
+          <h2 style={{ color: "white", marginTop: "20px", fontWeight: "600" }}>Processing file...</h2>
+          <p style={{ color: "#e2e8f0", marginTop: "8px" }}>Please wait, processing may take a few seconds.</p>
+        </div>
+      )}
+
+
     </div>
   );
 }
