@@ -13,6 +13,7 @@ import { getUserRole } from "./services/api";
 import SettingsPage from "./pages/SettingsPage";
 import LecturersPage from "./pages/LecturersPage";
 import TimetablePage from "./pages/TimetablePage";
+import HelpPage from "./pages/HelpPage";
 
 
 import Layout from "./components/ui/Layout";
@@ -35,6 +36,7 @@ function App() {
     else if (location.pathname === "/timetable") pageName = "Timetable";
     else if (location.pathname === "/history") pageName = "History";
     else if (location.pathname === "/settings") pageName = "Settings";
+    else if (location.pathname === "/help") pageName = "Help & Information";
 
     document.title = `UniSched – ${pageName}`;
   }, [location]);
@@ -82,6 +84,7 @@ function App() {
         <Route path="/timetable" element={<TimetablePage />} />
         <Route path="/history" element={<h2>History</h2>} />
         <Route path="/settings" element={<SettingsPage user={user} />} />
+        <Route path="/help" element={<HelpPage />} />
       </Routes>
 
       <Footer />

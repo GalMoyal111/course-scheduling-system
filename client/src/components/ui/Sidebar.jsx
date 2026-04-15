@@ -17,6 +17,7 @@ export default function Sidebar() {
     { path: "/timetable", label: "Timetable", icon: "calendar_month" },
     { path: "/history", label: "History", icon: "history" },
     { path: "/settings", label: "Settings", icon: "settings" },
+    { path: "/help", label: "Help", icon: "help" },
   ];
 
   return (
