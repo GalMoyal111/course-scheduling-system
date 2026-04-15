@@ -59,40 +59,28 @@ public class CSP {
         }
 
         Variable var = selectUnassignedVariable(assignment, variables);
-        List<DomainValue> orderedValues = orderDomainValues(var, assignment);
+        List<AssignedValue> orderedValues = orderDomainValues(var, assignment, roomManager);
         
-        for (DomainValue value : orderedValues) {
+        for (AssignedValue assignedValue : orderedValues) {
+            assignment.put(var, assignedValue);
+            for (int t = 0; t < var.getDuration(); t++) 
+                roomManager.bookRoom(assignedValue.getDay(), assignedValue.getStartFrame() + t, assignedValue.getRoom());
         	
-        	Classroom bookedRoom = isConsistent(var, value, assignment , roomManager);
-        	
-            if (bookedRoom != null) {
-            	
-            	AssignedValue assignedValue = new AssignedValue(value.getDay(), value.getStartFrame(), bookedRoom);
-            	assignment.put(var, assignedValue);
-                
-            	for (int t = 0; t < var.getDuration(); t++) 
-                    roomManager.bookRoom(value.getDay(), value.getStartFrame() + t, bookedRoom);
-                
-                
-                Map<Variable, List<DomainValue>> removedValues = forwardCheck(var, value, assignment, variables, roomManager);
-                
-                if(removedValues != null) {
-                	
-                    Map<Variable, AssignedValue> result = backtrack(assignment, variables , roomManager);
-                    
-                    if (result != null) {
-                        return result; // Solution found
-                    }
+            Map<Variable, List<DomainValue>> removedValues = forwardCheck(var, assignedValue, assignment, variables , roomManager);
+
+            if (removedValues != null) {
+                Map<Variable, AssignedValue> result = backtrack(assignment, variables, roomManager);
+                if (result != null) {
+                    return result; // Solution found
                 }
-                undoForwardCheck(removedValues);
-                
-                for (int t = 0; t < var.getDuration(); t++) 
-                    roomManager.releaseRoom(value.getDay(), value.getStartFrame() + t, bookedRoom);
-                
-                
-                assignment.remove(var); // Backtrack
-                
             }
+            
+            undoForwardCheck(removedValues);
+
+            for (int t = 0; t < var.getDuration(); t++){
+                roomManager.releaseRoom(assignedValue.getDay(), assignedValue.getStartFrame() + t, assignedValue.getRoom());
+            }
+            assignment.remove(var); // Backtrack
         }
         return null; // No solution found
     }
@@ -111,8 +99,22 @@ public class CSP {
     
     
     // Heuristic: Return the domain values in their original order (can be improved with more sophisticated heuristics)
-    private List<DomainValue> orderDomainValues(Variable var, Map<Variable, AssignedValue> assignment) {
-        return new ArrayList<>(var.getDomain().getValues());
+    private List<AssignedValue> orderDomainValues(Variable var, Map<Variable, AssignedValue> assignment, RoomManager roomManager) {
+        List<AssignedValue> orderedValues = new ArrayList<>();
+
+        for (DomainValue value : var.getDomain().getValues()) {
+            AssignedValue av = buildAssignedValue(var, value, assignment, roomManager);
+            if (av != null) {
+                orderedValues.add(av);
+            }
+        }
+        
+        orderedValues.sort((av1, av2) -> {
+            double score1 = softConstraintEvaluator.calculateTotalPenalty(var, av1, assignment);
+            double score2 = softConstraintEvaluator.calculateTotalPenalty(var, av2, assignment);
+            return Double.compare(score2, score1); // Higher score first
+        });
+        return orderedValues;
     }
 
 
@@ -223,6 +225,12 @@ public class CSP {
     }
 
 
-    
+    private AssignedValue buildAssignedValue(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment , RoomManager roomManager) {
+            Classroom bookedRoom = isConsistent(var, value, assignment , roomManager);
+            if (bookedRoom != null) {
+                return new AssignedValue(value.getDay(), value.getStartFrame(), bookedRoom);
+            }
+            return null;
+    }
 
 }
