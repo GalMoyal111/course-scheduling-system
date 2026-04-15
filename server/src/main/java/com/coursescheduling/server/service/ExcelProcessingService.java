@@ -85,26 +85,44 @@ public class ExcelProcessingService {
 
 	                int currentRowNum = i + 1;
 	                String courseId = getCourseIdFromCell(row.getCell(0));
-	                String lecturerName = row.getCell(3).toString().trim();
+	                if (courseId == null || courseId.trim().isEmpty()) {
+	                    addValidationIssue(summary.missingCourses, "[Missing Course ID]", currentRowNum);
+	                    continue;
+	                }
 	                
-
 	                if (!courseMap.containsKey(courseId)) {
 	                    addValidationIssue(summary.missingCourses, courseId, currentRowNum);
+	                    continue;
+	                }
+	                
+	                
+	                String lecturerName = getSafeCellString(row, 3);
+	                if (lecturerName.isEmpty()) {
+	                    addValidationIssue(summary.missingLecturers, "[Missing Lecturer Name]", currentRowNum);
 	                    continue;
 	                }
 	                if (!existingLecturers.contains(lecturerName)) {
 	                    addValidationIssue(summary.missingLecturers, lecturerName, currentRowNum);
 	                    continue;
 	                }
-
-	                String typeText = row.getCell(2).toString();
+	                
+	                
+	                String typeText = getSafeCellString(row, 2);
+	                if (typeText.isEmpty()) {
+	                    addValidationIssue(summary.invalidTypes, "[Missing Lesson Type]", currentRowNum);
+	                    continue;
+	                }
 	                LessonType type = parseType(typeText);
 	                if (type == null) {
 	                    addValidationIssue(summary.invalidTypes, typeText, currentRowNum);
 	                    continue;
 	                }
-
-	                String semesterText = row.getCell(5).toString();
+	                
+	                String semesterText = getSafeCellString(row, 5);
+	                if (semesterText.isEmpty()) {
+	                    addValidationIssue(summary.invalidSemesters, "[Missing Semester]", currentRowNum);
+	                    continue;
+	                }
 	                Semester semester;
 	                try {
 	                    semester = parseSemester(semesterText);
@@ -112,17 +130,31 @@ public class ExcelProcessingService {
 	                    addValidationIssue(summary.invalidSemesters, semesterText, currentRowNum);
 	                    continue;
 	                }
+       
 
 	                int duration;
 	                try {
-	                    if (row.getCell(7).getCellType() == org.apache.poi.ss.usermodel.CellType.NUMERIC) {
-	                        duration = (int) row.getCell(7).getNumericCellValue();
-	                    } else {
-	                        duration = Integer.parseInt(row.getCell(7).toString().trim());
+	                    org.apache.poi.ss.usermodel.Cell durationCell = row.getCell(7);
+	                    if (durationCell == null || durationCell.getCellType() == org.apache.poi.ss.usermodel.CellType.BLANK) {
+	                        addValidationIssue(summary.invalidDurations, "[Missing Duration]", currentRowNum);
+	                        continue;
 	                    }
-	                    if (duration <= 0) throw new Exception();
+	                    
+	                    if (durationCell.getCellType() == org.apache.poi.ss.usermodel.CellType.NUMERIC) {
+	                        double numericValue = durationCell.getNumericCellValue();
+	                        if (numericValue != 1.0 && numericValue != 2.0 && numericValue != 3.0 && numericValue != 4.0) {
+	                            throw new Exception(); 
+	                        }
+	                        duration = (int) numericValue;
+	                    } else {
+	                        duration = Integer.parseInt(durationCell.toString().trim());
+	                        if (duration != 1 && duration != 2 && duration != 3 && duration != 4) {
+	                            throw new Exception();
+	                        }
+	                    }
 	                } catch (Exception e) {
-	                    addValidationIssue(summary.invalidDurations, row.getCell(7).toString(), currentRowNum);
+	                    String cellVal = row.getCell(7) != null ? row.getCell(7).toString().trim() : "";
+	                    addValidationIssue(summary.invalidDurations, cellVal, currentRowNum);
 	                    continue;
 	                }
 
@@ -141,6 +173,14 @@ public class ExcelProcessingService {
 	}
 	
 	
+	
+	private String getSafeCellString(Row row, int cellIndex) {
+	    org.apache.poi.ss.usermodel.Cell cell = row.getCell(cellIndex);
+	    if (cell == null || cell.getCellType() == org.apache.poi.ss.usermodel.CellType.BLANK) {
+	        return "";
+	    }
+	    return cell.toString().trim();
+	}
 	
 	
 	

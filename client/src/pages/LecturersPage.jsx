@@ -365,7 +365,7 @@ const handleExport = async () => {
                 
                 return (
                 <div
-                  key={lecturer.id}
+                  key={key}
                   className={`lecturer-item ${selectedLecturerId === lecturer.id ? "active" : ""}`}
                   onClick={() => handleSelectLecturer(lecturer.id)}
                   style={{ 
