@@ -8,6 +8,7 @@ public class SoftConstraintFactory {
     public static List<SoftConstraint> createSoftConstraints() {
         List<SoftConstraint> softConstraints = new ArrayList<>();
         softConstraints.add(new RoomSizeEfficiencyConstraint());
+        softConstraints.add(new PreferMorningForHardCoursesConstraint());
         return softConstraints;
     }
 

@@ -103,10 +103,7 @@ public class CSP {
         List<AssignedValue> orderedValues = new ArrayList<>();
 
         for (DomainValue value : var.getDomain().getValues()) {
-            AssignedValue av = buildAssignedValue(var, value, assignment, roomManager);
-            if (av != null) {
-                orderedValues.add(av);
-            }
+            orderedValues.addAll(buildAssignedValues(var, value, assignment, roomManager));
         }
         
         orderedValues.sort((av1, av2) -> {
@@ -132,66 +129,66 @@ public class CSP {
 
     
     
-    // Placeholder for consistency check: In a real implementation, this would check the constraints of the problem
-    private Classroom isConsistent(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment , RoomManager roomManager) {
+    // // Placeholder for consistency check: In a real implementation, this would check the constraints of the problem
+    // private Classroom isConsistent(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment , RoomManager roomManager) {
     	
-    	int start1 = value.getStartFrame();
-        int end1 = start1 + var.getDuration() - 1;
+    // 	int start1 = value.getStartFrame();
+    //     int end1 = start1 + var.getDuration() - 1;
         
         
-        for (Map.Entry<Variable, AssignedValue> entry : assignment.entrySet()) {
-            Variable assignedVar = entry.getKey();
-            AssignedValue assignedTime = entry.getValue();
+    //     for (Map.Entry<Variable, AssignedValue> entry : assignment.entrySet()) {
+    //         Variable assignedVar = entry.getKey();
+    //         AssignedValue assignedTime = entry.getValue();
 
-            if (assignedVar.getLecturer().equals(var.getLecturer()) && assignedTime.getDay() == value.getDay()) {
+    //         if (assignedVar.getLecturer().equals(var.getLecturer()) && assignedTime.getDay() == value.getDay()) {
                 
-                int start2 = assignedTime.getStartFrame();
-                int end2 = start2 + assignedVar.getDuration() - 1; 
+    //             int start2 = assignedTime.getStartFrame();
+    //             int end2 = start2 + assignedVar.getDuration() - 1; 
                 
-                if (Math.max(start1, start2) <= Math.min(end1, end2)) {
-                    return null; 
-                }
-            }
-        }
+    //             if (Math.max(start1, start2) <= Math.min(end1, end2)) {
+    //                 return null; 
+    //             }
+    //         }
+    //     }
         
         
-        if (splitLessonConstraint.isSplitPartAlreadyScheduledToday(var, value, assignment)) {
-            // System.out.println("⚠️ Split lesson part for " + var.getCourseId() + " already scheduled today.");
-            return null;
-        }
+    //     if (splitLessonConstraint.isSplitPartAlreadyScheduledToday(var, value, assignment)) {
+    //         // System.out.println("⚠️ Split lesson part for " + var.getCourseId() + " already scheduled today.");
+    //         return null;
+    //     }
         
         
-        if (lecturerConstraint.isConsecutiveLimitExceeded(var, value, assignment)) {
-            System.out.println("⚠️ Lecturer " + var.getLecturer() + " exceeded max consecutive hours. Skipping slot.");
-            return null;
-        }
+    //     if (lecturerConstraint.isConsecutiveLimitExceeded(var, value, assignment)) {
+    //         System.out.println("⚠️ Lecturer " + var.getLecturer() + " exceeded max consecutive hours. Skipping slot.");
+    //         return null;
+    //     }
         
-        if (lecturerConstraint.isDailyLimitExceeded(var, value, assignment)) {
-            System.out.println("⚠️ Lecturer " + var.getLecturer() + " exceeded total daily hours (8). Skipping slot.");
-            return null;
-        }
+    //     if (lecturerConstraint.isDailyLimitExceeded(var, value, assignment)) {
+    //         System.out.println("⚠️ Lecturer " + var.getLecturer() + " exceeded total daily hours (8). Skipping slot.");
+    //         return null;
+    //     }
         
         
 
-        Set<Classroom> availableRooms = new HashSet<>(roomManager.getAvailableRooms(value.getDay(), start1));
+    //     Set<Classroom> availableRooms = new HashSet<>(roomManager.getAvailableRooms(value.getDay(), start1));
         
-        availableRooms.removeIf(room -> !roomConstraint.isRoomSuitable(var, room));
+    //     availableRooms.removeIf(room -> !roomConstraint.isRoomSuitable(var, room));
         
-        for (int t = 1; t < var.getDuration(); t++) {
-            Set<Classroom> nextFrameRooms = roomManager.getAvailableRooms(value.getDay(), start1 + t);
-            if (nextFrameRooms != null) {
-                availableRooms.retainAll(nextFrameRooms); 
-            } else {
-                availableRooms.clear();
-            }
-        }
+    //     for (int t = 1; t < var.getDuration(); t++) {
+    //         Set<Classroom> nextFrameRooms = roomManager.getAvailableRooms(value.getDay(), start1 + t);
+    //         if (nextFrameRooms != null) {
+    //             availableRooms.retainAll(nextFrameRooms); 
+    //         } else {
+    //             availableRooms.clear();
+    //         }
+    //     }
         
-        if (!availableRooms.isEmpty()) {
-            return availableRooms.iterator().next(); 
-        }
+    //     if (!availableRooms.isEmpty()) {
+    //         return availableRooms.iterator().next(); 
+    //     }
 
-        return null; 
-    }
+    //     return null; 
+    // }
 
 
     
@@ -204,7 +201,7 @@ public class CSP {
             if (!assignment.containsKey(futureVar)) {
                 List<DomainValue> toRemove = new ArrayList<>();
                 for (DomainValue futureValue : new ArrayList<>(futureVar.getDomain().getValues())) {
-                    if (isConsistent(futureVar, futureValue, assignment, roomManager) == null) {
+                    if (buildAssignedValues(futureVar, futureValue, assignment, roomManager).isEmpty()) {
                         toRemove.add(futureValue);
                     }
                 }
@@ -237,12 +234,85 @@ public class CSP {
     }
 
 
-    private AssignedValue buildAssignedValue(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment , RoomManager roomManager) {
-            Classroom bookedRoom = isConsistent(var, value, assignment , roomManager);
-            if (bookedRoom != null) {
-                return new AssignedValue(value.getDay(), value.getStartFrame(), bookedRoom);
+    private boolean isTimeAssignmentConsistent(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment) {
+        int start1 = value.getStartFrame();
+        int end1 = start1 + var.getDuration() - 1;
+
+        for (Map.Entry<Variable, AssignedValue> entry : assignment.entrySet()) {
+            Variable assignedVar = entry.getKey();
+            AssignedValue assignedTime = entry.getValue();
+
+            if (assignedVar.getLecturer().equals(var.getLecturer())
+                    && assignedTime.getDay() == value.getDay()) {
+
+                int start2 = assignedTime.getStartFrame();
+                int end2 = start2 + assignedVar.getDuration() - 1;
+
+                if (Math.max(start1, start2) <= Math.min(end1, end2)) {
+                    return false;
+                }
             }
-            return null;
+        }
+
+        if (splitLessonConstraint.isSplitPartAlreadyScheduledToday(var, value, assignment)) {
+            return false;
+        }
+
+        if (lecturerConstraint.isConsecutiveLimitExceeded(var, value, assignment)) {
+            return false;
+        }
+
+        if (lecturerConstraint.isDailyLimitExceeded(var, value, assignment)) {
+            return false;
+        }
+
+        return true;
     }
+
+    private Set<Classroom> getAvailableSuitableRooms(Variable var, DomainValue value, RoomManager roomManager) {
+        int startFrame = value.getStartFrame();
+
+        Set<Classroom> availableRooms =
+                new HashSet<>(roomManager.getAvailableRooms(value.getDay(), startFrame));
+
+        availableRooms.removeIf(room -> !roomConstraint.isRoomSuitable(var, room));
+
+        for (int t = 1; t < var.getDuration(); t++) {
+            Set<Classroom> nextFrameRooms =
+                    roomManager.getAvailableRooms(value.getDay(), startFrame + t);
+
+            if (nextFrameRooms != null) {
+                availableRooms.retainAll(nextFrameRooms);
+            } else {
+                availableRooms.clear();
+            }
+        }
+
+        return availableRooms;
+    }
+
+    private List<AssignedValue> buildAssignedValues(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment, RoomManager roomManager) {
+        List<AssignedValue> assignedValues = new ArrayList<>();
+
+        if (!isTimeAssignmentConsistent(var, value, assignment)) {
+            return assignedValues;
+        }
+
+        Set<Classroom> availableRooms = getAvailableSuitableRooms(var, value, roomManager);
+
+        for (Classroom room : availableRooms) {
+            assignedValues.add(new AssignedValue(value.getDay(), value.getStartFrame(), room));
+        }
+
+        return assignedValues;
+    }
+
+    // private AssignedValue buildAssignedValue(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment , RoomManager roomManager) {
+    //         Classroom bookedRoom = isConsistent(var, value, assignment , roomManager);
+    //         if (bookedRoom != null) {
+    //             return new AssignedValue(value.getDay(), value.getStartFrame(), bookedRoom);
+    //         }
+    //         return null;
+    // }
 
 }
