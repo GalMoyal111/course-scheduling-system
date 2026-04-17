@@ -83,22 +83,41 @@ public class VariableBuilder {
 	    System.out.println("================================\n");
 	}
 	
-	
-	private Variable mapLessonToVariable(Lesson lesson) {
-	    Variable v = new Variable();
-
-	    v.setLessonId(lesson.getLessonId());
-	    v.setCourseId(lesson.getCourseId());
-	    v.setLecturer(lesson.getLecturer());
-	    v.setCluster(lesson.getCluster());
-	    v.setType(lesson.getType());
-	    v.setDuration(lesson.getDuration());
-	    v.setSplitGroupId(lesson.getSplitGroupId());
-	    v.setCredits(lesson.getCredits());
-	    v.setIsHardCourse(false);
-
-	    return v;
+	private boolean isHardCourse(String courseId) {
+    	return "111".equals(courseId) || "333".equals(courseId);
 	}
+
+	private Variable mapLessonToVariable(Lesson lesson) {
+    	Variable v = new Variable();
+
+		v.setLessonId(lesson.getLessonId());
+		v.setCourseId(lesson.getCourseId());
+		v.setLecturer(lesson.getLecturer());
+		v.setCluster(lesson.getCluster());
+		v.setType(lesson.getType());
+		v.setDuration(lesson.getDuration());
+		v.setSplitGroupId(lesson.getSplitGroupId());
+		v.setCredits(lesson.getCredits());
+		v.setIsHardCourse(isHardCourse(lesson.getCourseId()));
+
+		return v;
+	}
+	
+	// private Variable mapLessonToVariable(Lesson lesson) {
+	//     Variable v = new Variable();
+
+	//     v.setLessonId(lesson.getLessonId());
+	//     v.setCourseId(lesson.getCourseId());
+	//     v.setLecturer(lesson.getLecturer());
+	//     v.setCluster(lesson.getCluster());
+	//     v.setType(lesson.getType());
+	//     v.setDuration(lesson.getDuration());
+	//     v.setSplitGroupId(lesson.getSplitGroupId());
+	//     v.setCredits(lesson.getCredits());
+	//     v.setIsHardCourse(false);
+
+	//     return v;
+	// }
 	
 	
 	private Map<String, List<Variable>> groupByCourse(List<Variable> variables) {
