@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.coursescheduling.server.algorithm.constraints.ElectiveCourseSequenceConstraint;
 import com.coursescheduling.server.algorithm.constraints.LecturerConstraint;
 import com.coursescheduling.server.algorithm.constraints.RoomConstraint;
 import com.coursescheduling.server.algorithm.constraints.SplitLessonConstraint;
@@ -35,8 +36,12 @@ public class CSP {
 	
 	@Autowired
     private SplitLessonConstraint splitLessonConstraint;
+	
+	@Autowired
+	private ElectiveCourseSequenceConstraint electiveCourseSequenceConstraint;
 
     private final SoftConstraintEvaluator softConstraintEvaluator;
+    
 	
 	
 	public CSP() {
@@ -114,15 +119,10 @@ public class CSP {
         System.out.println("----- Ordered values for lesson " + var.getLessonId() + " -----");
         for (AssignedValue av : orderedValues) {
         double score = softConstraintEvaluator.calculateTotalPenalty(var, av, assignment);
-        System.out.println(
-            "day=" + av.getDay()
-            + ", frame=" + av.getStartFrame()
-            + ", room=" + av.getRoom().getClassroomName()
-            + ", capacity=" + av.getRoom().getCapacity()
-            + ", penalty=" + score
-            );
+        
+        // System.out.println("day=" + av.getDay()+ ", frame=" + av.getStartFrame()+ ", room=" + av.getRoom().getClassroomName()+ ", capacity=" + av.getRoom().getCapacity()+ ", penalty=" + score);
         }
-        System.out.println("--------------------------------------------");
+        // System.out.println("--------------------------------------------");
         return orderedValues;
     }
 
@@ -263,6 +263,10 @@ public class CSP {
         }
 
         if (lecturerConstraint.isDailyLimitExceeded(var, value, assignment)) {
+            return false;
+        }
+        
+        if (!electiveCourseSequenceConstraint.isElectiveSequenceValid(var, value, assignment)) {
             return false;
         }
 

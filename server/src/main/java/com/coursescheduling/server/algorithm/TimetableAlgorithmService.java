@@ -2,6 +2,7 @@ package com.coursescheduling.server.algorithm;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Comparator;
 import com.coursescheduling.server.algorithm.model.AssignedValue;
 import com.coursescheduling.server.algorithm.solver.CSP;
 
@@ -111,6 +112,23 @@ public class TimetableAlgorithmService {
         
         
         // Additional constraints can be applied here (e.g., course-specific, room-specific)
+        
+        sortVariablesForCSP(variables);
+        
+        System.out.println("📋 Variables Order After Sorting:");
+        System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s%n", "Cluster", "Course ID", "Credits", "Type", "Lecturer");
+        System.out.println("-".repeat(75));
+        for (Variable v : variables) {
+            System.out.printf("%-10d | %-20s | %-10.1f | %-15s | %-10s%n",
+                    v.getCluster(),
+                    v.getCourseId(),
+                    v.getCredits(),
+                    v.getType(),
+                    v.getLecturer() != null ? v.getLecturer() : "TBD");
+        }
+        System.out.println("-".repeat(75));
+        
+        
 
         // Step 3: Run the CSP solver
         System.out.println("⏳ Running CSP Solver...");
@@ -142,5 +160,18 @@ public class TimetableAlgorithmService {
         }
 
         return results;
+    }
+    
+    
+    public void sortVariablesForCSP(List<Variable> variables) {
+        variables.sort(
+            Comparator.comparingInt(Variable::getCluster)
+            
+            .thenComparingDouble(v -> -v.getCredits())
+            
+            .thenComparing(Variable::getCourseId)
+            
+            .thenComparingInt(v -> v.getType().getPriority())
+        );
     }
 }
