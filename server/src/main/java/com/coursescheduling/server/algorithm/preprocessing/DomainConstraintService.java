@@ -44,7 +44,7 @@ public class DomainConstraintService {
         Map<String, List<DomainValue>> map = new HashMap<>();
 
         // Example constraints for lecturers (these should be based on real data)
-        map.put("משה כהן", List.of(
+        map.put("משה", List.of(
                 new DomainValue(1, 3),
                 new DomainValue(2, 5)
         ));
