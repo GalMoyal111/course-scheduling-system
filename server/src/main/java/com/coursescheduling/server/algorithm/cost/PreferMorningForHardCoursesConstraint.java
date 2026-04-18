@@ -27,5 +27,10 @@ public class PreferMorningForHardCoursesConstraint implements SoftConstraint {
     public String getName() {
         return "preferMorningForHardCourses";    
     }
+
+	@Override
+	public double getMaxPenalty() {
+		return 3;
+	}
     
 }

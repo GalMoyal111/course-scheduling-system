@@ -40,7 +40,7 @@ public class CSP {
 	
 	
 	public CSP() {
-        this.softConstraintEvaluator = new SoftConstraintEvaluator(SoftConstraintFactory.createSoftConstraints());
+        this.softConstraintEvaluator = new SoftConstraintEvaluator(SoftConstraintFactory.createSoftConstraints(), SoftConstraintFactory.getDefaultUserWeights());
     }
 
     // Main method to solve the CSP

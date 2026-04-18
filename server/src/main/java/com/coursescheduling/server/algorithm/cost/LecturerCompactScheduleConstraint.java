@@ -129,4 +129,16 @@ public class LecturerCompactScheduleConstraint implements SoftConstraint {
     public String getName() {
         return "lecturerCompactSchedule";
     }
+
+	@Override
+	public double getMaxPenalty() {
+		// 8 ^2 (max hours in a day) 
+        // + 4 for 4 hours gap
+        // +1 for even frame start
+        // +2 for extreme fatigue
+		return 71;
+	}
+    
+    
+    
 }

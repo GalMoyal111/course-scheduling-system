@@ -13,4 +13,6 @@ public interface SoftConstraint {
     //function to get the name of the soft constraint for identification purposes
     String getName();
 
+    
+    double getMaxPenalty();
 }

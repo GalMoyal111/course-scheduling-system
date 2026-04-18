@@ -54,5 +54,10 @@ public class RoomSizeEfficiencyConstraint implements SoftConstraint {
                 return 0;
         }
     }
+
+	@Override
+	public double getMaxPenalty() {
+		return 3;
+	}
     
 }

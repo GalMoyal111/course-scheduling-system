@@ -1,7 +1,9 @@
 package com.coursescheduling.server.algorithm.cost;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SoftConstraintFactory {
 
@@ -15,6 +17,14 @@ public class SoftConstraintFactory {
         return softConstraints;
     }
 
+    public static Map<String, Double> getDefaultUserWeights() {
+        Map<String, Double> defaultWeights = new HashMap<>();
+        defaultWeights.put("roomSizeEfficiency", 5.0);
+        defaultWeights.put("preferMorningForHardCourses", 5.0);
+        defaultWeights.put("lecturerCompactSchedule", 5.0);
+        return defaultWeights;
+    }
+    
 
     // חשוב!!! אולי להשתמש בcase כשיהיו יותר סוגים
     // public static SoftConstraint createSoftConstraint(String constraintType) {
