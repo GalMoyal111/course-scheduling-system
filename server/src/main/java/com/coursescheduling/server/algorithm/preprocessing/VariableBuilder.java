@@ -240,6 +240,9 @@ public class VariableBuilder {
 	    
 	    lessons.add(createLesson("888", "דונק", 2, LessonType.LECTURE , 9 , 3, null));
 	    lessons.add(createLesson("888", "דונק", 2, LessonType.TUTORIAL , 9 , 3, null));
+	    
+	    lessons.add(createLesson("999", "איתי", 2, LessonType.LECTURE , 9 , 3, null));
+	    lessons.add(createLesson("999", "איתי", 2, LessonType.TUTORIAL , 9 , 3, null));
 
 	    return lessons;
 	}

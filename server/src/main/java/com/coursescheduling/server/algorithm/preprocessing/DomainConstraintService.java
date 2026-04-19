@@ -28,13 +28,17 @@ public class DomainConstraintService {
 
             List<DomainValue> values = v.getDomain().getValues();
 
-            // Remove any domain values that match the lecturer's unavailable slots
-            values.removeIf(dv ->
-                unavailable.stream().anyMatch(slot ->
+            // Remove any domain values where the lesson's full duration overlaps with an unavailable slot
+            values.removeIf(dv -> {
+                int lessonStart = dv.getStartFrame();
+                int lessonEnd = lessonStart + v.getDuration() - 1;
+
+                return unavailable.stream().anyMatch(slot ->
                     slot.getDay() == dv.getDay() &&
-                    slot.getStartFrame() == dv.getStartFrame()
-                )
-            );
+                    slot.getStartFrame() >= lessonStart && 
+                    slot.getStartFrame() <= lessonEnd      
+                );
+            });
         }
     }
 
@@ -48,6 +52,11 @@ public class DomainConstraintService {
                 new DomainValue(1, 3),
                 new DomainValue(2, 5)
         ));
+        
+        map.put("איתי", List.of(
+                new DomainValue(1, 9)
+
+        ));
 
         return map;
     }
@@ -59,8 +68,16 @@ public class DomainConstraintService {
 
             List<DomainValue> values = v.getDomain().getValues();
 
-            values.removeIf(dv -> blockedSlots.stream().anyMatch(slot -> slot.getDay() == dv.getDay() &&
-                    slot.getStartFrame() == dv.getStartFrame()));
+            values.removeIf(dv -> {
+                int lessonStart = dv.getStartFrame();
+                int lessonEnd = lessonStart + v.getDuration() - 1;
+
+                return blockedSlots.stream().anyMatch(slot -> 
+                    slot.getDay() == dv.getDay() &&
+                    slot.getStartFrame() >= lessonStart &&
+                    slot.getStartFrame() <= lessonEnd
+                );
+            });
             
             
         }
