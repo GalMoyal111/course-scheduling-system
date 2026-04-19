@@ -14,6 +14,8 @@ public class SoftConstraintFactory {
         
         softConstraints.add(new LecturerCompactScheduleConstraint());
         
+        softConstraints.add(new CourseComponentsOverlapConstraint());
+        
         return softConstraints;
     }
 
@@ -22,6 +24,7 @@ public class SoftConstraintFactory {
         defaultWeights.put("roomSizeEfficiency", 5.0);
         defaultWeights.put("preferMorningForHardCourses", 5.0);
         defaultWeights.put("lecturerCompactSchedule", 5.0);
+        defaultWeights.put("CourseComponentsOverlap", 5.0);
         return defaultWeights;
     }
     

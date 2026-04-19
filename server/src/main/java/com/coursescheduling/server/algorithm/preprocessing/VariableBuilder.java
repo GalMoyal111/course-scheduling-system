@@ -192,8 +192,8 @@ public class VariableBuilder {
 
 	    List<Lesson> lessons = new ArrayList<>();
 
-	    lessons.add(createLesson("111", "משה", 2, LessonType.LECTURE, 1, 5, null));
-	    lessons.add(createLesson("111", "משה", 2, LessonType.LECTURE, 1, 5, null));
+	    lessons.add(createLesson("111", "משה 1", 2, LessonType.LECTURE, 1, 5, null));
+	    lessons.add(createLesson("111", "מושה 2", 2, LessonType.LECTURE, 1, 5, null));
 	    lessons.add(createLesson("111", "משה", 2, LessonType.TUTORIAL, 1, 5, null));
 	    lessons.add(createLesson("111", "משה", 2, LessonType.TUTORIAL, 1, 5, null));
 	    lessons.add(createLesson("111", "משה", 2, LessonType.LAB, 1, 5, null));

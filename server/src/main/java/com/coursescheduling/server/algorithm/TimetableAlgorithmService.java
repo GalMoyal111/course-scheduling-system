@@ -59,7 +59,9 @@ public class TimetableAlgorithmService {
         return List.of(
             new Classroom("A", "101", 60, RoomType.NORMAL),
             new Classroom("A", "102", 40, RoomType.NORMAL),
-            new Classroom("B", "201", 25, RoomType.LAB)
+            new Classroom("B", "201", 25, RoomType.LAB),
+            new Classroom("A", "103", 60, RoomType.NORMAL),
+            new Classroom("A", "104", 40, RoomType.NORMAL)
         );
     }
     
