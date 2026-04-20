@@ -4,20 +4,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
 import com.coursescheduling.server.model.Classroom;
+import com.coursescheduling.server.model.Lecturer;
 import com.coursescheduling.server.model.LessonType;
 import com.coursescheduling.server.model.RoomType;
+import com.coursescheduling.server.service.LecturerService;
 
 @Service
 public class DomainConstraintService {
+	
+	@Autowired
+    private LecturerService lecturerService;
 
     // This method applies lecturer-specific constraints to the variables' domains.
     public void applyLecturerConstraints(List<Variable> variables) {
-        Map<String, List<DomainValue>> constraints = getLecturerConstraints();
+        Map<String, List<DomainValue>> constraints = getLecturerConstraintsTest();
 
         for (Variable v : variables) {
 
@@ -43,8 +49,29 @@ public class DomainConstraintService {
     }
 
     
-    // This method defines constraints for specific lecturers
+    
     private Map<String, List<DomainValue>> getLecturerConstraints() {
+    	Map<String, List<DomainValue>> map = new HashMap<>();
+
+        try {
+            List<Lecturer> lecturers = lecturerService.getAllLecturers();
+
+            for (Lecturer lecturer : lecturers) {
+                if (lecturer.getName() != null && lecturer.getUnavailableSlots() != null) {
+                    map.put(lecturer.getName(), lecturer.getUnavailableSlots());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Error fetching lecturers for constraints: " + e.getMessage());
+        }
+
+        return map;
+    }
+    
+    
+    
+    // This method defines constraints for specific lecturers
+    private Map<String, List<DomainValue>> getLecturerConstraintsTest() {
         Map<String, List<DomainValue>> map = new HashMap<>();
 
         // Example constraints for lecturers (these should be based on real data)
