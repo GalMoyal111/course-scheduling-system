@@ -29,14 +29,14 @@ public class SoftConstraintFactory {
 
     public static Map<String, Double> getDefaultUserWeights() {
         Map<String, Double> defaultWeights = new HashMap<>();
-        defaultWeights.put("roomSizeEfficiency", 5.0);
-        defaultWeights.put("preferMorningForHardCourses", 5.0);
-        defaultWeights.put("lecturerCompactSchedule", 5.0);
+        defaultWeights.put("RoomSizeEfficiency", 5.0);
+        defaultWeights.put("PreferMorningForHardCourses", 5.0);
+        defaultWeights.put("LecturerCompactSchedule", 5.0);
         defaultWeights.put("CourseComponentsOverlap", 5.0);
         defaultWeights.put("MandatoryMorningPreferred", 5.0);
         defaultWeights.put("ElectiveEveningPreferred", 5.0);
         defaultWeights.put("InconvenientTiming", 5.0);
-        defaultWeights.put("electiveCourseInTheSameClassroom", 5.0);
+        defaultWeights.put("ElectiveCourseInTheSameClassroom", 5.0);
         return defaultWeights;
     }
     

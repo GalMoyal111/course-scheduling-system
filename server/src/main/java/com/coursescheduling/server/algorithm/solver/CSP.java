@@ -40,31 +40,35 @@ public class CSP {
 	@Autowired
 	private ElectiveCourseSequenceConstraint electiveCourseSequenceConstraint;
 
-    private final SoftConstraintEvaluator softConstraintEvaluator;
     
-	
-	
-	public CSP() {
-        this.softConstraintEvaluator = new SoftConstraintEvaluator(SoftConstraintFactory.createSoftConstraints(), SoftConstraintFactory.getDefaultUserWeights());
-    }
 
     // Main method to solve the CSP
-	public Map<Variable, AssignedValue> solve(List<Variable> variables, RoomManager roomManager) {
+	public Map<Variable, AssignedValue> solve(List<Variable> variables, RoomManager roomManager, Map<String, Double> customWeights) {
         Map<Variable, AssignedValue> assignment = new HashMap<>();
-        return backtrack(assignment, variables, roomManager);
+        
+        Map<String, Double> finalWeights = (customWeights != null && !customWeights.isEmpty()) 
+                ? customWeights 
+                : SoftConstraintFactory.getDefaultUserWeights();
+        
+        
+        SoftConstraintEvaluator currentEvaluator = new SoftConstraintEvaluator(SoftConstraintFactory.createSoftConstraints(), finalWeights);
+        
+        
+        return backtrack(assignment, variables, roomManager, currentEvaluator);
     }
 	
 
 
     // Backtracking search algorithm
-    private Map<Variable, AssignedValue> backtrack(Map<Variable, AssignedValue> assignment, List<Variable> variables, RoomManager roomManager) {
+    private Map<Variable, AssignedValue> backtrack(Map<Variable, AssignedValue> assignment, List<Variable> variables, RoomManager roomManager, SoftConstraintEvaluator evaluator) {
         
     	if (assignment.size() == variables.size()) {
             return new HashMap<>(assignment); // Return a copy of the solution
         }
 
         Variable var = selectUnassignedVariable(assignment, variables);
-        List<AssignedValue> orderedValues = orderDomainValues(var, assignment, roomManager);
+        
+        List<AssignedValue> orderedValues = orderDomainValues(var, assignment, roomManager, evaluator);
         
         for (AssignedValue assignedValue : orderedValues) {
             assignment.put(var, assignedValue);
@@ -74,7 +78,7 @@ public class CSP {
             Map<Variable, List<DomainValue>> removedValues = forwardCheck(var, assignedValue, assignment, variables , roomManager);
 
             if (removedValues != null) {
-                Map<Variable, AssignedValue> result = backtrack(assignment, variables, roomManager);
+                Map<Variable, AssignedValue> result = backtrack(assignment, variables, roomManager, evaluator);
                 if (result != null) {
                     return result; // Solution found
                 }
@@ -104,7 +108,7 @@ public class CSP {
     
     
     // Heuristic: Return the domain values in their original order (can be improved with more sophisticated heuristics)
-    private List<AssignedValue> orderDomainValues(Variable var, Map<Variable, AssignedValue> assignment, RoomManager roomManager) {
+    private List<AssignedValue> orderDomainValues(Variable var, Map<Variable, AssignedValue> assignment, RoomManager roomManager, SoftConstraintEvaluator evaluator) {
         List<AssignedValue> orderedValues = new ArrayList<>();
 
         for (DomainValue value : var.getDomain().getValues()) {
@@ -112,15 +116,15 @@ public class CSP {
         }
         
         orderedValues.sort((av1, av2) -> {
-            double score1 = softConstraintEvaluator.calculateTotalPenalty(var, av1, assignment);
-            double score2 = softConstraintEvaluator.calculateTotalPenalty(var, av2, assignment);
+        	double score1 = evaluator.calculateTotalPenalty(var, av1, assignment);
+            double score2 = evaluator.calculateTotalPenalty(var, av2, assignment);
             return Double.compare(score1, score2); // Sort in ascending order of penalty (lower penalty first)
         });
         System.out.println("----- Ordered values for lesson " + var.getLessonId() + " -----");
         for (AssignedValue av : orderedValues) {
-        double score = softConstraintEvaluator.calculateTotalPenalty(var, av, assignment);
+        	double score = evaluator.calculateTotalPenalty(var, av, assignment);
         
-        // System.out.println("day=" + av.getDay()+ ", frame=" + av.getStartFrame()+ ", room=" + av.getRoom().getClassroomName()+ ", capacity=" + av.getRoom().getCapacity()+ ", penalty=" + score);
+        	// System.out.println("day=" + av.getDay()+ ", frame=" + av.getStartFrame()+ ", room=" + av.getRoom().getClassroomName()+ ", capacity=" + av.getRoom().getCapacity()+ ", penalty=" + score);
         }
         // System.out.println("--------------------------------------------");
         return orderedValues;

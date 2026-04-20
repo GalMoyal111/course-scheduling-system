@@ -17,9 +17,9 @@ public class TestController {
     @Autowired
     private TimetableAlgorithmService algorithmService;
 
-    @GetMapping("/run")
-    public String run() {
-        algorithmService.run(Semester.A);
-        return "Algorithm executed";
-    }
+//    @GetMapping("/run")
+//    public String run() {
+//        algorithmService.run(Semester.A);
+//        return "Algorithm executed";
+//    }
 }

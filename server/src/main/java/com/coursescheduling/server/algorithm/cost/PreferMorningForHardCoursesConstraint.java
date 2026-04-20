@@ -25,7 +25,7 @@ public class PreferMorningForHardCoursesConstraint implements SoftConstraint {
 
     @Override
     public String getName() {
-        return "preferMorningForHardCourses";    
+        return "PreferMorningForHardCourses";    
     }
 
 	@Override

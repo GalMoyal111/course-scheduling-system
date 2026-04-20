@@ -34,7 +34,7 @@ public class RoomSizeEfficiencyConstraint implements SoftConstraint {
 
     @Override
     public String getName() {
-        return "roomSizeEfficiency";    
+        return "RoomSizeEfficiency";    
     }
 
     // חשוב!!!!! כרגע יש שכפול קוד למטרות בדיקה

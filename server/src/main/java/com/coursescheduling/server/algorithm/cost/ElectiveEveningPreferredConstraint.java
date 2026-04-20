@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class ElectiveEveningPreferredConstraint implements SoftConstraint {
 
-    private static final String CONSTRAINT_NAME = "ElectiveEveningPreferred";
+    private static final String CONSTRAINT_NAME = "ElectiveCourseInTheSameClassroom";
 
     @Override
     public String getName() {

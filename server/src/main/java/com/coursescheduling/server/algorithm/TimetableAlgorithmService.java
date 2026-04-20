@@ -16,6 +16,7 @@ import com.coursescheduling.server.algorithm.preprocessing.DomainConstraintServi
 import com.coursescheduling.server.algorithm.preprocessing.VariableBuilder;
 import com.coursescheduling.server.algorithm.solver.RoomManager;
 import com.coursescheduling.server.model.Classroom;
+import com.coursescheduling.server.model.GenerateTimetableRequest;
 import com.coursescheduling.server.model.RoomType;
 import com.coursescheduling.server.model.Semester;
 import com.coursescheduling.server.service.ClassroomService;
@@ -77,10 +78,11 @@ public class TimetableAlgorithmService {
     
     
     // Main method to run the algorithm
-    public List<ScheduledLessonDTO> run(Semester semester) {
+    public List<ScheduledLessonDTO> run(GenerateTimetableRequest request) {
+  	
+    	Semester semester = request.getSemester();
+    	Map<String, Double> userWeights = request.getSoftConstraintWeights();
     	
-    	
-
         System.out.println("🚀 Starting algorithm...");
 
 
@@ -134,7 +136,7 @@ public class TimetableAlgorithmService {
 
         // Step 3: Run the CSP solver
         System.out.println("⏳ Running CSP Solver...");
-        Map<Variable, AssignedValue> solution = csp.solve(variables, roomManager);
+        Map<Variable, AssignedValue> solution = csp.solve(variables, roomManager, userWeights);
         
         // Step 4: Convert solution to DTOs for client response
         List<ScheduledLessonDTO> results = new ArrayList<>();

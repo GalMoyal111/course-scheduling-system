@@ -1,23 +1,16 @@
-import React, { useState } from "react";
-import { generateTimetable } from "../services/api";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 export default function TimetablePage() {
+  const location = useLocation();
   const [schedule, setSchedule] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleRunAlgorithm = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const data = await generateTimetable();
-      setSchedule(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  // קליטת הנתונים שהגיעו מהדף הקודם (GeneratePage)
+  useEffect(() => {
+    if (location.state && location.state.schedule) {
+      setSchedule(location.state.schedule);
     }
-  };
+  }, [location.state]);
 
   const getLessonsForSlot = (day, hour) => {
     return schedule.filter((lesson) => {
@@ -32,64 +25,35 @@ export default function TimetablePage() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <header style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
-        <h2>Timetable Output</h2>
-        <button 
-          onClick={handleRunAlgorithm} 
-          disabled={loading}
-          style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer" }}
-        >
-          {loading ? "Running Algorithm..." : "Run Algorithm 🚀"}
-        </button>
-      </header>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      {/* טבלת השיבוץ */}
-      <div style={{ overflowX: "auto" }}>
-        <table border="1" cellPadding="10" style={{ width: "100%", borderCollapse: "collapse", textAlign: "center" }}>
+      <h2>Timetable Output</h2>
+      {schedule.length === 0 ? (
+        <p>No timetable found. Please go to the <strong>Generate</strong> page.</p>
+      ) : (
+        <table border="1" style={{ width: "100%", borderCollapse: "collapse", textAlign: "center" }}>
           <thead>
-            <tr style={{ backgroundColor: "#f4f4f4", color: "#333" }}>
+            <tr style={{ backgroundColor: "#f4f4f4" }}>
               <th>Hour \ Day</th>
-              {days.map((d) => (
-                <th key={d}>Day {d}</th>
-              ))}
+              {days.map(d => <th key={d}>Day {d}</th>)}
             </tr>
           </thead>
           <tbody>
-            {hours.map((hour) => (
+            {hours.map(hour => (
               <tr key={hour}>
-                <td style={{ fontWeight: "bold", backgroundColor: "#f9f9f9", color: "#333" }}>{hour}</td>
-                {days.map((day) => {
-                  const lessonsInSlot = getLessonsForSlot(day, hour);
-                  return (
-                    <td key={`${day}-${hour}`} style={{ verticalAlign: "top", minWidth: "120px" }}>
-                      {lessonsInSlot.map((l, idx) => (
-                        <div 
-                          key={idx} 
-                          style={{ 
-                            border: "1px solid #ccc", 
-                            borderRadius: "5px", 
-                            padding: "5px", 
-                            marginBottom: "5px",
-                            backgroundColor: "#e3f2fd",
-                            fontSize: "0.85em",
-                            color: "#000"
-                          }}
-                        >
-                          <strong>{l.courseId}</strong> ({l.type})<br />
-                          {l.lecturer}<br />
-                          {l.room ? `${l.room.building}-${l.room.classroomName}` : "No Room"}
-                        </div>
-                      ))}
-                    </td>
-                  );
-                })}
+                <td style={{ fontWeight: "bold" }}>{hour}</td>
+                {days.map(day => (
+                  <td key={`${day}-${hour}`} style={{ verticalAlign: "top", height: "60px" }}>
+                    {getLessonsForSlot(day, hour).map((l, i) => (
+                      <div key={i} style={{ background: "#e3f2fd", marginBottom: "2px", fontSize: "0.8em", padding: "2px", border: "1px solid #90caf9" }}>
+                        <strong>{l.courseId}</strong><br/>{l.lecturer}
+                      </div>
+                    ))}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      )}
     </div>
   );
 }

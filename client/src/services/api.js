@@ -391,19 +391,20 @@ export async function deleteUser(uid, token) {
   }
 }
 
-export async function generateTimetable() {
+export async function generateTimetable(requestData) {
   const res = await fetch(`${BASE_URL}/timetable/generate`, {
-    method: "GET",
+    method: "POST", // זה חייב להיות POST
     headers: {
+      "Content-Type": "application/json",
       "Accept": "application/json",
     },
+    body: JSON.stringify(requestData),
   });
 
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Generation failed: ${res.status} ${text}`);
   }
-
   return res.json();
 }
 

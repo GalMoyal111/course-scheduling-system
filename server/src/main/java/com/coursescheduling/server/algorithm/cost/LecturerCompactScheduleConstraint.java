@@ -127,7 +127,7 @@ public class LecturerCompactScheduleConstraint implements SoftConstraint {
 
     @Override
     public String getName() {
-        return "lecturerCompactSchedule";
+        return "LecturerCompactSchedule";
     }
 
 	@Override
