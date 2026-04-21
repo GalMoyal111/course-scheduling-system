@@ -135,9 +135,10 @@
 }
 
 .lesson-course {
-  font-weight: 800;
-  color: #1e293b;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  color: #475467;
+  font-weight: 700;
+  
 }
 
 .lesson-type {

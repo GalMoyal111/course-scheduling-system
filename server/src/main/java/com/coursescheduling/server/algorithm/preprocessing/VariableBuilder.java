@@ -29,10 +29,10 @@ public class VariableBuilder {
 	public List<Variable> createVariables(Semester semester){
 		
 		// the original
-		//List<Lesson> lessons = getSupportedLessonsFromDB(semester);
+		List<Lesson> lessons = getSupportedLessonsFromDB(semester);
 		
 		//temp
-		List<Lesson> lessons = createTestLessons();
+		//List<Lesson> lessons = createTestLessons();
 		
 		
 		List <Variable> variables = new ArrayList<>();

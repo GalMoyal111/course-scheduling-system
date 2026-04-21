@@ -16,10 +16,12 @@ import com.coursescheduling.server.algorithm.preprocessing.DomainConstraintServi
 import com.coursescheduling.server.algorithm.preprocessing.VariableBuilder;
 import com.coursescheduling.server.algorithm.solver.RoomManager;
 import com.coursescheduling.server.model.Classroom;
+import com.coursescheduling.server.model.Course;
 import com.coursescheduling.server.model.GenerateTimetableRequest;
 import com.coursescheduling.server.model.RoomType;
 import com.coursescheduling.server.model.Semester;
 import com.coursescheduling.server.service.ClassroomService;
+import com.coursescheduling.server.service.CourseService;
 
 import java.util.Map;
 
@@ -44,6 +46,9 @@ public class TimetableAlgorithmService {
     
     @Autowired
     private ClassroomService classroomService;
+    
+    @Autowired
+    private CourseService courseService;
     
 
     
@@ -93,10 +98,10 @@ public class TimetableAlgorithmService {
         // Step 2: Apply constraints to variables
         
         // temp for testing
-        List<Classroom> rooms = getClassrooms();
+        //List<Classroom> rooms = getClassrooms();
         
         // from DB
-        //List<Classroom> rooms = getRealClassroomsFromDB();
+        List<Classroom> rooms = getRealClassroomsFromDB();
         
         if (rooms.isEmpty()) {
             System.out.println("❌ No classrooms found. Algorithm cannot run.");
@@ -147,8 +152,15 @@ public class TimetableAlgorithmService {
                 Variable var = entry.getKey();
                 AssignedValue val = entry.getValue();
                 
+                String courseName = "";
+                Course courseObj = courseService.getCourseById(var.getCourseId());
+                if (courseObj != null && courseObj.getCourseName() != null) {
+                    courseName = courseObj.getCourseName();
+                }
+                
                 ScheduledLessonDTO dto = new ScheduledLessonDTO(
                     var.getCourseId(),
+                    courseName,          
                     var.getType().name(), 
                     var.getLecturer(),
                     val.getDay(),

@@ -23,7 +23,9 @@ public class DomainConstraintService {
 
     // This method applies lecturer-specific constraints to the variables' domains.
     public void applyLecturerConstraints(List<Variable> variables) {
-        Map<String, List<DomainValue>> constraints = getLecturerConstraintsTest();
+        //Map<String, List<DomainValue>> constraints = getLecturerConstraintsTest();
+        
+        Map<String, List<DomainValue>> constraints = getLecturerConstraints();
 
         for (Variable v : variables) {
 

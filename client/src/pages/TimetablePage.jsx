@@ -98,14 +98,19 @@ export default function TimetablePage() {
                           lessons.map((l, i) => (
                             <div key={i} className="lesson-card">
                               <div className="lesson-header">
-                                <span className="lesson-course">{l.courseId}</span>
+                                <span className="lesson-course" title={l.courseName}>
+                                  {l.courseName || l.courseId}
+                                </span>
                                 <span className="lesson-type">{translateType(l.type)}</span>
                               </div>
-                              <div className="lesson-lecturer">{l.lecturer}</div>
+                              <div className="lesson-lecturer">
+                                <span style={{ fontWeight: 'bold', marginLeft: '4px' }}>{l.courseId}</span> 
+                                • {l.lecturer}
+                              </div>
                               {l.room && (
                                 <div className="lesson-room">
                                   <span className="material-icons">location_on</span>
-                                  {l.room.building} {l.room.roomNumber}
+                                  {l.room.classroomName} {/* <--- כאן שינינו ל-classroomName */}
                                 </div>
                               )}
                             </div>

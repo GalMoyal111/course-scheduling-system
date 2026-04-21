@@ -5,6 +5,7 @@ import com.coursescheduling.server.model.Classroom;
 public class ScheduledLessonDTO {
 	
 	private String courseId;
+	private String courseName;
     private String type;
     private String lecturer;
     private int day;
@@ -13,8 +14,9 @@ public class ScheduledLessonDTO {
     private Classroom room;
     
     
-    public ScheduledLessonDTO(String courseId, String type, String lecturer, int day, int startFrame, int duration, Classroom room) {
+    public ScheduledLessonDTO(String courseId,String courseName, String type, String lecturer, int day, int startFrame, int duration, Classroom room) {
         this.courseId = courseId;
+        this.courseName = courseName;
         this.type = type;
         this.lecturer = lecturer;
         this.day = day;
@@ -31,6 +33,14 @@ public class ScheduledLessonDTO {
 
 	public void setCourseId(String courseId) {
 		this.courseId = courseId;
+	}
+	
+	public String getCourseName() {
+		return courseName;
+	}
+
+	public void setCourseName(String courseName) {
+		this.courseName = courseName;
 	}
 
 

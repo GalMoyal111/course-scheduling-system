@@ -270,6 +270,14 @@ public class CourseService {
     
     
     public Course getCourseById(String courseId) {
+    	
+    	if (cachedCourses != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
+            for (Course course : cachedCourses) {
+                if (course.getCourseId().equals(courseId)) {
+                    return course; 
+                }
+            }
+        }
         Firestore db = FirestoreClient.getFirestore();
 
         try {
