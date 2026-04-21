@@ -1,0 +1,180 @@
+/* TimetablePage.css */
+
+.timetable-page {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  background-color: #fcfcfd;
+  min-height: 100vh;
+}
+
+.timetable-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.timetable-header h1 {
+  font-size: 1.8rem;
+  color: #101828;
+  margin: 0;
+}
+
+/* עיצוב הטבלה בדומה לדף המרצים */
+.timetable-container {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f2f4f7;
+  overflow-x: auto;
+}
+
+.timetable-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 6px;
+  min-width: 900px;
+  direction: ltr; /* השעות והימים משמאל לימין */
+}
+
+.timetable-table th {
+  padding: 1rem;
+  background: #f9fafb;
+  color: #475467;
+  font-weight: 700;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.time-cell-label {
+  width: 100px;
+  font-weight: 600;
+  color: #667085;
+  background: #f9fafb;
+  text-align: center;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.slot-cell {
+  height: 80px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  vertical-align: top;
+  padding: 4px;
+  transition: all 0.2s;
+}
+
+.slot-cell:hover {
+  border-color: #cbd5e1;
+  background-color: #f1f5f9;
+}
+
+/* עיצוב כרטיס שיעור בתוך התא */
+.lesson-card {
+  background: white;
+  border-right: 4px solid #6366f1; /* פס צבע בצד */
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  font-size: 0.8rem;
+  color: #1e293b;
+  text-align: right;
+  direction: rtl;
+}
+
+.lesson-course {
+  font-weight: 700;
+  display: block;
+  color: #4f46e5;
+  margin-bottom: 2px;
+}
+
+.lesson-lecturer {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.break-row-style {
+  background-color: #f2f4f7 !important;
+  opacity: 0.7;
+}
+
+.break-text {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.lesson-card {
+  background: white;
+  border-right: 4px solid #6366f1;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  text-align: right;
+  direction: rtl;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lesson-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+
+.lesson-course {
+  font-weight: 800;
+  color: #1e293b;
+  font-size: 0.85rem;
+}
+
+.lesson-type {
+  font-size: 0.7rem;
+  background: #f1f5f9;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: #64748b;
+}
+
+.lesson-lecturer {
+  font-size: 0.8rem;
+  color: #475467;
+  font-weight: 500;
+}
+
+.lesson-room {
+  font-size: 0.75rem;
+  color: #6366f1;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.lesson-room .material-icons {
+  font-size: 14px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px;
+  color: #94a3b8;
+}
+
+.empty-state .material-icons {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}

@@ -2,15 +2,14 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateTimetable } from "../services/api";
 import Button from "../components/ui/Button";
+import "./GeneratePage.css";
 
 export default function GeneratePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   const [semester, setSemester] = useState("A");
-  
-  // 1. המילון האמיתי שנשלח לשרת (חייב להיות תואם ל-Java!)
+
   const [weights, setWeights] = useState({
     "RoomSizeEfficiency": 5.0,
     "PreferMorningForHardCourses": 5.0,
@@ -22,42 +21,52 @@ export default function GeneratePage() {
     "ElectiveCourseInTheSameClassroom": 5.0
   });
 
-  // 2. מילון תרגום - מה שהמשתמש רואה בעיניים (כדי שלא יקרא קוד)
-  const constraintLabels = {
-    "RoomSizeEfficiency": "Optimize Classroom Capacity",
-    "PreferMorningForHardCourses": "Hard Courses in the Morning",
-    "LecturerCompactSchedule": "Compact Lecturer Schedule (Avoid Holes)",
-    "CourseComponentsOverlap": "Prevent Overlap of Lectures/Tutorials",
-    "MandatoryMorningPreferred": "Mandatory Courses in the Morning",
-    "ElectiveEveningPreferred": "Elective Courses in the Evening",
-    "InconvenientTiming": "Avoid Late Hours & Fridays",
-    "ElectiveCourseInTheSameClassroom": "Keep Elective Groups in Same Room"
+  const constraintDetails = {
+    "RoomSizeEfficiency": { 
+        label: "Room Capacity Efficiency", 
+        desc: "Prioritize fitting large groups into optimal sized rooms." 
+    },
+    "PreferMorningForHardCourses": { 
+        label: "Morning Peak Performance", 
+        desc: "Schedule challenging courses during high-concentration hours." 
+    },
+    "LecturerCompactSchedule": { 
+        label: "Compact Staff Schedule", 
+        desc: "Minimize idle gaps (holes) between lessons for lecturers." 
+    },
+    "CourseComponentsOverlap": { 
+        label: "Prevent Component Overlap", 
+        desc: "Avoid scheduling lectures and tutorials on the same day." 
+    },
+    "MandatoryMorningPreferred": { 
+        label: "Core Courses in the Morning", 
+        desc: "Give priority to mandatory core subjects in early slots." 
+    },
+    "ElectiveEveningPreferred": { 
+        label: "Later Slots for Electives", 
+        desc: "Move enrichment and elective courses to the afternoon/evening." 
+    },
+    "InconvenientTiming": { 
+        label: "Avoid Weekends & Late Nights", 
+        desc: "Minimize classes on Fridays or very late evening hours." 
+    },
+    "ElectiveCourseInTheSameClassroom": { 
+        label: "Elective Room Grouping", 
+        desc: "Keep related elective tracks within the same physical classroom." 
+    }
   };
 
   const handleWeightChange = (constraintName, value) => {
-    setWeights((prev) => ({
-      ...prev,
-      [constraintName]: parseFloat(value),
-    }));
+    setWeights((prev) => ({ ...prev, [constraintName]: parseFloat(value) }));
   };
 
   const handleGenerate = async () => {
     setLoading(true);
     setError("");
-
     try {
-      // אורזים את הנתונים בדיוק במבנה של ה-DTO שבנינו ב-Java
-      const requestData = {
-        semester: semester,
-        softConstraintWeights: weights
-      };
-
-      // שולחים לשרת
+      const requestData = { semester, softConstraintWeights: weights };
       const generatedSchedule = await generateTimetable(requestData);
-
-      // קופצים לדף התצוגה ומעבירים אליו את התוצאה!
       navigate("/timetable", { state: { schedule: generatedSchedule } });
-      
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -65,49 +74,93 @@ export default function GeneratePage() {
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-      <h2>Generate Timetable AI ✨</h2>
-      <p style={{ color: "#666", marginBottom: "20px" }}>
-        Configure your preferences for the upcoming semester scheduling.
-      </p>
-
-      {error && <div style={{ color: "red", marginBottom: "15px" }}>{error}</div>}
-
-      <div style={{ marginBottom: "30px", padding: "15px", background: "white", borderRadius: "8px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-        <h3>1. Select Semester</h3>
-        <select 
-          value={semester} 
-          onChange={(e) => setSemester(e.target.value)}
-          style={{ padding: "8px", fontSize: "16px", borderRadius: "4px", width: "200px", marginTop: "10px" }}
-        >
-          <option value="A">Semester A</option>
-          <option value="B">Semester B</option>
-          <option value="SUMMER">Summer</option>
-        </select>
+    <div className="generate-page">
+      <div className="generate-header">
+        <h1>
+          <span className="material-icons generator-icon">auto_awesome</span>
+          AI Timetable Engine
+        </h1>
+        <p>Fine-tune the scheduling algorithm's behavior using the sliders below.</p>
       </div>
 
-      <div style={{ marginBottom: "30px", padding: "15px", background: "white", borderRadius: "8px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-        <h3>2. Adjust Preferences (1-10)</h3>
-        <p style={{ fontSize: "14px", color: "#666" }}>1 = Don't care, 10 = Extremely important</p>
+      {error && (
+        <div className="error-message">
+          <span className="material-icons">error_outline</span>
+          <strong>Error:</strong> {error}
+        </div>
+      )}
+
+      {/* Step 1 */}
+      <div className="generate-card">
+        <h3>
+          <span className="material-icons">calendar_month</span>
+          1. Target Semester
+        </h3>
+        <div className="form-group">
+          <label>Select the semester you wish to schedule:</label>
+          <select 
+            className="semester-select"
+            value={semester} 
+            onChange={(e) => setSemester(e.target.value)}
+          >
+            <option value="A">Semester A</option>
+            <option value="B">Semester B</option>
+            <option value="SUMMER">Summer Term</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Step 2 */}
+      <div className="generate-card">
+        <h3>
+          <span className="material-icons">settings_input_component</span>
+          2. Algorithm Optimization Weights
+        </h3>
+        <p className="hint-text">
+          Adjust the priority (1 = Low, 10 = High) for each scheduling rule.
+        </p>
         
         {Object.keys(weights).map((constraint) => (
-          <div key={constraint} style={{ marginTop: "15px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ width: "300px", fontWeight: "500" }}>{constraintLabels[constraint]}</span>
+          <div key={constraint} className="constraint-row">
+            <div className="constraint-info">
+              <span className="constraint-name">{constraintDetails[constraint].label}</span>
+              <span className="constraint-desc">{constraintDetails[constraint].desc}</span>
+            </div>
+            
             <input 
               type="range" 
+              className="weight-slider"
               min="1" max="10" step="0.5" 
               value={weights[constraint]} 
               onChange={(e) => handleWeightChange(constraint, e.target.value)}
-              style={{ flex: 1, margin: "0 15px" }}
             />
-            <span style={{ width: "40px", textAlign: "right", fontWeight: "bold" }}>{weights[constraint]}</span>
+            
+            <div className="weight-badge">{weights[constraint]}</div>
           </div>
         ))}
       </div>
 
-      <Button onClick={handleGenerate} disabled={loading} style={{ width: "100%", padding: "15px", fontSize: "18px" }}>
-        {loading ? "Generating Magic... ⏳" : "Generate Timetable 🚀"}
-      </Button>
+      {/* Primary Action Button */}
+      <div className="generate-footer">
+        <Button 
+          onClick={handleGenerate} 
+          disabled={loading} 
+          variant="primary"
+          className="generate-big-button"
+        >
+          {loading ? (
+            <div className="loading-content">
+               <span className="material-icons loading-spin">refresh</span>
+               AI Algorithm Processing...
+            </div>
+          ) : (
+            <div className="button-label">
+                <span>Generate Optimal Schedule</span>
+                <span className="material-icons">rocket_launch</span>
+            </div>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }

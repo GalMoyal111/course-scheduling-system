@@ -1,59 +1,125 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import Button from "../components/ui/Button";
+import "./TimetablePage.css";
 
 export default function TimetablePage() {
   const location = useLocation();
   const [schedule, setSchedule] = useState([]);
 
-  // קליטת הנתונים שהגיעו מהדף הקודם (GeneratePage)
   useEffect(() => {
+    // קבלת הרשימה מסוג List<ScheduledLessonDTO>
     if (location.state && location.state.schedule) {
       setSchedule(location.state.schedule);
     }
   }, [location.state]);
 
-  const getLessonsForSlot = (day, hour) => {
+  const hebrewDays = [
+    { name: "ראשון", index: 1 }, { name: "שני", index: 2 }, { name: "שלישי", index: 3 },
+    { name: "רביעי", index: 4 }, { name: "חמישי", index: 5 }, { name: "שישי", index: 6 },
+  ];
+
+  const times = [
+    { range: "08:30-09:20", frame: 1, isBreak: false },
+    { range: "09:30-10:20", frame: 2, isBreak: false },
+    { range: "10:30-11:20", frame: 3, isBreak: false },
+    { range: "11:30-12:20", frame: 4, isBreak: false },
+    { range: "12:20-12:50", frame: null, isBreak: true }, 
+    { range: "12:50-13:40", frame: 5, isBreak: false },
+    { range: "13:50-14:40", frame: 6, isBreak: false },
+    { range: "14:50-15:40", frame: 7, isBreak: false },
+    { range: "15:50-16:40", frame: 8, isBreak: false },
+    { range: "16:50-17:40", frame: 9, isBreak: false },
+    { range: "17:50-18:40", frame: 10, isBreak: false },
+    { range: "18:50-19:40", frame: 11, isBreak: false },
+    { range: "19:50-20:40", frame: 12, isBreak: false },
+  ];
+
+  // פונקציית תרגום לסוג השיעור
+  const translateType = (type) => {
+    const types = {
+      "LECTURE": "הרצאה",
+      "TUTORIAL": "תרגול",
+      "LAB": "מעבדה",
+      "PHYSICS_LAB": "מעבדת פיזיקה",
+      "NETWORKING_LAB": "מעבדת תקשורת",
+      "PBL": "PBL"
+    };
+    return types[type] || type;
+  };
+
+  const getLessonsForSlot = (day, frame) => {
+    if (!frame) return [];
     return schedule.filter((lesson) => {
+      // ב-DTO ששלחת השדות הם: day, startFrame, duration
       const start = lesson.startFrame;
       const end = start + (lesson.duration || 1) - 1;
-      return lesson.day === day && hour >= start && hour <= end;
+      return lesson.day === day && frame >= start && frame <= end;
     });
   };
 
-  const days = [1, 2, 3, 4, 5, 6]; 
-  const hours = Array.from({ length: 12 }, (_, i) => i + 1); 
-
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Timetable Output</h2>
-      {schedule.length === 0 ? (
-        <p>No timetable found. Please go to the <strong>Generate</strong> page.</p>
-      ) : (
-        <table border="1" style={{ width: "100%", borderCollapse: "collapse", textAlign: "center" }}>
-          <thead>
-            <tr style={{ backgroundColor: "#f4f4f4" }}>
-              <th>Hour \ Day</th>
-              {days.map(d => <th key={d}>Day {d}</th>)}
-            </tr>
-          </thead>
-          <tbody>
-            {hours.map(hour => (
-              <tr key={hour}>
-                <td style={{ fontWeight: "bold" }}>{hour}</td>
-                {days.map(day => (
-                  <td key={`${day}-${hour}`} style={{ verticalAlign: "top", height: "60px" }}>
-                    {getLessonsForSlot(day, hour).map((l, i) => (
-                      <div key={i} style={{ background: "#e3f2fd", marginBottom: "2px", fontSize: "0.8em", padding: "2px", border: "1px solid #90caf9" }}>
-                        <strong>{l.courseId}</strong><br/>{l.lecturer}
-                      </div>
-                    ))}
-                  </td>
+    <div className="timetable-page">
+      <div className="timetable-header">
+        <h1>Created time schedule</h1>
+        <Button onClick={() => window.print()} variant="secondary">
+          <span className="material-icons" style={{ marginRight: 8 }}>print</span>
+          Printing system
+        </Button>
+      </div>
+
+      <div className="timetable-container">
+        {schedule.length === 0 ? (
+          <div className="empty-state">
+             <span className="material-icons">calendar_today</span>
+             <p>No timetable found. Please generate via the "Generate" page.</p>
+          </div>
+        ) : (
+          <table className="timetable-table">
+            <thead>
+              <tr>
+                <th className="time-column">שעה</th>
+                {hebrewDays.map((day) => (
+                  <th key={day.index}>{day.name}</th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {times.map((timeItem, idx) => (
+                <tr key={idx} className={timeItem.isBreak ? "break-row-style" : ""}>
+                  <td className="time-cell-label">{timeItem.range}</td>
+                  {hebrewDays.map((day) => {
+                    const lessons = getLessonsForSlot(day.index, timeItem.frame);
+                    return (
+                      <td key={`${day.index}-${idx}`} className="slot-cell">
+                        {timeItem.isBreak ? (
+                          <div className="break-text">הפסקה</div>
+                        ) : (
+                          lessons.map((l, i) => (
+                            <div key={i} className="lesson-card">
+                              <div className="lesson-header">
+                                <span className="lesson-course">{l.courseId}</span>
+                                <span className="lesson-type">{translateType(l.type)}</span>
+                              </div>
+                              <div className="lesson-lecturer">{l.lecturer}</div>
+                              {l.room && (
+                                <div className="lesson-room">
+                                  <span className="material-icons">location_on</span>
+                                  {l.room.building} {l.room.roomNumber}
+                                </div>
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }

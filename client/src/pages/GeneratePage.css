@@ -1,0 +1,202 @@
+.generate-page {
+  padding: 40px 20px;
+  max-width: 850px;
+  margin: 0 auto;
+  background-color: #fcfcfd;
+  min-height: 100vh;
+  direction: ltr; /* English support */
+  text-align: left;
+}
+
+.generate-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.generator-icon {
+    font-size: 48px !important;
+    color: #6366f1;
+    margin-bottom: 8px;
+}
+
+.generate-header h1 {
+  font-size: 2.25rem;
+  color: #101828;
+  font-weight: 800;
+  margin: 0;
+}
+
+.generate-header p {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin-top: 8px;
+}
+
+.generate-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px 32px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f2f4f7;
+  margin-bottom: 24px;
+}
+
+.generate-card h3 {
+  font-size: 1.25rem;
+  color: #101828;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.hint-text {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin-bottom: 24px;
+}
+
+/* Semester Select Styling */
+.semester-select {
+  width: 100%;
+  max-width: 320px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.semester-select:focus {
+  border-color: #6366f1;
+  background-color: #fff;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+/* Constraint Rows */
+.constraint-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background-color: #fdfdfe;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.constraint-row:hover {
+  background-color: #f8faff;
+  border-color: #e0e7ff;
+}
+
+.constraint-info {
+  flex: 1.2;
+}
+
+.constraint-name {
+  display: block;
+  font-weight: 700;
+  color: #334155;
+  font-size: 0.95rem;
+  margin-bottom: 2px;
+}
+
+.constraint-desc {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+/* Vibrant Sliders */
+.weight-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  outline: none;
+}
+
+.weight-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  background: #4f46e5;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 4px solid white;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+  transition: 0.2s;
+}
+
+.weight-badge {
+  width: 44px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  color: #4f46e5;
+  background: #eef2ff;
+  border-radius: 10px;
+}
+
+/* The VIBRANT Button */
+.generate-footer {
+    margin-top: 40px;
+}
+
+.generate-big-button {
+    width: 100%;
+    padding: 22px !important;
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+    border-radius: 18px !important;
+    background-color: #6366f1 !important; /* Bright Indigo */
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 12px 24px -6px rgba(99, 102, 241, 0.5) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.generate-big-button:hover:not(:disabled) {
+    background-color: #4f46e5 !important;
+    transform: translateY(-4px);
+    box-shadow: 0 20px 30px -8px rgba(99, 102, 241, 0.6) !important;
+}
+
+.generate-big-button:active {
+    transform: translateY(0);
+}
+
+.button-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.loading-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    opacity: 0.9;
+}
+
+.loading-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
