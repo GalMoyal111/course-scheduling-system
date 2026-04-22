@@ -6,12 +6,19 @@ import com.coursescheduling.server.model.LessonType;
 import com.coursescheduling.server.model.RoomType;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 
 @Component
 public class RoomConstraint {
 	
-	public boolean isRoomSuitable(Variable var, Classroom room) {
-        return isTypeMatch(var.getType(), room.getType()) &&  isCapacityEnough(var.getType(), room.getCapacity());
+	public boolean isRoomSuitable(Variable var, Classroom room, List<Variable> allVariables) {
+        LessonType labType = findLabTypeForCourse(var.getCourseId(), allVariables);
+        if(isElectiveCourse(var) && labType != null && var.getType() == LessonType.LECTURE) {
+        	RoomType requiredRoomType = getRoomTypeForLab(labType);
+        	return room.getType() == requiredRoomType && isCapacityEnough(labType, room.getCapacity());
+        }
+        return isTypeMatch(var.getType(), room.getType()) && isCapacityEnough(var.getType(), room.getCapacity());
     }
 	
 	// returns true if the room type matches the lesson type requirements
@@ -57,11 +64,31 @@ public class RoomConstraint {
     }
     
     
-    
+    private boolean isElectiveCourse(Variable var) {
+        return var.getCluster() >= 9;
+    }
+	
+	private LessonType findLabTypeForCourse(String courseId, List<Variable> allVariables) {
+        for (Variable v : allVariables) {
+            if (v.getCourseId().equals(courseId) && (v.getType() == LessonType.PHYSICS_LAB || v.getType() == LessonType.NETWORKING_LAB || v.getType() == LessonType.LAB)) {
+                return v.getType();
+            }
+        }
+        return null; // No lab type found for this course
+    }
 	
 	
-	
-	
-	
+	private RoomType getRoomTypeForLab(LessonType labType) {
+        switch (labType) {
+            case PHYSICS_LAB:
+                return RoomType.PHYSICS_LAB;
+            case NETWORKING_LAB:
+                return RoomType.NETWORKING_LAB;
+            case LAB:
+                return RoomType.LAB;
+            default:
+                return null; // Not a lab type
+        }
+    }
 
 }

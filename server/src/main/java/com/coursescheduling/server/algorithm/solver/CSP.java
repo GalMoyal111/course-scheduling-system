@@ -3,10 +3,12 @@ package com.coursescheduling.server.algorithm.solver;
 import java.util.Map;
 import java.util.Set;
 
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.coursescheduling.server.algorithm.constraints.ElectiveCourseSequenceConstraint;
+import com.coursescheduling.server.algorithm.constraints.ElectiveLectureLabSameRoomConstraint;
 import com.coursescheduling.server.algorithm.constraints.LecturerConstraint;
 import com.coursescheduling.server.algorithm.constraints.RoomConstraint;
 import com.coursescheduling.server.algorithm.constraints.SplitLessonConstraint;
@@ -40,6 +42,9 @@ public class CSP {
 	@Autowired
 	private ElectiveCourseSequenceConstraint electiveCourseSequenceConstraint;
 
+    @Autowired
+    private ElectiveLectureLabSameRoomConstraint electiveLectureLabSameRoomConstraint;
+
     
 
     // Main method to solve the CSP
@@ -68,7 +73,7 @@ public class CSP {
 
         Variable var = selectUnassignedVariable(assignment, variables);
         
-        List<AssignedValue> orderedValues = orderDomainValues(var, assignment, roomManager, evaluator);
+        List<AssignedValue> orderedValues = orderDomainValues(var, assignment,variables, roomManager, evaluator);
         
         for (AssignedValue assignedValue : orderedValues) {
             assignment.put(var, assignedValue);
@@ -108,11 +113,11 @@ public class CSP {
     
     
     // Heuristic: Return the domain values in their original order (can be improved with more sophisticated heuristics)
-    private List<AssignedValue> orderDomainValues(Variable var, Map<Variable, AssignedValue> assignment, RoomManager roomManager, SoftConstraintEvaluator evaluator) {
+    private List<AssignedValue> orderDomainValues(Variable var, Map<Variable, AssignedValue> assignment,List<Variable> variables, RoomManager roomManager, SoftConstraintEvaluator evaluator) {
         List<AssignedValue> orderedValues = new ArrayList<>();
 
         for (DomainValue value : var.getDomain().getValues()) {
-            orderedValues.addAll(buildAssignedValues(var, value, assignment, roomManager));
+            orderedValues.addAll(buildAssignedValues(var, value, assignment, variables, roomManager));
         }
         
         orderedValues.sort((av1, av2) -> {
@@ -205,7 +210,7 @@ public class CSP {
             if (!assignment.containsKey(futureVar)) {
                 List<DomainValue> toRemove = new ArrayList<>();
                 for (DomainValue futureValue : new ArrayList<>(futureVar.getDomain().getValues())) {
-                    if (buildAssignedValues(futureVar, futureValue, assignment, roomManager).isEmpty()) {
+                    if (buildAssignedValues(futureVar, futureValue, assignment, variables, roomManager).isEmpty()) {
                         toRemove.add(futureValue);
                     }
                 }
@@ -277,13 +282,13 @@ public class CSP {
         return true;
     }
 
-    private Set<Classroom> getAvailableSuitableRooms(Variable var, DomainValue value, RoomManager roomManager) {
+    private Set<Classroom> getAvailableSuitableRooms(Variable var, DomainValue value, List<Variable> variables, RoomManager roomManager) {
         int startFrame = value.getStartFrame();
 
         Set<Classroom> availableRooms =
                 new HashSet<>(roomManager.getAvailableRooms(value.getDay(), startFrame));
 
-        availableRooms.removeIf(room -> !roomConstraint.isRoomSuitable(var, room));
+        availableRooms.removeIf(room -> !roomConstraint.isRoomSuitable(var, room, variables));
 
         for (int t = 1; t < var.getDuration(); t++) {
             Set<Classroom> nextFrameRooms =
@@ -299,17 +304,19 @@ public class CSP {
         return availableRooms;
     }
 
-    private List<AssignedValue> buildAssignedValues(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment, RoomManager roomManager) {
+    private List<AssignedValue> buildAssignedValues(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment, List<Variable> variables, RoomManager roomManager) {
         List<AssignedValue> assignedValues = new ArrayList<>();
 
         if (!isTimeAssignmentConsistent(var, value, assignment)) {
             return assignedValues;
         }
 
-        Set<Classroom> availableRooms = getAvailableSuitableRooms(var, value, roomManager);
+        Set<Classroom> availableRooms = getAvailableSuitableRooms(var, value, variables, roomManager);
 
         for (Classroom room : availableRooms) {
-            assignedValues.add(new AssignedValue(value.getDay(), value.getStartFrame(), room));
+            if(electiveLectureLabSameRoomConstraint.isValid(var, room, assignment, variables)) {
+                assignedValues.add(new AssignedValue(value.getDay(), value.getStartFrame(), room));
+            }
         }
 
         return assignedValues;
