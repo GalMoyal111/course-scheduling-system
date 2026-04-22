@@ -11,6 +11,7 @@ export function DataProvider({ children }) {
   const [courses, setCourses] = useState([]);
   const [classrooms, setClassrooms] = useState([]);
   const [lecturers, setLecturers] = useState([]);
+  const [schedule, setSchedule] = useState([]);
   
   // Cache timestamps
   const [lessonsTimestamp, setLessonsTimestamp] = useState(null);
@@ -163,6 +164,8 @@ export function DataProvider({ children }) {
     setClassrooms,
     lecturers,
     setLecturers,
+    schedule,
+    setSchedule,
     
     // Cache validation
     isCacheValid,
@@ -189,7 +192,7 @@ export function DataProvider({ children }) {
     fetchClassroomsIfNeeded,
   }), [
     // רשימת התלויות: האובייקט ייווצר מחדש רק כשאחד מאלה ישתנה
-    lessons, courses, classrooms, lecturers,
+    lessons, courses, classrooms, lecturers,schedule,
     lessonsTimestamp, coursesTimestamp, classroomsTimestamp, lecturersTimestamp,
     isCacheValid, 
     invalidateLessonsCache, invalidateCoursesCache, 

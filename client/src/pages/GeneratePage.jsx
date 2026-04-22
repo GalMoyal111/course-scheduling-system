@@ -3,12 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { generateTimetable } from "../services/api";
 import Button from "../components/ui/Button";
 import "./GeneratePage.css";
+import { useData } from "../context/DataContext";
 
 export default function GeneratePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [semester, setSemester] = useState("A");
+
+  const { setSchedule } = useData();
 
   const [weights, setWeights] = useState({
     "RoomSizeEfficiency": 5.0,
@@ -72,7 +75,9 @@ export default function GeneratePage() {
     try {
       const requestData = { semester, softConstraintWeights: weights };
       const generatedSchedule = await generateTimetable(requestData);
-      navigate("/timetable", { state: { schedule: generatedSchedule } });
+
+      setSchedule(generatedSchedule);
+      navigate("/timetable");
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -117,7 +122,6 @@ export default function GeneratePage() {
       </div>
 
       {/* Step 2 */}
-      {/* Step 2 */}
       <div className="generate-card">
         <h3>
           <span className="material-icons">settings_input_component</span>
@@ -128,9 +132,8 @@ export default function GeneratePage() {
         </p>
         
         {Object.keys(weights).map((constraint) => (
-          <div key={constraint} className="constraint-row" style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}> {/* הוספתי קצת סטיילינג כדי שהשורה לא תישבר מוזר */}
+          <div key={constraint} className="constraint-row" style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>
             
-            {/* --- השורה המקורית שלך עם הסליידר --- */}
             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
               <div className="constraint-info">
                 <span className="constraint-name">{constraintDetails[constraint].label}</span>
@@ -148,14 +151,12 @@ export default function GeneratePage() {
               <div className="weight-badge">{weights[constraint]}</div>
             </div>
             
-            {/* --- התוספת שלנו: הודעת האזהרה שמופיעה רק כשהמשקל הוא 0 --- */}
             {weights[constraint] == 0 && (
               <div style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "8px", fontWeight: "500", marginLeft: "250px" }}>
                 <span className="material-icons" style={{ fontSize: "14px", verticalAlign: "middle", marginRight: "4px" }}>warning</span>
                 Note: Assigning a weight of 0 will cause this constraint to be completely ignored.
               </div>
             )}
-            {/* -------------------------------------------------------- */}
             
           </div>
         ))}
@@ -169,19 +170,29 @@ export default function GeneratePage() {
           variant="primary"
           className="generate-big-button"
         >
-          {loading ? (
-            <div className="loading-content">
-               <span className="material-icons loading-spin">refresh</span>
-               AI Algorithm Processing...
-            </div>
-          ) : (
-            <div className="button-label">
+           {/* הורדנו את הטעינה מפה, הכפתור תמיד יראה אותו דבר, פשוט יהיה לחוץ/חסום */}
+           <div className="button-label">
                 <span>Generate Optimal Schedule</span>
                 <span className="material-icons">rocket_launch</span>
-            </div>
-          )}
+           </div>
         </Button>
       </div>
+
+      {/* --- התוספת שלנו: מסך טעינה מלא --- */}
+      {loading && (
+        <div className="uploading-overlay">
+          <div className="spinner"></div>
+          <h2 style={{ color: "white", marginTop: "20px", fontWeight: "600", fontSize: "24px" }}>
+             AI Algorithm is Processing...
+          </h2>
+          <p style={{ color: "#e2e8f0", marginTop: "8px", fontSize: "16px" }}>
+             Analyzing thousands of possibilities to build the perfect schedule.<br/>
+             This may take up to 1-2 minutes. Please don't close the window.
+          </p>
+        </div>
+      )}
+      {/* --------------------------------- */}
+
     </div>
   );
 }

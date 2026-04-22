@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useLocation } from "react-router-dom"; 
 import Button from "../components/ui/Button";
+import { useData } from "../context/DataContext";
 import "./TimetablePage.css";
 
 export default function TimetablePage() {
-  const location = useLocation();
-  const [schedule, setSchedule] = useState([]);
+  const { schedule } = useData();
 
   useEffect(() => {
-    // קבלת הרשימה מסוג List<ScheduledLessonDTO>
-    if (location.state && location.state.schedule) {
-      setSchedule(location.state.schedule);
-    }
-  }, [location.state]);
+    window.scrollTo(0, 0);
+  }, []);
 
   const hebrewDays = [
     { name: "ראשון", index: 1 }, { name: "שני", index: 2 }, { name: "שלישי", index: 3 },
@@ -50,6 +47,8 @@ export default function TimetablePage() {
 
   const getLessonsForSlot = (day, frame) => {
     if (!frame) return [];
+    if (!schedule || !Array.isArray(schedule)) return [];
+
     return schedule.filter((lesson) => {
       // ב-DTO ששלחת השדות הם: day, startFrame, duration
       const start = lesson.startFrame;
