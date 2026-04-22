@@ -18,7 +18,8 @@ export default function GeneratePage() {
     "MandatoryMorningPreferred": 5.0,
     "ElectiveEveningPreferred": 5.0,
     "InconvenientTiming": 5.0,
-    "ElectiveCourseInTheSameClassroom": 5.0
+    "ElectiveCourseInTheSameClassroom": 5.0,
+    "AvoidBuildingP" : 5.0
   });
 
   const constraintDetails = {
@@ -53,7 +54,12 @@ export default function GeneratePage() {
     "ElectiveCourseInTheSameClassroom": { 
         label: "Elective Room Grouping", 
         desc: "Keep related elective tracks within the same physical classroom." 
-    }
+    },
+    "AvoidBuildingP": {
+          label: "Avoid Building P",
+          desc: "Assign a penalty for scheduling classes in building P."
+      }
+
   };
 
   const handleWeightChange = (constraintName, value) => {
@@ -111,6 +117,7 @@ export default function GeneratePage() {
       </div>
 
       {/* Step 2 */}
+      {/* Step 2 */}
       <div className="generate-card">
         <h3>
           <span className="material-icons">settings_input_component</span>
@@ -121,21 +128,35 @@ export default function GeneratePage() {
         </p>
         
         {Object.keys(weights).map((constraint) => (
-          <div key={constraint} className="constraint-row">
-            <div className="constraint-info">
-              <span className="constraint-name">{constraintDetails[constraint].label}</span>
-              <span className="constraint-desc">{constraintDetails[constraint].desc}</span>
+          <div key={constraint} className="constraint-row" style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}> {/* הוספתי קצת סטיילינג כדי שהשורה לא תישבר מוזר */}
+            
+            {/* --- השורה המקורית שלך עם הסליידר --- */}
+            <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+              <div className="constraint-info">
+                <span className="constraint-name">{constraintDetails[constraint].label}</span>
+                <span className="constraint-desc">{constraintDetails[constraint].desc}</span>
+              </div>
+              
+              <input 
+                type="range" 
+                className="weight-slider"
+                min="0" max="10" step="1" 
+                value={weights[constraint]} 
+                onChange={(e) => handleWeightChange(constraint, e.target.value)}
+              />
+              
+              <div className="weight-badge">{weights[constraint]}</div>
             </div>
             
-            <input 
-              type="range" 
-              className="weight-slider"
-              min="1" max="10" step="0.5" 
-              value={weights[constraint]} 
-              onChange={(e) => handleWeightChange(constraint, e.target.value)}
-            />
+            {/* --- התוספת שלנו: הודעת האזהרה שמופיעה רק כשהמשקל הוא 0 --- */}
+            {weights[constraint] == 0 && (
+              <div style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "8px", fontWeight: "500", marginLeft: "250px" }}>
+                <span className="material-icons" style={{ fontSize: "14px", verticalAlign: "middle", marginRight: "4px" }}>warning</span>
+                Note: Assigning a weight of 0 will cause this constraint to be completely ignored.
+              </div>
+            )}
+            {/* -------------------------------------------------------- */}
             
-            <div className="weight-badge">{weights[constraint]}</div>
           </div>
         ))}
       </div>

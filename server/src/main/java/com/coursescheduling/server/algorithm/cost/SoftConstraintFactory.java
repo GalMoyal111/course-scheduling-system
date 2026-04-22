@@ -24,6 +24,8 @@ public class SoftConstraintFactory {
 
         softConstraints.add(new ElectiveCourseInTheSameClassroom());
         
+        softConstraints.add(new AvoidBuildingPConstraint());
+        
         return softConstraints;
     }
 
@@ -37,6 +39,7 @@ public class SoftConstraintFactory {
         defaultWeights.put("ElectiveEveningPreferred", 5.0);
         defaultWeights.put("InconvenientTiming", 5.0);
         defaultWeights.put("ElectiveCourseInTheSameClassroom", 5.0);
+        defaultWeights.put("AvoidBuildingP", 5.0);
         return defaultWeights;
     }
     
