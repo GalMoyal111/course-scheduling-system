@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
-import { useLocation } from "react-router-dom"; 
+import React, { useEffect, useMemo, useState } from "react";
 import Button from "../components/ui/Button";
 import { useData } from "../context/DataContext";
 import "./TimetablePage.css";
 
 export default function TimetablePage() {
   const { schedule } = useData();
+  const [selectedCluster, setSelectedCluster] = useState("ALL");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -32,6 +32,32 @@ export default function TimetablePage() {
     { range: "19:50-20:40", frame: 12, isBreak: false },
   ];
 
+  const clusterOptions = useMemo(() => {
+    if (!Array.isArray(schedule) || schedule.length === 0) {
+      return [{ value: "ALL", label: "All clusters" }];
+    }
+
+    const regularClusters = Array.from(
+      new Set(
+        schedule
+          .map((lesson) => Number(lesson.cluster))
+          .filter((cluster) => Number.isInteger(cluster) && cluster > 0 && cluster < 9)
+      )
+    ).sort((a, b) => a - b);
+
+    const options = [{ value: "ALL", label: "All clusters" }];
+
+    regularClusters.forEach((cluster) => {
+      options.push({ value: String(cluster), label: `Cluster ${cluster}` });
+    });
+
+    if (schedule.some((lesson) => Number(lesson.cluster) >= 9)) {
+      options.push({ value: "ELECTIVES", label: "Elective courses" });
+    }
+
+    return options;
+  }, [schedule]);
+
   // פונקציית תרגום לסוג השיעור
   const translateType = (type) => {
     const types = {
@@ -45,12 +71,27 @@ export default function TimetablePage() {
     return types[type] || type;
   };
 
-  const getLessonsForSlot = (day, frame) => {
-    if (!frame) return [];
-    if (!schedule || !Array.isArray(schedule)) return [];
+  const visibleSchedule = useMemo(() => {
+    if (!Array.isArray(schedule)) {
+      return [];
+    }
 
-    return schedule.filter((lesson) => {
-      // ב-DTO ששלחת השדות הם: day, startFrame, duration
+    if (selectedCluster === "ALL") {
+      return schedule;
+    }
+
+    if (selectedCluster === "ELECTIVES") {
+      return schedule.filter((lesson) => Number(lesson.cluster) >= 9);
+    }
+
+    const clusterNumber = Number(selectedCluster);
+    return schedule.filter((lesson) => Number(lesson.cluster) === clusterNumber);
+  }, [schedule, selectedCluster]);
+
+  const getVisibleLessonsForSlot = (day, frame) => {
+    if (!frame) return [];
+
+    return visibleSchedule.filter((lesson) => {
       const start = lesson.startFrame;
       const end = start + (lesson.duration || 1) - 1;
       return lesson.day === day && frame >= start && frame <= end;
@@ -67,11 +108,29 @@ export default function TimetablePage() {
         </Button>
       </div>
 
+      <div className="timetable-filter-bar">
+        <label className="timetable-filter-label" htmlFor="cluster-filter">
+          Cluster
+        </label>
+        <select
+          id="cluster-filter"
+          className="timetable-semester-select"
+          value={selectedCluster}
+          onChange={(e) => setSelectedCluster(e.target.value)}
+        >
+          {clusterOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="timetable-container">
-        {schedule.length === 0 ? (
+        {visibleSchedule.length === 0 ? (
           <div className="empty-state">
              <span className="material-icons">calendar_today</span>
-             <p>No timetable found. Please generate via the "Generate" page.</p>
+             <p>No timetable found for the selected cluster.</p>
           </div>
         ) : (
           <table className="timetable-table">
@@ -88,7 +147,7 @@ export default function TimetablePage() {
                 <tr key={idx} className={timeItem.isBreak ? "break-row-style" : ""}>
                   <td className="time-cell-label">{timeItem.range}</td>
                   {hebrewDays.map((day) => {
-                    const lessons = getLessonsForSlot(day.index, timeItem.frame);
+                    const lessons = getVisibleLessonsForSlot(day.index, timeItem.frame);
                     return (
                       <td key={`${day.index}-${idx}`} className="slot-cell">
                         {timeItem.isBreak ? (

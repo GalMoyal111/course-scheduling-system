@@ -12,9 +12,10 @@ public class ScheduledLessonDTO {
     private int startFrame;
     private int duration;
     private Classroom room;
+	private int cluster;
     
     
-    public ScheduledLessonDTO(String courseId,String courseName, String type, String lecturer, int day, int startFrame, int duration, Classroom room) {
+	public ScheduledLessonDTO(String courseId,String courseName, String type, String lecturer, int day, int startFrame, int duration, Classroom room, int cluster) {
         this.courseId = courseId;
         this.courseName = courseName;
         this.type = type;
@@ -23,6 +24,7 @@ public class ScheduledLessonDTO {
         this.startFrame = startFrame;
         this.duration = duration;
         this.room = room;
+		this.cluster = cluster;
     }
 
 
@@ -101,6 +103,16 @@ public class ScheduledLessonDTO {
 
 	public void setRoom(Classroom room) {
 		this.room = room;
+	}
+
+
+	public int getCluster() {
+		return cluster;
+	}
+
+
+	public void setCluster(int cluster) {
+		this.cluster = cluster;
 	}
 
 
