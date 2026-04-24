@@ -17,6 +17,7 @@ import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
 import com.coursescheduling.server.algorithm.preprocessing.DomainConstraintService;
 import com.coursescheduling.server.model.Classroom;
+import com.coursescheduling.server.model.LessonType;
 import com.coursescheduling.server.algorithm.cost.SoftConstraintEvaluator;
 import com.coursescheduling.server.algorithm.cost.SoftConstraintFactory;
 import java.util.HashSet;
@@ -203,24 +204,96 @@ public class CSP {
     
     
     // Placeholder for forward checking: In a real implementation, this would prune the domains of unassigned variables based on the current assignment
-    private Map<Variable, List<DomainValue>> forwardCheck(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment, List<Variable> variables ,RoomManager roomManager ) {
+ // Forward Checking ישיר ומהיר - שלב א: מניעת חפיפות מרצים
+    private Map<Variable, List<DomainValue>> forwardCheck(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment, List<Variable> variables, RoomManager roomManager) {
         Map<Variable, List<DomainValue>> removedValues = new HashMap<>();
         
+        int currentAssignedStart = value.getStartFrame();
+        int currentDuration = var.getDuration();
+        int currentAssignedEnd = currentAssignedStart + var.getDuration() - 1;
+        
+        String currentSplitId = var.getSplitGroupId();
+
         for (Variable futureVar : variables) {
             if (!assignment.containsKey(futureVar)) {
                 List<DomainValue> toRemove = new ArrayList<>();
-                for (DomainValue futureValue : new ArrayList<>(futureVar.getDomain().getValues())) {
-                    if (buildAssignedValues(futureVar, futureValue, assignment, variables, roomManager).isEmpty()) {
-                        toRemove.add(futureValue);
+                
+                if (futureVar.getLecturer().equals(var.getLecturer())) {
+                    for (DomainValue futureValue : futureVar.getDomain().getValues()) {
+                        if (futureValue.getDay() == value.getDay()) {
+                            int futureStart = futureValue.getStartFrame();
+                            int futureEnd = futureStart + futureVar.getDuration() - 1;
+                            
+                            if (Math.max(currentAssignedStart, futureStart) <= Math.min(currentAssignedEnd, futureEnd)) {
+                                toRemove.add(futureValue);
+                            }
+                        }
                     }
                 }
+                
+                
+                
+                
+                String futureSplitId = futureVar.getSplitGroupId();
+                if (currentSplitId != null && !currentSplitId.isEmpty() && currentSplitId.equals(futureSplitId)) {
+                    for (DomainValue futureValue : futureVar.getDomain().getValues()) {
+                        if (futureValue.getDay() == value.getDay()) {
+                            if (!toRemove.contains(futureValue)) {
+                                toRemove.add(futureValue);
+                            }
+                        }
+                    }
+                }
+                
+                
+                
+                
+                if (var.getCluster() >= 9 && futureVar.getCourseId().equals(var.getCourseId())) {
+                    boolean isFutureLab = futureVar.getType() == LessonType.LAB || 
+                                          futureVar.getType() == LessonType.PHYSICS_LAB || 
+                                          futureVar.getType() == LessonType.NETWORKING_LAB;
+                    
+                    Integer allowedStartMin = null;
+                    Integer allowedStartMax = null;
+
+                    int nextFrameAfterCurrent = currentAssignedStart + currentDuration; 
+
+                    if (var.getType() == LessonType.LECTURE && futureVar.getType() == LessonType.TUTORIAL) {
+                        allowedStartMin = nextFrameAfterCurrent;
+                        allowedStartMax = nextFrameAfterCurrent + 2; 
+                    }
+
+                    else if ((var.getType() == LessonType.LECTURE || var.getType() == LessonType.TUTORIAL) && isFutureLab) {
+                        allowedStartMin = nextFrameAfterCurrent;
+                        allowedStartMax = nextFrameAfterCurrent + 5; 
+                    }
+
+
+                    if (allowedStartMin != null && allowedStartMax != null) {
+                        for (DomainValue futureValue : futureVar.getDomain().getValues()) {
+                            if (futureValue.getDay() != value.getDay() || 
+                                futureValue.getStartFrame() < allowedStartMin || 
+                                futureValue.getStartFrame() > allowedStartMax) {
+                                
+                                if (!toRemove.contains(futureValue)) {
+                                    toRemove.add(futureValue);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                
+                
+                
+
                 if (!toRemove.isEmpty()) {
                     removedValues.put(futureVar, toRemove);
                     futureVar.getDomain().getValues().removeAll(toRemove);
                     
                     if (futureVar.getDomain().getValues().isEmpty()) {
-                        undoForwardCheck(removedValues); // Restore domains before backtracking
-                        return null; // Failure: Domain wiped out
+                        undoForwardCheck(removedValues); 
+                        return null; 
                     }
                 }
             }
