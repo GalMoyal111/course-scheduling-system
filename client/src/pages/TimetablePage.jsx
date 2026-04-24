@@ -2,10 +2,18 @@ import React, { useEffect, useMemo, useState } from "react";
 import Button from "../components/ui/Button";
 import { useData } from "../context/DataContext";
 import "./TimetablePage.css";
+import Modal from "../components/ui/Modal"; 
+import { saveTimetable } from "../services/api";
 
 export default function TimetablePage() {
-  const { schedule } = useData();
+  const { schedule, invalidateHistoryCache } = useData();
   const [selectedCluster, setSelectedCluster] = useState("ALL");
+
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const [saveSemester, setSaveSemester] = useState("A");
+  const [isSaving, setIsSaving] = useState(false);
+
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -98,14 +106,76 @@ export default function TimetablePage() {
     });
   };
 
+  const handleSaveClick = () => {
+    setIsSaveModalOpen(true);
+  };
+
+
+  const handleConfirmSave = async () => {
+    if (!saveName.trim()) {
+      alert("Please enter a name for the timetable.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const requestData = {
+        name: saveName.trim(),
+        semester: saveSemester,
+        schedule: schedule
+      };
+
+      await saveTimetable(requestData);
+      
+      invalidateHistoryCache();
+      
+      setIsSaveModalOpen(false);
+      setSaveName("");
+      alert("Timetable saved successfully!");
+    } catch (error) {
+      console.error("Save error:", error);
+      alert("Failed to save timetable. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="timetable-page">
       <div className="timetable-header">
         <h1>Created time schedule</h1>
-        <Button onClick={() => window.print()} variant="secondary">
-          <span className="material-icons" style={{ marginRight: 8 }}>print</span>
-          Printing system
-        </Button>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <button
+            onClick={handleSaveClick}
+            title="Save system in history"
+            style={{
+              padding: "8px 12px",
+              borderRadius: "6px",
+              border: "1px solid rgba(79, 70, 229, 0.2)",
+              backgroundColor: "transparent",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              transition: "all 0.2s ease",
+              color: "var(--text)"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(79, 70, 229, 0.08)";
+              e.currentTarget.style.borderColor = "rgba(79, 70, 229, 0.4)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.borderColor = "rgba(79, 70, 229, 0.2)";
+            }}
+          >
+            <span className="material-icons" style={{ fontSize: "1.3rem" }}>save</span>
+          </button>
+          <Button onClick={() => window.print()} variant="secondary">
+            <span className="material-icons" style={{ marginRight: 8 }}>print</span>
+            Printing system
+          </Button>
+        </div>
       </div>
 
       <div className="timetable-filter-bar">
@@ -183,6 +253,45 @@ export default function TimetablePage() {
           </table>
         )}
       </div>
+
+      <Modal
+        isOpen={isSaveModalOpen}
+        onClose={() => setIsSaveModalOpen(false)}
+        title="Save Timetable"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setIsSaveModalOpen(false)}>Cancel</Button>
+            <Button variant="primary" onClick={handleConfirmSave} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+          </>
+        }
+      >
+        <div className="form-field">
+          <label>Timetable Name</label>
+          <input
+            type="text"
+            className="ui-input"
+            placeholder="e.g., Option 1 - No Fridays"
+            value={saveName}
+            onChange={(e) => setSaveName(e.target.value)}
+          />
+        </div>
+        <div className="form-field" style={{ marginTop: '15px' }}>
+          <label>Semester</label>
+          <select 
+            className="ui-select" 
+            value={saveSemester} 
+            onChange={(e) => setSaveSemester(e.target.value)}
+          >
+            <option value="A">Semester A</option>
+            <option value="B">Semester B</option>
+            <option value="SUMMER">Summer Semester</option>
+          </select>
+        </div>
+      </Modal>
+
+
     </div>
   );
 }

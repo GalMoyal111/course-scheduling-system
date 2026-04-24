@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useMemo } from "react";
-import { getAllCourses, getAllLessons, getAllClassrooms, getAllLecturers } from "../services/api";
+import { getAllCourses, getAllLessons, getAllClassrooms, getAllLecturers, getTimetableHistory, getTimetableById } from "../services/api";
 
 const DataContext = createContext();
 
@@ -12,18 +12,22 @@ export function DataProvider({ children }) {
   const [classrooms, setClassrooms] = useState([]);
   const [lecturers, setLecturers] = useState([]);
   const [schedule, setSchedule] = useState([]);
+  const [currentTimetableMetadata, setCurrentTimetableMetadata] = useState(null); 
+  const [history, setHistory] = useState([]);
   
   // Cache timestamps
   const [lessonsTimestamp, setLessonsTimestamp] = useState(null);
   const [coursesTimestamp, setCoursesTimestamp] = useState(null);
   const [classroomsTimestamp, setClassroomsTimestamp] = useState(null);
   const [lecturersTimestamp, setLecturersTimestamp] = useState(null);
+  const [historyTimestamp, setHistoryTimestamp] = useState(null);
 
   const [isFetching, setIsFetching] = useState({
     courses: false,
     lessons: false,
     classrooms: false,
-    lecturers: false
+    lecturers: false,
+    history: false
   });
 
   const updateCoursesLocally = useCallback((newCourses) => {
@@ -54,12 +58,18 @@ export function DataProvider({ children }) {
     setLecturersTimestamp(null);
   }, []);
 
+  const invalidateHistoryCache = useCallback(() => {
+    setHistoryTimestamp(null);
+  }, []);
+
+
   // Invalidate all caches
   const invalidateAllCache = useCallback(() => {
     setLessonsTimestamp(null);
     setCoursesTimestamp(null);
     setClassroomsTimestamp(null);
     setLecturersTimestamp(null);
+    setHistoryTimestamp(null);
   }, []);
 
   const fetchCoursesIfNeeded = useCallback(async (caller = "Unknown") => {
@@ -152,6 +162,42 @@ export function DataProvider({ children }) {
   }, [classrooms.length, classroomsTimestamp, isCacheValid, isFetching.classrooms]);
 
 
+  const fetchHistoryIfNeeded = useCallback(async (caller = "Unknown") => {
+    if (isFetching.history) return;
+
+    if (history.length > 0 && isCacheValid(historyTimestamp)) {
+      console.log(`[Cache] History is fresh, skipping fetch for: ${caller}`);
+      return;
+    }
+    setIsFetching(prev => ({ ...prev, history: true }));
+    try {
+      const data = await getTimetableHistory(caller);
+      setHistory(Array.isArray(data) ? data : []);
+      setHistoryTimestamp(Date.now());
+    } catch (err) {
+      console.error("Failed to fetch history:", err);
+    } finally {
+      setIsFetching(prev => ({ ...prev, history: false }));
+    }
+  }, [history.length, historyTimestamp, isCacheValid, isFetching.history]);
+
+
+  const loadTimetableFromHistory = useCallback(async (id, caller = "Unknown") => {
+    try {
+      const fullSchedule = await getTimetableById(id, caller);
+      const metadata = history.find(h => h.id === id);
+      
+      setSchedule(fullSchedule);
+      setCurrentTimetableMetadata(metadata || null);
+      return true; 
+    } catch (err) {
+      console.error("Failed to load full timetable:", err);
+      return false; 
+    }
+  }, [history]);
+
+
+
 
   // הפתרון: שימוש ב-useMemo כדי למנוע יצירת אובייקט חדש בכל רינדור
   const contextValue = useMemo(() => ({
@@ -166,6 +212,12 @@ export function DataProvider({ children }) {
     setLecturers,
     schedule,
     setSchedule,
+    currentTimetableMetadata,
+    setCurrentTimetableMetadata,
+    history,
+    setHistory,
+    loadTimetableFromHistory,
+
     
     // Cache validation
     isCacheValid,
@@ -177,6 +229,9 @@ export function DataProvider({ children }) {
     setClassroomsTimestamp,
     lecturersTimestamp,
     setLecturersTimestamp,
+    historyTimestamp,
+    setHistoryTimestamp,
+
     
     // Cache invalidation
     invalidateLessonsCache,
@@ -184,20 +239,24 @@ export function DataProvider({ children }) {
     invalidateClassroomsCache,
     invalidateLecturersCache,
     invalidateAllCache,
+    invalidateHistoryCache,
+    invalidateAllCache,
+
 
     // Fetching state
     fetchCoursesIfNeeded,
     fetchLessonsIfNeeded,
     fetchLecturersIfNeeded,
     fetchClassroomsIfNeeded,
+    fetchHistoryIfNeeded,
+    updateCoursesLocally
   }), [
-    // רשימת התלויות: האובייקט ייווצר מחדש רק כשאחד מאלה ישתנה
-    lessons, courses, classrooms, lecturers,schedule,
-    lessonsTimestamp, coursesTimestamp, classroomsTimestamp, lecturersTimestamp,
+    lessons, courses, classrooms, lecturers, schedule, currentTimetableMetadata, history,
+    lessonsTimestamp, coursesTimestamp, classroomsTimestamp, lecturersTimestamp, historyTimestamp,
     isCacheValid, 
     invalidateLessonsCache, invalidateCoursesCache, 
-    invalidateClassroomsCache, invalidateLecturersCache, invalidateAllCache,
-    fetchCoursesIfNeeded, fetchLessonsIfNeeded, fetchLecturersIfNeeded, fetchClassroomsIfNeeded
+    invalidateClassroomsCache, invalidateLecturersCache, invalidateHistoryCache, invalidateAllCache,
+    fetchCoursesIfNeeded, fetchLessonsIfNeeded, fetchLecturersIfNeeded, fetchClassroomsIfNeeded, fetchHistoryIfNeeded, loadTimetableFromHistory, updateCoursesLocally
   ]);
 
   return (

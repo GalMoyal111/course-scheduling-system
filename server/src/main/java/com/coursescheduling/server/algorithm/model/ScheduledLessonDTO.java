@@ -27,6 +27,8 @@ public class ScheduledLessonDTO {
 		this.cluster = cluster;
     }
 
+	public ScheduledLessonDTO() {
+    }
 
 	public String getCourseId() {
 		return courseId;

@@ -499,4 +499,57 @@ export async function exportLecturersExcel() {
 }
 
 
+export async function saveTimetable(saveRequest) {
+  console.warn(`[API POST] saveTimetable | Saving: ${saveRequest.name}`);
+  const res = await fetch(`${BASE_URL}/timetable/save`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    body: JSON.stringify(saveRequest),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to save timetable: ${res.status} ${text}`);
+  }
+
+  return res.json(); 
+}
+
+export async function getTimetableHistory(caller = "Unknown") {
+  console.warn(`%c [API GET] getTimetableHistory | Called by: ${caller}`, "color: white; background: #8b5cf6; padding: 4px; border-radius: 4px;");
+  const res = await fetch(`${BASE_URL}/timetable/history`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch history: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}
+
+export async function getTimetableById(id, caller = "Unknown") {
+  console.warn(`%c [API GET] getTimetableById (${id}) | Called by: ${caller}`, "color: white; background: #ec4899; padding: 4px; border-radius: 4px;");
+  const res = await fetch(`${BASE_URL}/timetable/history/${id}`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch timetable data: ${res.status} ${text}`);
+  }
+
+  return res.json(); 
+}
+
 

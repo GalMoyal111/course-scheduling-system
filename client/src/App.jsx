@@ -15,6 +15,7 @@ import LecturersPage from "./pages/LecturersPage";
 import TimetablePage from "./pages/TimetablePage";
 import HelpPage from "./pages/HelpPage";
 import GeneratePage from "./pages/GeneratePage";
+import HistoryPage from "./pages/HistoryPage";
 
 
 import Layout from "./components/ui/Layout";
@@ -83,7 +84,7 @@ function App() {
         <Route path="/lecturers" element={<LecturersPage />} />
         <Route path="/generate" element={<GeneratePage />} />
         <Route path="/timetable" element={<TimetablePage />} />
-        <Route path="/history" element={<h2>History</h2>} />
+        <Route path="/history" element={<HistoryPage />} />
         <Route path="/settings" element={<SettingsPage user={user} />} />
         <Route path="/help" element={<HelpPage />} />
       </Routes>
