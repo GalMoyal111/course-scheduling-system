@@ -19,7 +19,7 @@ public class LecturerService {
     private static final String COLLECTION_NAME = "lecturers";
     private List<Lecturer> cachedLecturers = null;
     private long lastFetchTime = 0;
-    private static final long CACHE_DURATION = 300000; // 5 דקות
+    private static final long CACHE_DURATION = 30 * 60 * 1000;
 
     public List<Lecturer> getAllLecturers() throws Exception {
         if (cachedLecturers != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {

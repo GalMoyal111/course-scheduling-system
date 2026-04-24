@@ -14,7 +14,7 @@ public class ClassroomService {
 	
 	private List<Classroom> cachedClassrooms = null;
 	private long lastFetchTime = 0;
-	private static final long CACHE_DURATION = 300000;
+	private static final long CACHE_DURATION = 30 * 60 * 1000;
 	
 
     public void saveClassroomsToFirebase(List<Classroom> classrooms) throws Exception {

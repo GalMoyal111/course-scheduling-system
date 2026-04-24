@@ -110,7 +110,7 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
-          <span style={{ fontSize: "1.1rem", color: "var(--muted)" }}>🏢</span>
+          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>apartment</span>
           <select
             value={selectedBuilding}
             onChange={(e) => setSelectedBuilding(e.target.value)}
@@ -135,7 +135,7 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: "1.1rem", color: "var(--muted)" }}>🏷️</span>
+          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>label</span>
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
@@ -189,7 +189,7 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
               e.target.style.borderColor = "rgba(239, 68, 68, 0.2)";
             }}
           >
-            <span style={{ fontSize: "1rem" }}>✕</span>
+            <span className="material-icons" style={{ fontSize: "1rem", lineHeight: "1" }}>close</span>
             Clear Filters
           </button>
         )}
