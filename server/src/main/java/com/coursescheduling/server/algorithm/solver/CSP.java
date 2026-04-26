@@ -49,9 +49,24 @@ public class CSP {
     
 
     // Main method to solve the CSP
-	public Map<Variable, AssignedValue> solve(List<Variable> variables, RoomManager roomManager, Map<String, Double> customWeights) {
-        Map<Variable, AssignedValue> assignment = new HashMap<>();
+	public Map<Variable, AssignedValue> solve(List<Variable> variables, RoomManager roomManager, Map<String, Double> customWeights, Map<Variable, AssignedValue> initialAssignment) {
         
+		Map<Variable, AssignedValue> assignment = new HashMap<>();
+        
+		if (initialAssignment != null && !initialAssignment.isEmpty()) {
+            assignment.putAll(initialAssignment);
+            
+            for (Map.Entry<Variable, AssignedValue> entry : initialAssignment.entrySet()) {
+                Variable var = entry.getKey();
+                AssignedValue val = entry.getValue();
+                
+                for (int t = 0; t < var.getDuration(); t++) {
+                    roomManager.bookRoom(val.getDay(), val.getStartFrame() + t, val.getRoom());
+                }
+            }
+            System.out.println("🔒 Locked " + initialAssignment.size() + " manual assignments.");
+        }
+		
         Map<String, Double> finalWeights = (customWeights != null && !customWeights.isEmpty()) 
                 ? customWeights 
                 : SoftConstraintFactory.getDefaultUserWeights();

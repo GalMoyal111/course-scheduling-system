@@ -3,6 +3,8 @@ package com.coursescheduling.server.algorithm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Comparator;
+import java.util.HashMap;
+
 import com.coursescheduling.server.algorithm.model.AssignedValue;
 import com.coursescheduling.server.algorithm.solver.CSP;
 
@@ -18,6 +20,7 @@ import com.coursescheduling.server.algorithm.solver.RoomManager;
 import com.coursescheduling.server.model.Classroom;
 import com.coursescheduling.server.model.Course;
 import com.coursescheduling.server.model.GenerateTimetableRequest;
+import com.coursescheduling.server.model.ManualAssignmentDTO;
 import com.coursescheduling.server.model.RoomType;
 import com.coursescheduling.server.model.Semester;
 import com.coursescheduling.server.service.ClassroomService;
@@ -138,10 +141,34 @@ public class TimetableAlgorithmService {
         System.out.println("-".repeat(75));
         
         
+        Map<Variable, AssignedValue> initialAssignment = new HashMap<>();
+        List<ManualAssignmentDTO> manualAssignments = request.getManualAssignments();
+        
+        if (manualAssignments != null && !manualAssignments.isEmpty()) {
+            for (ManualAssignmentDTO manualDTO : manualAssignments) {
+                Variable matchingVar = variables.stream()
+                        .filter(v -> v.getLessonId().equals(manualDTO.getLessonId()))
+                        .findFirst()
+                        .orElse(null);
+
+                Classroom matchingRoom = rooms.stream()
+                        .filter(r -> r.getClassroomName().equals(manualDTO.getClassroomName()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (matchingVar != null && matchingRoom != null) {
+                    AssignedValue assignedValue = new AssignedValue(manualDTO.getDay(), manualDTO.getStartFrame(), matchingRoom);
+                    initialAssignment.put(matchingVar, assignedValue);
+                    System.out.println("📌 Applied Manual Assignment: " + matchingVar.getCourseId() + " to Room: " + matchingRoom.getClassroomName() + " on Day " + manualDTO.getDay());
+                } else {
+                    System.out.println("⚠️ Warning: Could not map manual assignment for lessonId: " + manualDTO.getLessonId());
+                }
+            }
+        }
 
         // Step 3: Run the CSP solver
         System.out.println("⏳ Running CSP Solver...");
-        Map<Variable, AssignedValue> solution = csp.solve(variables, roomManager, userWeights);
+        Map<Variable, AssignedValue> solution = csp.solve(variables, roomManager, userWeights, initialAssignment);
         
         // Step 4: Convert solution to DTOs for client response
         List<ScheduledLessonDTO> results = new ArrayList<>();
