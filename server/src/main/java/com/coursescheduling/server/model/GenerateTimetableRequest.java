@@ -1,11 +1,13 @@
 package com.coursescheduling.server.model;
 
+import java.util.List;
 import java.util.Map;
 
 public class GenerateTimetableRequest {
     
     private Semester semester;
     private Map<String, Double> softConstraintWeights;
+    private List<ManualAssignmentDTO> manualAssignments;
 
     public GenerateTimetableRequest() {
     }
@@ -25,4 +27,12 @@ public class GenerateTimetableRequest {
     public void setSoftConstraintWeights(Map<String, Double> softConstraintWeights) {
         this.softConstraintWeights = softConstraintWeights;
     }
+
+	public List<ManualAssignmentDTO> getManualAssignments() {
+		return manualAssignments;
+	}
+
+	public void setManualAssignments(List<ManualAssignmentDTO> manualAssignments) {
+		this.manualAssignments = manualAssignments;
+	}
 }

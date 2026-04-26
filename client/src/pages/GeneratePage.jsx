@@ -1,9 +1,20 @@
-import React, { useState } from "react";
+import React, { useState , useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { generateTimetable } from "../services/api";
 import Button from "../components/ui/Button";
 import "./GeneratePage.css";
 import { useData } from "../context/DataContext";
+import ManualAssignmentModal from "../components/ManualAssignmentModal";
+
+
+
+const DAY_NAMES = { 1: "ראשון", 2: "שני", 3: "שלישי", 4: "רביעי", 5: "חמישי", 6: "שישי" };
+const getStartTimeByFrame = (frame) => {
+  const times = { 1: "08:30", 2: "09:30", 3: "10:30", 4: "11:30", 5: "12:30", 6: "13:50", 7: "14:50", 8: "15:50", 9: "16:50", 10: "17:50", 11: "18:50", 12: "19:50" };
+  return times[frame] || "Unknown";
+}
+
+
 
 export default function GeneratePage() {
   const navigate = useNavigate();
@@ -11,7 +22,24 @@ export default function GeneratePage() {
   const [error, setError] = useState("");
   const [semester, setSemester] = useState("A");
 
-  const { setSchedule } = useData();
+const { 
+  setSchedule, 
+  fetchLessonsIfNeeded, 
+  fetchLecturersIfNeeded, 
+  fetchClassroomsIfNeeded,
+  fetchCoursesIfNeeded 
+  } = useData();
+  const [manualAssignments, setManualAssignments] = useState([]);
+  const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+
+
+  const handleAddManualAssignment = (newAssignment) => {
+    setManualAssignments((prev) => [...prev, newAssignment]);
+  };
+
+  const handleRemoveManualAssignment = (indexToRemove) => {
+    setManualAssignments((prev) => prev.filter((_, index) => index !== indexToRemove));
+  };
 
   const [weights, setWeights] = useState({
     "RoomSizeEfficiency": 5.0,
@@ -24,6 +52,25 @@ export default function GeneratePage() {
     "ElectiveCourseInTheSameClassroom": 5.0,
     "AvoidBuildingP" : 5.0
   });
+
+
+  React.useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        await Promise.all([
+          fetchLessonsIfNeeded("GeneratePage"),
+          fetchLecturersIfNeeded("GeneratePage"),
+          fetchClassroomsIfNeeded("GeneratePage"),
+          fetchCoursesIfNeeded("GeneratePage"),
+        ]);
+      } catch (err) {
+        console.error("Failed to load data for generator:", err);
+      }
+    };
+
+    loadInitialData();
+ }, [fetchLessonsIfNeeded, fetchLecturersIfNeeded, fetchClassroomsIfNeeded, fetchCoursesIfNeeded]);
+
 
   const constraintDetails = {
     "RoomSizeEfficiency": { 
@@ -73,7 +120,7 @@ export default function GeneratePage() {
     setLoading(true);
     setError("");
     try {
-      const requestData = { semester, softConstraintWeights: weights };
+      const requestData = { semester, softConstraintWeights: weights, manualAssignments: manualAssignments };
       const generatedSchedule = await generateTimetable(requestData);
 
       setSchedule(generatedSchedule);
@@ -119,6 +166,43 @@ export default function GeneratePage() {
             <option value="SUMMER">Summer Term</option>
           </select>
         </div>
+      </div>
+
+      <div className="generate-card">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+          <h3>
+            <span className="material-icons">push_pin</span>
+            Manual Assignments (Pre-scheduling)
+          </h3>
+          <Button variant="secondary" onClick={() => setIsManualModalOpen(true)}>
+            + Add Manual Assignment
+          </Button>
+        </div>
+        <p className="hint-text">
+          Have specific lessons that MUST be scheduled at an exact time and room? Add them here. 
+          The algorithm will lock them in place and build the rest of the schedule around them.
+        </p>
+
+        {manualAssignments.length > 0 && (
+          <div className="manual-assignments-list" style={{ marginTop: "15px", display: "flex", flexDirection: "column", gap: "10px" }}>
+            {manualAssignments.map((assignment, index) => (
+              <div key={index} style={{ display: "flex", justifyContent: "space-between", background: "#f8fafc", padding: "12px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                <div>
+                  <strong>{assignment.courseName} ({assignment.type})</strong>
+                  <div style={{ fontSize: "13px", color: "#64748b", marginTop: "4px" }}>
+                    Lecturer: {assignment.lecturer} | {DAY_NAMES[assignment.day]}, {getStartTimeByFrame(assignment.startFrame)} - {getStartTimeByFrame(assignment.startFrame + assignment.duration)} | Room: Building {assignment.building}, {assignment.classroomName}
+                  </div>
+                </div>
+                <button 
+                  onClick={() => handleRemoveManualAssignment(index)} 
+                  style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer" }}
+                >
+                  <span className="material-icons">delete</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Step 2 */}
@@ -193,6 +277,14 @@ export default function GeneratePage() {
       )}
       {/* --------------------------------- */}
 
+
+
+
+      <ManualAssignmentModal 
+        isOpen={isManualModalOpen} 
+        onClose={() => setIsManualModalOpen(false)}
+        onSave={handleAddManualAssignment}
+      />
     </div>
   );
 }
