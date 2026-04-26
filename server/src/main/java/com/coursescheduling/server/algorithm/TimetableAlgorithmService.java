@@ -159,9 +159,15 @@ public class TimetableAlgorithmService {
                 if (matchingVar != null && matchingRoom != null) {
                     AssignedValue assignedValue = new AssignedValue(manualDTO.getDay(), manualDTO.getStartFrame(), matchingRoom);
                     initialAssignment.put(matchingVar, assignedValue);
+                    
+                    DomainValue chosenDomainValue = new DomainValue(manualDTO.getDay(), manualDTO.getStartFrame());
+                    matchingVar.getDomain().getValues().clear();
+                    matchingVar.getDomain().getValues().add(chosenDomainValue);
+                    
                     System.out.println("📌 Applied Manual Assignment: " + matchingVar.getCourseId() + " to Room: " + matchingRoom.getClassroomName() + " on Day " + manualDTO.getDay());
                 } else {
                     System.out.println("⚠️ Warning: Could not map manual assignment for lessonId: " + manualDTO.getLessonId());
+
                 }
             }
         }

@@ -159,7 +159,7 @@ const {
           <select 
             className="semester-select"
             value={semester} 
-            onChange={(e) => setSemester(e.target.value)}
+            onChange={(e) => {setSemester(e.target.value); setManualAssignments([]);}}
           >
             <option value="A">Semester A</option>
             <option value="B">Semester B</option>
@@ -284,6 +284,7 @@ const {
         isOpen={isManualModalOpen} 
         onClose={() => setIsManualModalOpen(false)}
         onSave={handleAddManualAssignment}
+        currentSemester={semester}
       />
     </div>
   );

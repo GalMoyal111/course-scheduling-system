@@ -48,7 +48,7 @@ const getStartTimeByFrame = (frame) => {
     return times[frame] || "Unknown";
 }
 
-export default function ManualAssignmentModal({ isOpen, onClose, onSave }) {
+export default function ManualAssignmentModal({ isOpen, onClose, onSave, currentSemester }) {
   const { lessons, classrooms, lecturers } = useData();
 
   const [selectedCluster, setSelectedCluster] = useState("");
@@ -63,6 +63,7 @@ export default function ManualAssignmentModal({ isOpen, onClose, onSave }) {
   
   const [error, setError] = useState("");
 
+
   useEffect(() => {
     if (isOpen) {
       setSelectedCluster("");
@@ -76,30 +77,36 @@ export default function ManualAssignmentModal({ isOpen, onClose, onSave }) {
     }
   }, [isOpen]);
 
+  const semesterLessons = useMemo(() => {
+      if (!lessons || !currentSemester) return [];
+      return lessons.filter(l => l.semester === currentSemester);
+  }, [lessons, currentSemester]);
+
+
   const availableClusters = useMemo(() => {
     const clusters = new Set();
-    lessons.forEach(l => {
+    semesterLessons.forEach(l => { // שינוי כאן
       if (l.cluster) clusters.add(l.cluster);
     });
     return Array.from(clusters).sort((a, b) => a - b);
-  }, [lessons]);
+  }, [semesterLessons]); // שינוי כאן
 
   const filteredCourseNames = useMemo(() => {
     if (!selectedCluster) return [];
     const courseNames = new Set();
-    lessons
+    semesterLessons // שינוי כאן
       .filter(l => l.cluster.toString() === selectedCluster.toString())
       .forEach(l => courseNames.add(l.courseName));
     return Array.from(courseNames).sort();
-  }, [lessons, selectedCluster]);
+  }, [semesterLessons, selectedCluster]); // שינוי כאן
 
   const filteredLessons = useMemo(() => {
     if (!selectedCluster || !selectedCourseName) return [];
-    return lessons.filter(l => 
+    return semesterLessons.filter(l => // שינוי כאן
       l.cluster.toString() === selectedCluster.toString() && 
       l.courseName === selectedCourseName
     );
-  }, [lessons, selectedCluster, selectedCourseName]);
+  }, [semesterLessons, selectedCluster, selectedCourseName]);
 
   const availableBuildings = useMemo(() => {
     const buildings = new Set();
@@ -130,7 +137,7 @@ export default function ManualAssignmentModal({ isOpen, onClose, onSave }) {
       return;
     }
 
-    const lesson = lessons.find((l) => l.lessonId === selectedLessonId);
+    const lesson = semesterLessons.find((l) => l.lessonId === selectedLessonId);   
     if (!lesson) return;
 
     const duration = lesson.duration;
