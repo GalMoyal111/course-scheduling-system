@@ -3,15 +3,11 @@ import { useData } from "../context/DataContext";
 import Button from "./ui/Button";
 import Modal from "./ui/Modal";
 
-const CLUSTER_NUMBER_TO_NAME = {
-  1: "סמסטר 1", 2: "סמסטר 2", 3: "סמסטר 3", 4: "סמסטר 4",
-  5: "סמסטר 5", 6: "סמסטר 6", 7: "סמסטר 7", 8: "סמסטר 8",
-  9: "מדעים", 10: "עיבוד אותות ורשתות תקשורת", 11: "אלגוריתמים",
-  12: "סמינרים", 13: "הנדסת תוכנה", 14: "מעבדות"
-};
 
 export default function HardCourseModal({ isOpen, onClose, onSave, currentSemester }) {
-  const { lessons } = useData();
+  const { lessons, clusterMappings } = useData();
+
+  const clusterMapping = clusterMappings.numToName;
   const [selectedCluster, setSelectedCluster] = useState("");
   const [selectedCourseId, setSelectedCourseId] = useState("");
 
@@ -65,7 +61,7 @@ export default function HardCourseModal({ isOpen, onClose, onSave, currentSemest
           <select className="ui-select" value={selectedCluster} onChange={(e) => setSelectedCluster(e.target.value)}>
             <option value="">-- Select Cluster --</option>
             {availableClusters.map(c => (
-              <option key={c} value={c}>{CLUSTER_NUMBER_TO_NAME[c] || `Cluster ${c}`}</option>
+              <option key={c} value={c}>{clusterMapping[c] || `Cluster ${c}`}</option>
             ))}
           </select>
         </div>

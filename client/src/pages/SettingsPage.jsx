@@ -8,6 +8,10 @@ import { updateUserRole } from "../services/api";
 import { createUser } from "../services/api";
 import { deleteUser } from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
+import { useData } from "../context/DataContext";
+import { addCluster, deleteClusters } from "../services/api";
+import Modal from "../components/ui/Modal"; 
+
 
 
 export default function SettingsPage({ user }) {
@@ -20,6 +24,14 @@ export default function SettingsPage({ user }) {
     const [showCreateUserPassword, setShowCreateUserPassword] = useState(false);
     const [isDeleteUserConfirmOpen, setIsDeleteUserConfirmOpen] = useState(false);
     const [pendingCourse, setPendingCourse] = useState(null);
+
+
+    const { clusters, setClusters, fetchClustersIfNeeded, invalidateClustersCache } = useData();
+    const [isClusterModalOpen, setIsClusterModalOpen] = useState(false);
+    const [newClusterName, setNewClusterName] = useState("");
+    const [isDeleteClusterConfirmOpen, setIsDeleteClusterConfirmOpen] = useState(false);
+    const [clusterToDelete, setClusterToDelete] = useState(null);
+
 
 
     const handleChangePassword = async () => {
@@ -104,6 +116,53 @@ export default function SettingsPage({ user }) {
         }
         };
 
+
+    const handleAddCluster = async () => {
+        const trimmedName = newClusterName.trim();
+        if (!trimmedName) {
+            alert("Cluster name cannot be empty");
+            return;
+        }
+
+        const isDuplicate = clusters.some(
+            c => c.name.trim().toLowerCase() === trimmedName.toLowerCase()
+        );
+
+        if (isDuplicate) {
+            alert(`The cluster/semester "${trimmedName}" already exists!`);
+            return;
+        }
+
+        try {
+            const addedCluster = await addCluster({ name: trimmedName });
+            setClusters(prev => [...prev, addedCluster].sort((a, b) => a.number - b.number));
+            invalidateClustersCache();
+            alert("Cluster added successfully");
+            setNewClusterName("");
+            setIsClusterModalOpen(false);
+        } catch (err) {
+            console.error("Failed to add cluster:", err);
+            alert("Failed to add cluster");
+        }
+    };
+
+    const handleDeleteCluster = async (cluster) => {
+        try {
+            await deleteClusters([cluster]);
+            setClusters(prev => prev.filter(c => c.id !== cluster.id));
+            invalidateClustersCache();
+            alert("Cluster deleted successfully");
+            setIsDeleteClusterConfirmOpen(false);
+            setClusterToDelete(null);
+        } catch (err) {
+            console.error("Failed to delete cluster:", err);
+            alert("Failed to delete cluster");
+        }
+    };
+
+
+
+
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -121,7 +180,14 @@ export default function SettingsPage({ user }) {
         if (user?.role === ROLES.ADMIN) {
             fetchUsers();
         }
-    }, [user]);
+
+        fetchClustersIfNeeded();
+
+
+    }, [user, fetchClustersIfNeeded]);
+
+
+
 
     return (
         <div className="settings-page">
@@ -225,7 +291,7 @@ export default function SettingsPage({ user }) {
                                                     </svg>
                                                 ) : (
                                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M11.83 9L5.5 2.62C4.96 2.9 4.46 3.25 4 3.67v.02c-2.14 2.43-3.85 5.58-4.82 9.31.59 1.56 1.35 3.06 2.25 4.41l1.46-1.46C3.21 14.6 3 13.34 3 12c0-4.97 4-9 9-9c1.34 0 2.6.21 3.82.57l2.12-2.12c1.41-1.41 3.71-1.41 5.12 0s1.41 3.71 0 5.12L11.83 9zm9.08 4.93l-1.46 1.46C20.79 15.4 21 16.66 21 18c0 4.97-4 9-9 9c-1.34 0-2.6-.21-3.82-.57l-2.12 2.12c-1.41 1.41-3.71 1.41-5.12 0s-1.41-3.71 0-5.12L20.91 13.93zM12 18c2.76 0 5-2.24 5-5 0-.65-.13-1.26-.36-1.83l-6.47 6.47c.57.23 1.18.36 1.83.36z" fill="currentColor"/>
+                                                        <path d="M11.83 9L5.5 2.62C4.96 2.9 4.46 3.25 4 3.67v.02c-2.14 2.43-3.85 5.58-4.82 9.31.59 1.56 1.35 3.06 2.25 4.41l1.46-1.46C3.21 14.6 3 13.34 3 12c0-4.97 4-9 9-9c-1.34 0-2.6-.21-3.82-.57l-2.12 2.12c-1.41 1.41-3.71 1.41-5.12 0s-1.41-3.71 0-5.12L20.91 13.93zM12 18c2.76 0 5-2.24 5-5 0-.65-.13-1.26-.36-1.83l-6.47 6.47c.57.23 1.18.36 1.83.36z" fill="currentColor"/>
                                                     </svg>
                                                 )}
                                             </button>
@@ -309,6 +375,55 @@ export default function SettingsPage({ user }) {
                         </div>
                     </>
                 )}
+
+
+                {/* Clusters Management Section */}
+                <div className="settings-section">
+                    <div className="settings-section-header">
+                        <span className="material-icons settings-section-icon">category</span>
+                        <div>
+                            <h2 className="settings-section-title">Manage Clusters (Semesters)</h2>
+                            <p className="settings-section-desc">Add or remove clusters that appear in dropdowns</p>
+                        </div>
+                    </div>
+                    <div className="settings-section-content">
+                        <div style={{ marginBottom: "20px" }}>
+                            <button 
+                                onClick={() => setIsClusterModalOpen(true)}
+                                className="ui-btn ui-btn--primary"
+                            >
+                                <span className="material-icons btn-icon">add</span>
+                                Add New Cluster
+                            </button>
+                        </div>
+
+                        {clusters.length === 0 ? (
+                            <p className="settings-empty">No clusters found. Add one!</p>
+                        ) : (
+                            <div className="prereq-chips">
+                                {clusters.map((c) => (
+                                    <div 
+                                        key={c.id} 
+                                        className="prereq-chip"
+                                    >
+                                        <span>{c.name}</span>
+                                        <button 
+                                            onClick={() => { 
+                                                setClusterToDelete(c); 
+                                                setIsDeleteClusterConfirmOpen(true); 
+                                            }} 
+                                            className="prereq-chip-remove"
+                                            title="Delete Cluster"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
             </div>
 
             <ConfirmModal
@@ -336,6 +451,57 @@ export default function SettingsPage({ user }) {
                 confirmLabel="Yes, Delete"
                 cancelLabel="Cancel"
             />
+
+            <ConfirmModal
+                isOpen={isDeleteClusterConfirmOpen}
+                title="Delete Cluster"
+                message={`Are you sure you want to delete "${clusterToDelete?.name}"? Make sure no lessons are currently assigned to this cluster.`}
+                onConfirm={() => handleDeleteCluster(clusterToDelete)}
+                onCancel={() => {
+                    setIsDeleteClusterConfirmOpen(false);
+                    setClusterToDelete(null);
+                }}
+                confirmLabel="Yes, Delete"
+                cancelLabel="Cancel"
+            />
+
+            {/* מודל הוספת אשכול באמצעות הקומפוננטה הגנרית */}
+            <Modal
+                isOpen={isClusterModalOpen}
+                onClose={() => { setIsClusterModalOpen(false); setNewClusterName(""); }}
+                title="Add New Cluster"
+                size="normal"
+                footer={
+                    <>
+                        <button 
+                            className="ui-btn ui-btn--ghost" 
+                            onClick={() => { setIsClusterModalOpen(false); setNewClusterName(""); }}
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            className="ui-btn ui-btn--primary" 
+                            onClick={handleAddCluster}
+                            disabled={!newClusterName.trim()}
+                        >
+                            Save Cluster
+                        </button>
+                    </>
+                }
+            >
+                <div className="form-field">
+                    <label className="form-label">Cluster/Semester Name</label>
+                    <input
+                        type="text"
+                        placeholder="e.g. סמסטר 1, מגמת סייבר..."
+                        value={newClusterName}
+                        onChange={(e) => setNewClusterName(e.target.value)}
+                        className="ui-input"
+                        autoFocus
+                    />
+                </div>
+            </Modal>
+
         </div>
     );
-    }
+}

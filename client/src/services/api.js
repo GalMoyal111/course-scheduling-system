@@ -290,7 +290,7 @@ export async function addLesson(lesson) {
     throw new Error(`Add lesson failed: ${res.status} ${text}`);
   }
 
-  return res.text();
+  return res.json();
 }
 
 export async function deleteLessons(lessons) {
@@ -555,3 +555,37 @@ export async function getTimetableById(id, caller = "Unknown") {
 }
 
 
+export async function getAllClusters() {
+  const res = await fetch(`${BASE_URL}/getAllClusters`);
+  if (!res.ok) throw new Error("Failed to fetch clusters");
+  return res.json();
+}
+
+export async function addCluster(cluster) {
+  const res = await fetch(`${BASE_URL}/addSingleCluster`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(cluster),
+  });
+  if (!res.ok) throw new Error("Failed to add cluster");
+  return res.json();
+}
+
+export async function updateCluster(cluster) {
+  const res = await fetch(`${BASE_URL}/updateCluster`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(cluster),
+  });
+  if (!res.ok) throw new Error("Failed to update cluster");
+  return res.text();
+}
+
+export async function deleteClusters(clusters) {
+  const res = await fetch(`${BASE_URL}/deleteClusters`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(clusters),
+  });
+  if (!res.ok) throw new Error("Failed to delete clusters");
+}

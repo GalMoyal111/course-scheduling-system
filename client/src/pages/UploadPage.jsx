@@ -191,26 +191,31 @@ function UploadPage() {
     }
   };
 
-const handleAddLesson = async (oldLesson, newLesson) => {
+  const handleAddLesson = async (oldLesson, newLesson) => {
     try {
       if (oldLesson) {
         await deleteLessons([oldLesson]); 
-        await addLesson(newLesson);
-        
-        setLessons(prev => 
-          prev.map(l => l.lessonId === oldLesson.lessonId ? newLesson : l)
-        );
-      } else {
-        await addLesson(newLesson);
-        setLessons(prev => [...prev, newLesson]);
       }
       
+      // 🟢 מקבלים מהשרת רק את השיעורים החדשים (1 או 2 במידה ופוצל)
+      const newlySavedLessons = await addLesson(newLesson);
+      
+      // 🟢 מעדכנים את הרשימה המקומית בזהירות
+      setLessons(prev => {
+        // אם זה עריכה, נוריד את הגרסה הישנה מהרשימה
+        const filtered = oldLesson 
+          ? prev.filter(l => l.lessonId !== oldLesson.lessonId) 
+          : prev;
+        
+        // נוסיף את מה שקיבלנו מהשרת
+        return [...filtered, ...newlySavedLessons];
+      });
+      
       setLessonsTimestamp(Date.now());
-
       alert("Lesson saved successfully");
     } catch (err) {
-      console.error("Failed to save lesson:", err);
-      alert("Failed to save lesson. See console for details.");
+      console.error(err);
+      alert("Failed to save lesson");
     } finally {
       setIsModalOpen(false);
       setEditingLesson(null);

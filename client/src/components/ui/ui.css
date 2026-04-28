@@ -81,10 +81,16 @@
   display:inline-flex;
   align-items:center;
   gap:6px;
-  padding:6px 10px;
+  padding:6px 12px;
   border-radius:999px;
   border:1px solid #d1d5db;
   background:#f8fafc;
+  text-align:right;
+  flex-direction:row-reverse;
+  direction:rtl;
+  font-weight:500;
+  font-size:14px;
+  color:#374151;
 }
 .prereq-chip-remove{
   border:none;

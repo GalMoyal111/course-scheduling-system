@@ -6,8 +6,33 @@ import Modal from "../components/ui/Modal";
 import { saveTimetable } from "../services/api";
 
 export default function TimetablePage() {
-  const { schedule, invalidateHistoryCache } = useData();
+  const { schedule, clusters, invalidateHistoryCache, clusterMappings } = useData();
   const [selectedCluster, setSelectedCluster] = useState("ALL");
+
+
+  const clusterMapping = clusterMappings.numToName;
+
+  // Determine the range of semester numbers (typically 1-8)
+  const semesterRange = useMemo(() => {
+    const nums = new Set([1, 2, 3, 4, 5, 6, 7, 8]); // Default range
+    clusters.forEach(c => {
+      if (c.number && c.number < 9) {
+        nums.add(c.number);
+      }
+    });
+    return Array.from(nums).sort((a, b) => a - b);
+  }, [clusters]);
+
+  // Determine the max named cluster number
+  const maxNamedClusterNum = useMemo(() => {
+    let max = 8; // Default: semester range is 1-8
+    clusters.forEach(c => {
+      if (c.number && c.number > max) {
+        max = c.number;
+      }
+    });
+    return max;
+  }, [clusters]);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
@@ -45,26 +70,29 @@ export default function TimetablePage() {
       return [{ value: "ALL", label: "All clusters" }];
     }
 
+    // Filter for regular semester clusters (those in semesterRange)
     const regularClusters = Array.from(
       new Set(
         schedule
           .map((lesson) => Number(lesson.cluster))
-          .filter((cluster) => Number.isInteger(cluster) && cluster > 0 && cluster < 9)
+          .filter((cluster) => Number.isInteger(cluster) && semesterRange.includes(cluster))
       )
     ).sort((a, b) => a - b);
 
     const options = [{ value: "ALL", label: "All clusters" }];
 
     regularClusters.forEach((cluster) => {
-      options.push({ value: String(cluster), label: `Cluster ${cluster}` });
+      const label = clusterMapping[cluster] || `סמסטר ${cluster}`;
+      options.push({ value: String(cluster), label });
     });
 
-    if (schedule.some((lesson) => Number(lesson.cluster) >= 9)) {
+    // Check if there are any named clusters (clusters > maxNamedClusterNum or in DataContext)
+    if (schedule.some((lesson) => Number(lesson.cluster) > maxNamedClusterNum)) {
       options.push({ value: "ELECTIVES", label: "Elective courses" });
     }
 
     return options;
-  }, [schedule]);
+  }, [schedule, semesterRange, maxNamedClusterNum, clusterMapping]);
 
   // פונקציית תרגום לסוג השיעור
   const translateType = (type) => {
@@ -89,12 +117,12 @@ export default function TimetablePage() {
     }
 
     if (selectedCluster === "ELECTIVES") {
-      return schedule.filter((lesson) => Number(lesson.cluster) >= 9);
+      return schedule.filter((lesson) => Number(lesson.cluster) > maxNamedClusterNum);
     }
 
     const clusterNumber = Number(selectedCluster);
     return schedule.filter((lesson) => Number(lesson.cluster) === clusterNumber);
-  }, [schedule, selectedCluster]);
+  }, [schedule, selectedCluster, maxNamedClusterNum]);
 
   const getVisibleLessonsForSlot = (day, frame) => {
     if (!frame) return [];

@@ -4,22 +4,7 @@ import Button from "./ui/Button";
 import "./ui/ui.css"; // שימוש ב-CSS האחיד של המערכת
 import Modal from "./ui/Modal"; // שימוש בקומפוננטת המודאל האחידה
 
-const CLUSTER_NUMBER_TO_NAME = {
-  1: "סמסטר 1",
-  2: "סמסטר 2",
-  3: "סמסטר 3",
-  4: "סמסטר 4",
-  5: "סמסטר 5",
-  6: "סמסטר 6",
-  7: "סמסטר 7",
-  8: "סמסטר 8",
-  9: "מדעים",
-  10: "עיבוד אותות ורשתות תקשורת",
-  11: "אלגוריתמים",
-  12: "סמינרים",
-  13: "הנדסת תוכנה",
-  14: "מעבדות",
-};
+
 
 const DAY_NAMES = {
   1: "ראשון",
@@ -49,7 +34,10 @@ const getStartTimeByFrame = (frame) => {
 }
 
 export default function ManualAssignmentModal({ isOpen, onClose, onSave, currentSemester }) {
-  const { lessons, classrooms, lecturers } = useData();
+  const { lessons, classrooms, lecturers, clusterMappings } = useData();
+
+  // Build dynamic cluster mapping from DataContext
+  const clusterMapping = clusterMappings.numToName;
 
   const [selectedCluster, setSelectedCluster] = useState("");
   const [selectedCourseName, setSelectedCourseName] = useState("");
@@ -215,7 +203,7 @@ export default function ManualAssignmentModal({ isOpen, onClose, onSave, current
                         <option value="">-- Select Cluster --</option>
                         {availableClusters.map((cluster) => (
                             <option key={cluster} value={cluster}>
-                                {CLUSTER_NUMBER_TO_NAME[cluster] || `Cluster ${cluster}`}
+                                {clusterMapping[cluster] || `Cluster ${cluster}`}
                             </option>
                         ))}
                     </select>

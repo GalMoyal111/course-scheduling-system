@@ -131,6 +131,7 @@ public class LessonService {
 
 	        for (QueryDocumentSnapshot doc : documents) {
 	            Lesson lesson = doc.toObject(Lesson.class);
+	            lesson.setLessonId(doc.getId());
 	            lessons.add(lesson);
 	        }
 
@@ -160,7 +161,7 @@ public class LessonService {
 	    return l;
 	}
 	
-	public void addLesson(Lesson lesson) {
+	public List<Lesson> addLesson(Lesson lesson) {
 		
 		this.cachedLessons = null;
 		
@@ -234,6 +235,7 @@ public class LessonService {
 
 	    try {
 	        batch.commit().get();
+	        return lessonsToSave;
 	    } catch (Exception e) {
 	        throw new RuntimeException("Failed to add lesson", e);
 	    }
@@ -458,6 +460,7 @@ public class LessonService {
 
 	        for (QueryDocumentSnapshot doc : documents) {
 	            Lesson lesson = doc.toObject(Lesson.class);
+	            lesson.setLessonId(doc.getId());
 	            lessons.add(lesson);
 	        }
 

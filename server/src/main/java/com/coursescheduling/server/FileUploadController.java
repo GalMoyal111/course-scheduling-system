@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
+import com.coursescheduling.server.model.Cluster;
+import com.coursescheduling.server.service.ClusterService;
 
 // Controller to handle file uploads from the frontend. It receives the uploaded Excel file and delegates processing to the ExcelProcessingService.
 @RestController
@@ -53,6 +55,10 @@ public class FileUploadController {
     
     @Autowired
     private LecturerExcelService lecturerExcelService;
+    
+    
+    @Autowired
+    private ClusterService clusterService;
     
     
     // @Autowired
@@ -201,9 +207,9 @@ public class FileUploadController {
     }
     
     @PostMapping("/addSingleLesson")
-    public void addLesson(@RequestBody Lesson lesson) throws Exception {
+    public List<Lesson> addLesson(@RequestBody Lesson lesson) throws Exception {
     	System.out.println("test");
-        lessonService.addLesson(lesson);
+        return lessonService.addLesson(lesson);
     }
     
     @DeleteMapping("/deleteLessons")
@@ -285,5 +291,28 @@ public class FileUploadController {
         }
     }
 
+    
+    @GetMapping("/getAllClusters")
+    public List<Cluster> getAllClusters() throws Exception {
+        return clusterService.getAllClusters();
+    }
+
+    @PostMapping("/addSingleCluster")
+    public Cluster addCluster(@RequestBody Cluster cluster) throws Exception {
+        return clusterService.addCluster(cluster);
+    }
+
+    @PostMapping("/updateCluster")
+    public String updateCluster(@RequestBody Cluster cluster) throws Exception {
+        clusterService.updateCluster(cluster);
+        return "Cluster updated successfully";
+    }
+
+    @DeleteMapping("/deleteClusters")
+    public void deleteClusters(@RequestBody List<Cluster> clusters) throws Exception {
+        clusterService.deleteClusters(clusters);
+    }
+    
+    
     
 }

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useMemo } from "react";
-import { getAllCourses, getAllLessons, getAllClassrooms, getAllLecturers, getTimetableHistory, getTimetableById } from "../services/api";
+import { getAllCourses, getAllLessons, getAllClassrooms, getAllLecturers, getTimetableHistory, getTimetableById , getAllClusters} from "../services/api";
 
 const DataContext = createContext();
 
@@ -14,6 +14,7 @@ export function DataProvider({ children }) {
   const [schedule, setSchedule] = useState([]);
   const [currentTimetableMetadata, setCurrentTimetableMetadata] = useState(null); 
   const [history, setHistory] = useState([]);
+  const [clusters, setClusters] = useState([]);
   
   // Cache timestamps
   const [lessonsTimestamp, setLessonsTimestamp] = useState(null);
@@ -21,13 +22,16 @@ export function DataProvider({ children }) {
   const [classroomsTimestamp, setClassroomsTimestamp] = useState(null);
   const [lecturersTimestamp, setLecturersTimestamp] = useState(null);
   const [historyTimestamp, setHistoryTimestamp] = useState(null);
+  const [clustersTimestamp, setClustersTimestamp] = useState(null);
+
 
   const [isFetching, setIsFetching] = useState({
     courses: false,
     lessons: false,
     classrooms: false,
     lecturers: false,
-    history: false
+    history: false,
+    clusters: false
   });
 
   const updateCoursesLocally = useCallback((newCourses) => {
@@ -62,6 +66,10 @@ export function DataProvider({ children }) {
     setHistoryTimestamp(null);
   }, []);
 
+  const invalidateClustersCache = useCallback(() => {
+    setClustersTimestamp(null);
+  }, []);
+
 
   // Invalidate all caches
   const invalidateAllCache = useCallback(() => {
@@ -70,6 +78,7 @@ export function DataProvider({ children }) {
     setClassroomsTimestamp(null);
     setLecturersTimestamp(null);
     setHistoryTimestamp(null);
+    setClustersTimestamp(null);
   }, []);
 
   const fetchCoursesIfNeeded = useCallback(async (caller = "Unknown") => {
@@ -182,6 +191,28 @@ export function DataProvider({ children }) {
   }, [history.length, historyTimestamp, isCacheValid, isFetching.history]);
 
 
+  const fetchClustersIfNeeded = useCallback(async (caller = "Unknown") => {
+    if (isFetching.clusters) return;
+
+    if (clusters.length > 0 && isCacheValid(clustersTimestamp)) {
+      console.log(`[Cache] Clusters are fresh, skipping fetch for: ${caller}`);
+      return;
+    }
+
+    setIsFetching(prev => ({ ...prev, clusters: true }));
+
+    try {
+      const data = await getAllClusters(caller);
+      setClusters(Array.isArray(data) ? data : []);
+      setClustersTimestamp(Date.now());
+    } catch (err) {
+      console.error("Failed to fetch clusters:", err);
+    } finally {
+      setIsFetching(prev => ({ ...prev, clusters: false }));
+    }
+  }, [clusters.length, clustersTimestamp, isCacheValid, isFetching.clusters]);
+
+
   const loadTimetableFromHistory = useCallback(async (id, caller = "Unknown") => {
     try {
       const fullSchedule = await getTimetableById(id, caller);
@@ -195,6 +226,19 @@ export function DataProvider({ children }) {
       return false; 
     }
   }, [history]);
+
+
+  const clusterMappings = useMemo(() => {
+    const numToName = {};
+    const nameToNum = {};
+    
+    clusters.forEach(c => {
+      numToName[c.number] = c.name;
+      nameToNum[c.name] = c.number;
+    });
+
+    return { numToName, nameToNum };
+  }, [clusters]);
 
 
 
@@ -217,6 +261,9 @@ export function DataProvider({ children }) {
     history,
     setHistory,
     loadTimetableFromHistory,
+    clusters,
+    setClusters,
+    clusterMappings,
 
     
     // Cache validation
@@ -231,6 +278,8 @@ export function DataProvider({ children }) {
     setLecturersTimestamp,
     historyTimestamp,
     setHistoryTimestamp,
+    clustersTimestamp,
+    setClustersTimestamp,
 
     
     // Cache invalidation
@@ -241,6 +290,7 @@ export function DataProvider({ children }) {
     invalidateAllCache,
     invalidateHistoryCache,
     invalidateAllCache,
+    invalidateClustersCache,
 
 
     // Fetching state
@@ -249,14 +299,16 @@ export function DataProvider({ children }) {
     fetchLecturersIfNeeded,
     fetchClassroomsIfNeeded,
     fetchHistoryIfNeeded,
-    updateCoursesLocally
+    updateCoursesLocally,
+    fetchClustersIfNeeded
   }), [
     lessons, courses, classrooms, lecturers, schedule, currentTimetableMetadata, history,
     lessonsTimestamp, coursesTimestamp, classroomsTimestamp, lecturersTimestamp, historyTimestamp,
     isCacheValid, 
     invalidateLessonsCache, invalidateCoursesCache, 
     invalidateClassroomsCache, invalidateLecturersCache, invalidateHistoryCache, invalidateAllCache,
-    fetchCoursesIfNeeded, fetchLessonsIfNeeded, fetchLecturersIfNeeded, fetchClassroomsIfNeeded, fetchHistoryIfNeeded, loadTimetableFromHistory, updateCoursesLocally
+    fetchCoursesIfNeeded, fetchLessonsIfNeeded, fetchLecturersIfNeeded, fetchClassroomsIfNeeded, fetchHistoryIfNeeded, loadTimetableFromHistory, updateCoursesLocally,
+    clusters, clustersTimestamp, clusterMappings, invalidateClustersCache, fetchClustersIfNeeded
   ]);
 
   return (

@@ -1,10 +1,11 @@
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+
 import UploadForm from "../components/UploadForm";
 import AddCourseModal from "../components/AddCourseModal";
 import ConfirmModal from "../components/ConfirmModal";
 import CourseList from "../components/CourseList";
 import Button from "../components/ui/Button";
 import { uploadCourses, exportCourses, addCourse, deleteCourses, updateCourse } from "../services/api";
-import { useEffect, useState, useCallback } from "react";
 import { useData } from "../context/DataContext";
 
 import "./UploadPage.css"; // reuse the Upload page styles
@@ -28,7 +29,18 @@ export default function UploadCoursesPage() {
   const [uploadSavedCount, setUploadSavedCount] = useState(0);
   const [modalContext, setModalContext] = useState("upload"); // "upload" or "add"
   const [pendingCourse, setPendingCourse] = useState(null);
-  const { courses, setCourses, fetchCoursesIfNeeded, setCoursesTimestamp, invalidateCoursesCache } = useData();
+  const { courses, setCourses, fetchCoursesIfNeeded, setCoursesTimestamp, invalidateCoursesCache, clusters, clusterMappings } = useData();
+
+  // Build dynamic semester range from DataContext
+  const semesterRange = useMemo(() => {
+    const nums = new Set([1, 2, 3, 4, 5, 6, 7, 8]); // Default range
+    clusters.forEach(c => {
+      if (c.number && c.number < 9) {
+        nums.add(c.number);
+      }
+    });
+    return Array.from(nums).sort((a, b) => a - b);
+  }, [clusters]);
 
   const loadCourses = useCallback(async () => {
     await fetchCoursesIfNeeded("UploadCoursesPage");
@@ -105,9 +117,12 @@ export default function UploadCoursesPage() {
 
   const handleAddCourse = async (course) => {
     try {
+
+      const properClusterName = clusterMappings.numToName[course.cluster] || `סמסטר ${course.cluster}`;
+      
       const formattedCourse = {
         ...course,
-        clusterName: (course.cluster >= 1 && course.cluster <= 8) 
+        clusterName: (semesterRange.includes(course.cluster)) 
           ? `סמסטר ${course.cluster}` 
           : course.clusterName
       };
