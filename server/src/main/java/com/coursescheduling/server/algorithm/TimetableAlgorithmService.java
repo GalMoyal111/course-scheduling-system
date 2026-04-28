@@ -20,6 +20,7 @@ import com.coursescheduling.server.algorithm.solver.RoomManager;
 import com.coursescheduling.server.model.Classroom;
 import com.coursescheduling.server.model.Course;
 import com.coursescheduling.server.model.GenerateTimetableRequest;
+import com.coursescheduling.server.model.LessonType;
 import com.coursescheduling.server.model.ManualAssignmentDTO;
 import com.coursescheduling.server.model.RoomType;
 import com.coursescheduling.server.model.Semester;
@@ -97,6 +98,15 @@ public class TimetableAlgorithmService {
         // Step 1: Build variables from semester data
         List<Variable> variables = variableBuilder.createVariables(semester);
         
+        List<String> hardCourseIds = request.getHardCourseIds();
+        if (hardCourseIds != null && !hardCourseIds.isEmpty()) {
+            for (Variable var : variables) {
+                if (hardCourseIds.contains(var.getCourseId()) && var.getType() == LessonType.LECTURE) {
+                    var.setIsHardCourse(true);
+                    System.out.println("🔥 Marked as Hard Course (Morning Priority): " + var.getCourseId() + " [" + var.getType() + "]");
+                }
+            }
+        }
 
         // Step 2: Apply constraints to variables
         

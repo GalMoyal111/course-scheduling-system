@@ -5,7 +5,7 @@ import Button from "../components/ui/Button";
 import "./GeneratePage.css";
 import { useData } from "../context/DataContext";
 import ManualAssignmentModal from "../components/ManualAssignmentModal";
-
+import HardCourseModal from "../components/HardCourseModal";
 
 
 const DAY_NAMES = { 1: "ראשון", 2: "שני", 3: "שלישי", 4: "רביעי", 5: "חמישי", 6: "שישי" };
@@ -31,6 +31,9 @@ const {
   } = useData();
   const [manualAssignments, setManualAssignments] = useState([]);
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+
+  const [hardCourses, setHardCourses] = useState([]);
+  const [isHardModalOpen, setIsHardModalOpen] = useState(false);
 
 
   const handleAddManualAssignment = (newAssignment) => {
@@ -120,7 +123,7 @@ const {
     setLoading(true);
     setError("");
     try {
-      const requestData = { semester, softConstraintWeights: weights, manualAssignments: manualAssignments };
+      const requestData = { semester, softConstraintWeights: weights, manualAssignments: manualAssignments, hardCourseIds: hardCourses.map(c => c.courseId) };
       const generatedSchedule = await generateTimetable(requestData);
 
       setSchedule(generatedSchedule);
@@ -205,6 +208,27 @@ const {
         )}
       </div>
 
+      {/* Hard Courses Section */}
+      <div className="generate-card">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h3><span className="material-icons">priority_high</span> Hard Courses (Morning Priority)</h3>
+          <Button variant="secondary" onClick={() => setIsHardModalOpen(true)}>+ Add Hard Course</Button>
+        </div>
+        
+        {hardCourses.length > 0 && (
+          <div style={{ marginTop: "15px", display: "flex", flexWrap: "wrap", gap: "10px" }}>
+            {hardCourses.map((c, index) => (
+              <div key={index} className="badge" style={{ background: "#fee2e2", color: "#991b1b", padding: "8px 12px", borderRadius: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>{c.courseName}</span>
+                <span className="material-icons" style={{ fontSize: "16px", cursor: "pointer" }} onClick={() => setHardCourses(prev => prev.filter((_, i) => i !== index))}>close</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+
+
       {/* Step 2 */}
       <div className="generate-card">
         <h3>
@@ -286,6 +310,17 @@ const {
         onSave={handleAddManualAssignment}
         currentSemester={semester}
       />
+
+
+      <HardCourseModal 
+        isOpen={isHardModalOpen} 
+        onClose={() => setIsHardModalOpen(false)} 
+        onSave={(c) => setHardCourses(prev => [...prev, c])}
+        currentSemester={semester}
+      />
+
+
+
     </div>
   );
 }
