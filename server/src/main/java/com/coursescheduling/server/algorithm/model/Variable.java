@@ -1,5 +1,8 @@
 package com.coursescheduling.server.algorithm.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.coursescheduling.server.model.LessonType;
 
 public class Variable {
@@ -15,6 +18,8 @@ public class Variable {
 	private float credits;
 	private Boolean isHardCourse;
 	private Domain domain;
+	
+	private List<DomainValue> nonPreferredSlots = new ArrayList<>();
 	
 	
 	
@@ -84,6 +89,15 @@ public class Variable {
 	}
 	public void setIsHardCourse(Boolean isHardCourse) {
 		this.isHardCourse = isHardCourse;
+	}
+	
+	
+	public List<DomainValue> getNonPreferredSlots() {
+	    return nonPreferredSlots;
+	}
+
+	public void setNonPreferredSlots(List<DomainValue> nonPreferredSlots) {
+	    this.nonPreferredSlots = nonPreferredSlots;
 	}
 	
 	

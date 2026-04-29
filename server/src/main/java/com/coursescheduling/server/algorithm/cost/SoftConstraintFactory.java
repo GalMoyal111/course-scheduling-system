@@ -26,6 +26,8 @@ public class SoftConstraintFactory {
         
         softConstraints.add(new AvoidBuildingPConstraint());
         
+        softConstraints.add(new LecturerPreferenceConstraint());
+        
         return softConstraints;
     }
 
@@ -40,25 +42,11 @@ public class SoftConstraintFactory {
         defaultWeights.put("InconvenientTiming", 5.0);
         defaultWeights.put("ElectiveCourseInTheSameClassroom", 5.0);
         defaultWeights.put("AvoidBuildingP", 5.0);
+        defaultWeights.put("LecturerPreference", 5.0);
         return defaultWeights;
     }
     
 
-    // חשוב!!! אולי להשתמש בcase כשיהיו יותר סוגים
-    // public static SoftConstraint createSoftConstraint(String constraintType) {
-    //     switch (constraintType) {
-    //         case "RoomCapacity":
-    //             List<String> roomCapacityData = List.of("RoomA:30", "RoomB:50", "RoomC:20");
-    //             return new RoomCapacitySoftConstraint();
-    //         case "PreferredTimeSlot":
-    //             return new PreferredTimeSlotSoftConstraint();
-    //         case "InstructorPreference":
-    //             return new InstructorPreferenceSoftConstraint();
-    //         // Add more cases for different types of soft constraints
-    //         default:
-    //             throw new IllegalArgumentException("Unknown soft constraint type: " + constraintType);
-    //     }
-    // }
 
     
 }

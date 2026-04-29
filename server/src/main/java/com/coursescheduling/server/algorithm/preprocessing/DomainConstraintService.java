@@ -21,74 +21,58 @@ public class DomainConstraintService {
 	@Autowired
     private LecturerService lecturerService;
 
-    // This method applies lecturer-specific constraints to the variables' domains.
+	// This method applies lecturer-specific constraints and injects preferences
     public void applyLecturerConstraints(List<Variable> variables) {
-        //Map<String, List<DomainValue>> constraints = getLecturerConstraintsTest();
         
-        Map<String, List<DomainValue>> constraints = getLecturerConstraints();
-
-        for (Variable v : variables) {
-
-            List<DomainValue> unavailable = constraints.get(v.getLecturer());
-
-            if (unavailable == null)
-                continue;
-
-            List<DomainValue> values = v.getDomain().getValues();
-
-            // Remove any domain values where the lesson's full duration overlaps with an unavailable slot
-            values.removeIf(dv -> {
-                int lessonStart = dv.getStartFrame();
-                int lessonEnd = lessonStart + v.getDuration() - 1;
-
-                return unavailable.stream().anyMatch(slot ->
-                    slot.getDay() == dv.getDay() &&
-                    slot.getStartFrame() >= lessonStart && 
-                    slot.getStartFrame() <= lessonEnd      
-                );
-            });
-        }
-    }
-
-    
-    
-    private Map<String, List<DomainValue>> getLecturerConstraints() {
-    	Map<String, List<DomainValue>> map = new HashMap<>();
-
         try {
+            // 1. Fetch all lecturers ONCE from DB
             List<Lecturer> lecturers = lecturerService.getAllLecturers();
+            
+            // 2. Build a Map for O(1) quick lookup by Lecturer Name
+            Map<String, Lecturer> lecturerMap = new HashMap<>();
+            for (Lecturer l : lecturers) {
+                if (l.getName() != null) {
+                    lecturerMap.put(l.getName(), l);
+                }
+            }
 
-            for (Lecturer lecturer : lecturers) {
-                if (lecturer.getName() != null && lecturer.getUnavailableSlots() != null) {
-                    map.put(lecturer.getName(), lecturer.getUnavailableSlots());
+            // 3. Iterate over all variables to apply constraints and inject preferences
+            for (Variable v : variables) {
+                Lecturer lecturer = lecturerMap.get(v.getLecturer());
+                
+                if (lecturer == null) continue;
+
+                // Inject the non-preferred slots directly into the Variable for the CSP to use later
+                if (lecturer.getNonPreferredSlots() != null) {
+                    v.setNonPreferredSlots(lecturer.getNonPreferredSlots());
+                }
+
+                // Remove any domain values where the lesson's full duration overlaps with an unavailable slot
+                List<DomainValue> unavailable = lecturer.getUnavailableSlots();
+                
+                if (unavailable != null && !unavailable.isEmpty()) {
+                    List<DomainValue> values = v.getDomain().getValues();
+                    values.removeIf(dv -> {
+                        int lessonStart = dv.getStartFrame();
+                        int lessonEnd = lessonStart + v.getDuration() - 1;
+
+                        return unavailable.stream().anyMatch(slot ->
+                            slot.getDay() == dv.getDay() &&
+                            slot.getStartFrame() >= lessonStart && 
+                            slot.getStartFrame() <= lessonEnd      
+                        );
+                    });
                 }
             }
         } catch (Exception e) {
             System.err.println("❌ Error fetching lecturers for constraints: " + e.getMessage());
         }
-
-        return map;
     }
-    
-    
-    
-    // This method defines constraints for specific lecturers
-    private Map<String, List<DomainValue>> getLecturerConstraintsTest() {
-        Map<String, List<DomainValue>> map = new HashMap<>();
 
-        // Example constraints for lecturers (these should be based on real data)
-        map.put("משה", List.of(
-                new DomainValue(1, 3),
-                new DomainValue(2, 5)
-        ));
-        
-        map.put("איתי", List.of(
-                new DomainValue(1, 9)
+    
 
-        ));
-
-        return map;
-    }
+    
+   
     
     // This method applies global constraints to the variables' domains, such as blocked time slots.
     public void applyGlobalConstraints(List<Variable> variables, List<DomainValue> blockedSlots) {

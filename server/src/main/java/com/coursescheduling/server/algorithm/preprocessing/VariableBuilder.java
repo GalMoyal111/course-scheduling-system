@@ -28,11 +28,7 @@ public class VariableBuilder {
 	
 	public List<Variable> createVariables(Semester semester){
 		
-		// the original
 		List<Lesson> lessons = getSupportedLessonsFromDB(semester);
-		
-		//temp
-		//List<Lesson> lessons = createTestLessons();
 		
 		
 		List <Variable> variables = new ArrayList<>();
@@ -186,66 +182,6 @@ public class VariableBuilder {
         return filtered;
     }
 	
-	
-	
-	private List<Lesson> createTestLessons() {
-
-	    List<Lesson> lessons = new ArrayList<>();
-
-	    lessons.add(createLesson("111", "משה 1", 2, LessonType.LECTURE, 1, 5, null));
-	    lessons.add(createLesson("111", "מושה 2", 2, LessonType.LECTURE, 1, 5, null));
-	    lessons.add(createLesson("111", "משה", 2, LessonType.TUTORIAL, 1, 5, null));
-	    lessons.add(createLesson("111", "משה", 2, LessonType.TUTORIAL, 1, 5, null));
-	    lessons.add(createLesson("111", "משה", 2, LessonType.LAB, 1, 5, null));
-
-	    lessons.add(createLesson("222", "דנה", 2, LessonType.LECTURE, 1, 2, null));
-	    lessons.add(createLesson("222", "דנה", 2, LessonType.TUTORIAL, 1, 2, null));
-	    lessons.add(createLesson("222", "דנה", 2, LessonType.LAB, 1, 2, null));
-	    lessons.add(createLesson("222", "משה", 2, LessonType.LAB, 1, 2, null));
-
-	    String splitId1 = UUID.randomUUID().toString();
-	    lessons.add(createLesson("333", "יוסי", 2, LessonType.LECTURE, 2, 4, splitId1));
-	    lessons.add(createLesson("333", "יוסי", 2, LessonType.LECTURE, 2, 4, splitId1));
-	    
-	    String splitId3 = UUID.randomUUID().toString();
-	    lessons.add(createLesson("333", "אליס", 2, LessonType.LECTURE, 2, 5, splitId3));
-	    lessons.add(createLesson("333", "אליס", 2, LessonType.LECTURE, 2, 5, splitId3));
-	    
-
-	    lessons.add(createLesson("333", "יוסי", 2, LessonType.TUTORIAL, 2, 5, null));
-
-	    lessons.add(createLesson("444", "שרה", 2, LessonType.LECTURE, 3, 5, null));
-	    lessons.add(createLesson("444", "שרה", 2, LessonType.LECTURE, 3, 5, null));
-	    lessons.add(createLesson("444", "שרה", 2, LessonType.TUTORIAL, 3, 5, null));
-	    lessons.add(createLesson("444", "שרה", 2, LessonType.LAB, 3, 5, null));
-	    lessons.add(createLesson("444", "שרה", 2, LessonType.LAB, 3, 5, null));
-
-	    lessons.add(createLesson("555", "אבי", 2, LessonType.LECTURE, 3, 4, null));
-	    lessons.add(createLesson("555", "אבי", 2, LessonType.TUTORIAL, 3, 4, null));
-
-	    String splitId2 = UUID.randomUUID().toString();
-	    lessons.add(createLesson("666", "רון", 2, LessonType.LECTURE, 3, 3, splitId2));
-	    lessons.add(createLesson("666", "רון", 2, LessonType.LECTURE, 3, 3, splitId2));
-
-	    lessons.add(createLesson("666", "רון", 2, LessonType.LAB, 3, 3, null));
-	    lessons.add(createLesson("666", "רון", 2, LessonType.TUTORIAL, 3, 3, null));
-	    
-	    
-	    lessons.add(createLesson("777", "בוב", 3, LessonType.LECTURE, 3, 3, null));
-	    lessons.add(createLesson("777", "בוב", 3, LessonType.LECTURE, 3, 3, null));
-	    lessons.add(createLesson("777", "בוב", 2, LessonType.TUTORIAL, 3, 3, null));
-	    lessons.add(createLesson("777", "בוב", 2, LessonType.TUTORIAL, 3, 3, null));
-	    lessons.add(createLesson("777", "בוב", 2, LessonType.LAB, 3, 3, null));
-	    
-	    
-	    lessons.add(createLesson("888", "דונק", 2, LessonType.LECTURE , 9 , 3, null));
-	    lessons.add(createLesson("888", "דונק", 2, LessonType.TUTORIAL , 9 , 3, null));
-	    
-	    lessons.add(createLesson("999", "איתי", 2, LessonType.LECTURE , 9 , 3, null));
-	    lessons.add(createLesson("999", "איתי", 2, LessonType.TUTORIAL , 9 , 3, null));
-
-	    return lessons;
-	}
 	
 
 

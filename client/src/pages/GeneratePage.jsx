@@ -53,7 +53,8 @@ const {
     "ElectiveEveningPreferred": 5.0,
     "InconvenientTiming": 5.0,
     "ElectiveCourseInTheSameClassroom": 5.0,
-    "AvoidBuildingP" : 5.0
+    "AvoidBuildingP" : 5.0,
+    "LecturerPreference": 5.0
   });
 
 
@@ -111,8 +112,11 @@ const {
     "AvoidBuildingP": {
           label: "Avoid Building P",
           desc: "Assign a penalty for scheduling classes in building P."
+      },
+    "LecturerPreference": {
+          label: "Lecturer Preferences",
+          desc: "Respect lecturers' soft requests to avoid teaching on specific days/hours."
       }
-
   };
 
   const handleWeightChange = (constraintName, value) => {
