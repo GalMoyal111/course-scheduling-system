@@ -142,14 +142,14 @@ public class CoursesExcelService {
                 int tutorialHours = parseIntCell(row.getCell(5), formatter);
                 int labHours = parseIntCell(row.getCell(6), formatter);
                 int projectHours = parseIntCell(row.getCell(7), formatter);
+                
                 float credits = 0;
                 String creditStr = formatter.formatCellValue(row.getCell(8)).trim();
                 if (!creditStr.isEmpty()) {
                     credits = Float.parseFloat(creditStr);
                 }
 
-                String notes = formatter.formatCellValue(row.getCell(9)).trim();
-                String clusterName = formatter.formatCellValue(row.getCell(10)).trim();
+                String clusterName = formatter.formatCellValue(row.getCell(9)).trim();
 
                 Course course = new Course(
                         cluster,
@@ -161,7 +161,6 @@ public class CoursesExcelService {
                         labHours,
                         projectHours,
                         credits,
-                        notes,
                         clusterName
                 );
 
@@ -176,7 +175,7 @@ public class CoursesExcelService {
     }
 
     private boolean isRowEmpty(Row row, DataFormatter formatter) {
-        for (int cellIndex = 0; cellIndex <= 10; cellIndex++) {
+        for (int cellIndex = 0; cellIndex <= 9; cellIndex++) {
             String cellValue = formatter.formatCellValue(row.getCell(cellIndex)).trim();
             if (!cellValue.isEmpty()) {
                 return false;
@@ -319,8 +318,7 @@ public class CoursesExcelService {
             header.createCell(6).setCellValue("Lab Hours");
             header.createCell(7).setCellValue("Project Hours");
             header.createCell(8).setCellValue("Credits");
-            header.createCell(9).setCellValue("Notes");
-            header.createCell(10).setCellValue("Cluster Name");
+            header.createCell(9).setCellValue("Cluster Name");
 
             int rowIndex = 1;
 
@@ -338,8 +336,7 @@ public class CoursesExcelService {
                 row.createCell(6).setCellValue(asDouble(data.get("labHours")));
                 row.createCell(7).setCellValue(asDouble(data.get("projectHours")));
                 row.createCell(8).setCellValue(asDouble(data.get("credits")));
-                row.createCell(9).setCellValue(asString(data.get("notes")));
-                row.createCell(10).setCellValue(asString(data.get("clusterName")));
+                row.createCell(9).setCellValue(asString(data.get("clusterName")));
             }
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();

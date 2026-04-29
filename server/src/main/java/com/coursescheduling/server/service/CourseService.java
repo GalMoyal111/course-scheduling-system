@@ -55,25 +55,7 @@ public class CourseService {
         return "";
     }
 
-    /* public void saveCoursesToDatabase(List<Course> courses) {
-        // Implement logic to save the list of courses to the database (e.g., Firestore)
-        Firestore db = FirestoreClient.getFirestore();
-        for (Course course : courses) {
-            Map<String, Object> data = new HashMap<>();
-            data.put("courseName", course.getCourseName());
-            data.put("prerequisiteCourseNumberOrConditions", course.getPrerequisiteCourseNumberOrConditions());
-            data.put("lectureHours", course.getLectureHours());
-            data.put("tutorialHours", course.getTutorialHours());
-            data.put("labHours", course.getLabHours());
-            data.put("projectHours", course.getProjectHours());
-            data.put("credits", course.getCredits());
-            data.put("notes", course.getNotes());
-            data.put("clusterName", course.getClusterName());
 
-            // db.collection("courses").document(course.getCourseCode()).set(data, SetOptions.merge());
-            db.collection("courses").document(course.getSemesterNumber()).set(Map.of(course.getCourseCode(), data), SetOptions.merge());
-        }
-    } */
     
     public void saveCourseToFirebase(List<Course> courses) throws Exception {
     	
@@ -106,7 +88,6 @@ public class CourseService {
             data.put("labHours", course.getLabHours());
             data.put("projectHours", course.getProjectHours());
             data.put("credits", course.getCredits());
-            data.put("notes", course.getNotes());
             data.put("clusterName", normalizedClusterName);
 
             DocumentReference docRef = db.collection("courses").document(course.getCourseId());
@@ -138,7 +119,6 @@ public class CourseService {
         data.put("labHours", course.getLabHours());
         data.put("projectHours", course.getProjectHours());
         data.put("credits", course.getCredits());
-        data.put("notes", course.getNotes());
         data.put("clusterName", normalizedClusterName);
 
         db.collection("courses").document(normalizedCourseId).set(data);
@@ -193,7 +173,6 @@ public class CourseService {
             int projectHours = ((Number) courseData.get("projectHours")).intValue();
             float credits = ((Number) courseData.get("credits")).floatValue();
 
-            String notes = (String) courseData.get("notes");
             String clusterName = (String) courseData.get("clusterName");
 
             Course course = new Course();
@@ -208,7 +187,6 @@ public class CourseService {
             course.setLabHours(labHours);
             course.setProjectHours(projectHours);
             course.setCredits(credits);
-            course.setNotes(notes);
             course.setClusterName(normalizeClusterName(cluster, clusterName));
 
             courses.add(course);
@@ -259,7 +237,6 @@ public class CourseService {
         data.put("labHours", newCourse.getLabHours());
         data.put("projectHours", newCourse.getProjectHours());
         data.put("credits", newCourse.getCredits());
-        data.put("notes", newCourse.getNotes());
         data.put("clusterName", normalizedClusterName);
 
         batch.set(newDoc, data);

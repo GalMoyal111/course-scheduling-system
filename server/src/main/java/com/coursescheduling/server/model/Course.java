@@ -10,13 +10,12 @@ public class Course {
     private int labHours;
     private int projectHours;
     private float credits;
-    private String notes;
     private String clusterName;
 
     public Course() {}
 
     public Course(int cluster, String courseId, String courseName, String prerequisiteCourseNumber,
-                  int lectureHours, int tutorialHours, int labHours, int projectHours, float credits, String notes, String clusterName) {
+                  int lectureHours, int tutorialHours, int labHours, int projectHours, float credits, String clusterName) {
         this.cluster = cluster;
         this.courseId = courseId;
         this.courseName = courseName;
@@ -26,7 +25,6 @@ public class Course {
         this.labHours = labHours;
         this.projectHours = projectHours;
         this.credits = credits;
-        this.notes = notes;
         this.clusterName = clusterName;
     }
 
@@ -107,13 +105,6 @@ public class Course {
 		this.credits = credits;
 	}
 
-	public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
 
     public String getClusterName() {
         return clusterName;

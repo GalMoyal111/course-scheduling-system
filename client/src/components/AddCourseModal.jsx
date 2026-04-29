@@ -40,7 +40,6 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
   const [projectHours, setProjectHours] = useState("");
   const [credits, setCredits] = useState("");
   const [isCreditsEditable, setIsCreditsEditable] = useState(false);
-  const [notes, setNotes] = useState("");
   
   // 🟢 נשארנו עם שדה אחד ויחיד!
   const [clusterName, setClusterName] = useState("");
@@ -62,7 +61,6 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
     setProjectHours("");
     setCredits("");
     setIsCreditsEditable(false);
-    setNotes("");
     setClusterName("");
     setInvalidPrereqWarning(null);
     setPendingPrerequisite(null);
@@ -94,7 +92,6 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
       setProjectHours(initialCourse.projectHours != null ? String(initialCourse.projectHours) : "");
       setCredits(initialCourse.credits != null ? String(initialCourse.credits) : "");
       setIsCreditsEditable(false);
-      setNotes(initialCourse.notes || "");
     } else {
       resetForm();
     }
@@ -241,7 +238,6 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
         labHours: toNonNegativeInt(labHours, "lab hours"),
         projectHours: toNonNegativeInt(projectHours, "project hours"),
         credits: toNonNegativeFloat(credits, "credits"),
-        notes: notes.trim(),
         clusterName: clusterName.trim(), // <--- השם של האשכול (סמסטר 1, מדעים וכו')
       };
 
@@ -402,11 +398,6 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
               )}
             </label>
             <input className="ui-input" value={credits} readOnly={!isCreditsEditable} onChange={(e) => setCredits(e.target.value.replace(/[^\d.]/g, ""))} required />
-          </div>
-
-          <div className="form-field" style={{ gridColumn: 'span 2' }}>
-            <label>Notes</label>
-            <input className="ui-input" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional notes" />
           </div>
         </div>
       </form>
