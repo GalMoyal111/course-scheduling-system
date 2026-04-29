@@ -4,6 +4,7 @@ import AddLecturerModal from "../components/AddLecturerModal";
 import UploadForm from "../components/UploadForm";
 import { useData } from "../context/DataContext";
 import { addLecturer, deleteLecturers, updateLecturer, uploadLecturersExcel, exportLecturersExcel } from "../services/api";
+import Toast, { useToast } from "../components/ui/Toast";
 import "./LecturersPage.css";
 import ConfirmModal from "../components/ConfirmModal";
 
@@ -15,6 +16,8 @@ export default function LecturersPage() {
     setLecturersTimestamp ,
     invalidateLecturersCache
   } = useData();
+
+  const { toast, showSuccess, showError, closeToast } = useToast();
   
   const [selectedLecturerId, setSelectedLecturerId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -72,13 +75,13 @@ export default function LecturersPage() {
     );
 
     if (isDuplicate) {
-      alert(`The lecturer "${newLecturer.name}" already exists in the system.`);
+      showError(`The lecturer "${newLecturer.name}" already exists in the system.`);
       return;
     }
 
     try {
       const addedLecturerFromServer = await addLecturer(newLecturer);
-      alert("Lecturer added successfully!");
+      showSuccess("Lecturer added successfully!");
 
       setLecturers(prev => [...prev, addedLecturerFromServer]);
       setLecturersTimestamp(Date.now());
@@ -86,14 +89,14 @@ export default function LecturersPage() {
       setIsModalOpen(false);
     } catch (err) {
       console.error(err);
-      alert("Error adding lecturer");
+      showError("Error adding lecturer");
     }
   };
 
   const handleEditLecturer = async (updatedLecturer) => {
     try {
       await updateLecturer(updatedLecturer);
-      alert("Lecturer updated successfully!");
+      showSuccess("Lecturer updated successfully!");
 
       setLecturers(prev => 
         prev.map(l => l.id === updatedLecturer.id ? updatedLecturer : l)
@@ -105,7 +108,7 @@ export default function LecturersPage() {
       
     } catch (err) {
       console.error(err);
-      alert("Error updating lecturer");
+      showError("Error updating lecturer");
     }
   };
 
@@ -121,7 +124,7 @@ export default function LecturersPage() {
 
     try {
       await deleteLecturers([lecturerToPendingDelete]);
-      alert("Lecturer deleted successfully!");
+      showSuccess("Lecturer deleted successfully!");
       invalidateLecturersCache();
       
       const keyToDelete = keyFor(lecturerToPendingDelete);
@@ -136,7 +139,7 @@ export default function LecturersPage() {
       }
     } catch (err) {
       console.error(err);
-      alert("Error deleting lecturer");
+      showError("Error deleting lecturer");
     } finally {
       setIsDeleteModalOpen(false);
       setLecturerToPendingDelete(null);
@@ -149,7 +152,7 @@ export default function LecturersPage() {
 
     try {
       await deleteLecturers(selectedLecturers);
-      alert("Selected lecturers deleted successfully!");
+      showSuccess("Selected lecturers deleted successfully!");
       invalidateLecturersCache();
       
       const deletedKeys = new Set(selectedLecturers.map(keyFor));
@@ -165,7 +168,7 @@ export default function LecturersPage() {
       }
     } catch (err) {
       console.error(err);
-      alert("Error deleting selected lecturers");
+      showError("Error deleting selected lecturers");
     } finally {
       setIsMultiDeleteModalOpen(false);
     }
@@ -208,11 +211,11 @@ export default function LecturersPage() {
     try {
       await updateLecturer(selectedLecturer);
       setHasUnsavedChanges(false);
-      alert("Availability saved successfully!");
+      showSuccess("Availability saved successfully!");
       setLecturersTimestamp(Date.now());
     } catch (err) {
       console.error(err);
-      alert("Error saving availability");
+      showError("Error saving availability");
 
     } finally {
       setIsSaving(false);
@@ -267,7 +270,7 @@ export default function LecturersPage() {
 
     } catch (err) {
       console.error("Detailed upload error:", err);
-      alert("Error uploading file");
+      showError("Error uploading file");
     }
   };
 
@@ -285,7 +288,7 @@ const handleExport = async () => {
       a.download = 'lecturers_availability.xlsx';
       a.click();
     } catch (err) {
-      alert("Error exporting file");
+      showError("Error exporting file");
     }
   };
 
@@ -513,7 +516,7 @@ const handleExport = async () => {
         onClose={() => setIsSummaryModalOpen(false)} 
       />
 
-
+      <Toast toast={toast} onClose={closeToast} />
     </div>
   );
 }

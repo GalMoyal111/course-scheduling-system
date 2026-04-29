@@ -3,10 +3,12 @@ import Button from "./ui/Button";
 import "./ui/ui.css";
 import Modal from "./ui/Modal";
 import { useData } from "../context/DataContext";
+import Toast, { useToast } from "./ui/Toast";
 
 // Simple modal for adding a single course (uses app UI styles).
 export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse = null, allCourses = [] }) {
   const { clusters, fetchClustersIfNeeded } = useData();
+  const { toast, showSuccess, showError, closeToast } = useToast();
 
   // Initialize clusters on mount
   useEffect(() => {
@@ -259,7 +261,7 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
         resetForm();
       }
     } catch (err) {
-      alert(err.message || "Please enter valid values.");
+      showError(err.message || "Please enter valid values.");
     }
   };
 
@@ -351,10 +353,10 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
                 className="ui-input"
                 value={prerequisiteInput}
                 onChange={(e) => setPrerequisiteInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); try { handleAddPrerequisite(); } catch (err) { alert(err.message); } } }}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); try { handleAddPrerequisite(); } catch (err) { showError(err.message); } } }}
                 placeholder="5 or 6-digit code"
               />
-              <Button type="button" variant="ghost" onClick={() => { try { handleAddPrerequisite(); } catch (err) { alert(err.message); } }}>
+              <Button type="button" variant="ghost" onClick={() => { try { handleAddPrerequisite(); } catch (err) { showError(err.message); } }}>
                 +
               </Button>
             </div>

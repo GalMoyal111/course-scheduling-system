@@ -3,13 +3,14 @@ import AddRoomModal from "../components/AddRoomModal";
 import ConfirmModal from "../components/ConfirmModal";
 import ClassroomList from "../components/ClassroomList";
 import Button from "../components/ui/Button";
+import Toast, { useToast } from "../components/ui/Toast";
 import { uploadRooms, exportRooms, addRoom, deleteClassrooms, updateClassroom } from "../services/api";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useData } from "../context/DataContext";
 
 
 function UploadRoomsPage() {
-
+  const { toast, showSuccess, showError, closeToast } = useToast();
 
 
   const handleUpload = async (file) => {
@@ -45,7 +46,7 @@ function UploadRoomsPage() {
     } catch (err) {
       console.error(err);
       setExporting(false);
-      alert("Export failed");
+      showError("Export failed");
     }
   };
 
@@ -76,7 +77,7 @@ function UploadRoomsPage() {
       await loadClassrooms();
     } catch (err) {
       console.error(err);
-      alert("Upload failed");
+      showError("Upload failed");
     }
   };
 
@@ -128,7 +129,7 @@ function UploadRoomsPage() {
 
     } catch (err) {
       console.error(err);
-      alert("Failed to delete classroom(s)");
+      showError("Failed to delete classroom(s)");
     }
   };
 
@@ -149,11 +150,11 @@ function UploadRoomsPage() {
           )
         );
 
-        alert("Classroom updated successfully");
+        showSuccess("Classroom updated successfully");
       } else {
         await addRoom(classroom);
         setClassrooms(prev => [...prev, classroom]);
-        alert("Classroom added successfully");
+        showSuccess("Classroom added successfully");
       }
 
       setClassroomsTimestamp(Date.now());
@@ -161,7 +162,7 @@ function UploadRoomsPage() {
       setEditingClassroom(null);
     } catch (err) {
       console.error(err);
-      alert(editingClassroom ? "Failed to update classroom" : "Failed to add classroom");
+      showError(editingClassroom ? "Failed to update classroom" : "Failed to add classroom");
     }
   };
 
@@ -293,6 +294,8 @@ function UploadRoomsPage() {
         summary={uploadSummary} 
         onClose={() => setIsSummaryModalOpen(false)} 
       />
+
+      <Toast toast={toast} onClose={closeToast} />
     </div>
   );
 }

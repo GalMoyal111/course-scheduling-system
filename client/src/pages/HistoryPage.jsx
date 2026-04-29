@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useData } from "../context/DataContext";
 import Button from "../components/ui/Button";
+import Toast, { useToast } from "../components/ui/Toast";
 import "./HistoryPage.css";
 
 export default function HistoryPage() {
   const { history, fetchHistoryIfNeeded, loadTimetableFromHistory } = useData();
+  const { toast, showError, closeToast } = useToast();
   const navigate = useNavigate();
   const [loadingId, setLoadingId] = useState(null); 
 
@@ -21,7 +23,7 @@ export default function HistoryPage() {
     if (success) {
       navigate("/timetable");
     } else {
-      alert("Failed to load timetable. Please try again.");
+      showError("Failed to load timetable. Please try again.");
     }
   };
 
@@ -72,6 +74,8 @@ export default function HistoryPage() {
           ))
         )}
       </div>
+
+      <Toast toast={toast} onClose={closeToast} />
     </div>
   );
 }

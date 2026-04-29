@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Button from "../components/ui/Button";
 import { useData } from "../context/DataContext";
+import Toast, { useToast } from "../components/ui/Toast";
 import "./TimetablePage.css";
 import Modal from "../components/ui/Modal"; 
 import { saveTimetable } from "../services/api";
 
 export default function TimetablePage() {
   const { schedule, clusters, invalidateHistoryCache, clusterMappings } = useData();
+  const { toast, showSuccess, showError, closeToast } = useToast();
   const [selectedCluster, setSelectedCluster] = useState("ALL");
 
 
@@ -141,7 +143,7 @@ export default function TimetablePage() {
 
   const handleConfirmSave = async () => {
     if (!saveName.trim()) {
-      alert("Please enter a name for the timetable.");
+      showError("Please enter a name for the timetable.");
       return;
     }
 
@@ -159,10 +161,10 @@ export default function TimetablePage() {
       
       setIsSaveModalOpen(false);
       setSaveName("");
-      alert("Timetable saved successfully!");
+      showSuccess("Timetable saved successfully!");
     } catch (error) {
       console.error("Save error:", error);
-      alert("Failed to save timetable. Please try again.");
+      showError("Failed to save timetable. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -319,7 +321,7 @@ export default function TimetablePage() {
         </div>
       </Modal>
 
-
+      <Toast toast={toast} onClose={closeToast} />
     </div>
   );
 }

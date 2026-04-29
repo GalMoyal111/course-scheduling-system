@@ -10,7 +10,8 @@ import { deleteUser } from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
 import { useData } from "../context/DataContext";
 import { addCluster, deleteClusters } from "../services/api";
-import Modal from "../components/ui/Modal"; 
+import Modal from "../components/ui/Modal";
+import Toast, { useToast } from "../components/ui/Toast"; 
 
 
 
@@ -24,7 +25,7 @@ export default function SettingsPage({ user }) {
     const [showCreateUserPassword, setShowCreateUserPassword] = useState(false);
     const [isDeleteUserConfirmOpen, setIsDeleteUserConfirmOpen] = useState(false);
     const [pendingCourse, setPendingCourse] = useState(null);
-
+    const { toast, showSuccess, showError, closeToast } = useToast();
 
     const { clusters, setClusters, fetchClustersIfNeeded, invalidateClustersCache } = useData();
     const [isClusterModalOpen, setIsClusterModalOpen] = useState(false);
@@ -37,26 +38,26 @@ export default function SettingsPage({ user }) {
     const handleChangePassword = async () => {
         try {
             if (!auth.currentUser) {
-                alert("No user logged in");
+                showError("No user logged in");
                 return;
             }
 
             // Validate password length
             if (newPassword.length < 6) {
-                alert("Password must be at least 6 characters long");
+                showError("Password must be at least 6 characters long");
                 return;
             }
 
             await updatePassword(auth.currentUser, newPassword);
-            alert("Password updated successfully");
+            showSuccess("Password updated successfully");
             setNewPassword("");
             setIsPasswordConfirmOpen(false);
         } catch (err) {
             console.error(err);
             if (err.code === "auth/requires-recent-login") {
-                alert("Please log in again before changing password");
+                showError("Please log in again before changing password");
         } else {
-            alert("Failed to update password");
+            showError("Failed to update password");
         }
         }
     };
@@ -77,7 +78,7 @@ export default function SettingsPage({ user }) {
         );
         } catch (err) {
             console.error(err);
-            alert("Failed to update role");
+            showError("Failed to update role");
         }
     };
 
@@ -85,7 +86,7 @@ export default function SettingsPage({ user }) {
         try {
             // Validate password length
             if (newPassword.length < 6) {
-                alert("Password must be at least 6 characters long");
+                showError("Password must be at least 6 characters long");
                 return;
             }
 
@@ -93,14 +94,14 @@ export default function SettingsPage({ user }) {
 
             const uid = await createUser(newEmail, newPassword, newRole, token);
             setUsers((prev) => [...prev, { uid, email: newEmail, role: newRole }]);
-            alert("User created successfully");
+            showSuccess("User created successfully");
             setNewEmail("");
             setNewPassword("");
             setNewRole(ROLES.USER);
 
         } catch (err) {
             console.error(err);
-            alert("Failed to create user");
+            showError("Failed to create user");
         }
     };
 
@@ -112,7 +113,7 @@ export default function SettingsPage({ user }) {
 
         } catch (err) {
             console.error(err);
-            alert("Failed to delete user");
+            showError("Failed to delete user");
         }
         };
 
@@ -120,7 +121,7 @@ export default function SettingsPage({ user }) {
     const handleAddCluster = async () => {
         const trimmedName = newClusterName.trim();
         if (!trimmedName) {
-            alert("Cluster name cannot be empty");
+            showError("Cluster name cannot be empty");
             return;
         }
 
@@ -129,7 +130,7 @@ export default function SettingsPage({ user }) {
         );
 
         if (isDuplicate) {
-            alert(`The cluster/semester "${trimmedName}" already exists!`);
+            showError(`The cluster/semester "${trimmedName}" already exists!`);
             return;
         }
 
@@ -137,12 +138,12 @@ export default function SettingsPage({ user }) {
             const addedCluster = await addCluster({ name: trimmedName });
             setClusters(prev => [...prev, addedCluster].sort((a, b) => a.number - b.number));
             invalidateClustersCache();
-            alert("Cluster added successfully");
+            showSuccess("Cluster added successfully");
             setNewClusterName("");
             setIsClusterModalOpen(false);
         } catch (err) {
             console.error("Failed to add cluster:", err);
-            alert("Failed to add cluster");
+            showError("Failed to add cluster");
         }
     };
 
@@ -151,12 +152,12 @@ export default function SettingsPage({ user }) {
             await deleteClusters([cluster]);
             setClusters(prev => prev.filter(c => c.id !== cluster.id));
             invalidateClustersCache();
-            alert("Cluster deleted successfully");
+            showSuccess("Cluster deleted successfully");
             setIsDeleteClusterConfirmOpen(false);
             setClusterToDelete(null);
         } catch (err) {
             console.error("Failed to delete cluster:", err);
-            alert("Failed to delete cluster");
+            showError("Failed to delete cluster");
         }
     };
 
@@ -502,6 +503,7 @@ export default function SettingsPage({ user }) {
                 </div>
             </Modal>
 
+            <Toast toast={toast} onClose={closeToast} />
         </div>
     );
 }

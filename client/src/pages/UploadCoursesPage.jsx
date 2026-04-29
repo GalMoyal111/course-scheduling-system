@@ -5,6 +5,7 @@ import AddCourseModal from "../components/AddCourseModal";
 import ConfirmModal from "../components/ConfirmModal";
 import CourseList from "../components/CourseList";
 import Button from "../components/ui/Button";
+import Toast, { useToast } from "../components/ui/Toast";
 import { uploadCourses, exportCourses, addCourse, deleteCourses, updateCourse } from "../services/api";
 import { useData } from "../context/DataContext";
 
@@ -14,6 +15,7 @@ import "./UploadPage.css"; // reuse the Upload page styles
  * Minimal page for uploading course files (similar to lessons upload).
  */
 export default function UploadCoursesPage() {
+  const { toast, showSuccess, showError, closeToast } = useToast();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState(null);
   const [exporting, setExporting] = useState(false);
@@ -77,14 +79,14 @@ export default function UploadCoursesPage() {
         setAdjustedCourses(result.adjustedCourses);
         setInvalidCoursesModalOpen(true);
       } else {
-        alert("Courses uploaded successfully");
+        showSuccess("Courses uploaded successfully");
       }
       
       invalidateCoursesCache();
       await loadCourses();
     } catch (err) {
       console.error(err);
-      alert("Upload failed. Check console for details.");
+      showError("Upload failed. Check console for details.");
     }
   };
 
@@ -111,7 +113,7 @@ export default function UploadCoursesPage() {
     } catch (err) {
       console.error(err);
       setExporting(false);
-      alert("Export failed");
+      showError("Export failed");
     }
   };
 
@@ -144,7 +146,7 @@ export default function UploadCoursesPage() {
           : c
         ));
 
-        alert("Course updated successfully");
+        showSuccess("Course updated successfully");
 
       } else {
         // Check for invalid prerequisites before adding
@@ -177,7 +179,7 @@ export default function UploadCoursesPage() {
         
         await addCourse(course);
         setCourses(prevCourses => [...prevCourses, formattedCourse]);
-        alert("Course added successfully");
+        showSuccess("Course added successfully");
       }
       
       setCoursesTimestamp(Date.now());
@@ -186,7 +188,7 @@ export default function UploadCoursesPage() {
     
     } catch (err) {
       console.error(err);
-      alert(editingCourse ? "Failed to update course" : "Failed to add course");
+      showError(editingCourse ? "Failed to update course" : "Failed to add course");
     }
   };
 
@@ -223,7 +225,7 @@ export default function UploadCoursesPage() {
 
     } catch (err) {
       console.error(err);
-      alert("Failed to delete course(s). Check console for details.");
+      showError("Failed to delete course(s). Check console for details.");
     }
   };
 
@@ -395,13 +397,13 @@ export default function UploadCoursesPage() {
               setCourses(prev => [...prev, formattedPending]);
 
               setCoursesTimestamp(Date.now());
-              alert("Course added successfully (with non-existing prerequisites)");
+              showSuccess("Course added successfully (with non-existing prerequisites)");
 
               setIsModalOpen(false);
               setEditingCourse(null);
             } catch (err) {
               console.error(err);
-              alert("Failed to add course");
+              showError("Failed to add course");
             }
             setInvalidCoursesModalOpen(false);
             setInvalidCourses([]);
@@ -410,6 +412,8 @@ export default function UploadCoursesPage() {
           }
         }}
       />
+
+      <Toast toast={toast} onClose={closeToast} />
     </div>
   );
 }

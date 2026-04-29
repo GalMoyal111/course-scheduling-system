@@ -4,12 +4,14 @@ import ConfirmModal from "../components/ConfirmModal";
 import LessonList from "../components/LessonList";
 import AddLessonModal from "../components/AddLessonModal";
 import Button from "../components/ui/Button";
+import Toast, { useToast } from "../components/ui/Toast";
 import { useState, useEffect, useCallback } from "react";
 import { useData } from "../context/DataContext";
 
 
 import "./UploadPage.css";
 function UploadPage() {
+  const { toast, showSuccess, showError, closeToast } = useToast();
   // confirmation state for uploads
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState(null);
@@ -88,7 +90,7 @@ function UploadPage() {
 
     } catch (err) {
       console.error(err);
-      alert("Upload failed. Check console for details.");
+      showError("Upload failed. Check console for details.");
     } finally {
       setIsUploading(false);
   }
@@ -185,7 +187,7 @@ function UploadPage() {
 
     } catch (err) {
       console.error(err);
-      alert("Failed to delete lesson(s). Reverting UI and check console for details.");
+      showError("Failed to delete lesson(s). Reverting UI and check console for details.");
       // revert optimistic update
       setLessons(prevLessons);
     }
@@ -212,10 +214,10 @@ function UploadPage() {
       });
       
       setLessonsTimestamp(Date.now());
-      alert("Lesson saved successfully");
+      showSuccess("Lesson saved successfully");
     } catch (err) {
       console.error(err);
-      alert("Failed to save lesson");
+      showError("Failed to save lesson");
     } finally {
       setIsModalOpen(false);
       setEditingLesson(null);
@@ -259,7 +261,7 @@ function UploadPage() {
               window.URL.revokeObjectURL(url);
             } catch (err) {
               console.error(err);
-              alert("Export failed");
+              showError("Export failed");
             } finally {
               setExporting(false);
             }
@@ -352,7 +354,7 @@ function UploadPage() {
         </div>
       )}
 
-
+      <Toast toast={toast} onClose={closeToast} />
     </div>
   );
 }
