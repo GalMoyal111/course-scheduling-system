@@ -60,8 +60,8 @@ export default function LessonList({ lessons = [], onEdit, onDelete, onSelection
   const uniqueSemesters = useMemo(() => {
     const semesters = Array.from(new Set(lessons.map(l => l.semester).filter(s => s != null)))
       .sort((a, b) => {
-        // Define semester order: A, B, SUMMER
-        const semesterOrder = { "A": 1, "B": 2, "SUMMER": 3 };
+        // Define semester order: A, B
+        const semesterOrder = { "A": 1, "B": 2 };
         return (semesterOrder[a] || 99) - (semesterOrder[b] || 99);
       });
     return semesters;
@@ -277,7 +277,7 @@ export default function LessonList({ lessons = [], onEdit, onDelete, onSelection
           >
             <option value="">All Semesters</option>
             {uniqueSemesters.map(semester => {
-              const semesterLabels = { "A": "Semester A", "B": "Semester B", "SUMMER": "Summer" };
+              const semesterLabels = { "A": "Semester A", "B": "Semester B" };
               return (
                 <option key={semester} value={semester}>{semesterLabels[semester] || semester}</option>
               );

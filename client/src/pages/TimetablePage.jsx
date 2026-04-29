@@ -316,7 +316,6 @@ export default function TimetablePage() {
           >
             <option value="A">Semester A</option>
             <option value="B">Semester B</option>
-            <option value="SUMMER">Summer Semester</option>
           </select>
         </div>
       </Modal>

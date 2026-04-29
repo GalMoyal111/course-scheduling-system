@@ -282,8 +282,6 @@ public class ExcelProcessingService {
 	        return Semester.A;
 	    if (semesterText.contains("ב")) 
 	        return Semester.B;
-	    if (semesterText.contains("קיץ")) 
-	        return Semester.SUMMER;
 	    throw new IllegalArgumentException("Unknown semester: " + semesterText);
 	}
 	

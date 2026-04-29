@@ -18,7 +18,7 @@ public class Lesson {
 
     private String splitGroupId;  // for splitting lessons of 4 hours into two 2-hour lessons. 0 means no split.
 
-    private Semester semester; // 1 for first semester, 2 for second semester, summer for summer semester
+    private Semester semester; // 1 for first semester, 2 for second semester
 
     private float credits; // number of credits for this lesson
 

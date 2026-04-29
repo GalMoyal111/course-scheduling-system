@@ -418,8 +418,6 @@ public class LessonService {
 	            return "סמסטר א";
 	        case B:
 	            return "סמסטר ב";
-	        case SUMMER:
-	            return "סמסטר קיץ";
 	        default:
 	            return "";
 	    }

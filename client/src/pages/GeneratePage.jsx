@@ -166,7 +166,6 @@ const {
           >
             <option value="A">Semester A</option>
             <option value="B">Semester B</option>
-            <option value="SUMMER">Summer Term</option>
           </select>
         </div>
       </div>

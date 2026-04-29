@@ -188,7 +188,7 @@ export default function AddLessonModal({
       cluster: selectedClusterObj?.clusterId ?? initialLesson?.cluster ?? 0,
       type: { lecture: "LECTURE", practice: "TUTORIAL", laboratory: "LAB", physics_laboratory: "PHYSICS_LAB", networking_laboratory: "NETWORKING_LAB", pbl: "PBL" }[type] || "LECTURE",
       duration: parseInt(computedDuration || 1, 10),
-      semester: semester === "Summer" ? "SUMMER" : semester,
+      semester: semester,
       credits: computedCredits,
     };
     onSave(initialLesson, payload);
@@ -257,7 +257,6 @@ return (
               <option value="">(select)</option>
               <option value="A">A</option>
               <option value="B">B</option>
-              <option value="Summer">Summer</option>
             </select>
           </div>
         </div>

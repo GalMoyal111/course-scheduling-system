@@ -116,7 +116,7 @@ function UploadPage() {
   })
     .sort((a, b) => {
       // semester
-      const semesterOrder = { A: 1, B: 2, SUMMER: 3 };
+      const semesterOrder = { A: 1, B: 2 };
       const semDiff =
         (semesterOrder[a.semester] || 99) -
         (semesterOrder[b.semester] || 99);
