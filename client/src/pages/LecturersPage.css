@@ -224,8 +224,8 @@
 }
 
 .availability-cell.unavailable {
-  background-color: #fef2f2;
-  border-color: #fecaca;
+  background-color: #f9cdcd;
+  border-color: #f86262;
 }
 
 .availability-cell:hover:not(.break-cell) {
@@ -240,7 +240,7 @@
 }
 
 .availability-cell.unavailable:hover {
-  background-color: #fee2e2;
+  background-color: #f95151;
 }
 
 .break-cell {
@@ -263,4 +263,13 @@
     grid-template-columns: 1fr;
     overflow: auto;
   }
+}
+
+.availability-cell.non-preferred {
+  background-color: #ffedd5; /* צבע כתום בהיר */
+  border-color: #fdba74;
+}
+
+.availability-cell.non-preferred:hover {
+  background-color: #fed7aa; /* צבע כתום קצת יותר כהה בהובר */
 }

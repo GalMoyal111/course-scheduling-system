@@ -182,25 +182,30 @@ export default function LecturersPage() {
     setLecturers(
       lecturers.map((lecturer) => {
         if (lecturer.id === selectedLecturerId) {
-          const slots = lecturer.unavailableSlots || [];
-          const slotExists = slots.some(
-            (slot) => slot.day === dayIndex && slot.startFrame === startFrame
-          );
+          const hardSlots = lecturer.unavailableSlots || [];
+          const softSlots = lecturer.nonPreferredSlots || [];
 
-          let updatedSlots;
-          if (slotExists) {
-            updatedSlots = slots.filter(
-              (slot) => !(slot.day === dayIndex && slot.startFrame === startFrame)
-            );
-          } else {
-            updatedSlots = [
-              ...slots,
-              { day: dayIndex, startFrame: startFrame },
-            ];
+          const isHard = hardSlots.some(slot => slot.day === dayIndex && slot.startFrame === startFrame);
+          const isSoft = softSlots.some(slot => slot.day === dayIndex && slot.startFrame === startFrame);
+
+          let newHardSlots = [...hardSlots];
+          let newSoftSlots = [...softSlots];
+
+          // Logic: Available (neither) -> Prefer Not To (Soft) -> Unavailable (Hard) -> Available
+          if (!isHard && !isSoft) {
+            // Move to Soft
+            newSoftSlots.push({ day: dayIndex, startFrame: startFrame });
+          } else if (isSoft) {
+            // Move from Soft to Hard
+            newSoftSlots = newSoftSlots.filter(slot => !(slot.day === dayIndex && slot.startFrame === startFrame));
+            newHardSlots.push({ day: dayIndex, startFrame: startFrame });
+          } else if (isHard) {
+            // Move from Hard to Available
+            newHardSlots = newHardSlots.filter(slot => !(slot.day === dayIndex && slot.startFrame === startFrame));
           }
 
           setHasUnsavedChanges(true); 
-          return { ...lecturer, unavailableSlots: updatedSlots };
+          return { ...lecturer, unavailableSlots: newHardSlots, nonPreferredSlots: newSoftSlots };
         }
         return lecturer;
       })
@@ -435,7 +440,7 @@ const handleExport = async () => {
               <div className="availability-header-row">
                 <div>
                   <h3>Weekly Availability</h3>
-                  <p className="availability-hint">Click a cell to toggle availability. Red = Blocked, Green = Available.</p>
+                  <p className="availability-hint">Click to toggle: Green = Available ➔ Orange = Prefer Not To ➔ Red = Blocked.</p>
                 </div>
                 <Button 
                   variant="primary" 
@@ -622,12 +627,21 @@ function AvailabilityTable({ lecturer, onToggle }) {
                 if (timeItem.isBreak || isTuesdayAfternoon) {
                   return <td key={`${day.index}-${timeItem.range}`} className="availability-cell break-cell">{timeItem.isBreak ? "Break" : "No Class"}</td>;
                 }
-                const slots = lecturer.unavailableSlots || [];
-                const isUnavailable = slots.some(slot => slot.day === day.index && slot.startFrame === timeItem.frame);
+                
+                const hardSlots = lecturer.unavailableSlots || [];
+                const softSlots = lecturer.nonPreferredSlots || [];
+                
+                const isUnavailable = hardSlots.some(slot => slot.day === day.index && slot.startFrame === timeItem.frame);
+                const isNonPreferred = softSlots.some(slot => slot.day === day.index && slot.startFrame === timeItem.frame);
+                
+                let cellClass = "available";
+                if (isUnavailable) cellClass = "unavailable";
+                else if (isNonPreferred) cellClass = "non-preferred";
+
                 return (
                   <td
                     key={`${day.index}-${timeItem.frame}`}
-                    className={`availability-cell ${!isUnavailable ? "available" : "unavailable"}`}
+                    className={`availability-cell ${cellClass}`}
                     onClick={() => onToggle(day.index, timeItem.frame)}
                   />
                 );
