@@ -50,8 +50,8 @@ export default function UploadCoursesPage() {
   }, [fetchCoursesIfNeeded]);
 
   useEffect(() => {
-    loadCourses();
-  }, [loadCourses]);
+    fetchCoursesIfNeeded("UploadCoursesPage");
+  }, []);
 
   const handleUpload = async (file) => {
     setPendingFile(file);
@@ -74,7 +74,7 @@ export default function UploadCoursesPage() {
       setInvalidCoursesModalOpen(true);
       
       invalidateCoursesCache();
-      await loadCourses();
+      await fetchCoursesIfNeeded("UploadCoursesPage");
     } catch (err) {
       console.error(err);
       showError("Upload failed. Check console for details.");
