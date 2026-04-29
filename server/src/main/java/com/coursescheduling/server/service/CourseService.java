@@ -2,10 +2,6 @@ package com.coursescheduling.server.service;
 
 import java.util.*;
 
-// import java.util.HashMap;
-// import java.util.List;
-// import java.util.Map;
-
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;

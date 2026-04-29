@@ -401,6 +401,9 @@ export default function AddCourseModal({ isOpen, onClose, onSave, initialCourse 
           </div>
         </div>
       </form>
+
+      <Toast toast={toast} onClose={closeToast} />
+      
     </Modal>
   );
 }

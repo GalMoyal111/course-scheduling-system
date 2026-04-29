@@ -8,6 +8,7 @@ import Button from "../components/ui/Button";
 import Toast, { useToast } from "../components/ui/Toast";
 import { uploadCourses, exportCourses, addCourse, deleteCourses, updateCourse } from "../services/api";
 import { useData } from "../context/DataContext";
+import Modal from "../components/ui/Modal";
 
 import "./UploadPage.css"; // reuse the Upload page styles
 
@@ -66,21 +67,11 @@ export default function UploadCoursesPage() {
     try {
       const result = await uploadCourses(fileToUpload);
       
-      // result is now a JSON object with savedCount, invalidCourses, and adjustedCourses
-      if (result.invalidCourses && result.invalidCourses.length > 0) {
-        setUploadSavedCount(result.savedCount);
-        setInvalidCourses(result.invalidCourses);
-        setAdjustedCourses(result.adjustedCourses || []);
-        setInvalidCoursesModalOpen(true);
-      } else if (result.adjustedCourses && result.adjustedCourses.length > 0) {
-        // Show adjusted courses even if no invalid courses
-        setUploadSavedCount(result.savedCount);
-        setInvalidCourses([]);
-        setAdjustedCourses(result.adjustedCourses);
-        setInvalidCoursesModalOpen(true);
-      } else {
-        showSuccess("Courses uploaded successfully");
-      }
+      setUploadSavedCount(result.savedCount || 0);
+      setInvalidCourses(result.invalidCourses || []);
+      setAdjustedCourses(result.adjustedCourses || []);
+      setModalContext("upload");
+      setInvalidCoursesModalOpen(true);
       
       invalidateCoursesCache();
       await loadCourses();
@@ -425,75 +416,91 @@ function InvalidCoursesModal({ isOpen, invalidCourses, adjustedCourses, savedCou
   const hasAdjustedCourses = adjustedCourses && adjustedCourses.length > 0;
   const isAddContext = context === "add";
 
+  // הגדרת הכותרת למודל האחיד
+  const modalTitle = isAddContext ? "Missing Prerequisites Warning" : "Upload Completed";
+
+  // הגדרת הכפתורים למטה (Footer) למודל האחיד
+  const modalFooter = isAddContext ? (
+    <>
+      <Button variant="ghost" onClick={onClose}>
+        Cancel
+      </Button>
+      <Button variant="primary" onClick={onContinueAnyway}>
+        Continue Anyway
+      </Button>
+    </>
+  ) : (
+    <Button variant="primary" onClick={onClose}>
+      OK
+    </Button>
+  );
+
   return (
-    <div className="modal-overlay">
-      <div className="modal-card" role="dialog" aria-modal="true">
-        <div className="modal-header">
-          <h3>{isAddContext ? "Missing Prerequisites Warning" : "Upload Completed with Warnings"}</h3>
-        </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={modalTitle}
+      size="wide"
+      footer={modalFooter}
+    >
+      <div className="invalid-courses-modal-body" style={{ textAlign: "left" }}>
+        
+        {/* הודעת הצלחה - מוצגת רק בהעלאה */}
+        {!isAddContext && (
+          <div style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px", color: "#10b981", fontSize: "16px", fontWeight: "600" }}>
+            <span className="material-icons">check_circle</span>
+            {savedCount} course(s) uploaded successfully
+          </div>
+        )}
 
-        <div className="modal-body invalid-courses-modal-body">
-          {!isAddContext && (
-            <p className="invalid-courses-summary">
-              ✓ {savedCount} course(s) uploaded successfully
+        {/* רשימת שגיאות קריטיות (קורסים שלא נשמרו) */}
+        {hasInvalidCourses && (
+          <div style={{ marginBottom: "24px" }}>
+            <p style={{ color: "#ef4444", fontWeight: "600", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <span className="material-icons">error</span>
+              {invalidCourses.length} course(s) skipped:
             </p>
-          )}
 
-          {hasInvalidCourses && (
-            <>
-              <p className="invalid-courses-warning">
-                ✗ {invalidCourses.length} course(s) skipped due to invalid course code (must be 5 or 6 digits):
-              </p>
-
-              <div className="invalid-courses-list">
-                {invalidCourses.map((course, index) => (
-                  <div key={index} className="invalid-course-item">
-                    <div className="invalid-course-item-name">{course.courseName || "(No name)"}</div>
-                    <div className="invalid-course-item-code">Course Code: {course.courseId}</div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {hasAdjustedCourses && (
-            <>
-              <p className="adjusted-courses-warning" style={{ marginTop: hasInvalidCourses ? 20 : 0, color: "#ff9800" }}>
-                ⚠️ {adjustedCourses.length} course(s) {isAddContext ? "will be added, but some prerequisites do not exist in the system:" : "were saved, but some prerequisites were removed:"}
-              </p>
-
-              <div className="invalid-courses-list">
-                {adjustedCourses.map((course, index) => (
-                  <div key={index} className="invalid-course-item">
-                    <div className="invalid-course-item-name">{course.courseName || "(No name)"}</div>
-                    <div className="invalid-course-item-code">Course Code: {course.courseId}</div>
-                    <div className="adjusted-course-item-prerequisites" style={{ color: "#ff9800", marginTop: 4, fontSize: "0.9em" }}>
-                      Missing Prerequisites: {course.removedPrerequisites.join(", ")}
+            <div className="invalid-courses-list" style={{ maxHeight: "200px", overflowY: "auto", paddingRight: "8px" }}>
+              {invalidCourses.map((course, index) => (
+                <div key={index} className="invalid-course-item" style={{ background: "#fee2e2", padding: "12px", borderRadius: "8px", marginBottom: "8px", border: "1px solid #fca5a5" }}>
+                  <div style={{ fontWeight: "bold", color: "#991b1b" }}>{course.courseName || "(No name)"}</div>
+                  <div style={{ fontSize: "0.9em", color: "#b91c1c", marginTop: "4px" }}>Course Code: {course.courseId}</div>
+                  
+                  {/* כאן אנחנו מדפיסים את הסיבה שהוספנו בשרת! */}
+                  {course.reason && (
+                    <div style={{ fontSize: "0.9em", color: "#dc2626", marginTop: "4px", fontWeight: "500" }}>
+                      Reason: {course.reason}
                     </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-        <div className="modal-actions">
-          {isAddContext ? (
-            <>
-              <Button variant="ghost" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button variant="primary" onClick={onContinueAnyway}>
-                Continue Anyway
-              </Button>
-            </>
-          ) : (
-            <Button variant="primary" onClick={onClose}>
-              OK
-            </Button>
-          )}
-        </div>
+        {/* רשימת שגיאות אזהרה (קורסים שנשמרו אבל הקדמים שלהם לא קיימים) */}
+        {hasAdjustedCourses && (
+          <div>
+            <p style={{ color: "#f59e0b", fontWeight: "600", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <span className="material-icons">warning</span>
+              {adjustedCourses.length} course(s) {isAddContext ? "will be added, but missing prerequisites:" : "saved, but missing prerequisites removed:"}
+            </p>
+
+            <div className="invalid-courses-list" style={{ maxHeight: "200px", overflowY: "auto", paddingRight: "8px" }}>
+              {adjustedCourses.map((course, index) => (
+                <div key={index} className="invalid-course-item" style={{ background: "#fef3c7", padding: "12px", borderRadius: "8px", marginBottom: "8px", border: "1px solid #fcd34d" }}>
+                  <div style={{ fontWeight: "bold", color: "#b45309" }}>{course.courseName || "(No name)"}</div>
+                  <div style={{ fontSize: "0.9em", color: "#d97706", marginTop: "4px" }}>Course Code: {course.courseId}</div>
+                  <div style={{ fontSize: "0.9em", color: "#d97706", marginTop: "4px", fontWeight: "500" }}>
+                    Missing Prerequisites: {course.removedPrerequisites.join(", ")}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 }
