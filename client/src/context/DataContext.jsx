@@ -101,7 +101,7 @@ export function DataProvider({ children }) {
     } finally {
       setIsFetching(prev => ({ ...prev, courses: false }));
     }
-  }, [courses.length, coursesTimestamp, isCacheValid, isFetching.courses]);
+  }, [coursesTimestamp, isCacheValid]);
 
 
   const fetchLessonsIfNeeded = useCallback(async (caller = "Unknown") => {
@@ -289,7 +289,6 @@ export function DataProvider({ children }) {
     invalidateLecturersCache,
     invalidateAllCache,
     invalidateHistoryCache,
-    invalidateAllCache,
     invalidateClustersCache,
 
 
