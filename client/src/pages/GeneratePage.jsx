@@ -23,16 +23,22 @@ export default function GeneratePage() {
   const [semester, setSemester] = useState("A");
 
 const { 
-  setSchedule, 
-  fetchLessonsIfNeeded, 
-  fetchLecturersIfNeeded, 
-  fetchClassroomsIfNeeded,
-  fetchCoursesIfNeeded 
+    setSchedule, 
+    fetchLessonsIfNeeded, 
+    fetchLecturersIfNeeded, 
+    fetchClassroomsIfNeeded,
+    fetchCoursesIfNeeded,
+    
+    generatorWeights: weights, 
+    setGeneratorWeights: setWeights,
+    manualAssignments, 
+    setManualAssignments,
+    hardCourses, 
+    setHardCourses
   } = useData();
-  const [manualAssignments, setManualAssignments] = useState([]);
-  const [isManualModalOpen, setIsManualModalOpen] = useState(false);
 
-  const [hardCourses, setHardCourses] = useState([]);
+
+  const [isManualModalOpen, setIsManualModalOpen] = useState(false);
   const [isHardModalOpen, setIsHardModalOpen] = useState(false);
 
 
@@ -44,18 +50,7 @@ const {
     setManualAssignments((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
-  const [weights, setWeights] = useState({
-    "RoomSizeEfficiency": 5.0,
-    "PreferMorningForHardCourses": 5.0,
-    "LecturerCompactSchedule": 5.0,
-    "CourseComponentsOverlap": 5.0,
-    "MandatoryMorningPreferred": 5.0,
-    "ElectiveEveningPreferred": 5.0,
-    "InconvenientTiming": 5.0,
-    "ElectiveCourseInTheSameClassroom": 5.0,
-    "AvoidBuildingP" : 5.0,
-    "LecturerPreference": 5.0
-  });
+
 
 
   React.useEffect(() => {

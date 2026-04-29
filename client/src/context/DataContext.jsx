@@ -16,6 +16,23 @@ export function DataProvider({ children }) {
   const [history, setHistory] = useState([]);
   const [clusters, setClusters] = useState([]);
   
+
+  const [generatorWeights, setGeneratorWeights] = useState({
+    "RoomSizeEfficiency": 5.0,
+    "PreferMorningForHardCourses": 5.0,
+    "LecturerCompactSchedule": 5.0,
+    "CourseComponentsOverlap": 5.0,
+    "MandatoryMorningPreferred": 5.0,
+    "ElectiveEveningPreferred": 5.0,
+    "InconvenientTiming": 5.0,
+    "ElectiveCourseInTheSameClassroom": 5.0,
+    "AvoidBuildingP": 5.0,
+    "LecturerPreference": 5.0 
+  });
+  const [manualAssignments, setManualAssignments] = useState([]);
+  const [hardCourses, setHardCourses] = useState([]);
+
+
   // Cache timestamps
   const [lessonsTimestamp, setLessonsTimestamp] = useState(null);
   const [coursesTimestamp, setCoursesTimestamp] = useState(null);
@@ -265,6 +282,10 @@ export function DataProvider({ children }) {
     setClusters,
     clusterMappings,
 
+    generatorWeights, setGeneratorWeights,
+    manualAssignments, setManualAssignments,
+    hardCourses, setHardCourses,
+
     
     // Cache validation
     isCacheValid,
@@ -307,7 +328,8 @@ export function DataProvider({ children }) {
     invalidateLessonsCache, invalidateCoursesCache, 
     invalidateClassroomsCache, invalidateLecturersCache, invalidateHistoryCache, invalidateAllCache,
     fetchCoursesIfNeeded, fetchLessonsIfNeeded, fetchLecturersIfNeeded, fetchClassroomsIfNeeded, fetchHistoryIfNeeded, loadTimetableFromHistory, updateCoursesLocally,
-    clusters, clustersTimestamp, clusterMappings, invalidateClustersCache, fetchClustersIfNeeded
+    clusters, clustersTimestamp, clusterMappings, invalidateClustersCache, fetchClustersIfNeeded,
+    generatorWeights, manualAssignments, hardCourses
   ]);
 
   return (
