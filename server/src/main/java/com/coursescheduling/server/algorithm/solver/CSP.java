@@ -12,6 +12,7 @@ import com.coursescheduling.server.algorithm.constraints.ElectiveLectureLabSameR
 import com.coursescheduling.server.algorithm.constraints.LecturerConstraint;
 import com.coursescheduling.server.algorithm.constraints.RoomConstraint;
 import com.coursescheduling.server.algorithm.constraints.SplitLessonConstraint;
+import com.coursescheduling.server.algorithm.constraints.ClusterOneSundayEveningConstraint;
 import com.coursescheduling.server.algorithm.model.AssignedValue;
 import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
@@ -45,6 +46,9 @@ public class CSP {
 
     @Autowired
     private ElectiveLectureLabSameRoomConstraint electiveLectureLabSameRoomConstraint;
+
+    @Autowired
+    private ClusterOneSundayEveningConstraint clusterOneSundayEveningConstraint;
 
     
 
@@ -334,6 +338,10 @@ public class CSP {
     private boolean isTimeAssignmentConsistent(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment) {
         int start1 = value.getStartFrame();
         int end1 = start1 + var.getDuration() - 1;
+
+        if(!clusterOneSundayEveningConstraint.isValid(var, value)) {
+            return false;
+        }
 
         for (Map.Entry<Variable, AssignedValue> entry : assignment.entrySet()) {
             Variable assignedVar = entry.getKey();
