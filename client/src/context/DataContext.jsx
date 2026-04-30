@@ -31,6 +31,13 @@ export function DataProvider({ children }) {
   });
   const [manualAssignments, setManualAssignments] = useState([]);
   const [hardCourses, setHardCourses] = useState([]);
+  const [requiredCapacities, setRequiredCapacities] = useState({
+    LECTURE: 60,
+    TUTORIAL: 40,
+    LAB: 20,
+    PHYSICS_LAB: 15,
+    NETWORKING_LAB: 12
+  });
 
 
   // Cache timestamps
@@ -285,7 +292,7 @@ export function DataProvider({ children }) {
     generatorWeights, setGeneratorWeights,
     manualAssignments, setManualAssignments,
     hardCourses, setHardCourses,
-
+    requiredCapacities, setRequiredCapacities,
     
     // Cache validation
     isCacheValid,
@@ -329,7 +336,7 @@ export function DataProvider({ children }) {
     invalidateClassroomsCache, invalidateLecturersCache, invalidateHistoryCache, invalidateAllCache,
     fetchCoursesIfNeeded, fetchLessonsIfNeeded, fetchLecturersIfNeeded, fetchClassroomsIfNeeded, fetchHistoryIfNeeded, loadTimetableFromHistory, updateCoursesLocally,
     clusters, clustersTimestamp, clusterMappings, invalidateClustersCache, fetchClustersIfNeeded,
-    generatorWeights, manualAssignments, hardCourses
+    generatorWeights, manualAssignments, hardCourses, requiredCapacities
   ]);
 
   return (

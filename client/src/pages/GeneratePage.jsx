@@ -1,7 +1,8 @@
-import React, { useState , useEffect} from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateTimetable } from "../services/api";
 import Button from "../components/ui/Button";
+import Toast, { useToast } from "../components/ui/Toast";
 import "./GeneratePage.css";
 import { useData } from "../context/DataContext";
 import ManualAssignmentModal from "../components/ManualAssignmentModal";
@@ -34,7 +35,9 @@ const {
     manualAssignments, 
     setManualAssignments,
     hardCourses, 
-    setHardCourses
+    setHardCourses,
+    requiredCapacities, 
+    setRequiredCapacities
   } = useData();
 
 
@@ -122,7 +125,8 @@ const {
     setLoading(true);
     setError("");
     try {
-      const requestData = { semester, softConstraintWeights: weights, manualAssignments: manualAssignments, hardCourseIds: hardCourses.map(c => c.courseId) };
+      const requestData = { semester, softConstraintWeights: weights, manualAssignments: manualAssignments, hardCourseIds: hardCourses.map(c => c.courseId),requiredCapacities: requiredCapacities };
+      
       const generatedSchedule = await generateTimetable(requestData);
 
       setSchedule(generatedSchedule);
@@ -226,15 +230,122 @@ const {
       </div>
 
 
+      {/* 🔥 Step 3: Lesson Capacity Requirements */}
+      <div className="generate-card">
+        <h3>
+          <span className="material-icons">groups</span>
+          2. Lesson Capacity Requirements
+        </h3>
+        <p className="hint-text">
+          Define the minimum number of students each lesson type must accommodate. 
+          The algorithm will use these numbers to find classrooms with sufficient size.
+        </p>
+        
+        <div className="capacity-grid" style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+          gap: '16px', 
+          marginTop: '20px' 
+        }}>
+          {Object.entries(requiredCapacities).map(([type, value]) => {
+            const typeIcons = {
+              'LECTURE': 'school',
+              'TUTORIAL': 'groups',
+              'LAB': 'science',
+              'PHYSICS_LAB': 'bolt',
+              'NETWORKING_LAB': 'router',
+              'PBL': 'lightbulb'
+            };
+            const typeColors = {
+              'LECTURE': '#3b82f6',
+              'TUTORIAL': '#10b981',
+              'LAB': '#f59e0b',
+              'PHYSICS_LAB': '#8b5cf6',
+              'NETWORKING_LAB': '#ec4899',
+              'PBL': '#f97316'
+            };
+            
+            return (
+              <div key={type} style={{
+                background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                border: `2px solid ${typeColors[type]}20`,
+                borderRadius: '12px',
+                padding: '16px',
+                transition: 'all 0.2s ease',
+                cursor: 'pointer',
+                '&:hover': {
+                  borderColor: typeColors[type],
+                  boxShadow: `0 4px 12px ${typeColors[type]}15`
+                }
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                  <span className="material-icons" style={{ 
+                    color: typeColors[type], 
+                    fontSize: '24px'
+                  }}>
+                    {typeIcons[type]}
+                  </span>
+                  <label style={{ 
+                    fontSize: '0.9rem', 
+                    color: '#1e293b', 
+                    fontWeight: '700',
+                    margin: 0,
+                    textTransform: 'capitalize'
+                  }}>
+                    {type.replace('_', ' ').toLowerCase()}
+                  </label>
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input 
+                    type="number"
+                    style={{ 
+                      width: '100%',
+                      padding: '12px',
+                      border: `2px solid ${typeColors[type]}40`,
+                      borderRadius: '8px',
+                      fontSize: '0.95rem',
+                      fontWeight: '600',
+                      color: typeColors[type],
+                      backgroundColor: '#fff',
+                      transition: 'all 0.2s ease',
+                      outline: 'none'
+                    }}
+                    value={value}
+                    min="1"
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 1;
+                      setRequiredCapacities(prev => ({ ...prev, [type]: val }));
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = typeColors[type]}
+                    onBlur={(e) => e.target.style.borderColor = `${typeColors[type]}40`}
+                  />
+                  <span style={{
+                    fontSize: '0.75rem',
+                    color: '#64748b',
+                    fontWeight: '600',
+                    whiteSpace: 'nowrap',
+                    padding: '4px 8px',
+                    backgroundColor: `${typeColors[type]}10`,
+                    borderRadius: '6px'
+                  }}>
+                    students
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Step 2 */}
       <div className="generate-card">
         <h3>
           <span className="material-icons">settings_input_component</span>
-          2. Algorithm Optimization Weights
+          3. Algorithm Optimization Weights
         </h3>
         <p className="hint-text">
-          Adjust the priority (1 = Low, 10 = High) for each scheduling rule.
+          Adjust the priority (0 = Low, 10 = High) for each scheduling rule.
         </p>
         
         {Object.keys(weights).map((constraint) => (

@@ -16,7 +16,7 @@ public class RoomSizeEfficiencyConstraint implements SoftConstraint {
             return Double.MAX_VALUE; // Maximum penalty if no room is assigned
         }
         int roomCapacity = assignedRoom.getCapacity();
-        int requiredCapacity = getRequiredCapacity(variable.getType());
+        int requiredCapacity = variable.getRequiredCapacity();
 
         if (roomCapacity < requiredCapacity) {
             return Double.MAX_VALUE; // Maximum penalty for insufficient capacity
@@ -37,23 +37,6 @@ public class RoomSizeEfficiencyConstraint implements SoftConstraint {
         return "RoomSizeEfficiency";    
     }
 
-    // חשוב!!!!! כרגע יש שכפול קוד למטרות בדיקה
-    private int getRequiredCapacity(LessonType type) {
-        switch (type) {
-            case LECTURE:
-                return 60;
-            case TUTORIAL:
-                return 40;
-            case LAB:
-                return 20;
-            case PHYSICS_LAB:
-            	return 15;
-            case NETWORKING_LAB:
-            	return 12;
-            default:
-                return 0;
-        }
-    }
 
 	@Override
 	public double getMaxPenalty() {

@@ -9,6 +9,7 @@ public class GenerateTimetableRequest {
     private Map<String, Double> softConstraintWeights;
     private List<ManualAssignmentDTO> manualAssignments;
     private List<String> hardCourseIds;
+    private Map<LessonType, Integer> requiredCapacities;
 
     public List<String> getHardCourseIds() {
 		return hardCourseIds;
@@ -44,4 +45,14 @@ public class GenerateTimetableRequest {
 	public void setManualAssignments(List<ManualAssignmentDTO> manualAssignments) {
 		this.manualAssignments = manualAssignments;
 	}
+	
+	public Map<LessonType, Integer> getRequiredCapacities() {
+        return requiredCapacities;
+    }
+
+    public void setRequiredCapacities(Map<LessonType, Integer> requiredCapacities) {
+        this.requiredCapacities = requiredCapacities;
+    }
+    
+    
 }

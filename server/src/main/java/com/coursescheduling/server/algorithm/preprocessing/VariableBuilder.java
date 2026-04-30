@@ -26,15 +26,13 @@ public class VariableBuilder {
 	@Autowired
     private LessonService lessonService;
 	
-	public List<Variable> createVariables(Semester semester){
+	public List<Variable> createVariables(Semester semester, Map<LessonType, Integer> requiredCapacitiesMap, List<String> hardCourseIds){		
 		
 		List<Lesson> lessons = getSupportedLessonsFromDB(semester);
-		
-		
 		List <Variable> variables = new ArrayList<>();
 		
 		for (Lesson lesson : lessons) {
-	        Variable v = mapLessonToVariable(lesson);
+			Variable v = mapLessonToVariable(lesson, requiredCapacitiesMap, hardCourseIds);
 	        variables.add(v);
 	    }
 		
@@ -43,9 +41,7 @@ public class VariableBuilder {
 		assignIndexesPerCourse(byCourse);
 		
 		buildInitialDomains(variables);
-		
-		printVariables(byCourse);
-		
+				
 		
 		return variables;
 		
@@ -53,38 +49,11 @@ public class VariableBuilder {
 	
 	
 	
-	private void printVariables(Map<String, List<Variable>> byCourse) {
-
-	    System.out.println("\n========== VARIABLES ==========\n");
-
-	    for (String courseId : byCourse.keySet()) {
-
-	        System.out.println("📘 Course: " + courseId);
-	        System.out.println("--------------------------------");
-
-	        for (Variable v : byCourse.get(courseId)) {
-	            System.out.println(
-	                "Index: " + v.getIndex() +
-	                " | Type: " + v.getType() +
-	                " | Duration: " + v.getDuration() +
-	                " | Lecturer: " + v.getLecturer() +
-	                " | Split: " + v.getSplitGroupId()
-	            );
-	            System.out.println("Domain size: " + v.getDomain().getValues().size());
-	        }
-
-	        System.out.println();
-	    }
-
-	    System.out.println("================================\n");
-	}
 	
-	private boolean isHardCourse(String courseId) {
-    	return "111".equals(courseId) || "333".equals(courseId);
-	}
 
-	private Variable mapLessonToVariable(Lesson lesson) {
-    	Variable v = new Variable();
+	private Variable mapLessonToVariable(Lesson lesson, Map<LessonType, Integer> requiredCapacitiesMap, List<String> hardCourseIds) {    	
+		
+		Variable v = new Variable();
 
 		v.setLessonId(lesson.getLessonId());
 		v.setCourseId(lesson.getCourseId());
@@ -94,27 +63,25 @@ public class VariableBuilder {
 		v.setDuration(lesson.getDuration());
 		v.setSplitGroupId(lesson.getSplitGroupId());
 		v.setCredits(lesson.getCredits());
-		v.setIsHardCourse(isHardCourse(lesson.getCourseId()));
 
+		if (hardCourseIds != null && hardCourseIds.contains(lesson.getCourseId()) && lesson.getType() == LessonType.LECTURE) {
+			v.setIsHardCourse(true);
+		} else {
+			v.setIsHardCourse(false);
+		}
+		
+		
+		if (requiredCapacitiesMap != null && requiredCapacitiesMap.containsKey(lesson.getType())) {
+            v.setRequiredCapacity(requiredCapacitiesMap.get(lesson.getType()));
+        } else {
+            v.setRequiredCapacity(getDefaultCapacity(lesson.getType())); 
+        }
+		
+		
 		return v;
 	}
 	
-	// private Variable mapLessonToVariable(Lesson lesson) {
-	//     Variable v = new Variable();
 
-	//     v.setLessonId(lesson.getLessonId());
-	//     v.setCourseId(lesson.getCourseId());
-	//     v.setLecturer(lesson.getLecturer());
-	//     v.setCluster(lesson.getCluster());
-	//     v.setType(lesson.getType());
-	//     v.setDuration(lesson.getDuration());
-	//     v.setSplitGroupId(lesson.getSplitGroupId());
-	//     v.setCredits(lesson.getCredits());
-	//     v.setIsHardCourse(false);
-
-	//     return v;
-	// }
-	
 	
 	private Map<String, List<Variable>> groupByCourse(List<Variable> variables) {
 	    Map<String, List<Variable>> map = new HashMap<>();
@@ -125,6 +92,8 @@ public class VariableBuilder {
 
 	    return map;
 	}
+	
+	
 	
 	private void assignIndexesPerCourse(Map<String, List<Variable>> byCourse) {
 
@@ -183,26 +152,18 @@ public class VariableBuilder {
     }
 	
 	
-
-
-	private Lesson createLesson(String courseId, String lecturer, int duration, LessonType type,int cluster,  int credits, String splitId) {
-	    Lesson l = new Lesson();
-
-	    l.setLessonId(UUID.randomUUID().toString());
-	    l.setCourseId(courseId);
-	    l.setLecturer(lecturer);
-	    l.setDuration(duration);
-	    l.setType(type);
-	    l.setSplitGroupId(splitId); 
-	    l.setCluster(cluster);
-	    l.setCredits(credits);
-	    l.setSemester(Semester.A);
-
-	    return l;
-	}
 	
-	
-	
-	
+	private int getDefaultCapacity(LessonType type) {
+        if (type == null) return 0;
+        switch (type) {
+            case LECTURE: return 60;
+            case TUTORIAL: return 40;
+            case LAB: return 20;
+            case PHYSICS_LAB: return 15;
+            case NETWORKING_LAB: return 12;
+            default: return 0;
+        }
+    }
+
 	
 }

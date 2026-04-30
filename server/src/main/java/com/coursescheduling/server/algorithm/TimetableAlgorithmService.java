@@ -63,18 +63,6 @@ public class TimetableAlgorithmService {
 	    );
 	}
     
-
-    // temp - TODO: replace with DB call
-    private List<Classroom> getClassrooms() {
-        return List.of(
-            new Classroom("A", "101", 60, RoomType.NORMAL),
-            new Classroom("A", "102", 40, RoomType.NORMAL),
-            new Classroom("B", "201", 25, RoomType.LAB),
-            new Classroom("A", "103", 60, RoomType.NORMAL),
-            new Classroom("A", "104", 40, RoomType.NORMAL)
-        );
-    }
-    
     
     private List<Classroom> getRealClassroomsFromDB() {
         try {
@@ -86,33 +74,28 @@ public class TimetableAlgorithmService {
     }
     
     
+    
     // Main method to run the algorithm
     public List<ScheduledLessonDTO> run(GenerateTimetableRequest request) {
   	
     	Semester semester = request.getSemester();
     	Map<String, Double> userWeights = request.getSoftConstraintWeights();
     	
+    	
+    	Map<LessonType, Integer> capacities = request.getRequiredCapacities();
+        List<String> hardCourseIds = request.getHardCourseIds();
+        
+       
         System.out.println("🚀 Starting algorithm...");
 
 
         // Step 1: Build variables from semester data
-        List<Variable> variables = variableBuilder.createVariables(semester);
+        List<Variable> variables = variableBuilder.createVariables(semester, capacities, hardCourseIds);        
         
-        List<String> hardCourseIds = request.getHardCourseIds();
-        if (hardCourseIds != null && !hardCourseIds.isEmpty()) {
-            for (Variable var : variables) {
-                if (hardCourseIds.contains(var.getCourseId()) && var.getType() == LessonType.LECTURE) {
-                    var.setIsHardCourse(true);
-                    System.out.println("🔥 Marked as Hard Course (Morning Priority): " + var.getCourseId() + " [" + var.getType() + "]");
-                }
-            }
-        }
-
+        
         // Step 2: Apply constraints to variables
         
-        // temp for testing
-        //List<Classroom> rooms = getClassrooms();
-        
+
         // from DB
         List<Classroom> rooms = getRealClassroomsFromDB();
         

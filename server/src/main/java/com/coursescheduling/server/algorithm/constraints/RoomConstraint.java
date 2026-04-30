@@ -13,13 +13,18 @@ import java.util.List;
 public class RoomConstraint {
 	
 	public boolean isRoomSuitable(Variable var, Classroom room, List<Variable> allVariables) {
-        LessonType labType = findLabTypeForCourse(var.getCourseId(), allVariables);
-        if(isElectiveCourse(var) && labType != null && var.getType() == LessonType.LECTURE) {
-        	RoomType requiredRoomType = getRoomTypeForLab(labType);
-        	return room.getType() == requiredRoomType && isCapacityEnough(labType, room.getCapacity());
+		
+		Variable labVar = findLabVariableForCourse(var.getCourseId(), allVariables);
+		
+        if(isElectiveCourse(var) && labVar != null && var.getType() == LessonType.LECTURE) {
+        	RoomType requiredRoomType = getRoomTypeForLab(labVar.getType());
+        	return room.getType() == requiredRoomType && room.getCapacity() >= labVar.getRequiredCapacity();
         }
-        return isTypeMatch(var.getType(), room.getType()) && isCapacityEnough(var.getType(), room.getCapacity());
+        
+        return isTypeMatch(var.getType(), room.getType()) && room.getCapacity() >= var.getRequiredCapacity();
     }
+	
+	
 	
 	// returns true if the room type matches the lesson type requirements
 	private boolean isTypeMatch(LessonType lessonType, RoomType roomType) {
@@ -39,46 +44,22 @@ public class RoomConstraint {
         }
     }
 	
-	// returns true if the room capacity is sufficient for the lesson type
-	private boolean isCapacityEnough(LessonType type, int roomCapacity) {
-        return roomCapacity >= getRequiredCapacity(type);
-    }
-
-
-    // returns the required capacity for a given lesson type
-    private int getRequiredCapacity(LessonType type) {
-        switch (type) {
-            case LECTURE:
-                return 60;
-            case TUTORIAL:
-                return 40;
-            case LAB:
-                return 20;
-            case PHYSICS_LAB:
-            	return 15;
-            case NETWORKING_LAB:
-            	return 12;
-            default:
-                return 0;
-        }
-    }
-    
     
     private boolean isElectiveCourse(Variable var) {
         return var.getCluster() >= 9;
     }
 	
-	private LessonType findLabTypeForCourse(String courseId, List<Variable> allVariables) {
-        for (Variable v : allVariables) {
-            if (v.getCourseId().equals(courseId) && (v.getType() == LessonType.PHYSICS_LAB || v.getType() == LessonType.NETWORKING_LAB || v.getType() == LessonType.LAB)) {
-                return v.getType();
+    private Variable findLabVariableForCourse(String courseId, List<Variable> allVariables) {
+    	for (Variable v : allVariables) {
+            if (v.getCourseId().equals(courseId) && (v.getType() == LessonType.LAB)) {
+            	return v;
             }
         }
         return null; // No lab type found for this course
     }
 	
 	
-	private RoomType getRoomTypeForLab(LessonType labType) {
+    private RoomType getRoomTypeForLab(LessonType labType) {
         switch (labType) {
             case PHYSICS_LAB:
                 return RoomType.PHYSICS_LAB;
@@ -87,7 +68,7 @@ public class RoomConstraint {
             case LAB:
                 return RoomType.LAB;
             default:
-                return null; // Not a lab type
+                return null;
         }
     }
 

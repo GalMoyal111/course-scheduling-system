@@ -20,12 +20,19 @@ public class Variable {
 	private Domain domain;
 	
 	private List<DomainValue> nonPreferredSlots = new ArrayList<>();
+	private int requiredCapacity;
 	
 	
 	
 	
 	public Domain getDomain() {
 		return domain;
+	}
+	public int getRequiredCapacity() {
+		return requiredCapacity;
+	}
+	public void setRequiredCapacity(int requiredCapacity) {
+		this.requiredCapacity = requiredCapacity;
 	}
 	public void setDomain(Domain domain) {
 		this.domain = domain;
