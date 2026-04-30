@@ -93,6 +93,22 @@ public class TimetableAlgorithmService {
         List<Variable> variables = variableBuilder.createVariables(semester, capacities, hardCourseIds);        
         
         
+        for (Variable var : variables) {
+            if (var.getCluster() >= 9 && var.getType() == LessonType.LECTURE) {
+
+            	for (Variable otherVar : variables) {
+                    if (otherVar.getCourseId().equals(var.getCourseId()) && (otherVar.getType() == LessonType.LAB )) {
+                        
+                        var.setRequiredCapacity(otherVar.getRequiredCapacity());
+                        System.out.println("🔄 Updated capacity for elective lecture " + var.getCourseId() + " to " + var.getRequiredCapacity());
+                        break; 
+                    }
+                }
+            }
+        }
+        
+        
+        
         // Step 2: Apply constraints to variables
         
 

@@ -18,7 +18,7 @@ public class RoomConstraint {
 		
         if(isElectiveCourse(var) && labVar != null && var.getType() == LessonType.LECTURE) {
         	RoomType requiredRoomType = getRoomTypeForLab(labVar.getType());
-        	return room.getType() == requiredRoomType && room.getCapacity() >= labVar.getRequiredCapacity();
+        	return room.getType() == requiredRoomType && room.getCapacity() >= var.getRequiredCapacity();
         }
         
         return isTypeMatch(var.getType(), room.getType()) && room.getCapacity() >= var.getRequiredCapacity();

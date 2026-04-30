@@ -34,7 +34,7 @@ public class ElectiveCourseSequenceConstraint {
             return true; 
         }
 
-        if (currentType == LessonType.LAB || currentType == LessonType.PHYSICS_LAB || currentType == LessonType.NETWORKING_LAB) {
+        if (currentType == LessonType.LAB) {
             
             Variable matchingTutorial = findVariableByCourseAndType(variable.getCourseId(), LessonType.TUTORIAL, assignment);
             if (matchingTutorial != null) {
