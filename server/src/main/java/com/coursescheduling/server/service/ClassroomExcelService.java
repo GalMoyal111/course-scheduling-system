@@ -29,15 +29,18 @@ public class ClassroomExcelService {
 	    public int totalRows = 0;
 	    public int savedClassrooms = 0;
 	    public List<String> invalidRows = new ArrayList<>();
+	    public List<String> warningRows = new ArrayList<>();
 	    
 	    public int getTotalRows() { return totalRows; }
 	    public int getSavedClassrooms() { return savedClassrooms; }
 	    public List<String> getInvalidRows() { return invalidRows; }
+	    public List<String> getWarningRows() { return warningRows; }
 	}
 	
 	
 	public ClassroomUploadSummary process(MultipartFile file) {
 		ClassroomUploadSummary summary = new ClassroomUploadSummary();
+		java.util.Set<String> seenClassrooms = new java.util.HashSet<>();
 
 	    try (InputStream is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
 	        Sheet sheet = workbook.getSheetAt(0);
@@ -52,9 +55,18 @@ public class ClassroomExcelService {
 	            try {
 	                String building = row.getCell(0) != null ? row.getCell(0).getStringCellValue().trim() : "";
 	                String classroomName = row.getCell(1) != null ? row.getCell(1).getStringCellValue().trim() : "";
+	                String rowLabel = "Row " + (i + 1) + " (Building: " + safeValue(building) + ", Classroom: " + safeValue(classroomName) + ")";
 
 	                if (building.isEmpty() || classroomName.isEmpty()) {
-	                    summary.invalidRows.add("Row " + (i + 1) + ": Missing building name or classroom name");
+	                    summary.invalidRows.add(rowLabel + ": Missing building name or classroom name");
+	                    continue;
+	                }
+
+	                String classPrefix = extractBuildingPrefix(classroomName);
+	                if (classPrefix == null || !classPrefix.equalsIgnoreCase(building)) {
+	                    summary.invalidRows.add(
+	                        rowLabel + ": Building does not match classroom name prefix"
+	                    );
 	                    continue;
 	                }
 
@@ -62,7 +74,7 @@ public class ClassroomExcelService {
 	                if (row.getCell(2) != null) {
 	                    capacity = (int) row.getCell(2).getNumericCellValue();
 	                } else {
-	                	summary.invalidRows.add("Row " + (i + 1) + " (" + building + " " + classroomName + "): Lack of capacity");
+	                	summary.invalidRows.add(rowLabel + ": Lack of capacity");
 	                	continue;
 	                }
 
@@ -70,11 +82,20 @@ public class ClassroomExcelService {
 	                String typeStr = (typeCell != null) ? typeCell.getStringCellValue() : "NORMAL";
 	                RoomType type = parseRoomType(typeStr);
 
+	                String classroomKey = (building + "||" + classroomName).toLowerCase();
+	                if (seenClassrooms.contains(classroomKey)) {
+	                    summary.warningRows.add(
+	                        rowLabel + ": Duplicate classroom found in the uploaded file. Only the first occurrence was saved."
+	                    );
+	                    continue;
+	                }
+	                seenClassrooms.add(classroomKey);
+
 	                Classroom classroom = new Classroom(building, classroomName, capacity, type);
 	                classrooms.add(classroom);
 	                
 	            } catch (Exception e) {
-	                summary.invalidRows.add("Row " + (i + 1) + ": Invalid data format (make sure the capacity is a number)");
+	                summary.invalidRows.add("Row " + (i + 1) + ": Invalid data format (building/classroom/capacity could not be read)");
 	            }
 	        }
 
@@ -183,6 +204,25 @@ public class ClassroomExcelService {
 	        
 	        return RoomType.NORMAL; 
 	    }
+	}
+
+	private String extractBuildingPrefix(String classroomName) {
+	    if (classroomName == null) return null;
+
+	    String trimmed = classroomName.trim();
+	    if (trimmed.isEmpty()) return null;
+
+	    java.util.regex.Matcher matcher = java.util.regex.Pattern
+	        .compile("^([^0-9]+)(?=\\d)")
+	        .matcher(trimmed);
+
+	    if (!matcher.find()) return null;
+
+	    return matcher.group(1).trim();
+	}
+
+	private String safeValue(String value) {
+	    return (value == null || value.isBlank()) ? "<empty>" : value;
 	}
 	
 	

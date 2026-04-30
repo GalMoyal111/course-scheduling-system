@@ -60,7 +60,7 @@ function UploadRoomsPage() {
   const [pendingFile, setPendingFile] = useState(null);
 
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
-  const [uploadSummary, setUploadSummary] = useState({ totalRows: 0, savedClassrooms: 0, invalidRows: [] });
+  const [uploadSummary, setUploadSummary] = useState({ totalRows: 0, savedClassrooms: 0, invalidRows: [], warningRows: [] });
 
   const performUpload = async () => {
     if (!pendingFile) return;
@@ -328,6 +328,24 @@ function RoomUploadSummaryModal({ isOpen, summary, onClose }) {
           Out of {summary.totalRows} rows processed
         </div>
       </div>
+
+      {summary.warningRows && summary.warningRows.length > 0 && (
+        <div className="summary-section" style={{ marginBottom: '20px' }}>
+          <h4 style={{
+            fontSize: '14px', color: '#b45309', textTransform: 'uppercase',
+            borderBottom: '1px solid #fde68a', paddingBottom: '4px', marginBottom: '8px', textAlign: 'left'
+          }}>
+            Warnings (Saved Once)
+          </h4>
+          <div style={{ maxHeight: '120px', overflowY: 'auto', paddingLeft: '5px' }}>
+            {summary.warningRows.map((issue, idx) => (
+              <div key={idx} style={{ fontSize: '13px', marginBottom: '4px', color: '#4b5563', direction: 'ltr', textAlign: 'left' }}>
+                • {issue}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {summary.invalidRows && summary.invalidRows.length > 0 && (
         <div className="summary-section" style={{ marginBottom: '20px' }}>
