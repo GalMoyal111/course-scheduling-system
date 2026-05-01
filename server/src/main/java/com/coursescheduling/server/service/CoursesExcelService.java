@@ -83,16 +83,52 @@ public class CoursesExcelService {
         }
     }
 
+    public static class CreditWarningCourse {
+        private final String courseId;
+        private final String courseName;
+        private final float expectedCredits;
+        private final float actualCredits;
+
+        public CreditWarningCourse(String courseId, String courseName, float expectedCredits, float actualCredits) {
+            this.courseId = courseId;
+            this.courseName = courseName;
+            this.expectedCredits = expectedCredits;
+            this.actualCredits = actualCredits;
+        }
+
+        public String getCourseId() {
+            return courseId;
+        }
+
+        public String getCourseName() {
+            return courseName;
+        }
+
+        public float getExpectedCredits() {
+            return expectedCredits;
+        }
+
+        public float getActualCredits() {
+            return actualCredits;
+        }
+    }
+
     public static class CourseUploadSummary {
         
         private final int savedCount;
         private final List<InvalidCourse> invalidCourses;
         private final List<AdjustedCourse> adjustedCourses;
+        private final List<CreditWarningCourse> creditWarnings;
 
-        public CourseUploadSummary(int savedCount, List<InvalidCourse> invalidCourses, List<AdjustedCourse> adjustedCourses) {
+        public CourseUploadSummary(
+                int savedCount,
+                List<InvalidCourse> invalidCourses,
+                List<AdjustedCourse> adjustedCourses,
+                List<CreditWarningCourse> creditWarnings) {
             this.savedCount = savedCount;
             this.invalidCourses = invalidCourses;
             this.adjustedCourses = adjustedCourses;
+            this.creditWarnings = creditWarnings;
         }
 
         public int getSavedCount() {
@@ -105,6 +141,10 @@ public class CoursesExcelService {
 
         public List<AdjustedCourse> getAdjustedCourses() {
             return adjustedCourses;
+        }
+
+        public List<CreditWarningCourse> getCreditWarnings() {
+            return creditWarnings;
         }
     }
 
@@ -144,7 +184,7 @@ public class CoursesExcelService {
                 float credits = 0;
                 String creditStr = formatter.formatCellValue(row.getCell(7)).trim();
                 if (!creditStr.isEmpty()) {
-                    credits = Float.parseFloat(creditStr);
+                    credits = parseFloatValue(creditStr);
                 }
 
                 String clusterName = formatter.formatCellValue(row.getCell(8)).trim();
@@ -185,14 +225,39 @@ public class CoursesExcelService {
     private int parseIntCell(Cell cell, DataFormatter formatter) {
         if (cell == null) return 0;
 
-        String value = formatter.formatCellValue(cell).trim();
+        String value = normalizeNumericText(formatter.formatCellValue(cell));
         if (value.isEmpty()) return 0;
 
         try {
             return (int) Double.parseDouble(value);
         } catch (NumberFormatException e) {
-            throw new RuntimeException("Invalid numeric value in Excel cell: " + value);
+            return 0;
         }
+    }
+
+    private float parseFloatValue(String value) {
+        String normalized = normalizeNumericText(value);
+        if (normalized.isEmpty()) {
+            return 0;
+        }
+
+        try {
+            return Float.parseFloat(normalized);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private String normalizeNumericText(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        return value
+                .replace("\u200e", "")
+                .replace("\u200f", "")
+                .replace("\u00a0", "")
+                .trim();
     }
 
     private List<String> parsePrerequisiteIds(String prerequisiteText) {
@@ -225,6 +290,7 @@ public class CoursesExcelService {
         List<InvalidCourse> invalidCourseDetails = new ArrayList<>();
         List<Course> validCourses = new ArrayList<>();
         Set<String> validCourseIds = new HashSet<>();
+        List<CreditWarningCourse> creditWarnings = new ArrayList<>();
 
         Map<String, Integer> validClustersMap = new HashMap<>();
         
@@ -243,6 +309,16 @@ public class CoursesExcelService {
             String courseId = course.getCourseId() == null ? "" : course.getCourseId().trim();
             String clusterName = course.getClusterName() == null ? "" : course.getClusterName().trim();
 
+            String hoursValidationError = getHoursValidationError(course);
+            if (hoursValidationError != null) {
+                invalidCourseDetails.add(new InvalidCourse(
+                        courseId,
+                        course.getCourseName(),
+                        hoursValidationError
+                ));
+                continue;
+            }
+
             if (!courseId.matches(COURSE_ID_PATTERN)) {
                 invalidCourseDetails.add(new InvalidCourse(courseId, course.getCourseName(), "Invalid course code"));
                 
@@ -252,6 +328,17 @@ public class CoursesExcelService {
             } else {
                 course.setCourseId(courseId);
                 course.setCluster(validClustersMap.get(clusterName));
+
+                float expectedCredits = calculateExpectedCredits(course);
+                if (Math.abs(course.getCredits() - expectedCredits) > 0.001f) {
+                    creditWarnings.add(new CreditWarningCourse(
+                            courseId,
+                            course.getCourseName(),
+                            expectedCredits,
+                            course.getCredits()
+                    ));
+                }
+
                 validCourses.add(course);
                 validCourseIds.add(courseId);
             }
@@ -301,7 +388,42 @@ public class CoursesExcelService {
             }
         }
 
-        return new CourseUploadSummary(validCourses.size(), invalidCourseDetails, adjustedCourses);
+        return new CourseUploadSummary(validCourses.size(), invalidCourseDetails, adjustedCourses, creditWarnings);
+    }
+
+    private float calculateExpectedCredits(Course course) {
+        return course.getLectureHours()
+                + ((course.getTutorialHours() + course.getLabHours() + course.getProjectHours()) * 0.5f);
+    }
+
+    private String getHoursValidationError(Course course) {
+        List<String> invalidFields = new ArrayList<>();
+
+        if (course.getLectureHours() < 0) {
+            invalidFields.add("Lecture Hours");
+        }
+
+        if (course.getTutorialHours() < 0) {
+            invalidFields.add("Tutorial Hours");
+        }
+
+        if (course.getLabHours() < 0) {
+            invalidFields.add("Lab Hours");
+        }
+
+        if (course.getProjectHours() < 0) {
+            invalidFields.add("Project Hours");
+        }
+
+        if (course.getCredits() < 0) {
+            invalidFields.add("Credits");
+        }
+
+        if (invalidFields.isEmpty()) {
+            return null;
+        }
+
+        return "Hours must be greater than 0 for: " + String.join(", ", invalidFields);
     }
 
     public byte[] exportCoursesToExcel() {

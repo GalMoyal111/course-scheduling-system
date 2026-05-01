@@ -29,10 +29,11 @@ export default function UploadCoursesPage() {
   const [invalidCoursesModalOpen, setInvalidCoursesModalOpen] = useState(false);
   const [invalidCourses, setInvalidCourses] = useState([]);
   const [adjustedCourses, setAdjustedCourses] = useState([]);
+  const [creditWarnings, setCreditWarnings] = useState([]);
   const [uploadSavedCount, setUploadSavedCount] = useState(0);
   const [modalContext, setModalContext] = useState("upload"); // "upload" or "add"
   const [pendingCourse, setPendingCourse] = useState(null);
-  const { courses, setCourses, fetchCoursesIfNeeded, setCoursesTimestamp, invalidateCoursesCache, clusters, clusterMappings } = useData();
+  const { courses, setCourses, fetchCoursesIfNeeded, setCoursesTimestamp, invalidateCoursesCache, clusters } = useData();
 
   // Build dynamic semester range from DataContext
   const semesterRange = useMemo(() => {
@@ -51,7 +52,7 @@ export default function UploadCoursesPage() {
 
   useEffect(() => {
     fetchCoursesIfNeeded("UploadCoursesPage");
-  }, []);
+  }, [fetchCoursesIfNeeded]);
 
   const handleUpload = async (file) => {
     setPendingFile(file);
@@ -70,6 +71,7 @@ export default function UploadCoursesPage() {
       setUploadSavedCount(result.savedCount || 0);
       setInvalidCourses(result.invalidCourses || []);
       setAdjustedCourses(result.adjustedCourses || []);
+      setCreditWarnings(result.creditWarnings || []);
       setModalContext("upload");
       setInvalidCoursesModalOpen(true);
       
@@ -111,8 +113,6 @@ export default function UploadCoursesPage() {
   const handleAddCourse = async (course) => {
     try {
 
-      const properClusterName = clusterMappings.numToName[course.cluster] || `סמסטר ${course.cluster}`;
-      
       const formattedCourse = {
         ...course,
         clusterName: (semesterRange.includes(course.cluster)) 
@@ -162,6 +162,7 @@ export default function UploadCoursesPage() {
               removedPrerequisites: invalidPrereqs,
             },
           ]);
+          setCreditWarnings([]);
           setUploadSavedCount(0);
           setPendingCourse(course);
           setInvalidCoursesModalOpen(true);
@@ -365,12 +366,14 @@ export default function UploadCoursesPage() {
         isOpen={invalidCoursesModalOpen}
         invalidCourses={invalidCourses}
         adjustedCourses={adjustedCourses}
+        creditWarnings={creditWarnings}
         savedCount={uploadSavedCount}
         context={modalContext}
         onClose={() => {
           setInvalidCoursesModalOpen(false);
           setInvalidCourses([]);
           setAdjustedCourses([]);
+          setCreditWarnings([]);
           setPendingCourse(null);
         }}
         onContinueAnyway={async () => {
@@ -399,6 +402,7 @@ export default function UploadCoursesPage() {
             setInvalidCoursesModalOpen(false);
             setInvalidCourses([]);
             setAdjustedCourses([]);
+            setCreditWarnings([]);
             setPendingCourse(null);
           }
         }}
@@ -409,11 +413,12 @@ export default function UploadCoursesPage() {
   );
 }
 
-function InvalidCoursesModal({ isOpen, invalidCourses, adjustedCourses, savedCount, context = "upload", onClose, onContinueAnyway }) {
+function InvalidCoursesModal({ isOpen, invalidCourses, adjustedCourses, creditWarnings, savedCount, context = "upload", onClose, onContinueAnyway }) {
   if (!isOpen) return null;
 
   const hasInvalidCourses = invalidCourses && invalidCourses.length > 0;
   const hasAdjustedCourses = adjustedCourses && adjustedCourses.length > 0;
+  const hasCreditWarnings = creditWarnings && creditWarnings.length > 0;
   const isAddContext = context === "add";
 
   // הגדרת הכותרת למודל האחיד
@@ -494,6 +499,27 @@ function InvalidCoursesModal({ isOpen, invalidCourses, adjustedCourses, savedCou
                   <div style={{ fontSize: "0.9em", color: "#d97706", marginTop: "4px" }}>Course Code: {course.courseId}</div>
                   <div style={{ fontSize: "0.9em", color: "#d97706", marginTop: "4px", fontWeight: "500" }}>
                     Missing Prerequisites: {course.removedPrerequisites.join(", ")}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {hasCreditWarnings && (
+          <div style={{ marginTop: hasAdjustedCourses ? "24px" : "0" }}>
+            <p style={{ color: "#f59e0b", fontWeight: "600", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <span className="material-icons">warning</span>
+              {creditWarnings.length} course(s) saved with credits mismatch:
+            </p>
+
+            <div className="invalid-courses-list" style={{ maxHeight: "200px", overflowY: "auto", paddingRight: "8px" }}>
+              {creditWarnings.map((course, index) => (
+                <div key={index} className="invalid-course-item" style={{ background: "#fef3c7", padding: "12px", borderRadius: "8px", marginBottom: "8px", border: "1px solid #fcd34d" }}>
+                  <div style={{ fontWeight: "bold", color: "#b45309" }}>{course.courseName || "(No name)"}</div>
+                  <div style={{ fontSize: "0.9em", color: "#d97706", marginTop: "4px" }}>Course Code: {course.courseId}</div>
+                  <div style={{ fontSize: "0.9em", color: "#d97706", marginTop: "4px", fontWeight: "500" }}>
+                    Expected Credits: {course.expectedCredits} | Excel Credits: {course.actualCredits}
                   </div>
                 </div>
               ))}
