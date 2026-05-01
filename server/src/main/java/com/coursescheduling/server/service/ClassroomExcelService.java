@@ -37,7 +37,6 @@ public class ClassroomExcelService {
 	    public List<String> getWarningRows() { return warningRows; }
 	}
 	
-	
 	public ClassroomUploadSummary process(MultipartFile file) {
 		ClassroomUploadSummary summary = new ClassroomUploadSummary();
 		java.util.Set<String> seenClassrooms = new java.util.HashSet<>();
@@ -77,9 +76,24 @@ public class ClassroomExcelService {
 	                	summary.invalidRows.add(rowLabel + ": Lack of capacity");
 	                	continue;
 	                }
+	                
+	                // Validate that capacity is positive
+	                if (capacity <= 0) {
+	                	summary.warningRows.add(rowLabel + ": Capacity must be greater than 0. Row skipped.");
+	                	continue;
+	                }
 
 	                Cell typeCell = row.getCell(3);
 	                String typeStr = (typeCell != null) ? typeCell.getStringCellValue() : "NORMAL";
+	                
+	                // Check if the provided type is valid; if not, reject this row
+	                if (!isValidRoomType(typeStr)) {
+	                    summary.invalidRows.add(
+	                        rowLabel + ": Invalid room type '" + typeStr + "'. Must be one of: NORMAL, LAB, PHYSICS_LAB, NETWORKING_LAB, PBL, PROJECT, AUDITORIUM"
+	                    );
+	                    continue;
+	                }
+	                
 	                RoomType type = parseRoomType(typeStr);
 
 	                String classroomKey = (building + "||" + classroomName).toLowerCase();
@@ -112,7 +126,6 @@ public class ClassroomExcelService {
 	    }
 	}
 	
-
 	public List<Classroom> readClassroomsFromExcel(InputStream inputStream) throws Exception {
 
 	    List<Classroom> classrooms = new ArrayList<>();
@@ -143,10 +156,6 @@ public class ClassroomExcelService {
 
 	    return classrooms;
 	}
-	
-	
-	
-	
 	
 	public byte[] exportClassroomsToExcel() throws Exception {
 
@@ -224,7 +233,18 @@ public class ClassroomExcelService {
 	private String safeValue(String value) {
 	    return (value == null || value.isBlank()) ? "<empty>" : value;
 	}
-	
-	
+
+	private boolean isValidRoomType(String typeStr) {
+	    if (typeStr == null || typeStr.isBlank()) return true;
+	    
+	    String normalized = typeStr.trim().toUpperCase().replace(" ", "_");
+	    
+	    try {
+	        RoomType.valueOf(normalized);
+	        return true;
+	    } catch (IllegalArgumentException e) {
+	        return false;
+	    }
+	}	
 	
 }
