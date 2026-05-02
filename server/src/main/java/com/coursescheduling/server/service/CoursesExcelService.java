@@ -119,16 +119,27 @@ public class CoursesExcelService {
         private final List<InvalidCourse> invalidCourses;
         private final List<AdjustedCourse> adjustedCourses;
         private final List<CreditWarningCourse> creditWarnings;
+        private final String errorMessage;
 
         public CourseUploadSummary(
                 int savedCount,
                 List<InvalidCourse> invalidCourses,
                 List<AdjustedCourse> adjustedCourses,
                 List<CreditWarningCourse> creditWarnings) {
+            this(savedCount, invalidCourses, adjustedCourses, creditWarnings, null);
+        }
+
+        public CourseUploadSummary(
+                int savedCount,
+                List<InvalidCourse> invalidCourses,
+                List<AdjustedCourse> adjustedCourses,
+                List<CreditWarningCourse> creditWarnings,
+                String errorMessage) {
             this.savedCount = savedCount;
             this.invalidCourses = invalidCourses;
             this.adjustedCourses = adjustedCourses;
             this.creditWarnings = creditWarnings;
+            this.errorMessage = errorMessage;
         }
 
         public int getSavedCount() {
@@ -146,10 +157,22 @@ public class CoursesExcelService {
         public List<CreditWarningCourse> getCreditWarnings() {
             return creditWarnings;
         }
+
+        public String getErrorMessage() {
+            return errorMessage;
+        }
     }
 
     public CourseUploadSummary process(MultipartFile file) {
         try {
+            // Check if clusters are defined before processing the Excel file
+            List<Cluster> clusters = clusterService.getAllClusters();
+            if (clusters == null || clusters.isEmpty()) {
+                String errorMsg = "No classrooms defined. Please go to Settings to define classrooms before uploading courses.";
+                System.out.println("Upload blocked: " + errorMsg);
+                return new CourseUploadSummary(0, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), errorMsg);
+            }
+
             List<Course> courses = readCoursesFromExcel(file.getInputStream());
             CourseUploadSummary summary = validateAndSaveCourses(courses);
             System.out.println("Finished processing courses Excel file");
