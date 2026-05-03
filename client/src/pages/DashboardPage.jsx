@@ -55,7 +55,7 @@ export default function DashboardPage() {
       <section className="dashboard-section credits-section">
         <h2 className="dashboard-section-title">Created By</h2>
         <div className="credits-content">
-          <p><strong>Gal Moyal</strong> & <strong>Eden Forman</strong></p>
+          <p><strong>Gal Moyal</strong> & <strong>Eden Furman</strong></p>
         </div>
       </section>
 
