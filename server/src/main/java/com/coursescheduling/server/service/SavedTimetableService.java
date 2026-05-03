@@ -16,16 +16,25 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class SavedTimetableService {
 
     private static final String MAIN_COLLECTION = "saved_timetables";
     private static final String SUB_COLLECTION = "schedule_data";
+    
+    private List<SavedTimetableMetadata> cachedMetadata = null;
+    private long lastFetchTimeMetadata = 0;
+    private static final long CACHE_DURATION = 30 * 60 * 1000;
+    
+    private final Map<String, List<ScheduledLessonDTO>> timetableDataCache = new ConcurrentHashMap<>();
 
     public SavedTimetableMetadata saveTimetable(SaveTimetableRequest request) throws Exception {
-        Firestore db = FirestoreClient.getFirestore();
+    	this.cachedMetadata = null;
+    	Firestore db = FirestoreClient.getFirestore();
         
         String timetableId = UUID.randomUUID().toString();
         long currentTimestamp = System.currentTimeMillis();
@@ -49,10 +58,17 @@ public class SavedTimetableService {
 
         batch.commit().get();
 
+        timetableDataCache.put(timetableId, request.getSchedule());
         return metadata; 
     }
 
     public List<SavedTimetableMetadata> getAllSavedMetadata() throws Exception {
+    	
+    	if (cachedMetadata != null && (System.currentTimeMillis() - lastFetchTimeMetadata < CACHE_DURATION)) {
+            System.out.println("Returning Saved Timetables Metadata from Server Cache");
+            return cachedMetadata;
+        }
+    	
         Firestore db = FirestoreClient.getFirestore();
         ApiFuture<QuerySnapshot> future = db.collection(MAIN_COLLECTION).get();
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
@@ -62,12 +78,21 @@ public class SavedTimetableService {
             SavedTimetableMetadata metadata = document.toObject(SavedTimetableMetadata.class);
             metadataList.add(metadata);
         }
+        
+        this.cachedMetadata = metadataList;
+        this.lastFetchTimeMetadata = System.currentTimeMillis();
 
         return metadataList;
     }
 
     public List<ScheduledLessonDTO> getTimetableDataById(String timetableId) throws Exception {
-        Firestore db = FirestoreClient.getFirestore();
+       
+    	if (timetableDataCache.containsKey(timetableId)) {
+            System.out.println("Returning Timetable Data (" + timetableId + ") from Server Cache");
+            return timetableDataCache.get(timetableId);
+        }
+    	
+    	Firestore db = FirestoreClient.getFirestore();
         
         DocumentReference subDocRef = db.collection(MAIN_COLLECTION)
                                         .document(timetableId)
@@ -77,12 +102,16 @@ public class SavedTimetableService {
         ScheduleWrapper wrapper = subDocRef.get().get().toObject(ScheduleWrapper.class);
         
         if (wrapper != null && wrapper.getLessons() != null) {
+        	timetableDataCache.put(timetableId, wrapper.getLessons());
             return wrapper.getLessons();
         }
+        
         
         return new ArrayList<>(); 
     }
 
+    
+    
     public static class ScheduleWrapper {
         private List<ScheduledLessonDTO> lessons;
 

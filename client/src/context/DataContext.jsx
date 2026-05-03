@@ -108,7 +108,7 @@ export function DataProvider({ children }) {
   const fetchCoursesIfNeeded = useCallback(async (caller = "Unknown") => {
     if (isFetching.courses) return;
 
-    if (courses.length > 0 && isCacheValid(coursesTimestamp)) {
+    if (isCacheValid(coursesTimestamp)) {
       console.log(`[Cache] Courses are fresh, skipping fetch for: ${caller}`);
       return;
     }
@@ -131,7 +131,7 @@ export function DataProvider({ children }) {
   const fetchLessonsIfNeeded = useCallback(async (caller = "Unknown") => {
     if (isFetching.lessons) return;
 
-    if (lessons.length > 0 && isCacheValid(lessonsTimestamp)) {
+    if (isCacheValid(lessonsTimestamp)) {
       console.log(`[Cache] Lessons are fresh, skipping fetch for: ${caller}`);
       return;
     }
@@ -153,7 +153,7 @@ export function DataProvider({ children }) {
   const fetchLecturersIfNeeded = useCallback(async (caller = "Unknown") => {
     if (isFetching.lecturers) return;
 
-    if (lecturers.length > 0 && isCacheValid(lecturersTimestamp)) {
+    if (isCacheValid(lecturersTimestamp)) {
       console.log(`[Cache] Lecturers are fresh, skipping fetch for: ${caller}`);
       return;
     }
@@ -176,7 +176,7 @@ export function DataProvider({ children }) {
   const fetchClassroomsIfNeeded = useCallback(async (caller = "Unknown") => {
     if (isFetching.classrooms) return;
 
-    if (classrooms.length > 0 && isCacheValid(classroomsTimestamp)) {
+    if (isCacheValid(classroomsTimestamp)) {
       console.log(`[Cache] Classrooms are fresh, skipping fetch for: ${caller}`);
       return;
     }
@@ -198,7 +198,7 @@ export function DataProvider({ children }) {
   const fetchHistoryIfNeeded = useCallback(async (caller = "Unknown") => {
     if (isFetching.history) return;
 
-    if (history.length > 0 && isCacheValid(historyTimestamp)) {
+    if (isCacheValid(historyTimestamp)) {
       console.log(`[Cache] History is fresh, skipping fetch for: ${caller}`);
       return;
     }
@@ -218,7 +218,7 @@ export function DataProvider({ children }) {
   const fetchClustersIfNeeded = useCallback(async (caller = "Unknown") => {
     if (isFetching.clusters) return;
 
-    if (clusters.length > 0 && isCacheValid(clustersTimestamp)) {
+    if (isCacheValid(clustersTimestamp)) {
       console.log(`[Cache] Clusters are fresh, skipping fetch for: ${caller}`);
       return;
     }

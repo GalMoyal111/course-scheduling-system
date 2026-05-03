@@ -17,6 +17,14 @@ import com.google.firebase.cloud.FirestoreClient;
 @Service
 public class UserService {
 
+	private List<Map<String, String>> cachedUsers = null;
+	private long lastFetchTime = 0;
+	private static final long CACHE_DURATION = 30 * 60 * 1000;
+	
+	private Map<String, String> userRoleCache = new HashMap<>();
+    private Map<String, Long> userRoleFetchTime = new HashMap<>();
+    
+	
     private final Firestore firestore;
 
     public UserService(Firestore firestore) {
@@ -24,13 +32,26 @@ public class UserService {
     }
 
     public String getUserRole(String uid) throws Exception {
-        DocumentSnapshot userDoc = firestore.collection("users").document(uid).get().get();
+    	
+    	long currentTime = System.currentTimeMillis();
 
+        if (userRoleCache.containsKey(uid) && userRoleFetchTime.containsKey(uid)) {
+            if (currentTime - userRoleFetchTime.get(uid) < CACHE_DURATION) {
+                return userRoleCache.get(uid); 
+            }
+        }
+    	
+        DocumentSnapshot userDoc = firestore.collection("users").document(uid).get().get();
+        String role = "USER";
+        
         if (userDoc.exists() && userDoc.contains("role")) {
-            return userDoc.getString("role");
+            role = userDoc.getString("role");
         }
 
-        return "USER"; // default
+        userRoleCache.put(uid, role);
+        userRoleFetchTime.put(uid, currentTime);
+
+        return role;
     }
     
     
@@ -38,6 +59,11 @@ public class UserService {
     
     
     public List<Map<String, String>> getAllUsers(String currentUid) throws Exception {
+    	
+    	if (cachedUsers != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) { 
+            return cachedUsers;
+        }
+    	
         List<Map<String, String>> usersList = new ArrayList<>();
 
         List<QueryDocumentSnapshot> documents =
@@ -55,11 +81,15 @@ public class UserService {
             usersList.add(user);
         }
 
+        this.cachedUsers = usersList;
+        this.lastFetchTime = System.currentTimeMillis();
         return usersList;
     }
     
     
     public void updateUserRole(String uid, String role) throws Exception {
+    	this.cachedUsers = null;
+    	this.userRoleCache.remove(uid);
         Firestore db = FirestoreClient.getFirestore();
 
         db.collection("users")
@@ -69,6 +99,7 @@ public class UserService {
     
     
     public String createUser(String email, String password, String role) throws Exception {
+    	this.cachedUsers = null;
     	email = email.toLowerCase();
 
         if (email == null || email.isEmpty()) {
@@ -121,6 +152,9 @@ public class UserService {
     
     public void deleteUser(String uid) throws Exception {
 
+    	this.cachedUsers = null;
+    	this.userRoleCache.remove(uid);
+    	
         FirebaseAuth.getInstance().deleteUser(uid);
 
         Firestore db = FirestoreClient.getFirestore();

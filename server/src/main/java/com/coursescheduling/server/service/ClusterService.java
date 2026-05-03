@@ -13,8 +13,17 @@ import java.util.List;
 public class ClusterService {
 
     private static final String COLLECTION_NAME = "clusters";
+    private List<Cluster> cachedClusters = null;
+    private long lastFetchTime = 0;
+    private static final long CACHE_DURATION = 30 * 60 * 1000;
 
     public List<Cluster> getAllClusters() throws Exception {
+    	
+    	if (cachedClusters != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
+            System.out.println("Returning Clusters from Server Cache");
+            return cachedClusters;
+        }
+    	
         Firestore db = FirestoreClient.getFirestore();
         ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME).orderBy("number").get();
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
@@ -25,10 +34,15 @@ public class ClusterService {
             cluster.setId(document.getId());
             clusters.add(cluster);
         }
+        
+        this.cachedClusters = clusters;
+        this.lastFetchTime = System.currentTimeMillis();
+        
         return clusters;
     }
 
     public Cluster addCluster(Cluster cluster) throws Exception {
+    	this.cachedClusters = null;
         Firestore db = FirestoreClient.getFirestore();
         
         ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME)
@@ -56,6 +70,7 @@ public class ClusterService {
     }
 
     public void updateCluster(Cluster cluster) throws Exception {
+    	this.cachedClusters = null;
         Firestore db = FirestoreClient.getFirestore();
         if (cluster.getId() == null) {
             throw new Exception("Cannot update cluster without an ID");
@@ -64,6 +79,7 @@ public class ClusterService {
     }
 
     public void deleteClusters(List<Cluster> clusters) throws Exception {
+    	this.cachedClusters = null;
         Firestore db = FirestoreClient.getFirestore();
         WriteBatch batch = db.batch();
 
