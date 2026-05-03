@@ -305,8 +305,6 @@ function UploadPage() {
         </div>
       </div>
 
-      <footer className="upload-footer">Need the template? Check the README or contact your admin.</footer>
-
   <AddLessonModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingLesson(null); }} onSave={handleAddLesson} initialLesson={editingLesson}  mode={editingLesson ? "edit" : "add"} />
 
       <ConfirmModal

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Button from "../components/ui/Button";
+import Footer from "../components/ui/Footer";
 import { useData } from "../context/DataContext";
 import Toast, { useToast } from "../components/ui/Toast";
 import "./TimetablePage.css";
@@ -321,6 +322,7 @@ export default function TimetablePage() {
       </Modal>
 
       <Toast toast={toast} onClose={closeToast} />
+      <Footer />
     </div>
   );
 }

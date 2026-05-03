@@ -192,29 +192,40 @@
   width: 200px;
   min-width: 200px;
   max-width: 200px;
-  height: 100vh;
+  height: fit-content;
   background: white;
-  border-right: 1px solid #eee;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.08);
   display: flex;
   flex-direction: column;
   padding: 16px 12px;
+  position: sticky;
+  top: 16px;
+  margin: 16px;
 }
 
 .sidebar-logo {
   cursor: pointer;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(15, 23, 36, 0.06);
 }
 
 .sidebar-logo img {
-  width: 120px;
+  width: 100px;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-logo img:hover {
+  transform: scale(1.05);
 }
 
 .sidebar-menu {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .sidebar-item {
@@ -222,19 +233,24 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  color: #555;
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
 }
 
 .sidebar-item:hover {
-  background: #f3f4f6;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.06), rgba(124, 58, 237, 0.04));
+  color: #4f46e5;
 }
 
 .sidebar-item.active {
-  background: #e0e7ff;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(124, 58, 237, 0.08));
   color: #4f46e5;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.12);
 }
 
 
@@ -244,7 +260,8 @@
 .topbar {
   height: 70px;
   background: white;
-  border-bottom: 1px solid #eee;
+  border-bottom: none;
+  box-shadow: 0 2px 12px rgba(79, 70, 229, 0.06);
   display: flex;
   align-items: center;
   padding: 0 20px;
@@ -260,7 +277,7 @@
   margin-left:auto;
   display:flex;
   align-items:center;
-  gap:12px
+  gap:16px
 }
 
 .topbar-greeting{display:flex;align-items:center;gap:6px;margin-right:8px}
@@ -271,14 +288,16 @@
 .topbar-greeting .topbar-username{font-weight:700;color:var(--text)}
 
 .topbar-logo {
-  width: 36px;
-  height: 36px;
-}
-.topbar-logo {
   width: 50px;
   height: 50px;
   object-fit:contain;
-  border-radius:6px;
+  border-radius:12px;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.topbar-logo:hover {
+  transform: scale(1.05);
 }
 
 .topbar-title {
@@ -289,10 +308,20 @@
 }
 
 /* Slightly larger icon buttons in the topbar for better touch targets */
-.topbar .icon-btn{width:48px;height:48px}
-.topbar .icon-btn .material-icons{font-size:24px}
+.topbar .icon-btn{
+  width:48px;
+  height:48px;
+  border-radius:10px;
+  transition: all 0.2s ease;
+}
+.topbar .icon-btn .material-icons{
+  font-size:24px
+}
+.topbar .icon-btn:hover {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.06), rgba(124, 58, 237, 0.04));
+}
 .icon-btn--logout{color:var(--muted)}
-.icon-btn--logout:hover{color:var(--text);background:rgba(239,68,68,0.06)}
+.icon-btn--logout:hover{color:var(--text);background:linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.04))}
 
 @media (max-width:700px){
   .topbar-greeting{font-size:13px}

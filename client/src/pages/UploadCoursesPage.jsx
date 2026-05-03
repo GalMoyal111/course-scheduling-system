@@ -320,8 +320,6 @@ export default function UploadCoursesPage() {
         </div>
       </div>
 
-      <footer className="upload-footer">Need the template? Check the README or contact your admin.</footer>
-
       <AddCourseModal
         isOpen={isModalOpen}
         onClose={() => { setIsModalOpen(false); setEditingCourse(null); }}
