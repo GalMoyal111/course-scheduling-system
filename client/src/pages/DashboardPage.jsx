@@ -1,93 +1,67 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
-import { useData } from "../context/DataContext";
+import Footer from "../components/ui/Footer";
 import ImportExportModal from "../components/ImportExportModal";
 import "./DashboardPage.css";
 
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const {
-    courses,
-    lessons,
-    classrooms,
-    lecturers,
-    fetchCoursesIfNeeded,
-    fetchLessonsIfNeeded,
-    fetchClassroomsIfNeeded,
-    fetchLecturersIfNeeded
-  } = useData();
-
-  const [loading, setLoading] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
 
-  useEffect(() => {
-    const loadAllData = async () => {
-      setLoading(true);
-      try {
-        await Promise.all([
-          fetchCoursesIfNeeded("Dashboard"),
-          fetchLessonsIfNeeded("Dashboard"),
-          fetchClassroomsIfNeeded("Dashboard"),
-          fetchLecturersIfNeeded("Dashboard")
-        ]);
-      } catch (error) {
-        console.error("Failed to load dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadAllData();
-  }, [fetchCoursesIfNeeded, fetchLessonsIfNeeded, fetchClassroomsIfNeeded, fetchLecturersIfNeeded]);
-
-  const stats = {
-    courses: courses.length,
-    lessons: lessons.length,
-    classrooms: classrooms.length,
-    lecturers: lecturers.length,
-  };
-
-  const handleStatClick = (path) => {
-    navigate(path);
-  };
-
   return (
     <div className="dashboard-page">
-      <section className="dashboard-section">
-        <h2 className="dashboard-section-title">Overview</h2>
-        <div className="stats-grid">
-          <StatCard
-            title="Courses"
-            count={stats.courses}
-            icon="menu_book"
-            onClick={() => handleStatClick("/courses")}
-          />
-          <StatCard
-            title="Lessons"
-            count={stats.lessons}
-            icon="school"
-            onClick={() => handleStatClick("/lessons")}
-          />
-          <StatCard
-            title="Classrooms"
-            count={stats.classrooms}
-            icon="meeting_room"
-            onClick={() => handleStatClick("/classrooms")}
-          />
-          <StatCard
-            title="Lecturers"
-            count={stats.lecturers}
-            icon="person"
-            onClick={() => handleStatClick("/lecturers")}
-          />
+      {/* Welcome Section */}
+      <section className="dashboard-section welcome-section">
+        <div className="welcome-content">
+          <h1 className="welcome-title">Welcome to UniSched</h1>
+          <p className="welcome-subtitle">University Course Timetabling System</p>
         </div>
       </section>
 
+      {/* About Section */}
+      <section className="dashboard-section about-section">
+        <h2 className="dashboard-section-title">What is UniSched?</h2>
+        <div className="about-content">
+          <p>UniSched helps you create the perfect class schedule. Simply add your courses, lessons, classrooms, and teachers, and the system will automatically arrange them in the best possible way.</p>
+        </div>
+      </section>
+
+      {/* Quick Steps Section */}
       <section className="dashboard-section">
-        <h2 className="dashboard-section-title">Primary Actions</h2>
+        <h2 className="dashboard-section-title">Getting Started</h2>
+        <div className="quick-steps">
+          <div className="step">
+            <div className="step-icon">1</div>
+            <h4>Enter Your Information</h4>
+            <p>Add your courses, classes, rooms, and teachers to the system</p>
+          </div>
+          <div className="step">
+            <div className="step-icon">2</div>
+            <h4>Create a Schedule</h4>
+            <p>Click "Generate" to let the system create the best schedule</p>
+          </div>
+          <div className="step">
+            <div className="step-icon">3</div>
+            <h4>Review & Save</h4>
+            <p>Check your schedule and save it when you're happy</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Credits */}
+      <section className="dashboard-section credits-section">
+        <h2 className="dashboard-section-title">Created By</h2>
+        <div className="credits-content">
+          <p><strong>Gal Moyal</strong> & <strong>Eden Forman</strong></p>
+        </div>
+      </section>
+
+      {/* Primary Actions */}
+      <section className="dashboard-section">
+        <h2 className="dashboard-section-title">What's Next?</h2>
         <div className="actions-grid">
           <div className="action-card">
             <div className="action-header">
@@ -151,6 +125,8 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      <Footer />
+
       <ImportExportModal
         isOpen={importModalOpen}
         onClose={() => setImportModalOpen(false)}
@@ -161,20 +137,6 @@ export default function DashboardPage() {
         onClose={() => setExportModalOpen(false)}
         type="export"
       />
-    </div>
-  );
-}
-
-function StatCard({ title, count, icon, onClick }) {
-  return (
-    <div className="stat-card" onClick={onClick}>
-      <div className="stat-icon-wrapper">
-        <span className="material-icons stat-icon">{icon}</span>
-      </div>
-      <div className="stat-content">
-        <p className="stat-title">{title}</p>
-        <p className="stat-count">{count}</p>
-      </div>
     </div>
   );
 }
