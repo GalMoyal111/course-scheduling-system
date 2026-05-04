@@ -125,8 +125,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <Footer />
-
       <ImportExportModal
         isOpen={importModalOpen}
         onClose={() => setImportModalOpen(false)}

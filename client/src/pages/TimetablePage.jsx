@@ -322,7 +322,6 @@ export default function TimetablePage() {
       </Modal>
 
       <Toast toast={toast} onClose={closeToast} />
-      <Footer />
     </div>
   );
 }
