@@ -243,12 +243,22 @@ public class CoursesExcelService {
             String courseId = course.getCourseId() == null ? "" : course.getCourseId().trim();
             String clusterName = course.getClusterName() == null ? "" : course.getClusterName().trim();
 
+            String hoursValidationError = getHoursValidationError(course);
+            if (hoursValidationError != null) {
+                invalidCourseDetails.add(new InvalidCourse(
+                        courseId,
+                        course.getCourseName(),
+                        hoursValidationError
+                ));
+                continue;
+            }
+
             if (!courseId.matches(COURSE_ID_PATTERN)) {
                 invalidCourseDetails.add(new InvalidCourse(courseId, course.getCourseName(), "Invalid course code"));
-                
+                continue;
             } else if (clusterName.isEmpty() || !validClustersMap.containsKey(clusterName)) {
                 invalidCourseDetails.add(new InvalidCourse(courseId, course.getCourseName(), "Cluster name does not exist: " + clusterName));
-            
+                continue;
             } else {
                 course.setCourseId(courseId);
                 course.setCluster(validClustersMap.get(clusterName));
@@ -374,6 +384,36 @@ public class CoursesExcelService {
         } catch (NumberFormatException e) {
             return 0;
         }
+    }
+
+    private String getHoursValidationError(Course course) {
+        List<String> invalidFields = new ArrayList<>();
+
+        if (course.getLectureHours() < 0) {
+            invalidFields.add("Lecture Hours");
+        }
+
+        if (course.getTutorialHours() < 0) {
+            invalidFields.add("Tutorial Hours");
+        }
+
+        if (course.getLabHours() < 0) {
+            invalidFields.add("Lab Hours");
+        }
+
+        if (course.getProjectHours() < 0) {
+            invalidFields.add("Project Hours");
+        }
+
+        if (course.getCredits() < 0) {
+            invalidFields.add("Credits");
+        }
+
+        if (invalidFields.isEmpty()) {
+            return null;
+        }
+
+        return "Hours and credits must be 0 or greater for: " + String.join(", ", invalidFields);
     }
     
     public byte[] exportCoursesTemplate() throws Exception {
