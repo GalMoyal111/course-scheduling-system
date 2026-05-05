@@ -110,13 +110,13 @@ export default function DashboardPage() {
 
           <div className="action-card">
             <div className="action-header">
-              <span className="material-icons action-icon">calendar_month</span>
-              <h3>View Timetable</h3>
+              <span className="material-icons action-icon">history</span>
+              <h3>View History</h3>
             </div>
-            <p>View the generated timetable schedule</p>
+            <p>View your timetable generation history</p>
             <Button
               variant="primary"
-              onClick={() => navigate("/timetable")}
+              onClick={() => navigate("/history")}
               className="action-button"
             >
               View

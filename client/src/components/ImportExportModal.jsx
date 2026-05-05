@@ -6,9 +6,11 @@ import {
   uploadLessons,
   uploadCourses,
   uploadRooms,
+  uploadLecturersExcel,
   exportLessons,
   exportCourses,
   exportRooms,
+  exportLecturersExcel,
 } from "../services/api";
 import "./ImportExportModal.css";
 
@@ -68,6 +70,7 @@ export default function ImportExportModal({ isOpen, onClose, type = "import" }) 
       if (selectedOption === "lessons") await uploadLessons(selectedFile);
       else if (selectedOption === "courses") await uploadCourses(selectedFile);
       else if (selectedOption === "classrooms") await uploadRooms(selectedFile);
+      else if (selectedOption === "lecturers") await uploadLecturersExcel(selectedFile);
       else alert("Method not implemented yet");
       
       alert(`${selectedOption} imported successfully`);
@@ -88,6 +91,7 @@ export default function ImportExportModal({ isOpen, onClose, type = "import" }) 
       if (selectedOption === "lessons") blob = await exportLessons();
       else if (selectedOption === "courses") blob = await exportCourses();
       else if (selectedOption === "classrooms") blob = await exportRooms();
+      else if (selectedOption === "lecturers") blob = await exportLecturersExcel();
       
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
