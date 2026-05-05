@@ -13,10 +13,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import org.springframework.web.multipart.MultipartFile;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 
@@ -41,11 +37,9 @@ public class ClassroomExcelService {
 	    public List<String> getWarningRows() { return warningRows; }
 	}
 	
-	
 	public ClassroomUploadSummary process(MultipartFile file) {
 		ClassroomUploadSummary summary = new ClassroomUploadSummary();
-		// java.util.Set<String> seenClassrooms = new java.util.HashSet<>();
-		Set<String> seenClassrooms = new HashSet<>();
+		java.util.Set<String> seenClassrooms = new java.util.HashSet<>();
 
 	    try (InputStream is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
 	        Sheet sheet = workbook.getSheetAt(0);
@@ -82,9 +76,24 @@ public class ClassroomExcelService {
 	                	summary.invalidRows.add(rowLabel + ": Lack of capacity");
 	                	continue;
 	                }
+	                
+	                // Validate that capacity is positive
+	                if (capacity <= 0) {
+	                	summary.warningRows.add(rowLabel + ": Capacity must be greater than 0. Row skipped.");
+	                	continue;
+	                }
 
 	                Cell typeCell = row.getCell(3);
 	                String typeStr = (typeCell != null) ? typeCell.getStringCellValue() : "NORMAL";
+	                
+	                // Check if the provided type is valid; if not, reject this row
+	                if (!isValidRoomType(typeStr)) {
+	                    summary.invalidRows.add(
+	                        rowLabel + ": Invalid room type '" + typeStr + "'. Must be one of: NORMAL, LAB, PHYSICS_LAB, NETWORKING_LAB, PBL, PROJECT, AUDITORIUM"
+	                    );
+	                    continue;
+	                }
+	                
 	                RoomType type = parseRoomType(typeStr);
 
 	                String classroomKey = (building + "||" + classroomName).toLowerCase();
@@ -117,7 +126,6 @@ public class ClassroomExcelService {
 	    }
 	}
 	
-
 	public List<Classroom> readClassroomsFromExcel(InputStream inputStream) throws Exception {
 
 	    List<Classroom> classrooms = new ArrayList<>();
@@ -148,10 +156,6 @@ public class ClassroomExcelService {
 
 	    return classrooms;
 	}
-	
-	
-	
-	
 	
 	public byte[] exportClassroomsToExcel() throws Exception {
 
@@ -216,12 +220,10 @@ public class ClassroomExcelService {
 
 	    String trimmed = classroomName.trim();
 	    if (trimmed.isEmpty()) return null;
-		Matcher matcher = Pattern.compile("^([^0-9]+)(?=\\d)").matcher(trimmed);
-		
 
-	    // java.util.regex.Matcher matcher = java.util.regex.Pattern
-	    //     .compile("^([^0-9]+)(?=\\d)")
-	    //     .matcher(trimmed);
+	    java.util.regex.Matcher matcher = java.util.regex.Pattern
+	        .compile("^([^0-9]+)(?=\\d)")
+	        .matcher(trimmed);
 
 	    if (!matcher.find()) return null;
 
@@ -231,25 +233,18 @@ public class ClassroomExcelService {
 	private String safeValue(String value) {
 	    return (value == null || value.isBlank()) ? "<empty>" : value;
 	}
-	
-	
-	public byte[] exportClassroomsTemplate() throws Exception {
 
-	    Workbook workbook = new XSSFWorkbook();
-	    Sheet sheet = workbook.createSheet("Classrooms");
-
-	    Row header = sheet.createRow(0);
-	    header.createCell(0).setCellValue("Building");
-	    header.createCell(1).setCellValue("Classroom");
-	    header.createCell(2).setCellValue("Capacity");
-	    header.createCell(3).setCellValue("Type");
-
-	    ByteArrayOutputStream out = new ByteArrayOutputStream();
-	    workbook.write(out);
-	    workbook.close();
-
-	    return out.toByteArray();
-	}
-	
+	private boolean isValidRoomType(String typeStr) {
+	    if (typeStr == null || typeStr.isBlank()) return true;
+	    
+	    String normalized = typeStr.trim().toUpperCase().replace(" ", "_");
+	    
+	    try {
+	        RoomType.valueOf(normalized);
+	        return true;
+	    } catch (IllegalArgumentException e) {
+	        return false;
+	    }
+	}	
 	
 }
