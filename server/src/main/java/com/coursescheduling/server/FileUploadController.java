@@ -314,5 +314,62 @@ public class FileUploadController {
     }
     
     
+    @GetMapping("/rooms/template")
+    public ResponseEntity<byte[]> exportRoomsTemplate() {
+        try {
+            byte[] excelData = classroomExcelService.exportClassroomsTemplate();
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=classrooms_template.xlsx")
+                    .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    .body(excelData);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export classrooms template", e);
+        }
+    }
+
+    @GetMapping("/courses/template")
+    public ResponseEntity<byte[]> exportCoursesTemplate() {
+        try {
+            byte[] excelData = coursesExcelService.exportCoursesTemplate();
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=courses_template.xlsx")
+                    .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    .body(excelData);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export courses template", e);
+        }
+    }
+
+    @GetMapping("/lessons/template")
+    public ResponseEntity<byte[]> exportLessonsTemplate() {
+        try {
+            // שימי לב שכאן זה קורא ל-excelProcessingService לפי הקוד ששלחת
+            byte[] excelData = excelProcessingService.exportLessonsTemplate();
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=lessons_template.xlsx")
+                    .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    .body(excelData);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export lessons template", e);
+        }
+    }
+
+    @GetMapping("/lecturers/template")
+    public ResponseEntity<byte[]> exportLecturersTemplate() {
+        try {
+            byte[] excelData = lecturerExcelService.exportLecturersTemplate();
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=lecturers_template.xlsx")
+                    .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    .body(excelData);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export lecturers template", e);
+        }
+    }
+    
     
 }

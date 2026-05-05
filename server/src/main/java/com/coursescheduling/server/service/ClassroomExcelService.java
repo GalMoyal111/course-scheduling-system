@@ -233,5 +233,23 @@ public class ClassroomExcelService {
 	}
 	
 	
+	public byte[] exportClassroomsTemplate() throws Exception {
+
+	    Workbook workbook = new XSSFWorkbook();
+	    Sheet sheet = workbook.createSheet("Classrooms");
+
+	    Row header = sheet.createRow(0);
+	    header.createCell(0).setCellValue("Building");
+	    header.createCell(1).setCellValue("Classroom");
+	    header.createCell(2).setCellValue("Capacity");
+	    header.createCell(3).setCellValue("Type");
+
+	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+	    workbook.write(out);
+	    workbook.close();
+
+	    return out.toByteArray();
+	}
+	
 	
 }

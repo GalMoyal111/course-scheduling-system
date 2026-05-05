@@ -10,6 +10,7 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
 
   return (
     <div className="dashboard-page">
@@ -95,6 +96,21 @@ export default function DashboardPage() {
 
           <div className="action-card">
             <div className="action-header">
+              <span className="material-icons action-icon">description</span>
+              <h3>Get Templates</h3>
+            </div>
+            <p>Download blank Excel templates to easily fill in your system data</p>
+            <Button
+              variant="primary"
+              onClick={() => setTemplateModalOpen(true)}
+              className="action-button"
+            >
+              Templates
+            </Button>
+          </div>
+
+          <div className="action-card">
+            <div className="action-header">
               <span className="material-icons action-icon">auto_awesome</span>
               <h3>Generate Timetable</h3>
             </div>
@@ -134,6 +150,11 @@ export default function DashboardPage() {
         isOpen={exportModalOpen}
         onClose={() => setExportModalOpen(false)}
         type="export"
+      />
+      <ImportExportModal
+        isOpen={templateModalOpen}
+        onClose={() => setTemplateModalOpen(false)}
+        type="template"
       />
     </div>
   );

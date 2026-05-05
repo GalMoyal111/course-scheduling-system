@@ -375,4 +375,26 @@ public class CoursesExcelService {
             return 0;
         }
     }
+    
+    public byte[] exportCoursesTemplate() throws Exception {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Courses");
+
+        Row header = sheet.createRow(0);
+        header.createCell(0).setCellValue("Course Code");
+        header.createCell(1).setCellValue("Course Name");
+        header.createCell(2).setCellValue("Prerequisites / Conditions");
+        header.createCell(3).setCellValue("Lecture Hours");
+        header.createCell(4).setCellValue("Tutorial Hours");
+        header.createCell(5).setCellValue("Lab Hours");
+        header.createCell(6).setCellValue("Project Hours");
+        header.createCell(7).setCellValue("Credits");
+        header.createCell(8).setCellValue("Cluster Name");
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        workbook.write(out);
+        workbook.close();
+
+        return out.toByteArray();
+    }
 }

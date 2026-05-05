@@ -225,4 +225,22 @@ public class LecturerExcelService {
             return out.toByteArray();
         }
     }
+	
+	public byte[] exportLecturersTemplate() throws Exception {
+	    Workbook workbook = new XSSFWorkbook();
+	    Sheet sheet = workbook.createSheet("Lecturers");
+
+	    Row header = sheet.createRow(0);
+	    header.createCell(0).setCellValue("Name");
+	    header.createCell(1).setCellValue("Hard Block Day");
+	    header.createCell(2).setCellValue("Hard Block Hour");
+	    header.createCell(3).setCellValue("Prefer Not Day");
+	    header.createCell(4).setCellValue("Prefer Not Hour");
+
+	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+	    workbook.write(out);
+	    workbook.close();
+
+	    return out.toByteArray();
+	}
 }

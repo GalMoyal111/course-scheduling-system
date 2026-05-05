@@ -11,6 +11,7 @@ import {
   exportCourses,
   exportRooms,
   exportLecturersExcel,
+  exportLessonsTemplate, exportCoursesTemplate, exportRoomsTemplate, exportLecturersTemplate
 } from "../services/api";
 import "./ImportExportModal.css";
 
@@ -109,9 +110,48 @@ export default function ImportExportModal({ isOpen, onClose, type = "import" }) 
     }
   };
 
+  const handleTemplateDownload = async () => {
+    if (!selectedOption) return;
+    setIsLoading(true);
+    try {
+      let blob;
+      if (selectedOption === "lessons") blob = await exportLessonsTemplate();
+      else if (selectedOption === "courses") blob = await exportCoursesTemplate();
+      else if (selectedOption === "classrooms") blob = await exportRoomsTemplate();
+      else if (selectedOption === "lecturers") blob = await exportLecturersTemplate();
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${selectedOption}_template.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      resetAndClose();
+    } catch (error) {
+      console.error("Template download error:", error);
+      alert(`Failed to download template: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
-  const title = type === "import" ? "Import Information" : "Export Information";
+  const title = 
+    type === "import" ? "Import Information" : 
+    type === "export" ? "Export Information" : 
+    "Download Excel Template";
+
+  const getActionDetails = () => {
+    if (type === "import") return { label: "Upload", action: handleUpload };
+    if (type === "export") return { label: "Export", action: handleExport };
+    return { label: "Download", action: handleTemplateDownload }; 
+  };
+
+  const actionDetails = getActionDetails();
+  const showActionButton = (type === "import" && selectedFile) || ((type === "export" || type === "template") && selectedOption);
+
 
   const footerContent = (
     <>
@@ -122,13 +162,14 @@ export default function ImportExportModal({ isOpen, onClose, type = "import" }) 
       >
         {selectedFile ? "Back" : "Cancel"}
       </Button>
-      {((type === "import" && selectedFile) || (type === "export" && selectedOption)) && (
+      
+      {showActionButton && (
         <Button
           variant="primary"
-          onClick={type === "import" ? handleUpload : handleExport}
+          onClick={actionDetails.action}
           disabled={isLoading}
         >
-          {isLoading ? "Processing..." : (type === "import" ? "Upload" : "Export")}
+          {isLoading ? "Processing..." : actionDetails.label}
         </Button>
       )}
     </>

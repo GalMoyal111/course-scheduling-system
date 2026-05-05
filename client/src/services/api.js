@@ -589,3 +589,39 @@ export async function deleteClusters(clusters) {
   });
   if (!res.ok) throw new Error("Failed to delete clusters");
 }
+
+export async function exportRoomsTemplate() {
+  const res = await fetch(`${BASE_URL}/rooms/template`, {
+    method: "GET",
+    headers: { Accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+  });
+  if (!res.ok) throw new Error("Failed to download rooms template");
+  return res.blob();
+}
+
+export async function exportCoursesTemplate() {
+  const res = await fetch(`${BASE_URL}/courses/template`, {
+    method: "GET",
+    headers: { Accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+  });
+  if (!res.ok) throw new Error("Failed to download courses template");
+  return res.blob();
+}
+
+export async function exportLessonsTemplate() {
+  const res = await fetch(`${BASE_URL}/lessons/template`, {
+    method: "GET",
+    headers: { Accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+  });
+  if (!res.ok) throw new Error("Failed to download lessons template");
+  return res.blob();
+}
+
+export async function exportLecturersTemplate() {
+  const res = await fetch(`${BASE_URL}/lecturers/template`, {
+    method: "GET",
+    headers: { Accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+  });
+  if (!res.ok) throw new Error("Failed to download lecturers template");
+  return res.blob();
+}

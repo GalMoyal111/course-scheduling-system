@@ -1,4 +1,5 @@
 package com.coursescheduling.server.service;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -283,6 +284,33 @@ public class ExcelProcessingService {
 	    if (semesterText.contains("ב")) 
 	        return Semester.B;
 	    throw new IllegalArgumentException("Unknown semester: " + semesterText);
+	}
+	
+	
+	
+	public byte[] exportLessonsTemplate() throws Exception {
+	    Workbook workbook = new XSSFWorkbook();
+	    Sheet sheet = workbook.createSheet("Lessons");
+
+	    Row header = sheet.createRow(0);
+	    header.createCell(0).setCellValue("מס' קורס");
+	    header.createCell(1).setCellValue("שם הקורס");
+	    header.createCell(2).setCellValue("סוג");
+	    header.createCell(3).setCellValue("מרצה");
+	    header.createCell(4).setCellValue("סגל / ממח / עמית");
+	    header.createCell(5).setCellValue("סמסטר");
+	    header.createCell(6).setCellValue("מחלקה");
+	    header.createCell(7).setCellValue("שע'");
+	    header.createCell(8).setCellValue("מרצה");
+	    header.createCell(9).setCellValue("הערות");
+	    header.createCell(10).setCellValue("תאריך עדכון");
+	    
+
+	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+	    workbook.write(out);
+	    workbook.close();
+
+	    return out.toByteArray();
 	}
 	
 	
