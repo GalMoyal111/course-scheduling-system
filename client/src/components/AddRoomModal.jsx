@@ -4,11 +4,12 @@ import "./ui/ui.css";
 import Modal from "./ui/Modal";
 
 // Simple modal for adding a single classroom (uses app UI styles).
-export default function AddRoomModal({ isOpen, onClose, onSave, initialClassroom = null }) {
+export default function AddRoomModal({ isOpen, onClose, onSave, initialClassroom = null, existingClassrooms = [] }) {
   const [building, setBuilding] = useState("");
   const [classroomName, setClassroomName] = useState("");
   const [capacity, setCapacity] = useState("");
   const [type, setType] = useState("NORMAL");
+  const [validationError, setValidationError] = useState("");
 
   // Initialize fields when modal opens. If initialClassroom provided, pre-fill for edit.
   useEffect(() => {
@@ -24,6 +25,7 @@ export default function AddRoomModal({ isOpen, onClose, onSave, initialClassroom
         setCapacity("");
         setType("NORMAL");
       }
+      setValidationError("");
     }
   }, [isOpen, initialClassroom]);
 
@@ -33,13 +35,45 @@ export default function AddRoomModal({ isOpen, onClose, onSave, initialClassroom
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setValidationError("");
+
+    const trimmedBuilding = building.trim();
+    const trimmedClassroomName = classroomName.trim();
+
+    // Validation 1: Check if building name matches the classroom name
+    if (!trimmedClassroomName.includes(trimmedBuilding)) {
+      setValidationError("The classroom name must be the same as the building name."); 
+      return;
+    }
 
     const classroom = {
-      building: building.trim(),
-      classroomName: classroomName.trim(),
+      building: trimmedBuilding,
+      classroomName: trimmedClassroomName,
       capacity: parseInt(capacity, 10),
       type,
     };
+
+    // Validation 2: Check if classroom already exists
+    // When editing, allow saving if the name stays the same for the classroom being edited,
+    // but prevent changing to a name that belongs to a different existing classroom.
+    const normalize = (value) =>
+      String(value || "").trim().toLowerCase();
+
+    const classroomExists = existingClassrooms.some((c) => {
+      const isSameOriginalClassroom =
+        initialClassroom &&
+        normalize(c.classroomName) === normalize(initialClassroom.classroomName);
+
+      return (
+        normalize(c.classroomName) === normalize(trimmedClassroomName) &&
+        !isSameOriginalClassroom
+      );
+    });
+
+    if (classroomExists) {
+      setValidationError("This classroom already exists in the system, you cannot save.");
+      return;
+    }
 
     onSave(classroom);
   };
@@ -55,14 +89,29 @@ export default function AddRoomModal({ isOpen, onClose, onSave, initialClassroom
     </>
   );
 
-
-return (
+  return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={initialClassroom ? "Edit Classroom" : "Add Classroom"}
       footer={footerContent}
     >
+      {/* Error message display */}
+      {validationError && (
+        <div style={{
+          backgroundColor: "#fee2e2",
+          border: "1px solid #fca5a5",
+          borderRadius: "6px",
+          padding: "12px",
+          marginBottom: "16px",
+          color: "#991b1b",
+          fontSize: "0.95rem",
+          fontWeight: 500
+        }}>
+          {validationError}
+        </div>
+      )}
+      
       {/* נתנו לטופס id כדי שהכפתור בחוץ יוכל לדבר איתו */}
       <form id="add-room-form" onSubmit={handleSubmit}>
         <div className="form-field">

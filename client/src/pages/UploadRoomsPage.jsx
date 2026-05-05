@@ -284,7 +284,7 @@ function UploadRoomsPage() {
         </div>
       </div>
 
-  <AddRoomModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingClassroom(null); }} onSave={handleAddRoom} initialClassroom={editingClassroom} />
+  <AddRoomModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingClassroom(null); }} onSave={handleAddRoom} initialClassroom={editingClassroom} existingClassrooms={classrooms} />
       <ConfirmModal
         isOpen={confirmOpen}
         title="Upload will overwrite existing data"
