@@ -28,6 +28,8 @@ public class SoftConstraintFactory {
         
         softConstraints.add(new LecturerPreferenceConstraint());
         
+        softConstraints.add(new EnglishCourseTimingConstraint());
+        
         return softConstraints;
     }
 
@@ -43,6 +45,7 @@ public class SoftConstraintFactory {
         defaultWeights.put("ElectiveCourseInTheSameClassroom", 5.0);
         defaultWeights.put("AvoidBuildingP", 5.0);
         defaultWeights.put("LecturerPreference", 5.0);
+        defaultWeights.put("EnglishCourseTiming", 5.0);
         return defaultWeights;
     }
     

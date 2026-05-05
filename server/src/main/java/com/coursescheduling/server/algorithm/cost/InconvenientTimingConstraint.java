@@ -3,12 +3,16 @@ package com.coursescheduling.server.algorithm.cost;
 import com.coursescheduling.server.algorithm.model.AssignedValue;
 import com.coursescheduling.server.algorithm.model.Variable;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class InconvenientTimingConstraint implements SoftConstraint {
 
     private static final String CONSTRAINT_NAME = "InconvenientTiming";
 
+    private static final List<String> ENGLISH_COURSE_IDS = Arrays.asList("11063", "11064" ,"11360" ,"11060");
+    
     @Override
     public String getName() {
         return CONSTRAINT_NAME;
@@ -21,7 +25,9 @@ public class InconvenientTimingConstraint implements SoftConstraint {
         int startFrame = value.getStartFrame();
         int endFrame = startFrame + variable.getDuration() - 1;
 
-        if (day == 6) {
+        boolean isEnglishCourse = ENGLISH_COURSE_IDS.contains(variable.getCourseId());
+        
+        if (day == 6 && !isEnglishCourse) {
             penalty += 15;
         }
 

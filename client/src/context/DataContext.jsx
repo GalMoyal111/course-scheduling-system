@@ -27,7 +27,8 @@ export function DataProvider({ children }) {
     "InconvenientTiming": 5.0,
     "ElectiveCourseInTheSameClassroom": 5.0,
     "AvoidBuildingP": 5.0,
-    "LecturerPreference": 5.0 
+    "LecturerPreference": 5.0,
+    "EnglishCourseTiming": 5.0
   });
   const [manualAssignments, setManualAssignments] = useState([]);
   const [hardCourses, setHardCourses] = useState([]);

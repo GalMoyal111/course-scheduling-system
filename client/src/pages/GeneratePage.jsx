@@ -114,6 +114,10 @@ const {
     "LecturerPreference": {
           label: "Lecturer Preferences",
           desc: "Respect lecturers' soft requests to avoid teaching on specific days/hours."
+      },
+    "EnglishCourseTiming": {  
+          label: "English Course Optimal Timing",
+          desc: "Prioritize scheduling English courses on Friday mornings (slots 1-4) or weekday afternoons (slots 7-10)."
       }
   };
 

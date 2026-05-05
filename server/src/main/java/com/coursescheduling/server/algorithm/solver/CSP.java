@@ -259,11 +259,28 @@ public class CSP {
                 
                 String futureSplitId = futureVar.getSplitGroupId();
                 if (currentSplitId != null && !currentSplitId.isEmpty() && currentSplitId.equals(futureSplitId)) {
+                	
+                	boolean isEnglish = var.getCourseId().equals("11063") || var.getCourseId().equals("11064") || var.getCourseId().equals("11360") || var.getCourseId().equals("11060");
+                	
                     for (DomainValue futureValue : futureVar.getDomain().getValues()) {
                         if (futureValue.getDay() == value.getDay()) {
-                            if (!toRemove.contains(futureValue)) {
-                                toRemove.add(futureValue);
+                        	
+                        	if (isEnglish && value.getDay() == 6) {
+                                boolean isConsecutive = 
+                                    (futureValue.getStartFrame() == currentAssignedStart + currentDuration) ||
+                                    (futureValue.getStartFrame() + futureVar.getDuration() == currentAssignedStart);
+                                
+                                if (!isConsecutive) {
+                                    if (!toRemove.contains(futureValue)) {
+                                        toRemove.add(futureValue); 
+                                    }
+                                }
+                            } else {
+                                if (!toRemove.contains(futureValue)) {
+                                    toRemove.add(futureValue);
+                                }
                             }
+
                         }
                     }
                 }
