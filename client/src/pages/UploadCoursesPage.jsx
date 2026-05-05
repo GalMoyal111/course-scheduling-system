@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-
+import { useLocation } from "react-router-dom";
 import UploadForm from "../components/UploadForm";
 import AddCourseModal from "../components/AddCourseModal";
 import ConfirmModal from "../components/ConfirmModal";
@@ -33,6 +33,30 @@ export default function UploadCoursesPage() {
   const [modalContext, setModalContext] = useState("upload"); // "upload" or "add"
   const [pendingCourse, setPendingCourse] = useState(null);
   const { courses, setCourses, fetchCoursesIfNeeded, setCoursesTimestamp, invalidateCoursesCache, clusters, clusterMappings } = useData();
+
+  const location = useLocation();
+  const [isHighlightUpload, setIsHighlightUpload] = useState(false);
+
+
+  useEffect(() => {
+    if (location.state?.highlightUpload) {
+      setIsHighlightUpload(true);
+      
+      window.scrollTo({
+        top: 0,
+        behavior: "auto" // אפשר גם "auto" אם אתה רוצה מיידי
+      });
+
+      window.history.replaceState({}, document.title);
+
+      const timer = setTimeout(() => {
+        setIsHighlightUpload(false);
+      }, 2500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [location]);
+
 
   // Build dynamic semester range from DataContext
   const semesterRange = useMemo(() => {
@@ -293,7 +317,9 @@ export default function UploadCoursesPage() {
         </div>
       </div>
 
-      <UploadForm onUpload={handleUpload} />
+      <div className={isHighlightUpload ? "upload-highlight-active" : ""} style={{ transition: 'all 0.3s' }}>
+        <UploadForm onUpload={handleUpload} />
+      </div>
 
       <div style={{ marginTop: 12 }}>
         <CourseList

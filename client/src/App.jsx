@@ -16,6 +16,7 @@ import TimetablePage from "./pages/TimetablePage";
 import HelpPage from "./pages/HelpPage";
 import GeneratePage from "./pages/GeneratePage";
 import HistoryPage from "./pages/HistoryPage";
+import "./styles/global.css";
 
 
 import Layout from "./components/ui/Layout";

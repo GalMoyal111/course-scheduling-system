@@ -8,6 +8,7 @@ import Toast, { useToast } from "../components/ui/Toast";
 import "./LecturersPage.css";
 import ConfirmModal from "../components/ConfirmModal";
 import Modal from "../components/ui/Modal";
+import { useLocation } from "react-router-dom";
 
 
 export default function LecturersPage() {
@@ -39,6 +40,8 @@ export default function LecturersPage() {
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [uploadSummary, setUploadSummary] = useState({ totalRows: 0, savedLecturers: 0, invalidSlots: [] });
 
+  const location = useLocation();
+  const [isHighlightUpload, setIsHighlightUpload] = useState(false);
 
 
   const keyFor = (lecturer) => lecturer.id || lecturer.name;
@@ -55,6 +58,25 @@ export default function LecturersPage() {
   useEffect(() => {
     loadLecturers();
   }, [loadLecturers]);
+
+
+  useEffect(() => {
+    if (location.state?.highlightUpload) {
+      setIsHighlightUpload(true);
+      
+      window.scrollTo({
+        top: 0,
+        behavior: "auto" // אפשר גם "auto" אם אתה רוצה מיידי
+      });
+      window.history.replaceState({}, document.title);
+
+      const timer = setTimeout(() => {
+        setIsHighlightUpload(false);
+      }, 2500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [location]);
 
   const selectedLecturer = lecturers.find((l) => l.id === selectedLecturerId);
 
@@ -318,7 +340,9 @@ const handleExport = async () => {
         </div>
 
         <div style={{ marginTop: 12 }}>
-          <UploadForm onUpload={handleUpload} />
+          <div className={isHighlightUpload ? "upload-highlight-active" : ""} style={{ transition: 'all 0.3s' }}>
+            <UploadForm onUpload={handleUpload} />
+          </div>
         </div>
       </div>
 

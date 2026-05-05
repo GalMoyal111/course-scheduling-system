@@ -44,9 +44,9 @@ export default function ImportExportModal({ isOpen, onClose, type = "import" }) 
 
   const handleImportOptionSelect = (option) => {
     if (type === "import") {
-      // Navigate to the appropriate page
+      // Navigate to the appropriate page AND pass the state for the animation
       resetAndClose();
-      navigate(PAGE_ROUTES[option]);
+      navigate(PAGE_ROUTES[option], { state: { highlightUpload: true } });
     } else {
       // For export, keep the original behavior
       setSelectedOption(option);

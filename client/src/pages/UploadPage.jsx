@@ -8,6 +8,7 @@ import Toast, { useToast } from "../components/ui/Toast";
 import { useState, useEffect, useCallback } from "react";
 import { useData } from "../context/DataContext";
 import Modal from "../components/ui/Modal";
+import { useLocation } from "react-router-dom";
 
 import "./UploadPage.css";
 function UploadPage() {
@@ -45,7 +46,27 @@ function UploadPage() {
   const [summaryModalOpen, setSummaryModalOpen] = useState(false);
   const [uploadSummary, setUploadSummary] = useState({savedCount: 0, missingCourses: [],missingLecturers: [], totalRows: 0});
 
+  const location = useLocation();
+  const [isHighlightUpload, setIsHighlightUpload] = useState(false);
 
+  useEffect(() => {
+    if (location.state?.highlightUpload) {
+      setIsHighlightUpload(true);
+
+      window.scrollTo({
+        top: 0,
+        behavior: "auto" // אפשר גם "auto" אם אתה רוצה מיידי
+      });
+      
+      window.history.replaceState({}, document.title);
+
+      const timer = setTimeout(() => {
+        setIsHighlightUpload(false);
+      }, 2500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [location]);
   
 
   const loadInitialData = useCallback(async (caller = "UploadPage") => {
@@ -276,7 +297,9 @@ function UploadPage() {
         </div>
       </div>
 
-      <UploadForm onUpload={handleUpload} />
+      <div className={isHighlightUpload ? "upload-highlight-active" : ""}>
+        <UploadForm onUpload={handleUpload} />
+      </div>
 
         
 

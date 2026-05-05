@@ -8,6 +8,7 @@ import { uploadRooms, exportRooms, addRoom, deleteClassrooms, updateClassroom } 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useData } from "../context/DataContext";
 import Modal from "../components/ui/Modal";
+import { useLocation } from "react-router-dom";
 
 
 function UploadRoomsPage() {
@@ -61,6 +62,26 @@ function UploadRoomsPage() {
 
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [uploadSummary, setUploadSummary] = useState({ totalRows: 0, savedClassrooms: 0, invalidRows: [] });
+  const location = useLocation();
+  const [isHighlightUpload, setIsHighlightUpload] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.highlightUpload) {
+      setIsHighlightUpload(true);
+      window.scrollTo({
+        top: 0,
+        behavior: "auto" // אפשר גם "auto" אם אתה רוצה מיידי
+      });
+
+      window.history.replaceState({}, document.title);
+
+      const timer = setTimeout(() => {
+        setIsHighlightUpload(false);
+      }, 2500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [location]);
 
   const performUpload = async () => {
     if (!pendingFile) return;
@@ -239,7 +260,9 @@ function UploadRoomsPage() {
         </div>
       </div>
 
-      <UploadForm onUpload={handleUpload} />
+      <div className={isHighlightUpload ? "upload-highlight-active" : ""}>
+        <UploadForm onUpload={handleUpload} />
+      </div>
 
       <div style={{ marginTop: 12 }}>
         <ClassroomList
