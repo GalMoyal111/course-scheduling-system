@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "./ui/Button";
 import Modal from "./ui/Modal";
+import Toast, { useToast } from "./ui/Toast";
 import {
   uploadLessons,
   uploadCourses,
@@ -31,6 +32,7 @@ const PAGE_ROUTES = {
 
 export default function ImportExportModal({ isOpen, onClose, type = "import" }) {
   const navigate = useNavigate();
+  const { showSuccess, showError } = useToast();
   const [selectedOption, setSelectedOption] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -60,7 +62,7 @@ export default function ImportExportModal({ isOpen, onClose, type = "import" }) 
     if (file && (file.type.includes("sheet") || file.name.match(/\.(xlsx|xls)$/i))) {
       setSelectedFile(file);
     } else {
-      alert("Please select a valid Excel file (.xlsx or .xls)");
+      showError("Please select a valid Excel file (.xlsx or .xls)");
     }
   };
 
@@ -72,13 +74,13 @@ export default function ImportExportModal({ isOpen, onClose, type = "import" }) 
       else if (selectedOption === "courses") await uploadCourses(selectedFile);
       else if (selectedOption === "classrooms") await uploadRooms(selectedFile);
       else if (selectedOption === "lecturers") await uploadLecturersExcel(selectedFile);
-      else alert("Method not implemented yet");
+      else showError("Method not implemented yet");
       
-      alert(`${selectedOption} imported successfully`);
+      showSuccess(`${selectedOption} imported successfully`);
       resetAndClose();
     } catch (error) {
       console.error("Import error:", error);
-      alert(`Failed to import: ${error.message}`);
+      showError(`Failed to import: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +106,7 @@ export default function ImportExportModal({ isOpen, onClose, type = "import" }) 
       resetAndClose();
     } catch (error) {
       console.error("Export error:", error);
-      alert(`Failed to export: ${error.message}`);
+      showError(`Failed to export: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -130,7 +132,7 @@ export default function ImportExportModal({ isOpen, onClose, type = "import" }) 
       resetAndClose();
     } catch (error) {
       console.error("Template download error:", error);
-      alert(`Failed to download template: ${error.message}`);
+      showError(`Failed to download template: ${error.message}`);
     } finally {
       setIsLoading(false);
     }

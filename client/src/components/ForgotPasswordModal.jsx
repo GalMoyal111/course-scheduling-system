@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import Button from "./ui/Button";
 import Modal from "./ui/Modal";
+import Toast, { useToast } from "./ui/Toast";
 import "./ui/ui.css";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebase"; 
 
 export default function ForgotPasswordModal({ isOpen, onClose }) {
+  const { showError } = useToast();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -28,7 +30,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
       setSuccess(true);
     } catch (error) {
       console.error(error);
-      alert("Failed to send reset email. Please check the email address and try again.");
+      showError("Failed to send reset email. Please check the email address and try again.");
       setLoading(false);
     }
   };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Button from "./ui/Button";
 import Modal from "./ui/Modal";
+import Toast, { useToast } from "./ui/Toast";
 import "./ui/ui.css";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase.js";
@@ -8,6 +9,7 @@ import { getUserRole } from "../services/api";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 
 export default function LoginModal({ isOpen, onClose, onLogin }) {
+    const { showError } = useToast();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isForgotOpen, setIsForgotOpen] = useState(false);
@@ -45,7 +47,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
         
         // Validate password length
         if (password.length < 6) {
-            alert("Password must be at least 6 characters long");
+            showError("Password must be at least 6 characters long");
             return;
         }
 
@@ -63,7 +65,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
 
         } catch (error) {
             console.error(error);
-            alert("Login failed. Please check your email and password.");
+            showError("Login failed. Please check your email and password.");
             setLoading(false);
         }
     };

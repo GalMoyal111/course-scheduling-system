@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Button from "./ui/Button";
+import Toast, { useToast } from "./ui/Toast";
 import "./ui/ui.css";
 import { useData } from "../context/DataContext"; // שימוש ב-Context
 import Modal from "./ui/Modal";
@@ -21,6 +22,7 @@ export default function AddLessonModal({
   mode = "add",
 }) {
   const isEdit = mode === "edit";
+  const { showError } = useToast();
 
   const { 
   courses, 
@@ -176,7 +178,7 @@ export default function AddLessonModal({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!selectedCourse || !lecturer || !semester || !type) {
-      alert("Please fill all required fields.");
+      showError("Please fill all required fields.");
       return;
     }
 

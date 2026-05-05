@@ -1,14 +1,16 @@
 import { useState, useRef } from "react";
+import Toast, { useToast } from "./ui/Toast";
 import "./UploadForm.css";
 
 function UploadForm({ onUpload }) {
+  const { showError } = useToast();
   const [file, setFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!file) return alert("Please select a file first.");
+    if (!file) return showError("Please select a file first.");
     onUpload(file);
   };
 
