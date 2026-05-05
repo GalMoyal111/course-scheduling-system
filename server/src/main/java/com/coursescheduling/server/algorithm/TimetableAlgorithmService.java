@@ -90,7 +90,7 @@ public class TimetableAlgorithmService {
         List<String> hardCourseIds = request.getHardCourseIds();
         
         Integer electiveCapacity = request.getElectiveCapacity();
-        System.out.printf("/n electiveCapacity:" , electiveCapacity);
+        System.out.println("electiveCapacity:" + electiveCapacity);
         System.out.println("🚀 Starting algorithm...");
 
 
