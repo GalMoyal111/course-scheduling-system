@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.coursescheduling.server.algorithm.constraints.ElectiveCourseSequenceConstraint;
 import com.coursescheduling.server.algorithm.constraints.ElectiveLectureLabSameRoomConstraint;
 import com.coursescheduling.server.algorithm.constraints.LecturerConstraint;
+import com.coursescheduling.server.algorithm.constraints.NetworkingLabPairConstraint;
 import com.coursescheduling.server.algorithm.constraints.RoomConstraint;
 import com.coursescheduling.server.algorithm.constraints.SplitLessonConstraint;
 import com.coursescheduling.server.algorithm.constraints.ClusterOneSundayEveningConstraint;
@@ -49,6 +50,9 @@ public class CSP {
 
     @Autowired
     private ClusterOneSundayEveningConstraint clusterOneSundayEveningConstraint;
+    
+    @Autowired
+    private  NetworkingLabPairConstraint networkingLabPairConstraint;
 
     
 
@@ -339,6 +343,10 @@ public class CSP {
         int start1 = value.getStartFrame();
         int end1 = start1 + var.getDuration() - 1;
 
+        if (!networkingLabPairConstraint.isValid(var, value, assignment)) {
+            return false;
+        }
+        
         if(!clusterOneSundayEveningConstraint.isValid(var, value)) {
             return false;
         }
