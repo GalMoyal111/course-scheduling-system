@@ -37,7 +37,9 @@ const {
     hardCourses, 
     setHardCourses,
     requiredCapacities, 
-    setRequiredCapacities
+    setRequiredCapacities,
+    electiveCapacity, 
+    setElectiveCapacity
   } = useData();
 
 
@@ -118,7 +120,11 @@ const {
     "EnglishCourseTiming": {  
           label: "English Course Optimal Timing",
           desc: "Prioritize scheduling English courses on Friday mornings (slots 1-4) or weekday afternoons (slots 7-10)."
-      }
+      },
+    "LoadBalancing": {  
+          label: "Schedule Load Balancing",
+          desc: "Prevent overcrowding by penalizing time slots that have more than 20 concurrent lessons, spreading classes evenly."
+      }  
   };
 
   const handleWeightChange = (constraintName, value) => {
@@ -129,7 +135,7 @@ const {
     setLoading(true);
     setError("");
     try {
-      const requestData = { semester, softConstraintWeights: weights, manualAssignments: manualAssignments, hardCourseIds: hardCourses.map(c => c.courseId),requiredCapacities: requiredCapacities };
+      const requestData = { semester, softConstraintWeights: weights, manualAssignments: manualAssignments, hardCourseIds: hardCourses.map(c => c.courseId),requiredCapacities: requiredCapacities, electiveCapacity: electiveCapacity };
       
       const generatedSchedule = await generateTimetable(requestData);
 
@@ -339,6 +345,70 @@ const {
               </div>
             );
           })}
+          
+          {/* Elective Course Capacity */}
+          <div style={{
+            background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+            border: '2px solid #a78bfa20',
+            borderRadius: '12px',
+            padding: '16px',
+            transition: 'all 0.2s ease',
+            cursor: 'pointer'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+              <span className="material-icons" style={{ 
+                color: '#a78bfa', 
+                fontSize: '24px'
+              }}>
+                star
+              </span>
+              <label style={{ 
+                fontSize: '0.9rem', 
+                color: '#1e293b', 
+                fontWeight: '700',
+                margin: 0
+              }}>
+                Elective courses
+              </label>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <input 
+                type="number"
+                style={{ 
+                  width: '100%',
+                  padding: '12px',
+                  border: '2px solid #a78bfa40',
+                  borderRadius: '8px',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  color: '#a78bfa',
+                  backgroundColor: '#fff',
+                  transition: 'all 0.2s ease',
+                  outline: 'none'
+                }}
+                value={electiveCapacity}
+                min="1"
+                onChange={(e) => {
+                  const val = parseInt(e.target.value) || 1;
+                  setElectiveCapacity(val);
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#a78bfa'}
+                onBlur={(e) => e.target.style.borderColor = '#a78bfa40'}
+              />
+              <span style={{
+                fontSize: '0.75rem',
+                color: '#64748b',
+                fontWeight: '600',
+                whiteSpace: 'nowrap',
+                padding: '4px 8px',
+                backgroundColor: '#a78bfa10',
+                borderRadius: '6px'
+              }}>
+                students
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

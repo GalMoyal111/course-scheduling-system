@@ -10,6 +10,7 @@ public class GenerateTimetableRequest {
     private List<ManualAssignmentDTO> manualAssignments;
     private List<String> hardCourseIds;
     private Map<LessonType, Integer> requiredCapacities;
+    private Integer electiveCapacity;
 
     public List<String> getHardCourseIds() {
 		return hardCourseIds;
@@ -52,6 +53,14 @@ public class GenerateTimetableRequest {
 
     public void setRequiredCapacities(Map<LessonType, Integer> requiredCapacities) {
         this.requiredCapacities = requiredCapacities;
+    }
+    
+    public Integer getElectiveCapacity() {
+        return electiveCapacity;
+    }
+
+    public void setElectiveCapacity(Integer electiveCapacity) {
+        this.electiveCapacity = electiveCapacity;
     }
     
     

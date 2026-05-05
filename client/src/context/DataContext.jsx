@@ -15,6 +15,7 @@ export function DataProvider({ children }) {
   const [currentTimetableMetadata, setCurrentTimetableMetadata] = useState(null); 
   const [history, setHistory] = useState([]);
   const [clusters, setClusters] = useState([]);
+  const [electiveCapacity, setElectiveCapacity] = useState(25);
   
 
   const [generatorWeights, setGeneratorWeights] = useState({
@@ -28,7 +29,8 @@ export function DataProvider({ children }) {
     "ElectiveCourseInTheSameClassroom": 5.0,
     "AvoidBuildingP": 5.0,
     "LecturerPreference": 5.0,
-    "EnglishCourseTiming": 5.0
+    "EnglishCourseTiming": 5.0,
+    "LoadBalancing": 5.0
   });
   const [manualAssignments, setManualAssignments] = useState([]);
   const [hardCourses, setHardCourses] = useState([]);
@@ -294,6 +296,7 @@ export function DataProvider({ children }) {
     manualAssignments, setManualAssignments,
     hardCourses, setHardCourses,
     requiredCapacities, setRequiredCapacities,
+    electiveCapacity, setElectiveCapacity,
     
     // Cache validation
     isCacheValid,
@@ -337,7 +340,7 @@ export function DataProvider({ children }) {
     invalidateClassroomsCache, invalidateLecturersCache, invalidateHistoryCache, invalidateAllCache,
     fetchCoursesIfNeeded, fetchLessonsIfNeeded, fetchLecturersIfNeeded, fetchClassroomsIfNeeded, fetchHistoryIfNeeded, loadTimetableFromHistory, updateCoursesLocally,
     clusters, clustersTimestamp, clusterMappings, invalidateClustersCache, fetchClustersIfNeeded,
-    generatorWeights, manualAssignments, hardCourses, requiredCapacities
+    generatorWeights, manualAssignments, hardCourses, requiredCapacities, electiveCapacity
   ]);
 
   return (

@@ -83,32 +83,21 @@ public class TimetableAlgorithmService {
     	
     	
     	Map<LessonType, Integer> capacities = request.getRequiredCapacities();
+    	for (Map.Entry<LessonType, Integer> entry : capacities.entrySet()) {
+    	    System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+    	}
+    	
         List<String> hardCourseIds = request.getHardCourseIds();
         
-       
+        Integer electiveCapacity = request.getElectiveCapacity();
+        System.out.printf("/n electiveCapacity:" , electiveCapacity);
         System.out.println("🚀 Starting algorithm...");
 
 
         // Step 1: Build variables from semester data
-        List<Variable> variables = variableBuilder.createVariables(semester, capacities, hardCourseIds);        
+        List<Variable> variables = variableBuilder.createVariables(semester, capacities, hardCourseIds, electiveCapacity);        
         
-        
-        for (Variable var : variables) {
-            if (var.getCluster() >= 9 && var.getType() == LessonType.LECTURE) {
-
-            	for (Variable otherVar : variables) {
-                    if (otherVar.getCourseId().equals(var.getCourseId()) && (otherVar.getType() == LessonType.LAB )) {
-                        
-                        var.setRequiredCapacity(otherVar.getRequiredCapacity());
-                        System.out.println("🔄 Updated capacity for elective lecture " + var.getCourseId() + " to " + var.getRequiredCapacity());
-                        break; 
-                    }
-                }
-            }
-        }
-        
-        
-        
+     
         // Step 2: Apply constraints to variables
         
 
