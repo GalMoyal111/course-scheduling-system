@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "./ui/Button";
 import Modal from "./ui/Modal";
 import {
@@ -18,7 +19,15 @@ const IMPORT_OPTIONS = [
   { id: "lecturers", label: "Lecturers", icon: "person" },
 ];
 
+const PAGE_ROUTES = {
+  lessons: "/lessons",
+  courses: "/courses",
+  classrooms: "/classrooms",
+  lecturers: "/lecturers",
+};
+
 export default function ImportExportModal({ isOpen, onClose, type = "import" }) {
+  const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -31,6 +40,17 @@ export default function ImportExportModal({ isOpen, onClose, type = "import" }) 
     setSelectedFile(null);
     setIsLoading(false);
     onClose();
+  };
+
+  const handleImportOptionSelect = (option) => {
+    if (type === "import") {
+      // Navigate to the appropriate page
+      resetAndClose();
+      navigate(PAGE_ROUTES[option]);
+    } else {
+      // For export, keep the original behavior
+      setSelectedOption(option);
+    }
   };
 
   const handleFileSelect = (file) => {
@@ -128,7 +148,7 @@ export default function ImportExportModal({ isOpen, onClose, type = "import" }) 
                 <div
                   key={option.id}
                   className={`option-item ${selectedOption === option.id ? "selected" : ""}`}
-                  onClick={() => !isLoading && setSelectedOption(option.id)}
+                  onClick={() => !isLoading && handleImportOptionSelect(option.id)}
                 >
                   <span className="material-icons option-icon">{option.icon}</span>
                   <span className="option-label">{option.label}</span>
