@@ -110,6 +110,14 @@ public class CoursesExcelService {
 
     public CourseUploadSummary process(MultipartFile file) {
         try {
+            // Before attempting to read the uploaded Excel file, ensure clusters exist.
+            List<Cluster> clusters = clusterService.getAllClusters();
+            if (clusters == null || clusters.isEmpty()) {
+                List<InvalidCourse> errors = new ArrayList<>();
+                errors.add(new InvalidCourse("", "", "No clusters defined. Please go to Settings and define clusters before uploading courses."));
+                return new CourseUploadSummary(0, errors, new ArrayList<>());
+            }
+
             List<Course> courses = readCoursesFromExcel(file.getInputStream());
             CourseUploadSummary summary = validateAndSaveCourses(courses);
             System.out.println("Finished processing courses Excel file");
@@ -225,6 +233,8 @@ public class CoursesExcelService {
         List<InvalidCourse> invalidCourseDetails = new ArrayList<>();
         List<Course> validCourses = new ArrayList<>();
         Set<String> validCourseIds = new HashSet<>();
+        Set<String> seenCourseIds = new HashSet<>();  // Track course IDs we've already processed in this upload
+        Set<String> seenCourseNames = new HashSet<>();  // Track course names we've already processed in this upload
 
         Map<String, Integer> validClustersMap = new HashMap<>();
         
@@ -242,6 +252,7 @@ public class CoursesExcelService {
         for (Course course : courses) {
             String courseId = course.getCourseId() == null ? "" : course.getCourseId().trim();
             String clusterName = course.getClusterName() == null ? "" : course.getClusterName().trim();
+            String courseName = course.getCourseName() == null ? "" : course.getCourseName().trim();
 
             String hoursValidationError = getHoursValidationError(course);
             if (hoursValidationError != null) {
@@ -256,6 +267,12 @@ public class CoursesExcelService {
             if (!courseId.matches(COURSE_ID_PATTERN)) {
                 invalidCourseDetails.add(new InvalidCourse(courseId, course.getCourseName(), "Invalid course code"));
                 continue;
+            } else if (seenCourseIds.contains(courseId)) {
+                invalidCourseDetails.add(new InvalidCourse(courseId, course.getCourseName(), "Duplicate course code: " + courseId));
+                continue;
+            } else if (seenCourseNames.contains(courseName)) {
+                invalidCourseDetails.add(new InvalidCourse(courseId, course.getCourseName(), "Duplicate course name: " + courseName));
+                continue;
             } else if (clusterName.isEmpty() || !validClustersMap.containsKey(clusterName)) {
                 invalidCourseDetails.add(new InvalidCourse(courseId, course.getCourseName(), "Cluster name does not exist: " + clusterName));
                 continue;
@@ -264,6 +281,8 @@ public class CoursesExcelService {
                 course.setCluster(validClustersMap.get(clusterName));
                 validCourses.add(course);
                 validCourseIds.add(courseId);
+                seenCourseIds.add(courseId);  // Mark this course ID as processed
+                seenCourseNames.add(courseName);  // Mark this course name as processed
             }
         }
 
