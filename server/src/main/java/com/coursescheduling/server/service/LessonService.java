@@ -263,7 +263,6 @@ public class LessonService {
 	
 	public void deleteLessons(List<Lesson> lessons) throws Exception {
 		
-		this.cachedLessons = null;
 		
 	    Firestore db = FirestoreClient.getFirestore();
 	    WriteBatch batch = db.batch();
@@ -278,6 +277,9 @@ public class LessonService {
 	        batch.delete(docRef);
 	    }
 	    batch.commit().get();
+	    
+	    this.cachedLessons = null;
+	    this.lastFetchTime = 0;
 	}
 	
 	

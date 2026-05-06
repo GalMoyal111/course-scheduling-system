@@ -91,6 +91,10 @@ public class CSP {
     // Backtracking search algorithm
     private Map<Variable, AssignedValue> backtrack(Map<Variable, AssignedValue> assignment, List<Variable> variables, RoomManager roomManager, SoftConstraintEvaluator evaluator) {
         
+    	if (assignment.size() % 5 == 0) { 
+    	    System.out.println("Progress: " + assignment.size() + "/" + variables.size());
+    	}
+    	
     	if (assignment.size() == variables.size()) {
             return new HashMap<>(assignment); // Return a copy of the solution
         }
@@ -149,7 +153,7 @@ public class CSP {
             double score2 = evaluator.calculateTotalPenalty(var, av2, assignment);
             return Double.compare(score1, score2); // Sort in ascending order of penalty (lower penalty first)
         });
-        System.out.println("----- Ordered values for lesson " + var.getLessonId() + " -----");
+        //System.out.println("----- Ordered values for lesson " + var.getLessonId() + " -----");
         for (AssignedValue av : orderedValues) {
         	double score = evaluator.calculateTotalPenalty(var, av, assignment);
         

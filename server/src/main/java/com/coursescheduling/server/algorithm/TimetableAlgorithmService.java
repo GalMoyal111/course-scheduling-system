@@ -169,43 +169,74 @@ public class TimetableAlgorithmService {
                 }
             }
         }
+        
+        for (Variable v : variables) {
+            if (v.getDomain().getValues().isEmpty()) {
+                System.out.println("❌ Variable has empty domain: " + v.getCourseId());
+
+                throw new RuntimeException(
+                    "No suitable schedule found. One or more lessons have no available time slots due to constraints."
+                );
+            }
+        }
+        
+        for (Variable v : variables) {
+            String lecturer = v.getLecturer();
+            if (lecturer == null) continue;
+            
+            int totalHoursNeeded = variables.stream()
+                    .filter(var -> lecturer.equals(var.getLecturer()))
+                    .mapToInt(Variable::getDuration)
+                    .sum();
+                    
+            long totalAvailableSlots = v.getDomain().getValues().size(); 
+
+            if (totalHoursNeeded > totalAvailableSlots) {
+                System.out.println("Lecturer Overload: " + lecturer + " needs " + totalHoursNeeded + " hours but only has " + totalAvailableSlots + " available slots.");
+                throw new RuntimeException("Lecturer " + lecturer + " has more hours assigned than their total availability. Please check their unavailable slots.");
+            }
+        }
+        
 
         // Step 3: Run the CSP solver
         System.out.println("⏳ Running CSP Solver...");
         Map<Variable, AssignedValue> solution = csp.solve(variables, roomManager, userWeights, initialAssignment);
         
         // Step 4: Convert solution to DTOs for client response
+        
+        if (solution == null) {
+            System.out.println("No solution could be found.");
+            throw new RuntimeException("No suitable schedule found. This usually happens when manual assignments or lecturer constraints create a conflict. If you've placed manual assignments, consider removing them and trying again.");
+        }
+        
         List<ScheduledLessonDTO> results = new ArrayList<>();
 
         // If a solution is found, convert it to DTOs. Otherwise, return an empty list.
-        if (solution != null) {
-            for (Map.Entry<Variable, AssignedValue> entry : solution.entrySet()) {
-                Variable var = entry.getKey();
-                AssignedValue val = entry.getValue();
-                
-                String courseName = "";
-                Course courseObj = courseService.getCourseById(var.getCourseId());
-                if (courseObj != null && courseObj.getCourseName() != null) {
-                    courseName = courseObj.getCourseName();
-                }
-                
-                ScheduledLessonDTO dto = new ScheduledLessonDTO(
-                    var.getCourseId(),
-                    courseName,          
-                    var.getType().name(), 
-                    var.getLecturer(),
-                    val.getDay(),
-                    val.getStartFrame(),
-                    var.getDuration(),
-                    val.getRoom(),
-                    var.getCluster()
-                );
-                results.add(dto);
+
+        for (Map.Entry<Variable, AssignedValue> entry : solution.entrySet()) {
+            Variable var = entry.getKey();
+            AssignedValue val = entry.getValue();
+            
+            String courseName = "";
+            Course courseObj = courseService.getCourseById(var.getCourseId());
+            if (courseObj != null && courseObj.getCourseName() != null) {
+                courseName = courseObj.getCourseName();
             }
-            System.out.println("✅ Solution Found and returning to client!");
-        } else {
-            System.out.println("❌ No solution could be found.");
+            
+            ScheduledLessonDTO dto = new ScheduledLessonDTO(
+                var.getCourseId(),
+                courseName,          
+                var.getType().name(), 
+                var.getLecturer(),
+                val.getDay(),
+                val.getStartFrame(),
+                var.getDuration(),
+                val.getRoom(),
+                var.getCluster()
+            );
+            results.add(dto);
         }
+        System.out.println("Solution Found and returning to client!");
 
         return results;
     }

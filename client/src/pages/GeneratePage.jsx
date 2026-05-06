@@ -139,14 +139,35 @@ const {
     setLoading(true);
     setError("");
     try {
-      const requestData = { semester, softConstraintWeights: weights, manualAssignments: manualAssignments, hardCourseIds: hardCourses.map(c => c.courseId),requiredCapacities: requiredCapacities, electiveCapacity: electiveCapacity };
+      const requestData = { 
+        semester, 
+        softConstraintWeights: weights, 
+        manualAssignments, 
+        hardCourseIds: hardCourses.map(c => c.courseId),
+        requiredCapacities, 
+        electiveCapacity 
+      };
       
       const generatedSchedule = await generateTimetable(requestData);
-
       setSchedule(generatedSchedule);
       navigate("/timetable");
     } catch (err) {
-      setError(err.message);
+      console.error("Full Error Object:", err);
+      
+      let friendlyMessage = "We couldn't find a valid schedule with the current constraints.";
+      
+      try {
+        const errorBody = JSON.parse(err.message.replace(/Generation failed: \d+ /, ""));
+        if (errorBody.message) {
+          friendlyMessage = errorBody.message;
+        }
+      } catch (e) {
+        if (typeof err.message === 'string' && !err.message.includes("{")) {
+            friendlyMessage = err.message;
+        }
+      }
+
+      setError(friendlyMessage);
       setLoading(false);
     }
   };
@@ -161,10 +182,36 @@ const {
         <p>Fine-tune the scheduling algorithm's behavior using the sliders below.</p>
       </div>
 
+      {/* --- Error Modal Popup --- */}
       {error && (
-        <div className="error-message">
-          <span className="material-icons">error_outline</span>
-          <strong>Error:</strong> {error}
+        <div className="error-modal-overlay">
+          <div className="error-modal-content">
+            <div className="error-modal-header">
+              <span className="material-icons warning-icon">warning_amber</span>
+              <h2>Scheduling Conflict</h2>
+            </div>
+            
+            <div className="error-modal-body">
+              <p className="main-error-text">{error}</p>
+              
+              <div className="suggestions-box">
+                <h4>Suggested Actions:</h4>
+                <ul>
+                  {manualAssignments.length > 0 && (
+                    <li><strong>Manual Assignments:</strong> Try removing fixed lessons to give the AI more flexibility.</li>
+                  )}
+                  <li><strong>Lecturers:</strong> Check if someone is blocked (Unavailable) on too many slots.</li>
+                  <li><strong>Capacities:</strong> Ensure your requested student count isn't too high for the available rooms.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="error-modal-footer">
+              <Button variant="primary" onClick={() => setError("")}>
+                I'll adjust the settings
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 
