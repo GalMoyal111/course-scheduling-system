@@ -32,6 +32,8 @@ public class SoftConstraintFactory {
         
         softConstraints.add(new LoadBalancingConstraint());
         
+        softConstraints.add(new ClusterOverlapConstraint());
+        
         return softConstraints;
     }
 
@@ -49,6 +51,7 @@ public class SoftConstraintFactory {
         defaultWeights.put("LecturerPreference", 5.0);
         defaultWeights.put("EnglishCourseTiming", 5.0);
         defaultWeights.put("LoadBalancing", 5.0);
+        defaultWeights.put("ClusterOverlap", 5.0);
         return defaultWeights;
     }
     

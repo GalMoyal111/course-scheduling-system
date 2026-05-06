@@ -124,7 +124,11 @@ const {
     "LoadBalancing": {  
           label: "Schedule Load Balancing",
           desc: "Prevent overcrowding by penalizing time slots that have more than 20 concurrent lessons, spreading classes evenly."
-      }  
+      },
+    "ClusterOverlap": {
+          label: "Cluster Overlap Avoidance",
+          desc: "Minimize scheduling different courses from the same cluster at the same time to allow students to attend all related classes."
+      }
   };
 
   const handleWeightChange = (constraintName, value) => {
