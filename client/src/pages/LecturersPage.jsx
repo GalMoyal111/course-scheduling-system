@@ -117,7 +117,37 @@ export default function LecturersPage() {
     }
   };
 
+  // const handleEditLecturer = async (updatedLecturer) => {
+  //   try {
+  //     await updateLecturer(updatedLecturer);
+  //     showSuccess("Lecturer updated successfully!");
+
+  //     setLecturers(prev => 
+  //       prev.map(l => l.id === updatedLecturer.id ? updatedLecturer : l)
+  //     );
+
+  //     setIsModalOpen(false);
+  //     setEditingLecturer(null);
+  //     setLecturersTimestamp(Date.now());
+      
+  //   } catch (err) {
+  //     console.error(err);
+  //     showError("Error updating lecturer");
+  //   }
+  // };
+
   const handleEditLecturer = async (updatedLecturer) => {
+    const isDuplicate = lecturers.some(
+      (l) =>
+        l.id !== updatedLecturer.id &&
+        l.name.trim() === updatedLecturer.name.trim()
+    );
+
+    if (isDuplicate) {
+      showError(`The lecturer "${updatedLecturer.name}" already exists in the system.`);
+      return;
+    }
+
     try {
       await updateLecturer(updatedLecturer);
       showSuccess("Lecturer updated successfully!");
