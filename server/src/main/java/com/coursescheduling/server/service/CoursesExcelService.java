@@ -34,6 +34,9 @@ public class CoursesExcelService {
     private ClusterService clusterService;
 
     private static final String COURSE_ID_PATTERN = "^\\d{5,6}$";
+    
+    // Temporary storage for read errors during Excel processing
+    private List<InvalidCourse> readErrors = new ArrayList<>();
 
     public static class InvalidCourse {
         private final String courseId;
@@ -132,6 +135,7 @@ public class CoursesExcelService {
     public List<Course> readCoursesFromExcel(InputStream inputStream) {
         List<Course> courses = new ArrayList<>();
         DataFormatter formatter = new DataFormatter();
+        readErrors.clear();  // Clear previous errors
 
         try (Workbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -140,37 +144,53 @@ public class CoursesExcelService {
                 Row row = sheet.getRow(i);
                 if (row == null || isRowEmpty(row, formatter)) continue;
 
-                String courseCode = formatter.formatCellValue(row.getCell(0)).trim();
-                String courseName = formatter.formatCellValue(row.getCell(1)).trim();
-                String prerequisiteCourseNumber = formatter.formatCellValue(row.getCell(2)).trim();
+                try {
+                    String courseCode = formatter.formatCellValue(row.getCell(0)).trim();
+                    String courseName = formatter.formatCellValue(row.getCell(1)).trim();
+                    String prerequisiteCourseNumber = formatter.formatCellValue(row.getCell(2)).trim();
 
-                int lectureHours = parseIntCell(row.getCell(3), formatter);
-                int tutorialHours = parseIntCell(row.getCell(4), formatter);
-                int labHours = parseIntCell(row.getCell(5), formatter);
-                int projectHours = parseIntCell(row.getCell(6), formatter);
-                
-                float credits = 0;
-                String creditStr = formatter.formatCellValue(row.getCell(7)).trim();
-                if (!creditStr.isEmpty()) {
-                    credits = Float.parseFloat(creditStr);
+                    int lectureHours = parseIntCell(row.getCell(3), formatter);
+                    int tutorialHours = parseIntCell(row.getCell(4), formatter);
+                    int labHours = parseIntCell(row.getCell(5), formatter);
+                    int projectHours = parseIntCell(row.getCell(6), formatter);
+                    
+                    float credits = 0;
+                    String creditStr = formatter.formatCellValue(row.getCell(7)).trim();
+                    if (!creditStr.isEmpty()) {
+                        credits = Float.parseFloat(creditStr);
+                    }
+
+                    String clusterName = formatter.formatCellValue(row.getCell(8)).trim();
+
+                    Course course = new Course(
+                            0,
+                            courseCode,
+                            courseName,
+                            prerequisiteCourseNumber,
+                            lectureHours,
+                            tutorialHours,
+                            labHours,
+                            projectHours,
+                            credits,
+                            clusterName
+                    );
+
+                    courses.add(course);
+                } catch (NumberFormatException e) {
+                    String courseCode = formatter.formatCellValue(row.getCell(0)).trim();
+                    String courseName = formatter.formatCellValue(row.getCell(1)).trim();
+                    String errorMsg = "Row " + (i + 1) + " skipped: Invalid numeric value in Excel cell: " + e.getMessage();
+                    System.err.println(errorMsg);
+                    readErrors.add(new InvalidCourse(courseCode, courseName, errorMsg));
+                    continue;
+                } catch (RuntimeException e) {
+                    String courseCode = formatter.formatCellValue(row.getCell(0)).trim();
+                    String courseName = formatter.formatCellValue(row.getCell(1)).trim();
+                    String errorMsg = "Row " + (i + 1) + " skipped: " + e.getMessage();
+                    System.err.println(errorMsg);
+                    readErrors.add(new InvalidCourse(courseCode, courseName, errorMsg));
+                    continue;
                 }
-
-                String clusterName = formatter.formatCellValue(row.getCell(8)).trim();
-
-                Course course = new Course(
-                        0,
-                        courseCode,
-                        courseName,
-                        prerequisiteCourseNumber,
-                        lectureHours,
-                        tutorialHours,
-                        labHours,
-                        projectHours,
-                        credits,
-                        clusterName
-                );
-
-                courses.add(course);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -231,6 +251,10 @@ public class CoursesExcelService {
     public CourseUploadSummary validateAndSaveCourses(List<Course> courses) throws Exception {
         // רשימה אחת מסודרת שתכיל רק את השגיאות ותישלח לפרונט
         List<InvalidCourse> invalidCourseDetails = new ArrayList<>();
+        
+        // Add read errors first (rows that couldn't be parsed)
+        invalidCourseDetails.addAll(readErrors);
+        
         List<Course> validCourses = new ArrayList<>();
         Set<String> validCourseIds = new HashSet<>();
         Set<String> seenCourseIds = new HashSet<>();  // Track course IDs we've already processed in this upload
