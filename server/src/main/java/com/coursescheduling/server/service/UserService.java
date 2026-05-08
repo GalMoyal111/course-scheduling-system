@@ -61,7 +61,7 @@ public class UserService {
     public List<Map<String, String>> getAllUsers(String currentUid) throws Exception {
     	
     	if (cachedUsers != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) { 
-            return cachedUsers;
+    		return new ArrayList<>(cachedUsers);
         }
     	
         List<Map<String, String>> usersList = new ArrayList<>();
@@ -81,25 +81,27 @@ public class UserService {
             usersList.add(user);
         }
 
-        this.cachedUsers = usersList;
+        this.cachedUsers = new ArrayList<>(usersList);
         this.lastFetchTime = System.currentTimeMillis();
-        return usersList;
+        return new ArrayList<>(usersList);
     }
     
     
     public void updateUserRole(String uid, String role) throws Exception {
-    	this.cachedUsers = null;
-    	this.userRoleCache.remove(uid);
+    	
         Firestore db = FirestoreClient.getFirestore();
 
         db.collection("users")
           .document(uid)
           .update("role", role);
+        this.cachedUsers = null;
+        this.lastFetchTime = 0;
+    	this.userRoleCache.remove(uid);
     }
     
     
     public String createUser(String email, String password, String role) throws Exception {
-    	this.cachedUsers = null;
+    	
     	email = email.toLowerCase();
 
         if (email == null || email.isEmpty()) {
@@ -138,6 +140,8 @@ public class UserService {
               .document(uid)
               .set(userData);
 
+            this.cachedUsers = null;
+            this.lastFetchTime = 0;
             return uid;
 
         } catch (IllegalArgumentException e) {
@@ -146,14 +150,14 @@ public class UserService {
             e.printStackTrace();
             throw new RuntimeException("Failed to create user");
         }
+        
     }
     
     
     
     public void deleteUser(String uid) throws Exception {
 
-    	this.cachedUsers = null;
-    	this.userRoleCache.remove(uid);
+    	
     	
         FirebaseAuth.getInstance().deleteUser(uid);
 
@@ -162,6 +166,10 @@ public class UserService {
         db.collection("users")
           .document(uid)
           .delete();
+        
+        this.cachedUsers = null;
+        this.lastFetchTime = 0;
+    	this.userRoleCache.remove(uid);
     }
     
     

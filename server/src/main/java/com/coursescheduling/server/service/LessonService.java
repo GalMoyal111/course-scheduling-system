@@ -47,7 +47,7 @@ public class LessonService {
 	
     public void deleteAllLessons() {
     	
-    	this.cachedLessons = null;
+    	
     	
         Firestore db = FirestoreClient.getFirestore();
 
@@ -66,14 +66,14 @@ public class LessonService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to delete all lessons", e);
         }
+        
+        this.cachedLessons = null;
+        this.lastFetchTime = 0;
     }
 	
 	
 	public void saveLessons(List<Lesson> lessons) {
-		
-		this.cachedLessons = null;
-		
-		
+
 	    Firestore db = FirestoreClient.getFirestore();
 	    
 	    deleteAllLessons();
@@ -106,10 +106,16 @@ public class LessonService {
 	    if (count > 0) {
 	        try {
 	            batch.commit().get();
+	            
+	            this.cachedLessons = null;
+	    		this.lastFetchTime = 0;
+	    		
 	        } catch (Exception e) {
 	            throw new RuntimeException("Failed to commit final batch", e);
 	        }
 	    }
+		
+
 	}
 	
 	
@@ -119,7 +125,7 @@ public class LessonService {
 		
 		if (cachedLessons != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
 	        System.out.println("Returning Lessons from Server Cache (Big Save!)");
-	        return cachedLessons;
+	        return new ArrayList<>(cachedLessons);
 	    }
 		
 	    Firestore db = FirestoreClient.getFirestore();
@@ -139,10 +145,10 @@ public class LessonService {
 	        e.printStackTrace();
 	    }
 
-	    this.cachedLessons = lessons;
+	    this.cachedLessons = new ArrayList<>(lessons);
 	    this.lastFetchTime = System.currentTimeMillis();
 	    
-	    return lessons;
+	    return new ArrayList<>(lessons);
 	}
 	
 	
@@ -162,10 +168,7 @@ public class LessonService {
 	}
 	
 	public List<Lesson> addLesson(Lesson lesson) {
-		
-		this.cachedLessons = null;
-		
-		
+	
 	    Firestore db = FirestoreClient.getFirestore();
 
 	    Course course = courseService.getCourseById(lesson.getCourseId());
@@ -235,10 +238,14 @@ public class LessonService {
 
 	    try {
 	        batch.commit().get();
+	        this.cachedLessons = null;
+	        this.lastFetchTime = 0;
 	        return lessonsToSave;
 	    } catch (Exception e) {
 	        throw new RuntimeException("Failed to add lesson", e);
 	    }
+	    
+	    
 	}
 	
 	
@@ -288,7 +295,7 @@ public class LessonService {
 		
 		if (cachedGroupedCourses != null && (System.currentTimeMillis() - lastGroupedFetchTime < CACHE_DURATION)) {
 	        System.out.println("Returning Grouped Courses from Server Cache");
-	        return cachedGroupedCourses;
+	        return new ArrayList<>(cachedGroupedCourses);
 	    }
 		
 	    Firestore db = FirestoreClient.getFirestore();
@@ -314,7 +321,7 @@ public class LessonService {
 	            result.add(new ClusterCoursesList(entry.getKey(), entry.getValue()));
 	        }
 
-	        this.cachedGroupedCourses = result;
+	        this.cachedGroupedCourses = new ArrayList<>(result);
 	        this.lastGroupedFetchTime = System.currentTimeMillis();
 	        
 	        return result;

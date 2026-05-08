@@ -24,7 +24,7 @@ public class LecturerService {
     public List<Lecturer> getAllLecturers() throws Exception {
         if (cachedLecturers != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
             System.out.println("Returning Lecturers from Server Cache");
-            return cachedLecturers;
+            return new ArrayList<>(cachedLecturers);
         }
 
         Firestore db = FirestoreClient.getFirestore();
@@ -38,14 +38,14 @@ public class LecturerService {
             lecturers.add(lecturer);
         }
 
-        this.cachedLecturers = lecturers;
+        this.cachedLecturers = new ArrayList<>(lecturers);
         this.lastFetchTime = System.currentTimeMillis();
 
-        return lecturers;
+        return new ArrayList<>(lecturers);
     }
 
     public Lecturer addLecturer(Lecturer lecturer) throws Exception {
-        this.cachedLecturers = null;
+        
         Firestore db = FirestoreClient.getFirestore();
 
         if (lecturer.getName() != null) {
@@ -60,22 +60,25 @@ public class LecturerService {
         lecturer.setId(id);
         docRef.set(lecturer).get();
 
+        this.cachedLecturers = null;
+        this.lastFetchTime = 0;
         return lecturer;
     }
 
     public void updateLecturer(Lecturer lecturer) throws Exception {
-        this.cachedLecturers = null;
+        
         Firestore db = FirestoreClient.getFirestore();
 
         if (lecturer.getId() != null) {
             db.collection(COLLECTION_NAME).document(String.valueOf(lecturer.getId())).set(lecturer).get();
+            this.cachedLecturers = null;
+            this.lastFetchTime = 0;
         } else {
             throw new Exception("Cannot update lecturer without an ID");
         }
     }
 
     public void deleteLecturers(List<Lecturer> lecturers) throws Exception {
-        this.cachedLecturers = null;
         Firestore db = FirestoreClient.getFirestore();
         WriteBatch batch = db.batch();
 
@@ -86,10 +89,12 @@ public class LecturerService {
             }
         }
         batch.commit().get();
+        this.cachedLecturers = null;
+        this.lastFetchTime = 0;
+
     }
 
     public void saveLecturersBatch(List<Lecturer> lecturers) throws Exception {
-        this.cachedLecturers = null;
         Firestore db = FirestoreClient.getFirestore();
         WriteBatch batch = db.batch();
 
@@ -103,10 +108,12 @@ public class LecturerService {
             batch.set(docRef, lecturer);
         }
         batch.commit().get();
+        this.cachedLecturers = null;
+        this.lastFetchTime = 0;
+
     }
 
     public void deleteAllLecturers() throws Exception {
-        this.cachedLecturers = null;
         Firestore db = FirestoreClient.getFirestore();
         Iterable<DocumentReference> docRefs = db.collection(COLLECTION_NAME).listDocuments();
 
@@ -119,6 +126,9 @@ public class LecturerService {
         }
         if (hasOperations) {
             batch.commit().get();
+            this.cachedLecturers = null;
+            this.lastFetchTime = 0;
+
         }
     }
 }

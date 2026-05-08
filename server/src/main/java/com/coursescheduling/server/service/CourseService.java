@@ -53,10 +53,7 @@ public class CourseService {
 
 
     
-    public void saveCourseToFirebase(List<Course> courses) throws Exception {
-    	
-    	this.cachedCourses = null;
-    	
+    public void saveCourseToFirebase(List<Course> courses) throws Exception {	
     	if (lessonService != null) 
     	    lessonService.invalidateGroupedCache();
     	
@@ -91,13 +88,14 @@ public class CourseService {
 
         }
 
-        batch.commit().get();            
+        batch.commit().get();    
+    	this.cachedCourses = null;
+    	this.lastFetchTime = 0;
     }
 
 
     public void saveSingleCourse(Course course) {
     	
-    	this.cachedCourses = null;
     	if (lessonService != null) 
     	    lessonService.invalidateGroupedCache();
     	
@@ -118,13 +116,14 @@ public class CourseService {
         data.put("clusterName", normalizedClusterName);
 
         db.collection("courses").document(normalizedCourseId).set(data);
+    	this.cachedCourses = null;
+    	this.lastFetchTime = 0;
 
     }
     
 
     public void deleteCourses(List<CourseDeleteRequest> courses) throws Exception {
     	
-    	this.cachedCourses = null;
     	if (lessonService != null) 
     	    lessonService.invalidateGroupedCache();
     	
@@ -137,13 +136,18 @@ public class CourseService {
         }
 
         batch.commit().get();
+        
+    	this.cachedCourses = null;
+    	this.lastFetchTime = 0;
     }
+    
+    
 
     public List<Course> getAllCourses() throws Exception {
     	
     	if (cachedCourses != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
             System.out.println("Returning Courses from Server Cache (0 Firebase Reads)");
-            return cachedCourses;
+            return new ArrayList<>(cachedCourses);
         }
     	
     	
@@ -188,16 +192,16 @@ public class CourseService {
             courses.add(course);
         }
         
-        this.cachedCourses = courses;
+        this.cachedCourses = new ArrayList<>(courses);
         this.lastFetchTime = System.currentTimeMillis();
 
-        return courses;
+        return new ArrayList<>(courses);
     }
 
 
+    
     public void updateCourse(Course oldCourse, Course newCourse) throws Exception {
-    	
-    	this.cachedCourses = null;
+    
     	if (lessonService != null) 
     	    lessonService.invalidateGroupedCache();
     	
@@ -238,6 +242,8 @@ public class CourseService {
         batch.set(newDoc, data);
 
         batch.commit().get();
+    	this.cachedCourses = null;
+    	this.lastFetchTime = 0;
     }
     
     

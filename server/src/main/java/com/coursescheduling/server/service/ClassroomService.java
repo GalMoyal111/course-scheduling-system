@@ -18,9 +18,7 @@ public class ClassroomService {
 	
 
     public void saveClassroomsToFirebase(List<Classroom> classrooms) throws Exception {
-
-    	this.cachedClassrooms = null;
-    	
+ 	
         Firestore db = FirestoreClient.getFirestore();
 
         ApiFuture<QuerySnapshot> future = db.collection("classrooms").get();
@@ -53,15 +51,14 @@ public class ClassroomService {
                     SetOptions.merge()
             );
         }
-
+        
         batch.commit().get();
+        this.cachedClassrooms = null;
+        this.lastFetchTime = 0;
     }
 
 
-    public void saveSingleClassroom(Classroom classroom) {
-
-    	this.cachedClassrooms = null;
-    	
+    public void saveSingleClassroom(Classroom classroom) {	
         Firestore db = FirestoreClient.getFirestore();
 
         Map<String, Object> data = new HashMap<>();
@@ -71,12 +68,13 @@ public class ClassroomService {
         db.collection("classrooms")
                 .document(classroom.getBuilding())
                 .set(Map.of(classroom.getClassroomName(), data), SetOptions.merge());
+        
+        this.cachedClassrooms = null;
+        this.lastFetchTime = 0;
     }
 
 
     public void deleteClassrooms(List<ClassroomDeleteRequest> classrooms) throws Exception {
-
-    	this.cachedClassrooms = null;
     	
         Firestore db = FirestoreClient.getFirestore();
         WriteBatch batch = db.batch();
@@ -94,6 +92,9 @@ public class ClassroomService {
         }
 
         batch.commit().get();
+    	this.cachedClassrooms = null;
+    	this.lastFetchTime = 0;
+
     }
     
     
@@ -103,7 +104,7 @@ public class ClassroomService {
     	
     	if (cachedClassrooms != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
             System.out.println("Returning Classrooms from Server Cache");
-            return cachedClassrooms;
+            return new ArrayList<>(cachedClassrooms);
         }
 
         Firestore db = FirestoreClient.getFirestore();
@@ -155,16 +156,15 @@ public class ClassroomService {
             }
         }
 
-        this.cachedClassrooms = classrooms;
+        this.cachedClassrooms = new ArrayList<>(classrooms);
         this.lastFetchTime = System.currentTimeMillis();
         
-        return classrooms;
+        return new ArrayList<>(classrooms);
     }
     
     
     public void updateClassroom(Classroom oldClassroom, Classroom newClassroom) throws Exception {
 
-    	this.cachedClassrooms = null;
     	
         Firestore db = FirestoreClient.getFirestore();
         WriteBatch batch = db.batch();
@@ -194,6 +194,9 @@ public class ClassroomService {
         );
 
         batch.commit().get();
+    	this.cachedClassrooms = null;
+    	this.lastFetchTime = 0;
+
     }
     
     
