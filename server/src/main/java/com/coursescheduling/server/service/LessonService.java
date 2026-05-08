@@ -3,8 +3,10 @@ package com.coursescheduling.server.service;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Row;
@@ -273,16 +275,30 @@ public class LessonService {
 		
 	    Firestore db = FirestoreClient.getFirestore();
 	    WriteBatch batch = db.batch();
+	    
+	    Set<String> idsToDelete = new HashSet<String>();
+	    List<Lesson> allSystemLessons = getAllLessons();
 
 	    for (Lesson lesson : lessons) {
 
 	        if (lesson.getLessonId() == null)
 	            continue;
-
-	        DocumentReference docRef = db.collection("lessons").document(lesson.getLessonId());
-
+	        
+	        idsToDelete.add(lesson.getLessonId());
+	        
+	        if (lesson.getSplitGroupId() != null && !lesson.getSplitGroupId().isEmpty()) {
+	            for (Lesson cachedLesson : allSystemLessons) {
+	                if (lesson.getSplitGroupId().equals(cachedLesson.getSplitGroupId())) {
+	                    idsToDelete.add(cachedLesson.getLessonId());
+	                }
+	            }
+	        }
+	    }
+	    for (String id : idsToDelete) {
+	        DocumentReference docRef = db.collection("lessons").document(id);
 	        batch.delete(docRef);
 	    }
+	    
 	    batch.commit().get();
 	    
 	    this.cachedLessons = null;

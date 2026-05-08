@@ -189,27 +189,34 @@ function UploadPage() {
     if (!pendingDelete) return;
     const toDelete = Array.isArray(pendingDelete) ? pendingDelete : [pendingDelete];
 
-    // Prepare keys for matching lessons
     const keyFor = (l) => l.lessonId;
+
+    const splitGroupIds = new Set(
+      toDelete.map((l) => l.splitGroupId).filter(Boolean)
+    );
+
     const deleteSet = new Set(toDelete.map(keyFor));
 
-    // Optimistically remove from UI so user sees immediate change
+    lessons.forEach((l) => {
+      if (l.splitGroupId && splitGroupIds.has(l.splitGroupId)) {
+        deleteSet.add(keyFor(l));
+      }
+    });
+
     const prevLessons = lessons;
+    
     setLessons((prev) => prev.filter((l) => !deleteSet.has(keyFor(l))));
-    // close modal and clear selection immediately for feedback
+    
     setDeleteConfirmOpen(false);
     setPendingDelete(null);
     setSelectedLessons([]);
 
     try {
-      // call server delete endpoint
       await deleteLessons(toDelete);
       setLessonsTimestamp(Date.now());
-
     } catch (err) {
       console.error(err);
       showError("Failed to delete lesson(s). Reverting UI and check console for details.");
-      // revert optimistic update
       setLessons(prevLessons);
     }
   };
