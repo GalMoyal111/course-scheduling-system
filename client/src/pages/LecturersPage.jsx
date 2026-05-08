@@ -264,6 +264,39 @@ export default function LecturersPage() {
     );
   };
 
+  const handleSetWholeDay = (dayIndex, state) => {
+    setLecturers(
+      lecturers.map((lecturer) => {
+        if (lecturer.id === selectedLecturerId) {
+          let newHardSlots = [...(lecturer.unavailableSlots || [])];
+          let newSoftSlots = [...(lecturer.nonPreferredSlots || [])];
+
+          newHardSlots = newHardSlots.filter(slot => slot.day !== dayIndex);
+          newSoftSlots = newSoftSlots.filter(slot => slot.day !== dayIndex);
+
+          if (state !== 'available') {
+            const framesToAdd = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].filter(frame => {
+              const isBlockedSystemSlot = dayIndex === 6 && frame >= 5; 
+              return !isBlockedSystemSlot;
+            });
+
+            const newSlots = framesToAdd.map(frame => ({ day: dayIndex, startFrame: frame }));
+
+            if (state === 'unavailable') {
+              newHardSlots.push(...newSlots);
+            } else if (state === 'non-preferred') {
+              newSoftSlots.push(...newSlots);
+            }
+          }
+
+          setHasUnsavedChanges(true); 
+          return { ...lecturer, unavailableSlots: newHardSlots, nonPreferredSlots: newSoftSlots };
+        }
+        return lecturer;
+      })
+    );
+  };
+
   const saveAvailabilityChanges = async () => {
     if (!selectedLecturer) return;
     setIsSaving(true);
@@ -513,6 +546,7 @@ const handleExport = async () => {
               <AvailabilityTable
                 lecturer={selectedLecturer}
                 onToggle={handleToggleAvailability}
+                onSetWholeDay={handleSetWholeDay}
               />
             </div>
           </div>
@@ -637,7 +671,7 @@ function LecturerUploadSummaryModal({ isOpen, summary, onClose }) {
 
 
 
-function AvailabilityTable({ lecturer, onToggle }) {
+function AvailabilityTable({ lecturer, onToggle, onSetWholeDay }) {
   const hebrewDays = [
     { name: "ראשון", index: 1 }, { name: "שני", index: 2 }, { name: "שלישי", index: 3 },
     { name: "רביעי", index: 4 }, { name: "חמישי", index: 5 }, { name: "שישי", index: 6 },
@@ -668,6 +702,28 @@ function AvailabilityTable({ lecturer, onToggle }) {
             {hebrewDays.map((day) => (
               <th key={day.index} className="day-column">
                 <div className="day-hebrew">{day.name}</div>
+
+                {/* התוספת החדשה: עיגולי הבחירה הגורפים ליום */}
+                <div className="day-actions">
+                  <div className="custom-tooltip" data-tooltip="marke as available for the whole day">
+                    <button
+                      className="day-action-btn green"
+                      onClick={() => onSetWholeDay(day.index, 'available')}
+                    />
+                  </div>
+                  <div className="custom-tooltip" data-tooltip="prefer not to have lessons for the whole day">
+                    <button
+                      className="day-action-btn orange"
+                      onClick={() => onSetWholeDay(day.index, 'non-preferred')}
+                    />
+                  </div>
+                  <div className="custom-tooltip" data-tooltip="mark as unavailable for the whole day">
+                    <button
+                      className="day-action-btn red"
+                      onClick={() => onSetWholeDay(day.index, 'unavailable')}
+                    />
+                  </div>
+                </div>
               </th>
             ))}
           </tr>
