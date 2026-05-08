@@ -62,6 +62,44 @@ public class SavedTimetableService {
         return metadata; 
     }
 
+    public void deleteTimetable(String timetableId) throws Exception {
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentReference mainDocRef = db.collection(MAIN_COLLECTION).document(timetableId);
+        DocumentReference subDocRef = mainDocRef.collection(SUB_COLLECTION).document("full_array");
+
+        WriteBatch batch = db.batch();
+        batch.delete(subDocRef);
+        batch.delete(mainDocRef);
+        batch.commit().get();
+
+        // Invalidate caches
+        this.cachedMetadata = null;
+        this.timetableDataCache.remove(timetableId);
+    }
+
+    public SavedTimetableMetadata updateTimetableName(String timetableId, String newName) throws Exception {
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentReference mainDocRef = db.collection(MAIN_COLLECTION).document(timetableId);
+
+        Map<String, Object> update = new ConcurrentHashMap<>();
+        update.put("name", newName);
+
+        mainDocRef.update(update).get();
+
+        // Update cached metadata if present
+        if (this.cachedMetadata != null) {
+            for (SavedTimetableMetadata m : this.cachedMetadata) {
+                if (m.getId().equals(timetableId)) {
+                    m.setName(newName);
+                    break;
+                }
+            }
+        }
+
+        // Return updated metadata
+        return mainDocRef.get().get().toObject(SavedTimetableMetadata.class);
+    }
+
     public List<SavedTimetableMetadata> getAllSavedMetadata() throws Exception {
     	
     	if (cachedMetadata != null && (System.currentTimeMillis() - lastFetchTimeMetadata < CACHE_DURATION)) {

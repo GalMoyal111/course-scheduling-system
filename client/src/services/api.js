@@ -625,3 +625,31 @@ export async function exportLecturersTemplate() {
   if (!res.ok) throw new Error("Failed to download lecturers template");
   return res.blob();
 }
+
+export async function deleteTimetable(id) {
+  const res = await fetch(`${BASE_URL}/timetable/history/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to delete timetable: ${res.status} ${text}`);
+  }
+
+  return res.text();
+}
+
+export async function renameTimetable(id, newName) {
+  const res = await fetch(`${BASE_URL}/timetable/history/${id}/rename`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: newName }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to rename timetable: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}
