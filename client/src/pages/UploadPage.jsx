@@ -441,6 +441,7 @@ function LessonUploadSummaryModal({ isOpen, summary, onClose }) {
         </div>
       </div>
 
+      {renderIssueSection("Course Name Mismatches", summary.mismatchedCourseNames)}
       {renderIssueSection("Missing Courses", summary.missingCourses)}
       {renderIssueSection("Missing Lecturers", summary.missingLecturers)}
       {renderIssueSection("Invalid Lesson Types", summary.invalidTypes)}

@@ -57,6 +57,7 @@ public class ExcelProcessingService {
 	public static class LessonUploadSummary {
 	    public int savedCount = 0;
 	    public List<ValidationIssue> missingCourses = new ArrayList<>();
+	    public List<ValidationIssue> mismatchedCourseNames = new ArrayList<>();
 	    public List<ValidationIssue> missingLecturers = new ArrayList<>();
 	    public List<ValidationIssue> invalidTypes = new ArrayList<>();
 	    public List<ValidationIssue> invalidSemesters = new ArrayList<>();
@@ -86,6 +87,7 @@ public class ExcelProcessingService {
 
 	                int currentRowNum = i + 1;
 	                String courseId = getCourseIdFromCell(row.getCell(0));
+	                
 	                if (courseId == null || courseId.trim().isEmpty()) {
 	                    addValidationIssue(summary.missingCourses, "[Missing Course ID]", currentRowNum);
 	                    continue;
@@ -96,6 +98,16 @@ public class ExcelProcessingService {
 	                    continue;
 	                }
 	                
+	                String courseNameExcel = getSafeCellString(row, 1);
+                    Course dbCourse = courseMap.get(courseId);
+	                
+                    if (!courseNameExcel.trim().equals(dbCourse.getCourseName().trim())) {
+                        String errorMsg = String.format("Cours ID %s: course name in the excel is '%s', but expect '%s'", 
+                                                        courseId, courseNameExcel, dbCourse.getCourseName());
+                        addValidationIssue(summary.mismatchedCourseNames, errorMsg, currentRowNum);
+                        continue;
+                    }
+                    
 	                
 	                String lecturerName = getSafeCellString(row, 3);
 	                if (lecturerName.isEmpty()) {
@@ -159,8 +171,8 @@ public class ExcelProcessingService {
 	                    continue;
 	                }
 
-	                addLessonToList(courseId, row.getCell(1).toString(), type, lecturerName, semester, duration, lessons, courseMap);
-	                summary.savedCount++;
+	                addLessonToList(courseId, courseNameExcel, type, lecturerName, semester, duration, lessons, courseMap);
+                    summary.savedCount++;
 	            }
 
 	            if (!lessons.isEmpty()) {
