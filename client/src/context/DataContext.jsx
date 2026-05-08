@@ -109,10 +109,10 @@ export function DataProvider({ children }) {
     setClustersTimestamp(null);
   }, []);
 
-  const fetchCoursesIfNeeded = useCallback(async (caller = "Unknown") => {
+  const fetchCoursesIfNeeded = useCallback(async (caller = "Unknown", forceFetch = false) => {
     if (isFetching.courses) return;
 
-    if (isCacheValid(coursesTimestamp)) {
+    if (!forceFetch && isCacheValid(coursesTimestamp)) {
       console.log(`[Cache] Courses are fresh, skipping fetch for: ${caller}`);
       return;
     }

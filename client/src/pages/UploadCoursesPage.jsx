@@ -98,7 +98,7 @@ export default function UploadCoursesPage() {
       setInvalidCoursesModalOpen(true);
       
       invalidateCoursesCache();
-      await fetchCoursesIfNeeded("UploadCoursesPage");
+      await fetchCoursesIfNeeded("UploadCoursesPage", true);
     } catch (err) {
       console.error(err);
       showError("Upload failed. Check console for details.");
