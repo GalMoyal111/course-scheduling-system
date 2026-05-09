@@ -92,7 +92,7 @@ const {
     },
     "CourseComponentsOverlap": { 
         label: "Prevent Component Overlap", 
-        desc: "Ensures lectures and tutorials for the same course aren't scheduled on the same day, giving students time to process the material." 
+        desc: "Ensures lectures for the same course aren't scheduled on the same day, while also preventing tutorial overlaps, giving students time to process the material." 
     },
     "MandatoryMorningPreferred": { 
         label: "Core Courses in the Morning", 
