@@ -28,7 +28,7 @@ public class SavedTimetableService {
     
     private List<SavedTimetableMetadata> cachedMetadata = null;
     private long lastFetchTimeMetadata = 0;
-    private static final long CACHE_DURATION = 30 * 60 * 1000;
+    private static final long CACHE_DURATION = 60 * 60 * 1000;
     
     private final Map<String, List<ScheduledLessonDTO>> timetableDataCache = new ConcurrentHashMap<>();
 

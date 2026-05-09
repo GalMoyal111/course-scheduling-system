@@ -15,7 +15,7 @@ public class ClusterService {
     private static final String COLLECTION_NAME = "clusters";
     private List<Cluster> cachedClusters = null;
     private long lastFetchTime = 0;
-    private static final long CACHE_DURATION = 30 * 60 * 1000;
+    private static final long CACHE_DURATION = 60 * 60 * 1000;
 
     public List<Cluster> getAllClusters() throws Exception {
     	

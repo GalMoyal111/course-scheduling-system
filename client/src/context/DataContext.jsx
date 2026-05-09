@@ -4,7 +4,7 @@ import { getAllCourses, getAllLessons, getAllClassrooms, getAllLecturers, getTim
 const DataContext = createContext();
 
 // Cache duration in milliseconds (30 minutes)
-const CACHE_DURATION = 30 * 60 * 1000;
+const CACHE_DURATION = 60 * 60 * 1000;
 
 export function DataProvider({ children }) {
   const [lessons, setLessons] = useState([]);

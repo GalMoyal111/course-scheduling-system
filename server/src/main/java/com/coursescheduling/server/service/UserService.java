@@ -19,7 +19,7 @@ public class UserService {
 
 	private List<Map<String, String>> cachedUsers = null;
 	private long lastFetchTime = 0;
-	private static final long CACHE_DURATION = 30 * 60 * 1000;
+	private static final long CACHE_DURATION = 60 * 60 * 1000;
 	
 	private Map<String, String> userRoleCache = new HashMap<>();
     private Map<String, Long> userRoleFetchTime = new HashMap<>();
