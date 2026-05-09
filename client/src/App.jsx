@@ -16,6 +16,7 @@ import TimetablePage from "./pages/TimetablePage";
 import HelpPage from "./pages/HelpPage";
 import GeneratePage from "./pages/GeneratePage";
 import HistoryPage from "./pages/HistoryPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 import "./styles/global.css";
 
 
@@ -78,16 +79,79 @@ function App() {
   return (
     <Layout user={user} onLogin={setUser} onLogout={() => setUser(null)}>
       <Routes>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/classrooms" element={<UploadRoomsPage />} />
-        <Route path="/courses" element={<UploadCoursesPage />} />
-        <Route path="/lessons" element={<UploadPage />} />
-        <Route path="/lecturers" element={<LecturersPage />} />
-        <Route path="/generate" element={<GeneratePage />} />
-        <Route path="/timetable" element={<TimetablePage />} />
-        <Route path="/history" element={<HistoryPage />} />
-        <Route path="/settings" element={<SettingsPage user={user} />} />
-        <Route path="/help" element={<HelpPage />} />
+        <Route path="/" element={<DashboardPage user={user} />} />
+        <Route
+          path="/classrooms"
+          element={
+            <ProtectedRoute user={user}>
+              <UploadRoomsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/courses"
+          element={
+            <ProtectedRoute user={user}>
+              <UploadCoursesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lessons"
+          element={
+            <ProtectedRoute user={user}>
+              <UploadPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lecturers"
+          element={
+            <ProtectedRoute user={user}>
+              <LecturersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/generate"
+          element={
+            <ProtectedRoute user={user}>
+              <GeneratePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/timetable"
+          element={
+            <ProtectedRoute user={user}>
+              <TimetablePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute user={user}>
+              <HistoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute user={user}>
+              <SettingsPage user={user} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/help"
+          element={
+            <ProtectedRoute user={user}>
+              <HelpPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
 
       <Footer />

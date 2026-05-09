@@ -6,7 +6,7 @@ import "./ui.css";
 export default function Layout({ children , user , onLogin, onLogout}) {
   return (
     <div style={{ display: "flex" }}>
-      <Sidebar />
+      <Sidebar user={user} />
 
       <div style={{ flex: 1 }}>
         <Topbar user={user} onLogin={onLogin} onLogout={onLogout} />

@@ -1,16 +1,41 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
-import Footer from "../components/ui/Footer";
 import ImportExportModal from "../components/ImportExportModal";
+import Modal from "../components/ui/Modal";
 import "./DashboardPage.css";
+import LoginRequiredModal from "../components/LoginRequiredModal";
 
 
-export default function DashboardPage() {
+export default function DashboardPage({ user }) {
   const navigate = useNavigate();
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const handleActionClick = (action) => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
+    if (action === "import") {
+      setImportModalOpen(true);
+    } else if (action === "export") {
+      setExportModalOpen(true);
+    } else if (action === "template") {
+      setTemplateModalOpen(true);
+    }
+  };
+
+  const handleNavigate = (path) => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    navigate(path);
+  };
 
   return (
     <div className="dashboard-page">
@@ -72,7 +97,7 @@ export default function DashboardPage() {
             <p>Upload Excel files for lessons, courses, classrooms, or lecturers</p>
             <Button
               variant="primary"
-              onClick={() => setImportModalOpen(true)}
+              onClick={() => handleActionClick("import")}
               className="action-button"
             >
               Import
@@ -87,7 +112,7 @@ export default function DashboardPage() {
             <p>Download Excel files for lessons, courses, classrooms, or lecturers</p>
             <Button
               variant="primary"
-              onClick={() => setExportModalOpen(true)}
+              onClick={() => handleActionClick("export")}
               className="action-button"
             >
               Export
@@ -102,7 +127,7 @@ export default function DashboardPage() {
             <p>Download blank Excel templates to easily fill in your system data</p>
             <Button
               variant="primary"
-              onClick={() => setTemplateModalOpen(true)}
+              onClick={() => handleActionClick("template")}
               className="action-button"
             >
               Templates
@@ -117,7 +142,7 @@ export default function DashboardPage() {
             <p>Create an optimized timetable based on your data</p>
             <Button
               variant="primary"
-              onClick={() => navigate("/generate")}
+              onClick={() => handleNavigate("/generate")}
               className="action-button"
             >
               Generate
@@ -132,7 +157,7 @@ export default function DashboardPage() {
             <p>View your timetable generation history</p>
             <Button
               variant="primary"
-              onClick={() => navigate("/history")}
+              onClick={() => handleNavigate("/history")}
               className="action-button"
             >
               View
@@ -155,6 +180,11 @@ export default function DashboardPage() {
         isOpen={templateModalOpen}
         onClose={() => setTemplateModalOpen(false)}
         type="template"
+      />
+
+      <LoginRequiredModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
       />
     </div>
   );

@@ -1,12 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import logo from "../../assets/logo.png";
+import Modal from "./Modal";
 import "./ui.css";
-
+import LoginRequiredModal from "../LoginRequiredModal";
 import { useNavigate, useLocation } from "react-router-dom";
 
-export default function Sidebar() {
+export default function Sidebar({ user }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
   const items = [
     { path: "/", label: "Dashboard", icon: "dashboard" },
     { path: "/classrooms", label: "Classrooms", icon: "meeting_room" },
@@ -19,6 +22,23 @@ export default function Sidebar() {
     { path: "/settings", label: "Settings", icon: "settings" },
     { path: "/help", label: "Help", icon: "help" },
   ];
+
+  const handleNavigate = (path) => {
+    // Dashboard is always accessible
+    if (path === "/") {
+      navigate(path);
+      return;
+    }
+
+    // If user is not logged in, show modal instead of navigating
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    // User is logged in, navigate normally
+    navigate(path);
+  };
 
   return (
     <div className="sidebar">
@@ -35,13 +55,19 @@ export default function Sidebar() {
             className={`sidebar-item ${
               location.pathname === item.path ? "active" : ""
             }`}
-            onClick={() => navigate(item.path)}
+            onClick={() => handleNavigate(item.path)}
           >
             <span className="material-icons">{item.icon}</span>
             <span>{item.label}</span>
           </div>
         ))}
       </div>
+
+      {/* Login Modal */}
+      <LoginRequiredModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 }
