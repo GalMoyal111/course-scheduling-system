@@ -402,18 +402,18 @@ function LessonUploadSummaryModal({ isOpen, summary, onClose }) {
     if (!issues || issues.length === 0) return null;
     
     return (
-      <div className="summary-section" style={{ marginBottom: '20px' }}>
+      <div className="summary-section" style={{ marginBottom: '28px' }}>
         <h4 style={{ 
-          fontSize: '14px', color: '#b45309', textTransform: 'uppercase', 
-          borderBottom: '1px solid #fde68a', paddingBottom: '4px', marginBottom: '8px', textAlign: 'left' 
+          fontSize: '15px', color: '#b45309', textTransform: 'uppercase', fontWeight: '700',
+          borderBottom: '2px solid #fde68a', paddingBottom: '8px', marginBottom: '14px', textAlign: 'left', letterSpacing: '0.5px'
         }}>
           {title}
         </h4>
-        <div style={{ maxHeight: '120px', overflowY: 'auto', paddingLeft: '5px', textAlign: 'left' }}>
+        <div style={{ maxHeight: '220px', overflowY: 'auto', paddingLeft: '8px', textAlign: 'left' }}>
           {issues.map((issue, idx) => (
-            <div key={idx} style={{ fontSize: '13px', marginBottom: '4px', color: '#4b5563' }}>
-              <span style={{ fontWeight: '600' }}>{issue.identifier}</span>
-              <span style={{ color: '#9ca3af', marginLeft: '6px' }}>
+            <div key={idx} style={{ fontSize: '14px', marginBottom: '10px', color: '#4b5563', padding: '8px', backgroundColor: '#fafaf9', borderRadius: '4px', borderLeft: '3px solid #f59e0b' }}>
+              <span style={{ fontWeight: '700', color: '#1f2937' }}>{issue.identifier}</span>
+              <span style={{ color: '#9ca3af', marginLeft: '8px', fontSize: '13px' }}>
                 (Lines: {issue.rows.join(', ')})
               </span>
             </div>
@@ -424,7 +424,7 @@ function LessonUploadSummaryModal({ isOpen, summary, onClose }) {
   };
 
   const footer = (
-    <Button variant="primary" onClick={onClose} style={{ width: '100%', padding: '10px', fontWeight: '600' }}>
+    <Button variant="primary" onClick={onClose} style={{ width: '100%', padding: '14px', fontWeight: '700', fontSize: '15px' }}>
       Close Summary
     </Button>
   );
@@ -434,14 +434,14 @@ function LessonUploadSummaryModal({ isOpen, summary, onClose }) {
       isOpen={isOpen}
       onClose={onClose}
       title="Upload Summary"
-      size="normal"
+      size="wide"
       footer={footer}
     >
-      <div style={{ textAlign: 'center', backgroundColor: '#f0fdf4', padding: '15px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #dcfce7' }}>
-        <div style={{ color: '#166534', fontWeight: '700', fontSize: '18px' }}>
+      <div style={{ textAlign: 'center', backgroundColor: '#f0fdf4', padding: '20px', borderRadius: '8px', marginBottom: '28px', border: '1px solid #dcfce7' }}>
+        <div style={{ color: '#166534', fontWeight: '700', fontSize: '20px' }}>
           ✓ {summary.savedCount} Lessons Saved
         </div>
-        <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+        <div style={{ fontSize: '14px', color: '#666', marginTop: '6px' }}>
           Out of {summary.totalRows} rows processed
         </div>
       </div>
@@ -454,7 +454,7 @@ function LessonUploadSummaryModal({ isOpen, summary, onClose }) {
       {renderIssueSection("Invalid Durations", summary.invalidDurations)}
 
       {summary.savedCount === 0 && (
-        <p style={{ color: '#ef4444', textAlign: 'center', fontSize: '14px', fontWeight: '500' }}>
+        <p style={{ color: '#ef4444', textAlign: 'center', fontSize: '15px', fontWeight: '500' }}>
           No lessons were imported. Please fix the errors above.
         </p>
       )}
