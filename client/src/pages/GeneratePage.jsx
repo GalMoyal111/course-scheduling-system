@@ -7,6 +7,7 @@ import "./GeneratePage.css";
 import { useData } from "../context/DataContext";
 import ManualAssignmentModal from "../components/ManualAssignmentModal";
 import HardCourseModal from "../components/HardCourseModal";
+import InfoButton from "../components/InfoButton";
 
 
 const DAY_NAMES = { 1: "ראשון", 2: "שני", 3: "שלישי", 4: "רביעי", 5: "חמישי", 6: "שישי" };
@@ -78,56 +79,56 @@ const {
 
   const constraintDetails = {
     "RoomSizeEfficiency": { 
-        label: "Room Capacity Efficiency", 
-        desc: "Prioritize fitting large groups into optimal sized rooms." 
+        label: "Optimize Classroom Capacity", 
+        desc: "Prevents wasting large classrooms on small groups, keeping them available for larger courses." 
     },
     "PreferMorningForHardCourses": { 
         label: "Morning Peak Performance", 
-        desc: "Schedule challenging courses during high-concentration hours." 
+        desc: "Schedules demanding courses in the early morning when students are most focused." 
     },
     "LecturerCompactSchedule": { 
         label: "Compact Staff Schedule", 
-        desc: "Minimize idle gaps (holes) between lessons for lecturers." 
+        desc: "Minimizes waiting times for lecturers by grouping their teaching hours and preventing single-lesson campus visits." 
     },
     "CourseComponentsOverlap": { 
         label: "Prevent Component Overlap", 
-        desc: "Avoid scheduling lectures and tutorials on the same day." 
+        desc: "Ensures lectures and tutorials for the same course aren't scheduled on the same day, giving students time to process the material." 
     },
     "MandatoryMorningPreferred": { 
         label: "Core Courses in the Morning", 
-        desc: "Give priority to mandatory core subjects in early slots." 
+        desc: "Prioritizes scheduling mandatory and core subjects during the earlier, more convenient hours of the day." 
     },
     "ElectiveEveningPreferred": { 
         label: "Later Slots for Electives", 
-        desc: "Move enrichment and elective courses to the afternoon/evening." 
+        desc: "Shifts elective and enrichment courses to the afternoon and evening, freeing up mornings for mandatory courses." 
     },
     "InconvenientTiming": { 
-        label: "Avoid Weekends & Late Nights", 
-        desc: "Minimize classes on Fridays or very late evening hours." 
+        label: "Avoid Late Hours & Fridays", 
+        desc: "Minimizes classes on Fridays or during late evening hours as much as possible (except for English courses)." 
     },
     "ElectiveCourseInTheSameClassroom": { 
         label: "Elective Room Grouping", 
-        desc: "Keep related elective tracks within the same physical classroom." 
+        desc: "Keeps all lessons of a specific elective course in the exact same classroom to prevent students from moving around unnecessarily." 
     },
     "AvoidBuildingP": {
           label: "Avoid Building P",
-          desc: "Assign a penalty for scheduling classes in building P."
+          desc: "Prefers scheduling lessons in any other building, using Building P only when no other classrooms are available across the campus."
       },
     "LecturerPreference": {
           label: "Lecturer Preferences",
-          desc: "Respect lecturers' soft requests to avoid teaching on specific days/hours."
+          desc: "Respects lecturers' requests by avoiding scheduling classes during hours they prefer not to teach."
       },
     "EnglishCourseTiming": {  
           label: "English Course Optimal Timing",
-          desc: "Prioritize scheduling English courses on Friday mornings (slots 1-4) or weekday afternoons (slots 7-10)."
+          desc: "Schedules English courses during their traditional time slots (Friday mornings or weekday afternoons)."
       },
     "LoadBalancing": {  
-          label: "Schedule Load Balancing",
-          desc: "Prevent overcrowding by penalizing time slots that have more than 20 concurrent lessons, spreading classes evenly."
+          label: "Campus Load Balancing",
+          desc: "Spreads lessons across the week to prevent overcrowding and having too many concurrent classes."
       },
     "ClusterOverlap": {
           label: "Cluster Overlap Avoidance",
-          desc: "Minimize scheduling different courses from the same cluster at the same time to allow students to attend all related classes."
+          desc: "Crucial: Prevents scheduling two courses from the same track or semester at the same time, ensuring students can attend both."
       }
   };
 
@@ -179,7 +180,7 @@ const {
           <span className="material-icons generator-icon">auto_awesome</span>
           AI Timetable Engine
         </h1>
-        <p>Fine-tune the scheduling algorithm's behavior using the sliders below.</p>
+        <p>Let our intelligent algorithm create the perfect schedule for your courses. Configure your preferences below and generate an optimized timetable in seconds.</p>
       </div>
 
       {/* --- Error Modal Popup --- */}
@@ -217,12 +218,18 @@ const {
 
       {/* Step 1 */}
       <div className="generate-card">
-        <h3>
-          <span className="material-icons">calendar_month</span>
-          1. Target Semester
-        </h3>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <h3 style={{ margin: 0 }}>
+            <span className="material-icons">calendar_month</span>
+            1. Target Semester
+          </h3>
+          <InfoButton 
+            title="What is a Semester?"
+            description="A semester is a complete academic term. Select which semester (A or B) you want to create a schedule for. All courses assigned to that semester will be scheduled."
+          />
+        </div>
         <div className="form-group">
-          <label>Select the semester you wish to schedule:</label>
+          <label>Choose which semester to schedule:</label>
           <select 
             className="semester-select"
             value={semester} 
@@ -236,17 +243,22 @@ const {
 
       <div className="generate-card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-          <h3>
-            <span className="material-icons">push_pin</span>
-            Manual Assignments (Pre-scheduling)
-          </h3>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <h3 style={{ margin: 0 }}>
+              <span className="material-icons">push_pin</span>
+              2. Manual Assignments (Lock in Specific Times)
+            </h3>
+            <InfoButton 
+              title="What are Manual Assignments?"
+              description="Use this if you have specific lessons that MUST be scheduled at an exact time and room. The algorithm will lock them in place and build the rest of the schedule around them."
+            />
+          </div>
           <Button variant="secondary" onClick={() => setIsManualModalOpen(true)}>
-            + Add Manual Assignment
+            + Add Assignment
           </Button>
         </div>
         <p className="hint-text">
-          Have specific lessons that MUST be scheduled at an exact time and room? Add them here. 
-          The algorithm will lock them in place and build the rest of the schedule around them.
+          Need a lesson at a specific time? Lock it in here and let the algorithm organize everything else around it.
         </p>
 
         {manualAssignments.length > 0 && (
@@ -274,8 +286,17 @@ const {
       {/* Hard Courses Section */}
       <div className="generate-card">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h3><span className="material-icons">priority_high</span> Hard Courses (Morning Priority)</h3>
-          <Button variant="secondary" onClick={() => setIsHardModalOpen(true)}>+ Add Hard Course</Button>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <h3 style={{ margin: 0 }}>
+              <span className="material-icons">priority_high</span>
+              3. Challenging Courses (Morning Preference)
+            </h3>
+            <InfoButton 
+              title="Why Morning for Hard Courses?"
+              description="Difficult courses require maximum student focus. By scheduling them in the morning when students are most alert and energized, they learn better. Use this for demanding subjects like advanced math, physics, or programming."
+            />
+          </div>
+          <Button variant="secondary" onClick={() => setIsHardModalOpen(true)}>+ Add Course</Button>
         </div>
         
         {hardCourses.length > 0 && (
@@ -293,13 +314,18 @@ const {
 
       {/* 🔥 Step 3: Lesson Capacity Requirements */}
       <div className="generate-card">
-        <h3>
-          <span className="material-icons">groups</span>
-          2. Lesson Capacity Requirements
-        </h3>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <h3 style={{ margin: 0 }}>
+            <span className="material-icons">groups</span>
+            4. Classroom Size Requirements
+          </h3>
+          <InfoButton 
+            title="Why Specify Class Sizes?"
+            description="Different lesson types need different room sizes. A lecture for 100 students needs a large hall, while a lab for 20 students needs a smaller space. The algorithm will automatically select appropriate classrooms based on these numbers."
+          />
+        </div>
         <p className="hint-text">
-          Define the minimum number of students each lesson type must accommodate. 
-          The algorithm will use these numbers to find classrooms with sufficient size.
+          Tell us the expected number of students for each lesson type, and we'll find suitable classrooms automatically.
         </p>
         
         <div className="capacity-grid" style={{ 
@@ -465,13 +491,35 @@ const {
 
       {/* Step 2 */}
       <div className="generate-card">
-        <h3>
-          <span className="material-icons">settings_input_component</span>
-          3. Algorithm Optimization Weights
-        </h3>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <h3 style={{ margin: 0 }}>
+            <span className="material-icons">settings_input_component</span>
+            5. Fine-Tune Scheduling Priorities
+          </h3>
+          <InfoButton 
+            title="How to Use Sliders?"
+            description="Each slider controls how important a scheduling rule is. Set to 10 (High) to make it a top priority, or 0 (Low) to ignore it. For example, set 'Compact Staff Schedule' to 10 if your lecturers want minimal campus visits."
+          />
+        </div>
         <p className="hint-text">
-          Adjust the priority (0 = Low, 10 = High) for each scheduling rule.
+          Adjust each priority slider (0 = Low, 10 = High) to customize how the algorithm schedules your timetable. Higher values mean the algorithm will work harder to satisfy that rule.
         </p>
+
+        <div style={{
+          background: 'linear-gradient(135deg, #f0f9ff 0%, #f8fafc 100%)',
+          border: '1px solid #e0f2fe',
+          borderRadius: '8px',
+          padding: '12px 16px',
+          marginBottom: '24px',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '12px'
+        }}>
+          <span className="material-icons" style={{ color: '#0ea5e9', marginTop: '2px', flexShrink: 0, fontSize: '20px' }}>lightbulb</span>
+          <div style={{ color: '#0c4a6e', fontSize: '0.9rem', lineHeight: '1.5' }}>
+            <strong>Quick tip:</strong> Mix high and low priorities for the best results. If everything is set to 10, the algorithm can't prioritize what truly matters to you.
+          </div>
+        </div>
         
         {Object.keys(weights).map((constraint) => (
           <div key={constraint} className="constraint-row" style={{ display: 'flex', flexDirection: 'column', marginBottom: '15px' }}>

@@ -313,3 +313,15 @@
     from { opacity: 0; transform: scale(0.9); }
     to { opacity: 1; transform: scale(1); }
 }
+
+/* Improved header styling with info button */
+.generate-card > div:first-child {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.generate-card h3 {
+    flex-shrink: 0;
+}

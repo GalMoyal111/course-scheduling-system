@@ -1,0 +1,36 @@
+.info-button-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.info-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  margin-left: 8px;
+}
+
+.info-button:hover {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  transform: scale(1.05);
+}
+
+.info-button:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.info-button .material-icons {
+  font-size: 18px;
+}
