@@ -14,13 +14,13 @@ export default function Sidebar({ user }) {
     { path: "/", label: "Dashboard", icon: "dashboard" },
     { path: "/classrooms", label: "Classrooms", icon: "meeting_room" },
     { path: "/courses", label: "Courses", icon: "menu_book" },
-    { path: "/lessons", label: "Lessons", icon: "school" },
     { path: "/lecturers", label: "Lecturers", icon: "person" },
+    { path: "/lessons", label: "Lessons", icon: "school" },
     { path: "/generate", label: "Generate", icon: "auto_awesome" },
     { path: "/timetable", label: "Timetable", icon: "calendar_month" },
     { path: "/history", label: "History", icon: "history" },
-    { path: "/settings", label: "Settings", icon: "settings" },
     { path: "/help", label: "Help", icon: "help" },
+    { path: "/settings", label: "Settings", icon: "settings" },
   ];
 
   const handleNavigate = (path) => {
