@@ -90,6 +90,16 @@ export default function SettingsPage({ user }) {
                 return;
             }
 
+            // Check if email already exists
+            const emailExists = users.some(
+                (u) => u.email.toLowerCase() === newEmail.toLowerCase()
+            );
+            
+            if (emailExists) {
+                showError("The user already exists in the system");
+                return;
+            }
+
             const token = await auth.currentUser.getIdToken();
 
             const uid = await createUser(newEmail, newPassword, newRole, token);
