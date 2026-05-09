@@ -6,15 +6,15 @@ export default function FAQAccordion() {
   const faqs = [
     {
       id: 1,
-      question: "How do I get started with UniSched?",
+      question: "How do I get started with the system?",
       answer:
-        "Start by logging in, then go to the Dashboard. From there, you can upload courses, classrooms, and lecturers. After that, create lessons and generate the timetable.",
+        "Start by logging in, then define your clusters (semesters/programs) in Settings. Next, upload your courses, classrooms, and lecturers using Excel files. Then create lessons and finally generate the timetable using the Generate page.",
     },
     {
       id: 2,
       question: "What file formats are supported for importing?",
       answer:
-        "UniSched supports CSV, Excel (.xlsx), and JSON formats. Make sure your files have proper headers and formatting before importing.",
+        "The system supports Excel files (.xlsx format). Make sure your Excel file has proper headers and formatting before importing.",
     },
     {
       id: 3,
@@ -38,13 +38,13 @@ export default function FAQAccordion() {
       id: 6,
       question: "How do I export data?",
       answer:
-        "Go to the Dashboard and click the Export button. Select which data you want to export and choose your preferred format (CSV, Excel, or JSON).",
+        "Go to the Dashboard and click the Export button. Select which data you want to export and download it as an Excel file.",
     },
     {
       id: 7,
       question: "Is there a way to backup my data?",
       answer:
-        "Yes! Use the export feature on the Dashboard to create regular backups. Download your data in CSV, Excel, or JSON format.",
+        "Yes! Use the export feature on the Dashboard to create regular backups. Download your data as Excel files and store them safely.",
     },
     {
       id: 8,

@@ -14,280 +14,284 @@ export default function HelpPage() {
     <div className="help-page">
       {/* Header */}
       <section className="help-header">
-        <h1>Help & Information</h1>
+        <h1>
+          <span className="material-icons" style={{ fontSize: '48px', color: '#6366f1', marginRight: '12px', verticalAlign: 'middle' }}>school</span>
+          User Guide
+        </h1>
         <p className="help-subtitle">
-          Learn how to use UniSched and make the most of the course scheduling system
+          How to Use the Smart Scheduling System
         </p>
       </section>
 
-      {/* Getting Started Section */}
+      {/* Introduction Section */}
       <HelpSection
-        title="Getting Started"
-        isExpanded={expandedSection === "getting-started"}
-        onToggle={() => toggleSection("getting-started")}
+        title="Welcome!"
+        isExpanded={expandedSection === "introduction"}
+        onToggle={() => toggleSection("introduction")}
       >
         <div className="section-content">
-          <h3>Welcome to UniSched</h3>
           <p>
-            UniSched is a comprehensive course scheduling system designed to help manage and organize academic courses, classrooms, lecturers, and lessons efficiently.
+            Welcome to the automatic timetable generation system!
+          </p>
+          <p>
+            This system is designed to save you <strong>hours of manual work and frustration</strong> by creating the best possible schedule for students, lecturers, and college requirements.
+          </p>
+          <p>
+            To let the algorithm do its magic, it needs the right input from you. Just follow these <strong>4 simple steps</strong>.
+          </p>
+        </div>
+      </HelpSection>
+
+      {/* Step 1: Login */}
+      <HelpSection
+        title="Step 1: Login"
+        isExpanded={expandedSection === "step1"}
+        onToggle={() => toggleSection("step1")}
+      >
+        <div className="section-content">
+          <p>
+            To get started, log in with your username and password.
+          </p>
+          <div className="step-box">
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>lock</span> Why is login important?</h4>
+            <p>
+              Your login ensures that all the data you enter (lecturers, courses, and schedules) is securely saved in the cloud and available anytime, from anywhere.
+            </p>
+          </div>
+        </div>
+      </HelpSection>
+
+      {/* Step 2: Define Clusters */}
+      <HelpSection
+        title="Step 2: Define Study Clusters (in Settings)"
+        isExpanded={expandedSection === "step2"}
+        onToggle={() => toggleSection("step2")}
+      >
+        <div className="section-content">
+          <p>
+            Before entering data, the system needs to understand how your students are grouped.
+          </p>
+          <p>
+            <strong>Go to the Settings page and define your "clusters".</strong>
+          </p>
+          
+          <div className="step-box">
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>groups</span> What is a cluster?</h4>
+            <p>
+              A cluster is a semester number. Examples:
+            </p>
+            <ul>
+              <li>"סמסטר 1"</li>
+              <li>"סמסטר 2"</li>
+              <li>"עיבוד אותות ורשתות תקשורת"</li>
+            </ul>
+          </div>
+
+          <div className="step-box">
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>priority_high</span> Why is this important?</h4>
+            <p>
+              The algorithm uses clusters to prevent conflicts. It will never schedule two courses from the same cluster at the same time, so students can attend both.
+            </p>
+          </div>
+        </div>
+      </HelpSection>
+
+      {/* Step 3: Enter Data */}
+      <HelpSection
+        title="Step 3: Enter Data into the System"
+        isExpanded={expandedSection === "step3"}
+        onToggle={() => toggleSection("step3")}
+      >
+        <div className="section-content">
+          <p>
+            Now it's time to enter the information the system will use. You can move between the different pages using the side menu.
           </p>
 
-          <h4>First Steps</h4>
-          <ol>
-            <li><strong>Log In:</strong> Access the system using your credentials</li>
-            <li><strong>Navigate to Dashboard:</strong> View an overview of all your data</li>
-            <li><strong>Upload Your Data:</strong> Start by uploading courses, classrooms, and lecturers</li>
-            <li><strong>Create Lessons:</strong> Define lessons and assign them to courses</li>
-            <li><strong>Generate Timetable:</strong> Use the system to generate an optimized schedule</li>
-          </ol>
+          <div className="step-box">
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>menu_book</span> Courses</h4>
+            <p>Here you define all the courses being taught.</p>
+            <p><strong>For each course, enter:</strong></p>
+            <ul>
+              <li>Course name</li>
+              <li>Course code</li>
+              <li>Related cluster (from Step 2)</li>
+            </ul>
+          </div>
+
+          <div className="step-box">
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>person</span> Lecturers</h4>
+            <p>Here you add your teaching staff.</p>
+            <p><strong>The most important part of this page is the availability table.</strong> By clicking on time slots, you can define:</p>
+            <ul>
+              <li><strong>Red (Hard Constraint):</strong> The lecturer absolutely cannot teach at this time.</li>
+              <li><strong>Orange (Soft Constraint):</strong> The lecturer prefers not to teach at this time (the algorithm will try to avoid it).</li>
+            </ul>
+          </div>
+
+          <div className="step-box">
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>meeting_room</span> Classrooms</h4>
+            <p>These are the physical rooms on campus.</p>
+            <p><strong>For each classroom, define:</strong></p>
+            <ul>
+              <li>Room name</li>
+              <li>Building</li>
+              <li>Capacity (number of seats)</li>
+            </ul>
+          </div>
+
+          <div className="step-box">
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>school</span> Lessons</h4>
+            <p>This is where everything connects together!</p>
+            <p><strong>Here you create the actual lessons by:</strong></p>
+            <ul>
+              <li>Choosing a course</li>
+              <li>Assigning a lecturer</li>
+              <li>Defining the lesson type (lecture, tutorial, lab, etc.)</li>
+              <li>Setting the lesson duration (for example: 2 hours)</li>
+            </ul>
+          </div>
 
           <p className="tip-box">
-            <strong>💡 Tip:</strong> Make sure all your data is complete and accurate before generating the timetable.
+            <strong>💡 Tip:</strong> If you have a lot of data, you can use the Excel upload option on different pages to import everything with one click.
           </p>
         </div>
       </HelpSection>
 
-      {/* Main Features Section */}
+      {/* Step 4: Generate Timetable */}
       <HelpSection
-        title="Main Features"
-        isExpanded={expandedSection === "main-features"}
-        onToggle={() => toggleSection("main-features")}
+        title="Step 4: Generate the Timetable"
+        isExpanded={expandedSection === "step4"}
+        onToggle={() => toggleSection("step4")}
       >
         <div className="section-content">
-          <div className="feature-grid">
-            {/* Dashboard */}
-            <div className="feature-card">
-              <div className="feature-icon">📊</div>
-              <h4>Dashboard</h4>
-              <p>
-                Get an overview of your system with statistics on courses, classrooms, lecturers, and lessons.
-                Quick access to import/export functionality.
-              </p>
-            </div>
+          <p>
+            After all the data is in the system, go to the <strong>Generate page</strong> to run the smart algorithm.
+          </p>
 
-            {/* Courses */}
-            <div className="feature-card">
-              <div className="feature-icon">📚</div>
-              <h4>Courses</h4>
-              <p>
-                Upload and manage courses. Add course details and organize them for scheduling.
-              </p>
-            </div>
-
-            {/* Classrooms */}
-            <div className="feature-card">
-              <div className="feature-icon">🏢</div>
-              <h4>Classrooms</h4>
-              <p>
-                Define available classrooms with capacity information. Essential for course scheduling.
-              </p>
-            </div>
-
-            {/* Lecturers */}
-            <div className="feature-card">
-              <div className="feature-icon">👨‍🏫</div>
-              <h4>Lecturers</h4>
-              <p>
-                Manage lecturer profiles and assign them to courses. Track lecturer availability and workload.
-              </p>
-            </div>
-
-            {/* Lessons */}
-            <div className="feature-card">
-              <div className="feature-icon">🎓</div>
-              <h4>Lessons</h4>
-              <p>
-                Create and define lessons for each course. Specify lesson type, duration, and requirements.
-              </p>
-            </div>
-
-            {/* Timetable */}
-            <div className="feature-card">
-              <div className="feature-icon">📅</div>
-              <h4>Timetable</h4>
-              <p>
-                View and manage the generated timetable. See all scheduled classes with their assigned classrooms and lecturers.
-              </p>
-            </div>
-          </div>
-        </div>
-      </HelpSection>
-
-      {/* How to Use Guide Section */}
-      <HelpSection
-        title="How to Use the System"
-        isExpanded={expandedSection === "how-to-use"}
-        onToggle={() => toggleSection("how-to-use")}
-      >
-        <div className="section-content">
-          <h3>Step-by-Step Guide</h3>
-
-          <h4>1. Upload Courses</h4>
           <div className="step-box">
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>calendar_month</span> 1️⃣ Select Semester</h4>
             <p>
-              Navigate to the <strong>Courses</strong> section from the sidebar. You can:
-            </p>
-            <ul>
-              <li>Upload courses from a file (CSV, Excel, or JSON)</li>
-              <li>Add individual courses manually using the add button</li>
-              <li>Edit existing courses</li>
-              <li>Delete courses that are no longer needed</li>
-            </ul>
-            <p className="tip-box">
-              <strong>💡 Tip:</strong> Use the import feature for bulk uploads to save time.
+              Choose which semester you want to generate the timetable for.
             </p>
           </div>
 
-          <h4>2. Upload Classrooms</h4>
           <div className="step-box">
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>push_pin</span> 2️⃣ Manual Assignments</h4>
             <p>
-              Go to <strong>Classrooms</strong> and:
-            </p>
-            <ul>
-              <li>Add classroom information (name, capacity, location)</li>
-              <li>Specify any special features or equipment (projector, lab equipment, etc.)</li>
-              <li>Upload multiple classrooms at once</li>
-            </ul>
-          </div>
-
-          <h4>3. Add Lecturers</h4>
-          <div className="step-box">
-            <p>
-              In the <strong>Lecturers</strong> section:
-            </p>
-            <ul>
-              <li>Register all lecturers in the system</li>
-              <li>Assign lecturers to courses</li>
-              <li>Define lecturer availability if needed</li>
-              <li>Manage lecturer preferences</li>
-            </ul>
-          </div>
-
-          <h4>4. Create Lessons</h4>
-          <div className="step-box">
-            <p>
-              Navigate to <strong>Lessons</strong> and:
-            </p>
-            <ul>
-              <li>Create lessons for each course</li>
-              <li>Specify lesson type (lecture, tutorial, lab, etc.)</li>
-              <li>Set duration (in hours)</li>
-              <li>Define which lecturer teaches the lesson</li>
-              <li>Upload multiple lessons at once</li>
-            </ul>
-          </div>
-
-          <h4>5. Generate Timetable</h4>
-          <div className="step-box">
-            <p>
-              Once all data is entered, go to <strong>Generate</strong> to:
-            </p>
-            <ul>
-              <li>Create an optimized schedule automatically</li>
-              <li>The system avoids conflicts and respects constraints</li>
-              <li>Review the generated timetable</li>
-              <li>Make manual adjustments if needed</li>
-            </ul>
-            <p className="tip-box">
-              <strong>💡 Tip:</strong> Ensure all required fields are filled before generating the timetable.
+              Need a lesson to happen on Tuesday at 10:00 in a specific classroom? No problem. Set it here, and the algorithm will lock it in place and build the rest of the schedule around it.
             </p>
           </div>
 
-          <h4>6. View & Export Timetable</h4>
           <div className="step-box">
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>priority_high</span> 3️⃣ Hard Courses</h4>
             <p>
-              Access the <strong>Timetable</strong> section to:
+              Mark courses that require high concentration, and the algorithm will try to place them in the early morning hours.
             </p>
+          </div>
+
+          <div className="step-box">
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>groups</span> 4️⃣ Capacity Requirements</h4>
+            <p>
+              Define how many students are expected in each lesson type (lecture, lab, etc.), so the system can assign suitable classrooms.
+            </p>
+          </div>
+
+          <div className="step-box">
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>settings</span> 5️⃣ Algorithm Weights</h4>
+            <p>
+              Here you tell the algorithm what matters most to you.
+            </p>
+            <p><strong>Move the sliders from:</strong></p>
             <ul>
-              <li>View the complete schedule</li>
-              <li>Filter by course, lecturer, or classroom</li>
-              <li>Export the timetable to various formats</li>
-              <li>Print the schedule</li>
+              <li><strong>0</strong> = Ignore this rule</li>
+              <li><strong>10</strong> = Highest priority</li>
             </ul>
+            <p><strong>For example:</strong></p>
+            <ul>
+              <li>Want to avoid long breaks ("windows") for lecturers? Give it a high weight.</li>
+              <li>Want mandatory courses in the morning? Increase that slider.</li>
+            </ul>
+          </div>
+
+          <div className="step-box">
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle', color: '#6366f1' }}>rocket_launch</span> Launch!</h4>
+            <p>
+              Click the <strong>"Generate Optimal Schedule"</strong> button.
+            </p>
+            <p>
+              The algorithm will analyze tens of thousands of possible schedules in seconds to minutes and present you with the best possible timetable!
+            </p>
           </div>
         </div>
       </HelpSection>
 
       {/* Data Management Section */}
       <HelpSection
-        title="Data Management"
+        title="Tips & Best Practices"
         isExpanded={expandedSection === "data-management"}
         onToggle={() => toggleSection("data-management")}
       >
         <div className="section-content">
-          <h3>Importing & Exporting Data</h3>
-
           <div className="step-box">
-            <h4>Importing Data</h4>
-            <p>You can import data from your files:</p>
-            <ul>
-              <li>Go to <strong>Dashboard</strong> and click the Import button</li>
-              <li>Select your file (CSV, Excel, or JSON format)</li>
-              <li>Map columns to the appropriate fields</li>
-              <li>Review and confirm the import</li>
-            </ul>
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>upload_file</span> Use Excel Upload for Large Datasets</h4>
+            <p>
+              If you have a lot of data (many courses, lecturers, or classrooms), use the Excel upload option. This saves time compared to entering data manually one by one.
+            </p>
           </div>
 
           <div className="step-box">
-            <h4>Exporting Data</h4>
-            <p>Export your data for backup or external use:</p>
-            <ul>
-              <li>Use the Export button on the Dashboard</li>
-              <li>Select which data to export (courses, lecturers, etc.)</li>
-              <li>Choose your preferred format</li>
-              <li>Download the file</li>
-            </ul>
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>check_circle</span> Keep Data Accurate</h4>
+            <p>
+              Regularly update lecturer information, classroom details, and course data. Accurate data leads to better scheduling results.
+            </p>
           </div>
 
           <div className="step-box">
-            <h4>File Format Guidelines</h4>
-            <p>Supported formats:</p>
-            <ul>
-              <li><strong>CSV:</strong> Comma-separated values for easy spreadsheet import</li>
-              <li><strong>Excel:</strong> .xlsx files with proper formatting</li>
-              <li><strong>JSON:</strong> Structured data format for advanced users</li>
-            </ul>
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>tune</span> Be Realistic with Constraints</h4>
+            <p>
+              Set realistic constraints and preferences. If you make every rule a hard constraint, the algorithm may not be able to find a valid schedule. Use soft constraints (orange) for preferences.
+            </p>
+          </div>
+
+          <div className="step-box">
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>save</span> Export Your Data Regularly</h4>
+            <p>
+              Use the export feature on the Dashboard to backup your data. This protects you if anything goes wrong.
+            </p>
           </div>
         </div>
       </HelpSection>
 
       {/* Settings & Administration Section */}
       <HelpSection
-        title="Settings & Administration"
+        title="Settings & User Management"
         isExpanded={expandedSection === "settings"}
         onToggle={() => toggleSection("settings")}
       >
         <div className="section-content">
-          <h3>System Settings</h3>
-
           <div className="step-box">
-            <h4>Account Management</h4>
-            <p>In <strong>Settings</strong>, you can:</p>
-            <ul>
-              <li>Change your password</li>
-              <li>Update your profile information</li>
-              <li>View your account details</li>
-            </ul>
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>lock</span> Change Your Password</h4>
+            <p>
+              In the <strong>Settings</strong> page, you can update your password anytime for security.
+            </p>
           </div>
 
           <div className="step-box">
-            <h4>User Roles (Admin Only)</h4>
-            <p>Administrators can manage user access:</p>
-            <ul>
-              <li><strong>Admin:</strong> Full system access and user management</li>
-              <li><strong>Coordinator:</strong> Can manage courses, classrooms, and lecturers</li>
-              <li><strong>User:</strong> Can view data and export timetables</li>
-            </ul>
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>category</span> Manage Study Clusters (Semesters)</h4>
+            <p>
+              In Settings, you can also add, edit, or remove the clusters/semesters that appear in dropdowns throughout the system. This is how you organize your study groups.
+            </p>
           </div>
 
           <div className="step-box">
-            <h4>User Management</h4>
-            <p>Administrators can:</p>
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle' }}>people</span> User Management (Admin Only)</h4>
+            <p>
+              If you're an administrator, you can:
+            </p>
             <ul>
               <li>Create new user accounts</li>
-              <li>Assign roles and permissions</li>
-              <li>Modify user settings</li>
-              <li>Delete inactive accounts</li>
+              <li>Change user roles (Admin or User)</li>
+              <li>Delete user accounts</li>
             </ul>
           </div>
         </div>
@@ -309,55 +313,34 @@ export default function HelpPage() {
         onToggle={() => toggleSection("troubleshooting")}
       >
         <div className="section-content">
-          <h3>Common Issues & Solutions</h3>
-
           <div className="step-box">
-            <h4>❌ Cannot log in</h4>
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle', color: '#ef4444' }}>error</span> The timetable generation fails</h4>
+            <p><strong>What to do:</strong></p>
             <ul>
-              <li>Check your email and password are correct</li>
-              <li>Ensure your account has been created by an administrator</li>
-              <li>Try resetting your password using the "Forgot Password" option</li>
-              <li>Clear your browser cache and cookies</li>
+              <li>Check that all required data is complete (courses, lecturers, classrooms, lessons)</li>
+              <li>Make sure lecturers aren't blocked (unavailable) on too many time slots</li>
+              <li>Verify classrooms have sufficient capacity for the expected number of students</li>
+              <li>Try reducing some of the high-priority constraints or adjusting them to be more flexible</li>
             </ul>
           </div>
 
           <div className="step-box">
-            <h4>❌ Import file not recognized</h4>
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle', color: '#ef4444' }}>error</span> I can't upload my file</h4>
+            <p><strong>What to do:</strong></p>
             <ul>
-              <li>Verify the file format is supported (CSV, Excel, or JSON)</li>
-              <li>Check that column headers match the required format</li>
-              <li>Ensure the file is not corrupted</li>
-              <li>Try re-saving the file in the correct format</li>
+              <li>Make sure your file is in Excel format (.xlsx)</li>
+              <li>Check that the file isn't corrupted</li>
+              <li>Verify the column headers match what the system expects</li>
             </ul>
           </div>
 
           <div className="step-box">
-            <h4>❌ Timetable generation fails</h4>
+            <h4><span className="material-icons" style={{ fontSize: '20px', marginRight: '8px', verticalAlign: 'middle', color: '#ef4444' }}>error</span> Can't log in</h4>
+            <p><strong>What to do:</strong></p>
             <ul>
-              <li>Ensure all required data is complete (courses, lecturers, classrooms, lessons)</li>
-              <li>Check for conflicting constraints</li>
-              <li>Verify that lecturers are assigned to courses</li>
-              <li>Ensure classrooms have sufficient capacity</li>
-            </ul>
-          </div>
-
-          <div className="step-box">
-            <h4>❌ Scheduling conflicts or errors</h4>
-            <ul>
-              <li>Review lecturer availability and workload</li>
-              <li>Check classroom capacity against class sizes</li>
-              <li>Verify that all lessons are properly configured</li>
-              <li>Consider adjusting constraints or preferences</li>
-            </ul>
-          </div>
-
-          <div className="step-box">
-            <h4>❌ Performance issues or slow loading</h4>
-            <ul>
-              <li>Reduce the amount of data or filter results</li>
-              <li>Clear browser cache</li>
-              <li>Try using a different browser</li>
-              <li>Check your internet connection</li>
+              <li>Verify your email and password are correct</li>
+              <li>Ask your administrator to confirm your account was created</li>
+              <li>Use the "Forgot Password" option to reset your password</li>
             </ul>
           </div>
         </div>
@@ -365,53 +348,44 @@ export default function HelpPage() {
 
       {/* Best Practices Section */}
       <HelpSection
-        title="Best Practices"
+        title="Key Takeaways"
         isExpanded={expandedSection === "best-practices"}
         onToggle={() => toggleSection("best-practices")}
       >
         <div className="section-content">
-          <h3>Tips for Optimal Usage</h3>
-
           <div className="best-practice-list">
             <div className="practice-item">
-              <h4>🎯 Keep Data Accurate</h4>
+              <h4><span className="material-icons" style={{ fontSize: '24px', marginRight: '8px', verticalAlign: 'middle', color: '#10b981' }}>lightbulb</span> The algorithm is smart, but needs good input</h4>
               <p>
-                Regularly update lecturer information, classroom details, and course data. Accurate data leads to better scheduling.
+                Garbage in, garbage out. Make sure all your data (courses, lecturers, classrooms, lessons) is complete and accurate.
               </p>
             </div>
 
             <div className="practice-item">
-              <h4>📋 Plan Ahead</h4>
+              <h4><span className="material-icons" style={{ fontSize: '24px', marginRight: '8px', verticalAlign: 'middle', color: '#10b981' }}>balance</span> Balance is key when setting priorities</h4>
               <p>
-                Prepare all your data before generating the timetable. Have courses, classrooms, and lecturers ready.
+                Not all constraints are equally important. Mix high and low values to let the algorithm make smart trade-offs.
               </p>
             </div>
 
             <div className="practice-item">
-              <h4>💾 Regular Backups</h4>
+              <h4><span className="material-icons" style={{ fontSize: '24px', marginRight: '8px', verticalAlign: 'middle', color: '#10b981' }}>handshake</span> Soft constraints are your friend</h4>
               <p>
-                Export your data regularly as a backup. Use the export feature to save your schedules.
+                Use orange (soft constraints) for preferences. Hard constraints (red) should only be for things that are absolutely impossible.
               </p>
             </div>
 
             <div className="practice-item">
-              <h4>🔍 Review Schedules</h4>
+              <h4><span className="material-icons" style={{ fontSize: '24px', marginRight: '8px', verticalAlign: 'middle', color: '#10b981' }}>preview</span> Review before you publish</h4>
               <p>
-                Always review the generated timetable for any issues before publishing. Make manual adjustments if needed.
+                Always review the generated timetable before sharing it. Look for any issues and make manual adjustments if needed.
               </p>
             </div>
 
             <div className="practice-item">
-              <h4>⚙️ Optimize Constraints</h4>
+              <h4><span className="material-icons" style={{ fontSize: '24px', marginRight: '8px', verticalAlign: 'middle', color: '#10b981' }}>backup</span> Backup your data</h4>
               <p>
-                Set realistic constraints and preferences to help the algorithm generate better schedules.
-              </p>
-            </div>
-
-            <div className="practice-item">
-              <h4>👥 Communicate Changes</h4>
-              <p>
-                Keep stakeholders informed about schedule changes and system updates.
+                Use the export feature regularly to save your schedules as backup files.
               </p>
             </div>
           </div>
@@ -420,29 +394,17 @@ export default function HelpPage() {
 
       {/* Contact & Support Section */}
       <HelpSection
-        title="Contact & Support"
+        title="Need Help?"
         isExpanded={expandedSection === "contact"}
         onToggle={() => toggleSection("contact")}
       >
         <div className="section-content">
-          <h3>Need Help?</h3>
-
-          <div className="support-box">
-            <p>
-              If you encounter any issues or have questions not answered in this help guide:
-            </p>
-            <ul>
-              <li><strong>📧 Email Support:</strong> Contact your system administrator</li>
-              <li><strong>📞 Phone:</strong> Reach out to your IT department</li>
-              <li><strong>🆘 Emergency Issues:</strong> Report critical issues immediately</li>
-            </ul>
-          </div>
-
-          <div className="info-box">
-            <p>
-              <strong>System Information:</strong> UniSched v1.0 - Course Scheduling System
-            </p>
-          </div>
+          <p>
+            If you encounter any issues or have questions not answered in this guide, contact your system administrator.
+          </p>
+          <p>
+            They can help you with technical issues, account problems, or questions about your institution's specific setup.
+          </p>
         </div>
       </HelpSection>
     </div>
