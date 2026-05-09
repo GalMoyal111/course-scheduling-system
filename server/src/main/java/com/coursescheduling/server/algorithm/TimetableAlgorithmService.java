@@ -1,6 +1,7 @@
 package com.coursescheduling.server.algorithm;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -28,7 +29,7 @@ import com.coursescheduling.server.service.ClassroomService;
 import com.coursescheduling.server.service.CourseService;
 
 import java.util.Map;
-
+import java.util.Random;
 
 /*
     * This service orchestrates the entire timetable generation process. It:
@@ -54,7 +55,7 @@ public class TimetableAlgorithmService {
     @Autowired
     private CourseService courseService;
     
-
+    private final Random random = new Random();
     
     private List<DomainValue> getGlobalBlockedSlots() {
 	    return List.of(
@@ -137,7 +138,7 @@ public class TimetableAlgorithmService {
                     v.getLecturer() != null ? v.getLecturer() : "TBD");
         }
         System.out.println("-".repeat(75));
-        
+     
         
         Map<Variable, AssignedValue> initialAssignment = new HashMap<>();
         List<ManualAssignmentDTO> manualAssignments = request.getManualAssignments();
@@ -252,5 +253,25 @@ public class TimetableAlgorithmService {
             
             .thenComparingInt(v -> v.getType().getPriority())
         );
+        
+        int start = 0;
+
+        while (start < variables.size()) {
+
+            int end = start + 1;
+
+            while (end < variables.size()
+                    && variables.get(start).getCourseId().equals(variables.get(end).getCourseId())
+                    && variables.get(start).getType() == variables.get(end).getType()) {
+
+                end++;
+            }
+
+            if (end - start > 1) {
+                Collections.shuffle(variables.subList(start, end), random);
+            }
+
+            start = end;
+        }
     }
 }

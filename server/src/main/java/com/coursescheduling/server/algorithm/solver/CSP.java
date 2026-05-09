@@ -1,6 +1,7 @@
 package com.coursescheduling.server.algorithm.solver;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.checkerframework.checker.units.qual.A;
@@ -24,6 +25,7 @@ import com.coursescheduling.server.algorithm.cost.SoftConstraintEvaluator;
 import com.coursescheduling.server.algorithm.cost.SoftConstraintFactory;
 import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -54,7 +56,7 @@ public class CSP {
     @Autowired
     private  NetworkingLabPairConstraint networkingLabPairConstraint;
 
-    
+    private final Random random = new Random();
 
     // Main method to solve the CSP
 	public Map<Variable, AssignedValue> solve(List<Variable> variables, RoomManager roomManager, Map<String, Double> customWeights, Map<Variable, AssignedValue> initialAssignment) {
@@ -91,9 +93,6 @@ public class CSP {
     // Backtracking search algorithm
     private Map<Variable, AssignedValue> backtrack(Map<Variable, AssignedValue> assignment, List<Variable> variables, RoomManager roomManager, SoftConstraintEvaluator evaluator) {
         
-    	if (assignment.size() % 5 == 0) { 
-    	    System.out.println("Progress: " + assignment.size() + "/" + variables.size());
-    	}
     	
     	if (assignment.size() == variables.size()) {
             return new HashMap<>(assignment); // Return a copy of the solution
@@ -148,18 +147,16 @@ public class CSP {
             orderedValues.addAll(buildAssignedValues(var, value, assignment, variables, roomManager));
         }
         
-        orderedValues.sort((av1, av2) -> {
-        	double score1 = evaluator.calculateTotalPenalty(var, av1, assignment);
-            double score2 = evaluator.calculateTotalPenalty(var, av2, assignment);
-            return Double.compare(score1, score2); // Sort in ascending order of penalty (lower penalty first)
-        });
-        //System.out.println("----- Ordered values for lesson " + var.getLessonId() + " -----");
-        for (AssignedValue av : orderedValues) {
-        	double score = evaluator.calculateTotalPenalty(var, av, assignment);
+        // לא בטוחה שזה נותן את התוצאות שאנחנו רוצות - צריך לראות
+        Collections.shuffle(orderedValues, random);
         
-        	// System.out.println("day=" + av.getDay()+ ", frame=" + av.getStartFrame()+ ", room=" + av.getRoom().getClassroomName()+ ", capacity=" + av.getRoom().getCapacity()+ ", penalty=" + score);
-        }
-        // System.out.println("--------------------------------------------");
+        orderedValues.sort((av1, av2) -> {
+            double score1 = evaluator.calculateTotalPenalty(var, av1, assignment);
+            double score2 = evaluator.calculateTotalPenalty(var, av2, assignment);
+
+            return Double.compare(score1, score2);
+        });
+        
         return orderedValues;
     }
 
@@ -230,8 +227,6 @@ public class CSP {
 
     
     
-    // Placeholder for forward checking: In a real implementation, this would prune the domains of unassigned variables based on the current assignment
- // Forward Checking ישיר ומהיר - שלב א: מניעת חפיפות מרצים
     private Map<Variable, List<DomainValue>> forwardCheck(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment, List<Variable> variables, RoomManager roomManager) {
         Map<Variable, List<DomainValue>> removedValues = new HashMap<>();
         
@@ -437,8 +432,12 @@ public class CSP {
         }
 
         Set<Classroom> availableRooms = getAvailableSuitableRooms(var, value, variables, roomManager);
+        
+        List<Classroom> shuffledRooms = new ArrayList<>(availableRooms);
 
-        for (Classroom room : availableRooms) {
+        Collections.shuffle(shuffledRooms, random);
+
+        for (Classroom room : shuffledRooms) {
             if(electiveLectureLabSameRoomConstraint.isValid(var, room, assignment, variables)) {
                 assignedValues.add(new AssignedValue(value.getDay(), value.getStartFrame(), room));
             }
