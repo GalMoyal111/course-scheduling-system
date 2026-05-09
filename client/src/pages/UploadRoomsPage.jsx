@@ -96,7 +96,7 @@ function UploadRoomsPage() {
       setIsSummaryModalOpen(true);
 
       invalidateClassroomsCache();
-      await loadClassrooms();
+      await fetchClassroomsIfNeeded("UploadRoomsPage", true);
     } catch (err) {
       console.error(err);
       showError("Upload failed");

@@ -358,7 +358,7 @@ export default function LecturersPage() {
       setIsSummaryModalOpen(true);
 
       invalidateLecturersCache();
-      await loadLecturers();
+      await fetchLecturersIfNeeded("LecturersPage", true);
 
     } catch (err) {
       console.error("Detailed upload error:", err);

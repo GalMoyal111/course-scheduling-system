@@ -132,15 +132,16 @@ export function DataProvider({ children }) {
   }, [coursesTimestamp, isCacheValid]);
 
 
-  const fetchLessonsIfNeeded = useCallback(async (caller = "Unknown") => {
+  const fetchLessonsIfNeeded = useCallback(async (caller = "Unknown", forceFetch = false) => {
     if (isFetching.lessons) return;
 
-    if (isCacheValid(lessonsTimestamp)) {
+    if (!forceFetch && isCacheValid(lessonsTimestamp)) {
       console.log(`[Cache] Lessons are fresh, skipping fetch for: ${caller}`);
       return;
     }
 
     setIsFetching(prev => ({ ...prev, lessons: true }));
+    console.warn(`[API GET] Fetching lessons for: ${caller}`);
 
     try {
       const data = await getAllLessons(caller);
@@ -154,15 +155,16 @@ export function DataProvider({ children }) {
   }, [lessons.length, lessonsTimestamp, isCacheValid, isFetching.lessons]);
 
 
-  const fetchLecturersIfNeeded = useCallback(async (caller = "Unknown") => {
+  const fetchLecturersIfNeeded = useCallback(async (caller = "Unknown", forceFetch = false) => {
     if (isFetching.lecturers) return;
 
-    if (isCacheValid(lecturersTimestamp)) {
+    if (!forceFetch && isCacheValid(lecturersTimestamp)) {
       console.log(`[Cache] Lecturers are fresh, skipping fetch for: ${caller}`);
       return;
     }
 
     setIsFetching(prev => ({ ...prev, lecturers: true }));
+    console.warn(`[API GET] Fetching lecturers for: ${caller}`);
 
     try {
       const data = await getAllLecturers(caller);
@@ -177,15 +179,16 @@ export function DataProvider({ children }) {
 
 
 
-  const fetchClassroomsIfNeeded = useCallback(async (caller = "Unknown") => {
+  const fetchClassroomsIfNeeded = useCallback(async (caller = "Unknown", forceFetch = false) => {
     if (isFetching.classrooms) return;
 
-    if (isCacheValid(classroomsTimestamp)) {
+    if (!forceFetch && isCacheValid(classroomsTimestamp)) {
       console.log(`[Cache] Classrooms are fresh, skipping fetch for: ${caller}`);
       return;
     }
 
     setIsFetching(prev => ({ ...prev, classrooms: true }));
+    console.warn(`[API GET] Fetching classrooms for: ${caller}`);
 
     try {
       const data = await getAllClassrooms(caller);

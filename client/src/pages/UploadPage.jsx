@@ -107,7 +107,12 @@ function UploadPage() {
       setSummaryModalOpen(true);
 
       invalidateLessonsCache();
-      await loadInitialData();
+      await Promise.all([
+        fetchLessonsIfNeeded("UploadPage", true),
+        fetchCoursesIfNeeded("UploadPage"),
+        fetchLecturersIfNeeded("UploadPage"),
+        fetchClassroomsIfNeeded("UploadPage"),
+      ]);
 
     } catch (err) {
       console.error(err);
