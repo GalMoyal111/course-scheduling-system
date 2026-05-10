@@ -26,16 +26,6 @@ export default function TimetablePage() {
     return Array.from(nums).sort((a, b) => a - b);
   }, [clusters]);
 
-  // Determine the max named cluster number
-  const maxNamedClusterNum = useMemo(() => {
-    let max = 8; // Default: semester range is 1-8
-    clusters.forEach(c => {
-      if (c.number && c.number > max) {
-        max = c.number;
-      }
-    });
-    return max;
-  }, [clusters]);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
@@ -89,13 +79,12 @@ export default function TimetablePage() {
       options.push({ value: String(cluster), label });
     });
 
-    // Check if there are any named clusters (clusters > maxNamedClusterNum or in DataContext)
-    if (schedule.some((lesson) => Number(lesson.cluster) > maxNamedClusterNum)) {
+    if (schedule.some((lesson) => Number(lesson.cluster) >= 9)) {
       options.push({ value: "ELECTIVES", label: "Elective courses" });
     }
 
     return options;
-  }, [schedule, semesterRange, maxNamedClusterNum, clusterMapping]);
+  }, [schedule, semesterRange, clusterMapping]);
 
   // פונקציית תרגום לסוג השיעור
   const translateType = (type) => {
@@ -120,12 +109,12 @@ export default function TimetablePage() {
     }
 
     if (selectedCluster === "ELECTIVES") {
-      return schedule.filter((lesson) => Number(lesson.cluster) > maxNamedClusterNum);
+      return schedule.filter((lesson) => Number(lesson.cluster) >= 9);
     }
 
     const clusterNumber = Number(selectedCluster);
     return schedule.filter((lesson) => Number(lesson.cluster) === clusterNumber);
-  }, [schedule, selectedCluster, maxNamedClusterNum]);
+  }, [schedule, selectedCluster]);
 
   const getVisibleLessonsForSlot = (day, frame) => {
     if (!frame) return [];
