@@ -47,7 +47,7 @@ export default function HistoryPage() {
     try {
       await (await import("../services/api")).deleteTimetable(id);
       showSuccess("Timetable deleted");
-      await fetchHistoryIfNeeded("HistoryPage");
+      await fetchHistoryIfNeeded("HistoryPage", true);
     } catch (err) {
       console.error(err);
       showError("Failed to delete timetable");
@@ -76,7 +76,7 @@ export default function HistoryPage() {
     try {
       await (await import("../services/api")).renameTimetable(renameTarget.id, newName);
       showSuccess("Timetable renamed");
-      await fetchHistoryIfNeeded("HistoryPage");
+      await fetchHistoryIfNeeded("HistoryPage", true);
     } catch (err) {
       console.error(err);
       showError("Failed to rename timetable");

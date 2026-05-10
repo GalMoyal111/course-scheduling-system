@@ -202,10 +202,10 @@ export function DataProvider({ children }) {
   }, [classrooms.length, classroomsTimestamp, isCacheValid, isFetching.classrooms]);
 
 
-  const fetchHistoryIfNeeded = useCallback(async (caller = "Unknown") => {
+  const fetchHistoryIfNeeded = useCallback(async (caller = "Unknown", forceFetch = false) => {
     if (isFetching.history) return;
 
-    if (isCacheValid(historyTimestamp)) {
+    if (!forceFetch && isCacheValid(historyTimestamp)) {
       console.log(`[Cache] History is fresh, skipping fetch for: ${caller}`);
       return;
     }
