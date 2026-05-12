@@ -5,6 +5,8 @@ import com.coursescheduling.server.algorithm.model.AssignedValue;
 
 import java.util.Map;
 
+import org.checkerframework.checker.units.qual.s;
+
 public class PreferMorningForHardCoursesConstraint implements SoftConstraint {
 
     @Override
@@ -13,14 +15,11 @@ public class PreferMorningForHardCoursesConstraint implements SoftConstraint {
             return 0.0; // No penalty for non-hard courses
         }
         int startFrame = value.getStartFrame();
-        if (startFrame <= 3) {
+        if (startFrame <= 3) 
             return 0.0; // No penalty for morning slots (frames 1-3)
-        } else if (startFrame <= 6) {
-            return 1.0; // Small penalty for mid-day slots (frames 4-6)
-        } else if (startFrame <= 9) {
-            return 2.0; // Larger penalty for afternoon slots (frames 7-9)
+        else {
+            return startFrame; 
         }
-        return 3.0; // Maximum penalty for late afternoon/evening slots (frames 10-12)
     }
 
     @Override
@@ -30,7 +29,7 @@ public class PreferMorningForHardCoursesConstraint implements SoftConstraint {
 
 	@Override
 	public double getMaxPenalty() {
-		return 3;
+		return 5;
 	}
     
 }

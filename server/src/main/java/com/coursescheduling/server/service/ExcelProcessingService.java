@@ -313,9 +313,7 @@ public class ExcelProcessingService {
 	    header.createCell(5).setCellValue("סמסטר");
 	    header.createCell(6).setCellValue("מחלקה");
 	    header.createCell(7).setCellValue("שע'");
-	    header.createCell(8).setCellValue("מרצה");
-	    header.createCell(9).setCellValue("הערות");
-	    header.createCell(10).setCellValue("תאריך עדכון");
+
 	    
 
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
