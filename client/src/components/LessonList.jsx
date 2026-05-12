@@ -19,13 +19,34 @@ function getTypeLabel(type) {
 }
 
 
-export default function LessonList({ lessons = [], onEdit, onDelete, onSelectionChange, title = "Lessons" }) {
-  const [selectedCourseName, setSelectedCourseName] = useState("");
-  const [selectedLecturer, setSelectedLecturer] = useState("");
-  const [selectedCluster, setSelectedCluster] = useState("");
-  const [selectedType, setSelectedType] = useState("");
-  const [selectedSemester, setSelectedSemester] = useState("");
-  const [selectedCredits, setSelectedCredits] = useState("");
+export default function LessonList({ lessons = [], clusters = [], onEdit, onDelete, onSelectionChange, title = "Lessons" }) {
+  const [selectedCourseNames, setSelectedCourseNames] = useState([]);
+  const [selectedLecturers, setSelectedLecturers] = useState([]);
+  const [selectedClusters, setSelectedClusters] = useState([]);
+  const [selectedTypes, setSelectedTypes] = useState([]);
+  const [selectedSemesters, setSelectedSemesters] = useState([]);
+  const [selectedCredits, setSelectedCredits] = useState([]);
+
+  const [openFilter, setOpenFilter] = useState(null);
+
+  const clusterNameByNumber = useMemo(() => {
+    return new Map(
+      clusters.map(cluster => [
+        Number(cluster.number),
+        cluster.name
+      ])
+    );
+  }, [clusters]);
+
+  const lessonsWithClusterNames = useMemo(() => {
+    return lessons.map(lesson => ({
+      ...lesson,
+      clusterName:
+        lesson.clusterName ||
+        clusterNameByNumber.get(Number(lesson.cluster)) ||
+        String(lesson.cluster)
+    }));
+  }, [lessons, clusterNameByNumber]);
 
   // Extract unique values for each filter
   const uniqueCourseNames = useMemo(() => {
@@ -35,21 +56,22 @@ export default function LessonList({ lessons = [], onEdit, onDelete, onSelection
   }, [lessons]);
 
   const uniqueLecturers = useMemo(() => {
-    const lecturers = Array.from(new Set(lessons.map(l => l.lecturer).filter(Boolean)))
+    const lecturers = Array.from(new Set(lessonsWithClusterNames.map(l => l.lecturer).filter(Boolean)))
       .sort((a, b) => a.localeCompare(b, 'he'));
     return lecturers;
-  }, [lessons]);
+  }, [lessonsWithClusterNames]);
 
   const uniqueClusters = useMemo(() => {
-    const clusters = Array.from(new Set(lessons.map(l => String(l.cluster)).filter(Boolean)))
-      .sort((a, b) => {
-        const numA = parseInt(a);
-        const numB = parseInt(b);
-        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-        return a.localeCompare(b, 'he');
-      });
+    const clusters = Array.from(
+      new Set(
+        lessonsWithClusterNames
+          .map(l => l.clusterName)
+          .filter(name => name != null && name !== "")
+      )
+    ).sort((a, b) => a.localeCompare(b, "he"));
+
     return clusters;
-  }, [lessons]);
+  }, [lessonsWithClusterNames]);
 
   const uniqueTypes = useMemo(() => {
     const types = Array.from(new Set(lessons.map(l => l.type).filter(Boolean)))
@@ -75,16 +97,16 @@ export default function LessonList({ lessons = [], onEdit, onDelete, onSelection
 
   // Filter lessons based on selected filters
   const filteredLessons = useMemo(() => {
-    return lessons.filter(l => {
-      if (selectedCourseName && l.courseName !== selectedCourseName) return false;
-      if (selectedLecturer && l.lecturer !== selectedLecturer) return false;
-      if (selectedCluster && parseInt(l.cluster) !== parseInt(selectedCluster)) return false;
-      if (selectedType && l.type !== selectedType) return false;
-      if (selectedSemester && l.semester !== selectedSemester) return false;
-      if (selectedCredits && l.credits !== parseInt(selectedCredits)) return false;
+    return lessonsWithClusterNames.filter(l => {
+      if (selectedCourseNames.length > 0 &&!selectedCourseNames.includes(l.courseName)) {return false;}
+      if (selectedLecturers.length > 0 &&!selectedLecturers.includes(l.lecturer)) {return false;}
+      if (selectedClusters.length > 0 && !selectedClusters.includes(l.clusterName)) {return false;}
+      if (selectedTypes.length > 0 &&!selectedTypes.includes(l.type)) {return false;}
+      if (selectedSemesters.length > 0 &&!selectedSemesters.includes(l.semester)) {return false;}
+      if (selectedCredits.length > 0 &&!selectedCredits.includes(l.credits)) {return false;}
       return true;
     });
-  }, [lessons, selectedCourseName, selectedLecturer, selectedCluster, selectedType, selectedSemester, selectedCredits]);
+  }, [lessonsWithClusterNames ,selectedCourseNames,selectedLecturers,selectedClusters,selectedTypes,selectedSemesters,selectedCredits]);
 
   if (!lessons || lessons.length === 0) {
     return (
@@ -103,16 +125,25 @@ export default function LessonList({ lessons = [], onEdit, onDelete, onSelection
     );
   }
 
-  const hasActiveFilters = selectedCourseName || selectedLecturer || selectedCluster || selectedType || selectedSemester || selectedCredits;
+  const hasActiveFilters = selectedCourseNames.length > 0 || selectedLecturers.length > 0 || selectedClusters.length > 0 || selectedTypes.length > 0 || selectedSemesters.length > 0 || selectedCredits.length > 0;
   const displayCount = hasActiveFilters ? filteredLessons.length : lessons.length;
 
   const clearAllFilters = () => {
-    setSelectedCourseName("");
-    setSelectedLecturer("");
-    setSelectedCluster("");
-    setSelectedType("");
-    setSelectedSemester("");
-    setSelectedCredits("");
+    setSelectedCourseNames([]);
+    setSelectedLecturers([]);
+    setSelectedClusters([]);
+    setSelectedTypes([]);
+    setSelectedSemesters([]);
+    setSelectedCredits([]);
+    setOpenFilter(null);
+  };
+
+  const toggleValue = (value, setter) => {
+    setter((current) =>
+      current.includes(value)
+        ? current.filter((item) => item !== value)
+        : [...current, value]
+    );
   };
 
   return (
@@ -157,158 +188,77 @@ export default function LessonList({ lessons = [], onEdit, onDelete, onSelection
           <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Filters:</span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>book</span>
-          <select
-            value={selectedCourseName}
-            onChange={(e) => setSelectedCourseName(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid rgba(15, 23, 36, 0.12)",
-              backgroundColor: selectedCourseName ? "rgba(79, 70, 229, 0.08)" : "white",
-              color: "var(--text)",
-              fontSize: "0.95rem",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              fontWeight: selectedCourseName ? 600 : 500,
-              minWidth: "140px"
-            }}
-          >
-            <option value="">All Courses</option>
-            {uniqueCourseNames.map(name => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
-        </div>
+        <DropdownFilter
+          icon="book"
+          label="Courses"
+          filterKey="course"
+          openFilter={openFilter}
+          setOpenFilter={setOpenFilter}
+          options={uniqueCourseNames}
+          selectedValues={selectedCourseNames}
+          onToggle={(value) => toggleValue(value, setSelectedCourseNames)}
+        />
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>person</span>
-          <select
-            value={selectedLecturer}
-            onChange={(e) => setSelectedLecturer(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid rgba(15, 23, 36, 0.12)",
-              backgroundColor: selectedLecturer ? "rgba(79, 70, 229, 0.08)" : "white",
-              color: "var(--text)",
-              fontSize: "0.95rem",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              fontWeight: selectedLecturer ? 600 : 500,
-              minWidth: "130px"
-            }}
-          >
-            <option value="">All Lecturers</option>
-            {uniqueLecturers.map(lecturer => (
-              <option key={lecturer} value={lecturer}>{lecturer}</option>
-            ))}
-          </select>
-        </div>
+        <DropdownFilter
+          icon="person"
+          label="Lecturers"
+          filterKey="lecturer"
+          openFilter={openFilter}
+          setOpenFilter={setOpenFilter}
+          options={uniqueLecturers}
+          selectedValues={selectedLecturers}
+          onToggle={(value) => toggleValue(value, setSelectedLecturers)}
+        />
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>layers</span>
-          <select
-            value={selectedCluster}
-            onChange={(e) => setSelectedCluster(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid rgba(15, 23, 36, 0.12)",
-              backgroundColor: selectedCluster ? "rgba(79, 70, 229, 0.08)" : "white",
-              color: "var(--text)",
-              fontSize: "0.95rem",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              fontWeight: selectedCluster ? 600 : 500,
-              minWidth: "110px"
-            }}
-          >
-            <option value="">All Clusters</option>
-            {uniqueClusters.map(cluster => (
-              <option key={cluster} value={cluster}>{cluster}</option>
-            ))}
-          </select>
-        </div>
+        <DropdownFilter
+          icon="layers"
+          label="Clusters"
+          filterKey="cluster"
+          openFilter={openFilter}
+          setOpenFilter={setOpenFilter}
+          options={uniqueClusters}
+          selectedValues={selectedClusters}
+          onToggle={(value) => toggleValue(value, setSelectedClusters)}
+        />
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>label</span>
-          <select
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid rgba(15, 23, 36, 0.12)",
-              backgroundColor: selectedType ? "rgba(79, 70, 229, 0.08)" : "white",
-              color: "var(--text)",
-              fontSize: "0.95rem",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              fontWeight: selectedType ? 600 : 500,
-              minWidth: "130px"
-            }}
-          >
-            <option value="">All Types</option>
-            {uniqueTypes.map(type => (
-              <option key={type} value={type}>{getTypeLabel(type)}</option>
-            ))}
-          </select>
-        </div>
+        <DropdownFilter
+          icon="label"
+          label="Types"
+          filterKey="type"
+          openFilter={openFilter}
+          setOpenFilter={setOpenFilter}
+          options={uniqueTypes}
+          selectedValues={selectedTypes}
+          onToggle={(value) => toggleValue(value, setSelectedTypes)}
+          getOptionLabel={getTypeLabel}
+        />
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>event</span>
-          <select
-            value={selectedSemester}
-            onChange={(e) => setSelectedSemester(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid rgba(15, 23, 36, 0.12)",
-              backgroundColor: selectedSemester ? "rgba(79, 70, 229, 0.08)" : "white",
-              color: "var(--text)",
-              fontSize: "0.95rem",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              fontWeight: selectedSemester ? 600 : 500,
-              minWidth: "110px"
-            }}
-          >
-            <option value="">All Semesters</option>
-            {uniqueSemesters.map(semester => {
-              const semesterLabels = { "A": "Semester A", "B": "Semester B" };
-              return (
-                <option key={semester} value={semester}>{semesterLabels[semester] || semester}</option>
-              );
-            })}
-          </select>
-        </div>
+        <DropdownFilter
+          icon="event"
+          label="Semesters"
+          filterKey="semester"
+          openFilter={openFilter}
+          setOpenFilter={setOpenFilter}
+          options={uniqueSemesters}
+          selectedValues={selectedSemesters}
+          onToggle={(value) => toggleValue(value, setSelectedSemesters)}
+          getOptionLabel={(semester) => {
+            const semesterLabels = { A: "Semester A", B: "Semester B" };
+            return semesterLabels[semester] || semester;
+          }}
+        />
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>star</span>
-          <select
-            value={selectedCredits}
-            onChange={(e) => setSelectedCredits(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid rgba(15, 23, 36, 0.12)",
-              backgroundColor: selectedCredits ? "rgba(79, 70, 229, 0.08)" : "white",
-              color: "var(--text)",
-              fontSize: "0.95rem",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              fontWeight: selectedCredits ? 600 : 500,
-              minWidth: "100px"
-            }}
-          >
-            <option value="">All Credits</option>
-            {uniqueCreditsValues.map(credit => (
-              <option key={credit} value={credit}>{credit} Credits</option>
-            ))}
-          </select>
-        </div>
+        <DropdownFilter
+          icon="star"
+          label="Credits"
+          filterKey="credits"
+          openFilter={openFilter}
+          setOpenFilter={setOpenFilter}
+          options={uniqueCreditsValues}
+          selectedValues={selectedCredits}
+          onToggle={(value) => toggleValue(value, setSelectedCredits)}
+          getOptionLabel={(credit) => `${credit} Credits`}
+        />
 
         {hasActiveFilters && (
           <button
@@ -351,6 +301,106 @@ export default function LessonList({ lessons = [], onEdit, onDelete, onSelection
           onSelectionChange={onSelectionChange}
         />
       </div>
+    </div>
+  );
+}
+
+function DropdownFilter({
+  icon,
+  label,
+  filterKey,
+  openFilter,
+  setOpenFilter,
+  options,
+  selectedValues,
+  onToggle,
+  getOptionLabel = (value) => value,
+}) {
+  const isOpen = openFilter === filterKey;
+
+  const getButtonText = () => {
+    if (selectedValues.length === 0) return `All ${label}`;
+    if (selectedValues.length === 1) return getOptionLabel(selectedValues[0]);
+    return `${selectedValues.length} selected`;
+  };
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
+      <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>
+        {icon}
+      </span>
+
+      <button
+        type="button"
+        onClick={() => setOpenFilter(isOpen ? null : filterKey)}
+        style={{
+          padding: "8px 12px",
+          borderRadius: "6px",
+          border: "1px solid rgba(15, 23, 36, 0.12)",
+          backgroundColor: selectedValues.length > 0 ? "rgba(79, 70, 229, 0.08)" : "white",
+          color: "var(--text)",
+          fontSize: "0.95rem",
+          cursor: "pointer",
+          fontWeight: selectedValues.length > 0 ? 600 : 500,
+          minWidth: "150px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "8px"
+        }}
+      >
+        {getButtonText()}
+        <span className="material-icons" style={{ fontSize: "1rem" }}>
+          expand_more
+        </span>
+      </button>
+
+      {isOpen && (
+        <div
+          style={{
+            position: "absolute",
+            top: "110%",
+            left: 28,
+            zIndex: 20,
+            minWidth: "220px",
+            maxHeight: "260px",
+            overflowY: "auto",
+            backgroundColor: "white",
+            border: "1px solid rgba(15, 23, 36, 0.12)",
+            borderRadius: "8px",
+            boxShadow: "0 8px 24px rgba(15, 23, 36, 0.12)",
+            padding: "8px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "6px"
+          }}
+        >
+          {options.map(option => (
+            <label
+              key={option}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "6px 8px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "0.9rem",
+                backgroundColor: selectedValues.includes(option)
+                  ? "rgba(79, 70, 229, 0.08)"
+                  : "transparent"
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={selectedValues.includes(option)}
+                onChange={() => onToggle(option)}
+              />
+              {getOptionLabel(option)}
+            </label>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -424,14 +474,14 @@ function SelectableTable({ lessons, onEdit, onDelete, onSelectionChange }) {
                   type="checkbox"
                   aria-label={`Select ${l.courseId} ${l.courseName}`}
                   checked={checked}
-                  onChange={() => toggleRow(l)}
+                  onChange={(e) => {e.stopPropagation(); toggleRow(l);}}
                   onClick={(e) => e.stopPropagation()}
                 />
               </td>
               <td>{l.courseId}</td>
               <td>{l.courseName}</td>
               <td>{l.lecturer}</td>
-              <td>{l.cluster}</td>
+              <td>{l.clusterName || l.cluster}</td>
               <td>{typeBadge(l.type)}</td>
               <td>{l.duration}</td>
               <td>{l.semester ? String(l.semester) : ""}</td>

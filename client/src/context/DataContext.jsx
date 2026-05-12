@@ -35,13 +35,7 @@ export function DataProvider({ children }) {
   });
   const [manualAssignments, setManualAssignments] = useState([]);
   const [hardCourses, setHardCourses] = useState([]);
-  const [requiredCapacities, setRequiredCapacities] = useState({
-    LECTURE: 60,
-    TUTORIAL: 40,
-    LAB: 20,
-    PHYSICS_LAB: 15,
-    NETWORKING_LAB: 12
-  });
+  const [requiredCapacities, setRequiredCapacities] = useState({LECTURE: 60,TUTORIAL: 40,LAB: 20,PHYSICS_LAB: 15,NETWORKING_LAB: 12});
 
 
   // Cache timestamps

@@ -31,10 +31,12 @@ function UploadPage() {
     courses, 
     classrooms, 
     lecturers,
+    clusters,
     fetchLessonsIfNeeded,
     fetchCoursesIfNeeded,
     fetchLecturersIfNeeded,
     fetchClassroomsIfNeeded,
+    fetchClustersIfNeeded,
     invalidateLessonsCache,
     invalidateAllCache
   } = useData();
@@ -76,11 +78,12 @@ function UploadPage() {
         fetchCoursesIfNeeded(caller),
         fetchLecturersIfNeeded(caller),
         fetchClassroomsIfNeeded(caller),
+        fetchClustersIfNeeded(caller)
       ]);
     } catch (err) {
       console.error("Failed to load page data:", err);
     }
-  }, [fetchLessonsIfNeeded, fetchCoursesIfNeeded, fetchLecturersIfNeeded, fetchClassroomsIfNeeded]);
+  }, [fetchLessonsIfNeeded, fetchCoursesIfNeeded, fetchLecturersIfNeeded, fetchClassroomsIfNeeded, fetchClustersIfNeeded]);
 
   useEffect(() => {
     loadInitialData();
@@ -112,6 +115,7 @@ function UploadPage() {
         fetchCoursesIfNeeded("UploadPage"),
         fetchLecturersIfNeeded("UploadPage"),
         fetchClassroomsIfNeeded("UploadPage"),
+        fetchClustersIfNeeded("UploadPage")
       ]);
 
     } catch (err) {
@@ -318,6 +322,7 @@ function UploadPage() {
       <div style={{ marginTop: 12 }}>
         <LessonList
           lessons={filtered}
+          clusters={clusters}
           onEdit={handleEditLesson}
           onDelete={handleDeleteLesson}
           onSelectionChange={(arr) => setSelectedLessons(arr)}
