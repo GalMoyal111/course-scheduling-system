@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import "./ui/ui.css";
 
 export default function CourseList({ courses = [], onEdit, onDelete, onSelectionChange, title = "Courses" }) {
-  const [selectedSemester, setSelectedSemester] = useState("");
-  const [selectedCredits, setSelectedCredits] = useState("");
-
+  const [selectedSemesters, setSelectedSemesters] = useState([]);
+  const [selectedCredits, setSelectedCredits] = useState([]);
+  const [isSemestersDropdownOpen, setIsSemestersDropdownOpen] = useState(false);
+  const [isCreditsDropdownOpen, setIsCreditsDropdownOpen] = useState(false);
   // Extract unique semesters (cluster names) from courses
   // This includes both named clusters (מדעים, etc.) and semester labels (סמסטר 1-8)
   const uniqueSemesters = useMemo(() => {
@@ -46,11 +47,23 @@ export default function CourseList({ courses = [], onEdit, onDelete, onSelection
   // Filter courses based on selected filters
   const filteredCourses = useMemo(() => {
     return courses.filter(c => {
-      if (selectedSemester && c.clusterName !== selectedSemester) return false;
-      if (selectedCredits && c.credits !== parseFloat(selectedCredits)) return false;
+      if (
+        selectedSemesters.length > 0 &&
+        !selectedSemesters.includes(c.clusterName)
+      ) {
+        return false;
+      }
+
+      if (
+        selectedCredits.length > 0 &&
+        !selectedCredits.includes(c.credits)
+      ) {
+        return false;
+      }
+
       return true;
     });
-  }, [courses, selectedSemester, selectedCredits]);
+  }, [courses, selectedSemesters, selectedCredits]);
 
   if (!courses || courses.length === 0) {
     return (
@@ -69,8 +82,36 @@ export default function CourseList({ courses = [], onEdit, onDelete, onSelection
     );
   }
 
-  const hasActiveFilters = selectedSemester || selectedCredits;
+  const hasActiveFilters = selectedSemesters.length > 0 || selectedCredits.length > 0;
   const displayCount = hasActiveFilters ? filteredCourses.length : courses.length;
+
+  const getSelectedSemestersText = () => {
+    if (selectedSemesters.length === 0) return "All Semesters";
+    if (selectedSemesters.length === 1) return selectedSemesters[0];
+    return `${selectedSemesters.length} Semesters selected`;
+  };
+
+  const getSelectedCreditsText = () => {
+    if (selectedCredits.length === 0) return "All Credits";
+    if (selectedCredits.length === 1) return `${selectedCredits[0]} Credits`;
+    return `${selectedCredits.length} Credits selected`;
+  };
+
+  const toggleSemester = (semester) => {
+    setSelectedSemesters((current) =>
+      current.includes(semester)
+        ? current.filter((item) => item !== semester)
+        : [...current, semester]
+    );
+  };
+
+  const toggleCredits = (credits) => {
+    setSelectedCredits((current) =>
+      current.includes(credits)
+        ? current.filter((item) => item !== credits)
+        : [...current, credits]
+    );
+  };
 
   return (
     <div className="ui-card">
@@ -115,60 +156,170 @@ export default function CourseList({ courses = [], onEdit, onDelete, onSelection
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
-          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>school</span>
-          <select
-            value={selectedSemester}
-            onChange={(e) => setSelectedSemester(e.target.value)}
+          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>
+            school
+          </span>
+
+          <button
+            type="button"
+            onClick={() => {
+              setIsSemestersDropdownOpen(!isSemestersDropdownOpen);
+              setIsCreditsDropdownOpen(false);
+            }}
             style={{
               padding: "8px 12px",
               borderRadius: "6px",
               border: "1px solid rgba(15, 23, 36, 0.12)",
-              backgroundColor: selectedSemester ? "rgba(79, 70, 229, 0.08)" : "white",
+              backgroundColor: selectedSemesters.length > 0 ? "rgba(79, 70, 229, 0.08)" : "white",
               color: "var(--text)",
               fontSize: "0.95rem",
               cursor: "pointer",
-              transition: "all 0.2s ease",
-              fontWeight: selectedSemester ? 600 : 500,
-              minWidth: "140px"
+              fontWeight: selectedSemesters.length > 0 ? 600 : 500,
+              minWidth: "170px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "8px"
             }}
           >
-            <option value="">All Semesters</option>
-            {uniqueSemesters.map(semester => (
-              <option key={semester} value={semester}>{semester}</option>
-            ))}
-          </select>
+            {getSelectedSemestersText()}
+            <span className="material-icons" style={{ fontSize: "1rem" }}>
+              expand_more
+            </span>
+          </button>
+
+          {isSemestersDropdownOpen && (
+            <div
+              style={{
+                position: "absolute",
+                top: "110%",
+                left: 28,
+                zIndex: 20,
+                minWidth: "220px",
+                backgroundColor: "white",
+                border: "1px solid rgba(15, 23, 36, 0.12)",
+                borderRadius: "8px",
+                boxShadow: "0 8px 24px rgba(15, 23, 36, 0.12)",
+                padding: "8px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px"
+              }}
+            >
+              {uniqueSemesters.map(semester => (
+                <label
+                  key={semester}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "6px 8px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                    backgroundColor: selectedSemesters.includes(semester)
+                      ? "rgba(79, 70, 229, 0.08)"
+                      : "transparent"
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedSemesters.includes(semester)}
+                    onChange={() => toggleSemester(semester)}
+                  />
+                  {semester}
+                </label>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>star</span>
-          <select
-            value={selectedCredits}
-            onChange={(e) => setSelectedCredits(e.target.value)}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
+          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>
+            star
+          </span>
+
+          <button
+            type="button"
+            onClick={() => {
+              setIsCreditsDropdownOpen(!isCreditsDropdownOpen);
+              setIsSemestersDropdownOpen(false);
+            }}
             style={{
               padding: "8px 12px",
               borderRadius: "6px",
               border: "1px solid rgba(15, 23, 36, 0.12)",
-              backgroundColor: selectedCredits ? "rgba(79, 70, 229, 0.08)" : "white",
+              backgroundColor: selectedCredits.length > 0 ? "rgba(79, 70, 229, 0.08)" : "white",
               color: "var(--text)",
               fontSize: "0.95rem",
               cursor: "pointer",
-              transition: "all 0.2s ease",
-              fontWeight: selectedCredits ? 600 : 500,
-              minWidth: "120px"
+              fontWeight: selectedCredits.length > 0 ? 600 : 500,
+              minWidth: "150px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "8px"
             }}
           >
-            <option value="">All Credits</option>
-            {uniqueCredits.map(credit => (
-              <option key={credit} value={credit}>{credit} Credits</option>
-            ))}
-          </select>
+            {getSelectedCreditsText()}
+            <span className="material-icons" style={{ fontSize: "1rem" }}>
+              expand_more
+            </span>
+          </button>
+
+          {isCreditsDropdownOpen && (
+            <div
+              style={{
+                position: "absolute",
+                top: "110%",
+                left: 28,
+                zIndex: 20,
+                minWidth: "170px",
+                backgroundColor: "white",
+                border: "1px solid rgba(15, 23, 36, 0.12)",
+                borderRadius: "8px",
+                boxShadow: "0 8px 24px rgba(15, 23, 36, 0.12)",
+                padding: "8px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px"
+              }}
+            >
+              {uniqueCredits.map(credit => (
+                <label
+                  key={credit}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "6px 8px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                    backgroundColor: selectedCredits.includes(credit)
+                      ? "rgba(79, 70, 229, 0.08)"
+                      : "transparent"
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedCredits.includes(credit)}
+                    onChange={() => toggleCredits(credit)}
+                  />
+                  {credit} Credits
+                </label>
+              ))}
+            </div>
+          )}
         </div>
 
         {hasActiveFilters && (
           <button
             onClick={() => {
-              setSelectedSemester("");
-              setSelectedCredits("");
+              setSelectedSemesters([]);
+              setSelectedCredits([]);
+              setIsCreditsDropdownOpen(false);
+              setIsSemestersDropdownOpen(false);
             }}
             style={{
               padding: "8px 14px",
@@ -216,6 +367,12 @@ function SelectableTable({ courses, onEdit, onDelete, onSelectionChange }) {
   const [selectedMap, setSelectedMap] = useState({});
 
   const keyFor = (course) => `${course.courseId || ""}||${course.cluster || ""}`;
+  const stableKey = courses.map(keyFor).join("|");
+
+  useEffect(() => {
+    setSelectedMap({});
+    onSelectionChange && onSelectionChange([]);
+  }, [stableKey]);
 
   const toggleRow = (course) => {
     const key = keyFor(course);
@@ -279,7 +436,10 @@ function SelectableTable({ courses, onEdit, onDelete, onSelectionChange }) {
                   type="checkbox"
                   aria-label={`Select ${course.courseId || "course"}`}
                   checked={checked}
-                  onChange={() => toggleRow(course)}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    toggleRow(course);
+                  }}
                   onClick={(e) => e.stopPropagation()}
                 />
               </td>

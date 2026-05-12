@@ -18,10 +18,20 @@ function getTypeLabel(type) {
   return typeMap[type] || type;
 }
 
+  const capacityRanges = [
+    { label: "Up to 20", min: 0, max: 20 },
+    { label: "21 - 40", min: 21, max: 40 },
+    { label: "41 - 60", min: 41, max: 60 },
+    { label: "More than 60", min: 61, max: Infinity },
+  ];
 
 export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSelectionChange, title = "Classrooms" }) {
-  const [selectedBuilding, setSelectedBuilding] = useState("");
-  const [selectedType, setSelectedType] = useState("");
+  const [selectedBuildings, setSelectedBuildings] = useState([]);
+  const [selectedTypes, setSelectedTypes] = useState([]);
+  const [selectedCapacityRanges, setSelectedCapacityRanges] = useState([]);
+  const [isBuildingsDropdownOpen, setIsBuildingsDropdownOpen] = useState(false);
+  const [isTypesDropdownOpen, setIsTypesDropdownOpen] = useState(false);
+  const [isCapacityDropdownOpen, setIsCapacityDropdownOpen] = useState(false);
 
   // Extract unique buildings and types from classrooms
   const uniqueBuildings = useMemo(() => {
@@ -38,14 +48,24 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
     return types;
   }, [classrooms]);
 
+
+
   // Filter classrooms based on selected filters
   const filteredClassrooms = useMemo(() => {
     return classrooms.filter(c => {
-      if (selectedBuilding && c.building !== selectedBuilding) return false;
-      if (selectedType && c.type !== selectedType) return false;
+      if (selectedBuildings.length > 0 && !selectedBuildings.includes(c.building)) return false;
+      if (selectedTypes.length > 0 && !selectedTypes.includes(c.type)) return false;
+      if (selectedCapacityRanges.length > 0) {
+        const capacity = Number(c.capacity);
+        const matchesCapacity = selectedCapacityRanges.some(rangeLabel => {
+          const range = capacityRanges.find(r => r.label === rangeLabel);
+          return range && capacity >= range.min && capacity <= range.max;
+        });
+        if (!matchesCapacity) return false;
+      }
       return true;
     });
-  }, [classrooms, selectedBuilding, selectedType]);
+  }, [classrooms, selectedBuildings, selectedTypes, selectedCapacityRanges]);
 
   if (!classrooms || classrooms.length === 0) {
     return (
@@ -64,8 +84,34 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
     );
   }
 
-  const hasActiveFilters = selectedBuilding || selectedType;
+  const hasActiveFilters = selectedBuildings.length > 0 || selectedTypes.length > 0 || selectedCapacityRanges.length > 0;
   const displayCount = hasActiveFilters ? filteredClassrooms.length : classrooms.length;
+
+  const getSelectedBuildingsText = () => {
+    if (selectedBuildings.length === 0) return "All Buildings";
+    if (selectedBuildings.length === 1) return selectedBuildings[0];
+    return `${selectedBuildings.length} Buildings selected`;
+  };
+
+  const getSelectedTypesText = () => {
+    if (selectedTypes.length === 0) return "All Types";
+    if (selectedTypes.length === 1) return getTypeLabel(selectedTypes[0]);
+    return `${selectedTypes.length} Types selected`;
+  };
+
+  const getSelectedCapacityText = () => {
+    if (selectedCapacityRanges.length === 0) return "All Capacities";
+    if (selectedCapacityRanges.length === 1) return selectedCapacityRanges[0];
+    return `${selectedCapacityRanges.length} Capacity ranges selected`;
+  };
+
+  const toggleCapacityRange = (rangeLabel) => {
+    setSelectedCapacityRanges((current) =>
+      current.includes(rangeLabel)
+        ? current.filter((item) => item !== rangeLabel)
+        : [...current, rangeLabel]
+    );
+  };
 
   return (
     <div className="ui-card">
@@ -110,60 +156,263 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
-          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>apartment</span>
-          <select
-            value={selectedBuilding}
-            onChange={(e) => setSelectedBuilding(e.target.value)}
+          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>
+            apartment
+          </span>
+
+          <button
+            type="button"
+            onClick={() => {
+              setIsBuildingsDropdownOpen(!isBuildingsDropdownOpen);
+              setIsTypesDropdownOpen(false);
+              setIsCapacityDropdownOpen(false);
+            }}
             style={{
               padding: "8px 12px",
               borderRadius: "6px",
               border: "1px solid rgba(15, 23, 36, 0.12)",
-              backgroundColor: selectedBuilding ? "rgba(79, 70, 229, 0.08)" : "white",
+              backgroundColor: selectedBuildings.length > 0 ? "rgba(79, 70, 229, 0.08)" : "white",
               color: "var(--text)",
               fontSize: "0.95rem",
               cursor: "pointer",
-              transition: "all 0.2s ease",
-              fontWeight: selectedBuilding ? 600 : 500,
-              minWidth: "140px"
+              fontWeight: selectedBuildings.length > 0 ? 600 : 500,
+              minWidth: "160px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "8px"
             }}
           >
-            <option value="">All Buildings</option>
-            {uniqueBuildings.map(building => (
-              <option key={building} value={building}>{building}</option>
-            ))}
-          </select>
+            {getSelectedBuildingsText()}
+            <span className="material-icons" style={{ fontSize: "1rem" }}>
+              expand_more
+            </span>
+          </button>
+
+          {isBuildingsDropdownOpen && (
+            <div
+              style={{
+                position: "absolute",
+                top: "110%",
+                left: 28,
+                zIndex: 20,
+                minWidth: "180px",
+                backgroundColor: "white",
+                border: "1px solid rgba(15, 23, 36, 0.12)",
+                borderRadius: "8px",
+                boxShadow: "0 8px 24px rgba(15, 23, 36, 0.12)",
+                padding: "8px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px"
+              }}
+            >
+              {uniqueBuildings.map(building => (
+                <label
+                  key={building}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "6px 8px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                    backgroundColor: selectedBuildings.includes(building)
+                      ? "rgba(79, 70, 229, 0.08)"
+                      : "transparent"
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedBuildings.includes(building)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedBuildings([...selectedBuildings, building]);
+                      } else {
+                        setSelectedBuildings(selectedBuildings.filter(b => b !== building));
+                      }
+                    }}
+                  />
+                  {building}
+                </label>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>label</span>
-          <select
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
+
+        <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
+          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>
+            label
+          </span>
+
+          <button
+            type="button"
+            onClick={() => {
+              setIsTypesDropdownOpen(!isTypesDropdownOpen);
+              setIsBuildingsDropdownOpen(false);
+              setIsCapacityDropdownOpen(false);
+            }}
             style={{
               padding: "8px 12px",
               borderRadius: "6px",
               border: "1px solid rgba(15, 23, 36, 0.12)",
-              backgroundColor: selectedType ? "rgba(79, 70, 229, 0.08)" : "white",
+              backgroundColor: selectedTypes.length > 0 ? "rgba(79, 70, 229, 0.08)" : "white",
               color: "var(--text)",
               fontSize: "0.95rem",
               cursor: "pointer",
-              transition: "all 0.2s ease",
-              fontWeight: selectedType ? 600 : 500,
-              minWidth: "130px"
+              fontWeight: selectedTypes.length > 0 ? 600 : 500,
+              minWidth: "160px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "8px"
             }}
           >
-            <option value="">All Types</option>
-            {uniqueTypes.map(type => (
-              <option key={type} value={type}>{getTypeLabel(type)}</option>
-            ))}
-          </select>
+            {getSelectedTypesText()}
+            <span className="material-icons" style={{ fontSize: "1rem" }}>
+              expand_more
+            </span>
+          </button>
+
+          {isTypesDropdownOpen && (
+            <div
+              style={{
+                position: "absolute",
+                top: "110%",
+                left: 28,
+                zIndex: 20,
+                minWidth: "200px",
+                backgroundColor: "white",
+                border: "1px solid rgba(15, 23, 36, 0.12)",
+                borderRadius: "8px",
+                boxShadow: "0 8px 24px rgba(15, 23, 36, 0.12)",
+                padding: "8px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px"
+              }}
+            >
+              {uniqueTypes.map(type => (
+                <label
+                  key={type}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "6px 8px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                    backgroundColor: selectedTypes.includes(type)
+                      ? "rgba(79, 70, 229, 0.08)"
+                      : "transparent"
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedTypes.includes(type)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedTypes([...selectedTypes, type]);
+                      } else {
+                        setSelectedTypes(selectedTypes.filter(t => t !== type));
+                      }
+                    }}
+                  />
+                  {getTypeLabel(type)}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
+          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>
+            groups
+          </span>
+
+          <button
+            type="button"
+            onClick={() => {
+              setIsCapacityDropdownOpen(!isCapacityDropdownOpen);
+              setIsBuildingsDropdownOpen(false);
+              setIsTypesDropdownOpen(false);
+            }}
+            style={{
+              padding: "8px 12px",
+              borderRadius: "6px",
+              border: "1px solid rgba(15, 23, 36, 0.12)",
+              backgroundColor: selectedCapacityRanges.length > 0 ? "rgba(79, 70, 229, 0.08)" : "white",
+              color: "var(--text)",
+              fontSize: "0.95rem",
+              cursor: "pointer",
+              fontWeight: selectedCapacityRanges.length > 0 ? 600 : 500,
+              minWidth: "180px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "8px"
+            }}
+          >
+            {getSelectedCapacityText()}
+            <span className="material-icons" style={{ fontSize: "1rem" }}>
+              expand_more
+            </span>
+          </button>
+
+          {isCapacityDropdownOpen && (
+            <div
+              style={{
+                position: "absolute",
+                top: "110%",
+                left: 28,
+                zIndex: 20,
+                minWidth: "200px",
+                backgroundColor: "white",
+                border: "1px solid rgba(15, 23, 36, 0.12)",
+                borderRadius: "8px",
+                boxShadow: "0 8px 24px rgba(15, 23, 36, 0.12)",
+                padding: "8px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px"
+              }}
+            >
+              {capacityRanges.map(range => (
+                <label
+                  key={range.label}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "6px 8px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                    backgroundColor: selectedCapacityRanges.includes(range.label)
+                      ? "rgba(79, 70, 229, 0.08)"
+                      : "transparent"
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedCapacityRanges.includes(range.label)}
+                    onChange={() => toggleCapacityRange(range.label)}
+                  />
+                  {range.label}
+                </label>
+              ))}
+            </div>
+          )}
         </div>
 
         {hasActiveFilters && (
           <button
             onClick={() => {
-              setSelectedBuilding("");
-              setSelectedType("");
+              setSelectedBuildings([]);
+              setSelectedTypes([]);
+              setSelectedCapacityRanges([]);
             }}
             style={{
               padding: "8px 14px",
