@@ -665,3 +665,43 @@ export async function cancelGeneration() {
   }
   return res.text();
 }
+
+
+export async function exportCurrentToExcel(scheduleData) {
+  const res = await fetch(`${BASE_URL}/timetable/export/current`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    },
+    body: JSON.stringify(scheduleData),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Export failed: ${res.status} ${text}`);
+  }
+
+  return await res.blob();
+}
+
+export async function exportSavedToExcel(timetableId) {
+  const res = await fetch(
+    `${BASE_URL}/timetable/history/${timetableId}/export`,
+    {
+      method: "GET",
+      headers: {
+        Accept:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      },
+    }
+  );
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Export failed: ${res.status} ${text}`);
+  }
+
+  return await res.blob();
+}

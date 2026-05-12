@@ -5,12 +5,13 @@ import { useData } from "../context/DataContext";
 import Toast, { useToast } from "../components/ui/Toast";
 import "./TimetablePage.css";
 import Modal from "../components/ui/Modal"; 
-import { saveTimetable } from "../services/api";
+import { saveTimetable, exportCurrentToExcel } from "../services/api";
 
 export default function TimetablePage() {
   const { schedule, clusters, invalidateHistoryCache, clusterMappings } = useData();
   const { toast, showSuccess, showError, closeToast } = useToast();
   const [selectedCluster, setSelectedCluster] = useState("ALL");
+  const [isExporting, setIsExporting] = useState(false);
 
 
   const clusterMapping = clusterMappings.numToName;
@@ -160,11 +161,53 @@ export default function TimetablePage() {
     }
   };
 
+
+  const handleExportExcel = async () => {
+    if (!schedule || schedule.length === 0) return;
+    
+    setIsExporting(true);
+    try {
+      const blob = await exportCurrentToExcel(schedule);
+      
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const fileName = `Timetable_Export_${new Date().toLocaleDateString()}.xlsx`;
+      link.setAttribute('download', fileName);
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      showSuccess("Excel file downloaded successfully!");
+    } catch (error) {
+      console.error("Export error:", error);
+      showError("Failed to export Excel. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+
   return (
     <div className="timetable-page">
       <div className="timetable-header">
         <h1>Created time schedule</h1>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          
+          <Button 
+            onClick={handleExportExcel} 
+            variant="secondary" 
+            disabled={isExporting}
+            style={{ display: "flex", alignItems: "center", gap: "8px" }}
+          >
+            <span className="material-icons">table_view</span>
+            {isExporting ? "Exporting..." : "Excel Export"}
+          </Button>
+          
           <button
             onClick={handleSaveClick}
             title="Save system in history"
