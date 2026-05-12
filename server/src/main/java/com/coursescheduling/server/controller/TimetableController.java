@@ -38,6 +38,11 @@ public class TimetableController {
     }
 	
 	
+	@PostMapping("/cancel")
+    public void cancelGeneration() {
+        algorithmService.cancelAlgorithm();
+    }
+	
 	@PostMapping("/save")
     public SavedTimetableMetadata saveTimetable(@RequestBody SaveTimetableRequest request) throws Exception {
         return savedTimetableService.saveTimetable(request);

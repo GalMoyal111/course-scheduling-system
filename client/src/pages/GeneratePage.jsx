@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo , useRef} from "react";
 import { useNavigate } from "react-router-dom";
-import { generateTimetable } from "../services/api";
+import { generateTimetable, cancelGeneration } from "../services/api";
 import Button from "../components/ui/Button";
 import Toast, { useToast } from "../components/ui/Toast";
 import "./GeneratePage.css";
@@ -8,6 +8,8 @@ import { useData } from "../context/DataContext";
 import ManualAssignmentModal from "../components/ManualAssignmentModal";
 import HardCourseModal from "../components/HardCourseModal";
 import InfoButton from "../components/InfoButton";
+import Modal from "../components/ui/Modal";
+
 
 
 const DAY_NAMES = { 1: "ראשון", 2: "שני", 3: "שלישי", 4: "רביעי", 5: "חמישי", 6: "שישי" };
@@ -23,25 +25,28 @@ export default function GeneratePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [semester, setSemester] = useState("A");
+  const [isCancelling, setIsCancelling] = useState(false);
+  const isCancellingRef = useRef(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-const { 
-    setSchedule, 
-    fetchLessonsIfNeeded, 
-    fetchLecturersIfNeeded, 
-    fetchClassroomsIfNeeded,
-    fetchCoursesIfNeeded,
-    
-    generatorWeights: weights, 
-    setGeneratorWeights: setWeights,
-    manualAssignments, 
-    setManualAssignments,
-    hardCourses, 
-    setHardCourses,
-    requiredCapacities, 
-    setRequiredCapacities,
-    electiveCapacity, 
-    setElectiveCapacity
-  } = useData();
+  const { 
+      setSchedule, 
+      fetchLessonsIfNeeded, 
+      fetchLecturersIfNeeded, 
+      fetchClassroomsIfNeeded,
+      fetchCoursesIfNeeded,
+      
+      generatorWeights: weights, 
+      setGeneratorWeights: setWeights,
+      manualAssignments, 
+      setManualAssignments,
+      hardCourses, 
+      setHardCourses,
+      requiredCapacities, 
+      setRequiredCapacities,
+      electiveCapacity, 
+      setElectiveCapacity
+    } = useData();
 
 
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
@@ -57,6 +62,17 @@ const {
   };
 
 
+  const confirmCancel = async () => {
+    setShowCancelConfirm(false); 
+    setIsCancelling(true);     
+    isCancellingRef.current = true;  
+    try {
+      await cancelGeneration();
+    } catch (err) {
+      console.error("Failed to trigger cancel:", err);
+      setIsCancelling(false);
+    }
+  };
 
 
   React.useEffect(() => {
@@ -139,6 +155,8 @@ const {
   const handleGenerate = async () => {
     setLoading(true);
     setError("");
+    setIsCancelling(false);
+    isCancellingRef.current = false;
     try {
       const requestData = { 
         semester, 
@@ -155,6 +173,16 @@ const {
     } catch (err) {
       console.error("Full Error Object:", err);
       
+      const errorMessage = err.response?.data || err.message || "";
+      
+      if (isCancellingRef.current || errorMessage.includes("CANCELLED_BY_USER") || errorMessage.toLowerCase().includes("cancel")) {
+        console.log("Timetable generation was successfully cancelled by the user.");
+        setLoading(false);
+        setIsCancelling(false);
+        isCancellingRef.current = false;
+        return; // עוצרים נקי בלי הודעת שגיאה
+      }
+
       let friendlyMessage = "We couldn't find a valid schedule with the current constraints.";
       
       try {
@@ -572,13 +600,31 @@ const {
       {loading && (
         <div className="uploading-overlay">
           <div className="spinner"></div>
-          <h2 style={{ color: "white", marginTop: "20px", fontWeight: "600", fontSize: "24px" }}>
-             AI Algorithm is Processing...
+          <h2 style={{ color: "white", marginTop: "20px", fontWeight: "600", fontSize: "24px", textAlign: "center" }}>
+            {isCancelling ? "Stopping Algorithm..." : "AI Algorithm is Processing..."}
           </h2>
-          <p style={{ color: "#e2e8f0", marginTop: "8px", fontSize: "16px" }}>
-             Analyzing thousands of possibilities to build the perfect schedule.<br/>
-             This may take up to 1-2 minutes. Please don't close the window.
+          <p style={{ color: "#e2e8f0", marginTop: "8px", fontSize: "16px", textAlign: "center" }}>
+            {isCancelling 
+              ? "Safely aborting the process. Please wait a moment." 
+              : <>Analyzing thousands of possibilities to build the perfect schedule.<br/>This may take up to 1-2 minutes.</>
+            }
           </p>
+          
+          {!isCancelling && (
+            <Button 
+              variant="secondary"
+              onClick={() => setShowCancelConfirm(true)} // פותח את המודל במקום לבטל ישר
+              style={{ 
+                marginTop: "24px", 
+                backgroundColor: "rgba(255, 255, 255, 0.1)", 
+                color: "white", 
+                borderColor: "rgba(255, 255, 255, 0.3)" 
+              }}
+            >
+              <span className="material-icons" style={{ marginRight: "8px", verticalAlign: "middle" }}>stop_circle</span>
+              Cancel Generation
+            </Button>
+          )}
         </div>
       )}
       {/* --------------------------------- */}
@@ -600,6 +646,29 @@ const {
         onSave={(c) => setHardCourses(prev => [...prev, c])}
         currentSemester={semester}
       />
+
+      <Modal
+        isOpen={showCancelConfirm}
+        onClose={() => setShowCancelConfirm(false)}
+        title="Stop Generation?"
+        variant="warning"
+        centerContent={true}
+        footer={
+          <div style={{ display: "flex", gap: "10px", justifyContent: "center", width: "100%" }}>
+            <Button variant="secondary" onClick={() => setShowCancelConfirm(false)}>
+              No, Keep Going
+            </Button>
+            <Button variant="danger" onClick={confirmCancel}>
+              Yes, Stop
+            </Button>
+          </div>
+        }
+      >
+        <p style={{ textAlign: "center", fontSize: "16px", margin: 0, color: "#334155" }}>
+          Are you sure you want to stop the AI from generating the schedule?<br/>
+          Any progress will be lost.
+        </p>
+      </Modal>
 
 
 

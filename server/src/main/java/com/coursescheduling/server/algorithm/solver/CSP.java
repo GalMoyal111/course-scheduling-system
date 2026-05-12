@@ -3,6 +3,8 @@ package com.coursescheduling.server.algorithm.solver;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,9 +60,11 @@ public class CSP {
 
     private final Random random = new Random();
 
+    private AtomicBoolean isCancelled = new AtomicBoolean(false);
+    
     // Main method to solve the CSP
 	public Map<Variable, AssignedValue> solve(List<Variable> variables, RoomManager roomManager, Map<String, Double> customWeights, Map<Variable, AssignedValue> initialAssignment) {
-        
+        		
 		Map<Variable, AssignedValue> assignment = new HashMap<>();
         
 		if (initialAssignment != null && !initialAssignment.isEmpty()) {
@@ -93,6 +97,10 @@ public class CSP {
     // Backtracking search algorithm
     private Map<Variable, AssignedValue> backtrack(Map<Variable, AssignedValue> assignment, List<Variable> variables, RoomManager roomManager, SoftConstraintEvaluator evaluator) {
         
+    	if (isCancelled.get()) {
+    	    System.out.println("SP: Backtrack stopped due to cancellation!");
+    	    throw new CancellationException("Algorithm cancelled by user");
+    	}
     	
     	if (assignment.size() == variables.size()) {
             return new HashMap<>(assignment); // Return a copy of the solution
@@ -454,4 +462,15 @@ public class CSP {
     //         return null;
     // }
 
+    public void cancel() {
+        this.isCancelled.set(true); 
+    }
+    
+    public void resetCancelFlag() {
+        this.isCancelled.set(false);
+    }
+
+    public boolean isCancelled() {
+        return this.isCancelled.get();
+    }
 }

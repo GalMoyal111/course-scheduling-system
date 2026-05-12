@@ -653,3 +653,15 @@ export async function renameTimetable(id, newName) {
 
   return res.json();
 }
+
+
+export async function cancelGeneration() {
+  const res = await fetch(`${BASE_URL}/timetable/cancel`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Cancel failed: ${res.status} ${text}`);
+  }
+  return res.text();
+}

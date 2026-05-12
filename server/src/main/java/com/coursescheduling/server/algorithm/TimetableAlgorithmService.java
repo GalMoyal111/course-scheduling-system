@@ -30,6 +30,7 @@ import com.coursescheduling.server.service.CourseService;
 
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CancellationException;
 
 /*
     * This service orchestrates the entire timetable generation process. It:
@@ -79,6 +80,10 @@ public class TimetableAlgorithmService {
     // Main method to run the algorithm
     public List<ScheduledLessonDTO> run(GenerateTimetableRequest request) {
   	
+    	if (csp != null) {
+            csp.resetCancelFlag(); 
+    	}
+    	
     	Semester semester = request.getSemester();
     	Map<String, Double> userWeights = request.getSoftConstraintWeights();
     	
@@ -198,48 +203,62 @@ public class TimetableAlgorithmService {
             }
         }
         
+        
 
         // Step 3: Run the CSP solver
+        
+        
+        if (csp.isCancelled()) {
+            System.out.println("Algorithm Service: Cancelled during preprocessing! Aborting.");
+            return new ArrayList<>(); 
+        }
         System.out.println("⏳ Running CSP Solver...");
-        Map<Variable, AssignedValue> solution = csp.solve(variables, roomManager, userWeights, initialAssignment);
         
-        // Step 4: Convert solution to DTOs for client response
-        
-        if (solution == null) {
-            System.out.println("No solution could be found.");
-            throw new RuntimeException("No suitable schedule found. This usually happens when manual assignments or lecturer constraints create a conflict. If you've placed manual assignments, consider removing them and trying again.");
-        }
-        
-        List<ScheduledLessonDTO> results = new ArrayList<>();
+        try {
+        	Map<Variable, AssignedValue> solution = csp.solve(variables, roomManager, userWeights, initialAssignment);
+        	
+        	if (solution == null) {
+                System.out.println("No solution could be found.");
+                throw new RuntimeException("No suitable schedule found. This usually happens when manual assignments or lecturer constraints create a conflict. If you've placed manual assignments, consider removing them and trying again.");
+        	}
+        	
+            // Step 4: Convert solution to DTOs for client response
+            List<ScheduledLessonDTO> results = new ArrayList<>();
 
-        // If a solution is found, convert it to DTOs. Otherwise, return an empty list.
-
-        for (Map.Entry<Variable, AssignedValue> entry : solution.entrySet()) {
-            Variable var = entry.getKey();
-            AssignedValue val = entry.getValue();
-            
-            String courseName = "";
-            Course courseObj = courseService.getCourseById(var.getCourseId());
-            if (courseObj != null && courseObj.getCourseName() != null) {
-                courseName = courseObj.getCourseName();
+            for (Map.Entry<Variable, AssignedValue> entry : solution.entrySet()) {
+                Variable var = entry.getKey();
+                AssignedValue val = entry.getValue();
+                
+                String courseName = "";
+                Course courseObj = courseService.getCourseById(var.getCourseId());
+                if (courseObj != null && courseObj.getCourseName() != null) {
+                    courseName = courseObj.getCourseName();
+                }
+                
+                ScheduledLessonDTO dto = new ScheduledLessonDTO(
+                    var.getCourseId(),
+                    courseName,          
+                    var.getType().name(), 
+                    var.getLecturer(),
+                    val.getDay(),
+                    val.getStartFrame(),
+                    var.getDuration(),
+                    val.getRoom(),
+                    var.getCluster()
+                );
+                results.add(dto);
             }
-            
-            ScheduledLessonDTO dto = new ScheduledLessonDTO(
-                var.getCourseId(),
-                courseName,          
-                var.getType().name(), 
-                var.getLecturer(),
-                val.getDay(),
-                val.getStartFrame(),
-                var.getDuration(),
-                val.getRoom(),
-                var.getCluster()
-            );
-            results.add(dto);
-        }
-        System.out.println("Solution Found and returning to client!");
+            System.out.println("Solution Found and returning to client!");
 
-        return results;
+            return results;
+        	
+        } catch (CancellationException e) {
+            System.out.println("CSP Solver stopped due to user cancellation.");
+        	throw new RuntimeException("CANCELLED_BY_USER");
+		}
+        
+        
+        
     }
     
     
@@ -274,4 +293,14 @@ public class TimetableAlgorithmService {
             start = end;
         }
     }
+    
+    
+    public void cancelAlgorithm() {
+        if (csp != null) {
+            csp.cancel();
+            System.out.println("Cancel signal sent to CSP!");
+        }
+    }
+    
+    
 }
