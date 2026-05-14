@@ -16,7 +16,7 @@ import com.coursescheduling.server.algorithm.constraints.LecturerConstraint;
 import com.coursescheduling.server.algorithm.constraints.NetworkingLabPairConstraint;
 import com.coursescheduling.server.algorithm.constraints.RoomConstraint;
 import com.coursescheduling.server.algorithm.constraints.SplitLessonConstraint;
-import com.coursescheduling.server.algorithm.constraints.ClusterOneSundayEveningConstraint;
+import com.coursescheduling.server.algorithm.constraints.ClusterOneAndTwoSundayEveningConstraint;
 import com.coursescheduling.server.algorithm.model.AssignedValue;
 import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
@@ -53,7 +53,7 @@ public class CSP {
     private ElectiveLectureLabSameRoomConstraint electiveLectureLabSameRoomConstraint;
 
     @Autowired
-    private ClusterOneSundayEveningConstraint clusterOneSundayEveningConstraint;
+    private ClusterOneAndTwoSundayEveningConstraint clusterOneAndTwoSundayEveningConstraint;
     
     @Autowired
     private  NetworkingLabPairConstraint networkingLabPairConstraint;
@@ -371,7 +371,7 @@ public class CSP {
             return false;
         }
         
-        if(!clusterOneSundayEveningConstraint.isValid(var, value)) {
+        if(!clusterOneAndTwoSundayEveningConstraint.isValid(var, value)) {
             return false;
         }
 

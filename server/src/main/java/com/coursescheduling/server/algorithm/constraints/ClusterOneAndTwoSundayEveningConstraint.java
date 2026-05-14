@@ -6,14 +6,15 @@ import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
 
 @Component
-public class ClusterOneSundayEveningConstraint {
+public class ClusterOneAndTwoSundayEveningConstraint {
 
     private static final int CLUSTER_ONE = 1;
+    private static final int CLUSTER_TWO = 2;
     private static final int SUNDAY = 1;
     private static final int FIRST_BLOCKED_FRAME = 9; 
 
     public boolean isValid(Variable variable, DomainValue value) {
-        if (variable.getCluster() != CLUSTER_ONE) {
+        if (variable.getCluster() != CLUSTER_ONE && variable.getCluster() != CLUSTER_TWO) {
             return true; 
         }
 
