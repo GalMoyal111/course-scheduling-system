@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Button from "../components/ui/Button";
 import AddLecturerModal from "../components/AddLecturerModal";
 import UploadForm from "../components/UploadForm";
@@ -42,7 +42,7 @@ export default function LecturersPage() {
 
   const location = useLocation();
   const [isHighlightUpload, setIsHighlightUpload] = useState(false);
-
+  const lecturerPanelRef = useRef(null);
 
   const keyFor = (lecturer) => lecturer.id || lecturer.name;
 
@@ -317,7 +317,11 @@ export default function LecturersPage() {
       setHasUnsavedChanges(false);
       loadLecturers();
     }
+
     setSelectedLecturerId(id);
+
+    setTimeout(() => {
+      lecturerPanelRef.current?.scrollIntoView({behavior: "smooth",block: "start"});}, 0);
   };
 
 
@@ -509,7 +513,7 @@ const handleExport = async () => {
 
         {/* Main Panel */}
         {selectedLecturer ? (
-          <div className="lecturer-details-panel">
+          <div className="lecturer-details-panel" ref={lecturerPanelRef}>
             <div className="details-header">
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <h1 dir="rtl">{selectedLecturer.name}</h1>
@@ -547,7 +551,7 @@ const handleExport = async () => {
             </div>
           </div>
         ) : (
-          <div className="lecturer-details-panel" style={{ justifyContent: "center", alignItems: "center", color: "#94a3b8" }}>
+          <div className="lecturer-details-panel" style={{alignItems: "center", color: "#94a3b8", paddingTop: "90px" }}>
             <div style={{ textAlign: "center" }}>
               <span className="material-icons" style={{ fontSize: "64px", marginBottom: "16px", opacity: 0.5 }}>
                 touch_app
