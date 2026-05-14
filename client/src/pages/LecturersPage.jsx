@@ -48,11 +48,7 @@ export default function LecturersPage() {
 
   const loadLecturers = useCallback(async () => {
     await fetchLecturersIfNeeded("LecturersPage");
-    
-    if (!selectedLecturerId && lecturers.length > 0) {
-      setSelectedLecturerId(lecturers[0].id);
-    }
-  }, [fetchLecturersIfNeeded, lecturers, selectedLecturerId]);
+  }, [fetchLecturersIfNeeded]);
 
 
   useEffect(() => {
@@ -187,7 +183,7 @@ export default function LecturersPage() {
       setLecturers(updatedList);
       setLecturersTimestamp(Date.now());
 
-      if (keyFor(selectedLecturer) === keyToDelete) {
+      if (selectedLecturer && keyFor(selectedLecturer) === keyToDelete) {
         setHasUnsavedChanges(false);
         setSelectedLecturerId(updatedList.length > 0 ? updatedList[0].id : null);
       }
