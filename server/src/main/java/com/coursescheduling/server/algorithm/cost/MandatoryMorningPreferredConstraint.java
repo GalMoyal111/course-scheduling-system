@@ -25,7 +25,7 @@ public class MandatoryMorningPreferredConstraint implements SoftConstraint {
             int endFrame = startFrame + variable.getDuration() - 1; 
 
             for (int frame = startFrame; frame <= endFrame; frame++) {
-                if (frame >= 9 && frame <= 12) {
+                if (frame >= 7 && frame <= 12) {
                     penalty += 10.0; 
                 }
             }
