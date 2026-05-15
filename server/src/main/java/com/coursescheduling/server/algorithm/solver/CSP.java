@@ -74,8 +74,10 @@ public class CSP {
                 Variable var = entry.getKey();
                 AssignedValue val = entry.getValue();
                 
-                for (int t = 0; t < var.getDuration(); t++) {
-                    roomManager.bookRoom(val.getDay(), val.getStartFrame() + t, val.getRoom());
+                if (!var.isVirtual() && val.getRoom() != null) {
+                    for (int t = 0; t < var.getDuration(); t++) {
+                        roomManager.bookRoom(val.getDay(), val.getStartFrame() + t, val.getRoom());
+                    }
                 }
             }
             System.out.println("🔒 Locked " + initialAssignment.size() + " manual assignments.");
@@ -112,9 +114,12 @@ public class CSP {
         
         for (AssignedValue assignedValue : orderedValues) {
             assignment.put(var, assignedValue);
-            for (int t = 0; t < var.getDuration(); t++) 
-                roomManager.bookRoom(assignedValue.getDay(), assignedValue.getStartFrame() + t, assignedValue.getRoom());
-        	
+            
+            if (!var.isVirtual()) {
+                for (int t = 0; t < var.getDuration(); t++) {
+                    roomManager.bookRoom(assignedValue.getDay(), assignedValue.getStartFrame() + t, assignedValue.getRoom());
+                }
+            }
             Map<Variable, List<DomainValue>> removedValues = forwardCheck(var, assignedValue, assignment, variables , roomManager);
 
             if (removedValues != null) {
@@ -126,8 +131,10 @@ public class CSP {
             
             undoForwardCheck(removedValues);
 
-            for (int t = 0; t < var.getDuration(); t++){
-                roomManager.releaseRoom(assignedValue.getDay(), assignedValue.getStartFrame() + t, assignedValue.getRoom());
+            if (!var.isVirtual()) {
+                for (int t = 0; t < var.getDuration(); t++){
+                    roomManager.releaseRoom(assignedValue.getDay(), assignedValue.getStartFrame() + t, assignedValue.getRoom());
+                }
             }
             assignment.remove(var); // Backtrack
         }
@@ -438,6 +445,13 @@ public class CSP {
         if (!isTimeAssignmentConsistent(var, value, assignment)) {
             return assignedValues;
         }
+
+        if (var.isVirtual()) {
+            assignedValues.add(new AssignedValue(value.getDay(), value.getStartFrame(), null));
+            return assignedValues;
+        }
+        
+
 
         Set<Classroom> availableRooms = getAvailableSuitableRooms(var, value, variables, roomManager);
         

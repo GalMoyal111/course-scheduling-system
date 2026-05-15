@@ -11,6 +11,11 @@ public class RoomSizeEfficiencyConstraint implements SoftConstraint {
 
     @Override
     public double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
+    	
+    	if (variable.isVirtual()) {
+            return 0.0; 
+        }
+    	
         Classroom assignedRoom = value.getRoom();
         if (assignedRoom == null) {
             return Double.MAX_VALUE; // Maximum penalty if no room is assigned

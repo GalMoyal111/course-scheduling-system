@@ -22,6 +22,7 @@ public class Variable {
 	private List<DomainValue> nonPreferredSlots = new ArrayList<>();
 	private int requiredCapacity;
 	private boolean isEnglishCourse = false;
+	private boolean isVirtual = false;
 	
 	
 	
@@ -114,6 +115,14 @@ public class Variable {
 
     public void setEnglishCourse(boolean englishCourse) {
         isEnglishCourse = englishCourse;
+    }
+    
+    public boolean isVirtual() {
+        return isVirtual;
+    }
+
+    public void setVirtual(boolean virtual) {
+        isVirtual = virtual;
     }
 	
 }

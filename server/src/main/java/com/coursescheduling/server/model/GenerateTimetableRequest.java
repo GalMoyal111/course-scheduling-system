@@ -12,6 +12,8 @@ public class GenerateTimetableRequest {
     private Map<LessonType, Integer> requiredCapacities;
     private Integer electiveCapacity;
     private List<String> englishCourseIds;
+    
+    private List<String> virtualCourseIds;
 
     public List<String> getHardCourseIds() {
 		return hardCourseIds;
@@ -70,6 +72,14 @@ public class GenerateTimetableRequest {
 
     public void setEnglishCourseIds(List<String> englishCourseIds) {
         this.englishCourseIds = englishCourseIds;
+    }
+    
+    public List<String> getVirtualCourseIds() {
+        return virtualCourseIds;
+    }
+
+    public void setVirtualCourseIds(List<String> virtualCourseIds) {
+        this.virtualCourseIds = virtualCourseIds;
     }
     
 }

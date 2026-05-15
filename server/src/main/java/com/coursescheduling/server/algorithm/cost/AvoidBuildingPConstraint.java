@@ -8,7 +8,12 @@ public class AvoidBuildingPConstraint implements SoftConstraint {
 
     @Override
     public double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
-        if (value.getRoom() != null && value.getRoom().getBuilding() != null) {
+        
+    	if (variable.isVirtual()) {
+            return 0.0; 
+        }
+    	
+    	if (value.getRoom() != null && value.getRoom().getBuilding() != null) {
             if (value.getRoom().getBuilding().trim().equalsIgnoreCase("P")) {
                 return 10.0; 
             }

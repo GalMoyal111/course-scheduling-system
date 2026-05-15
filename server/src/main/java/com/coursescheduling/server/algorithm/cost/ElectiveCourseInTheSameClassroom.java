@@ -14,6 +14,12 @@ public class ElectiveCourseInTheSameClassroom implements SoftConstraint {
             AssignedValue value,
             Map<Variable, AssignedValue> currentAssignment
     ) {
+    	
+    	if (variable.isVirtual()) {
+            return 0.0; 
+        }
+    	
+    	
         if (variable.getCluster() < 9) {
             return 0.0;
         }

@@ -47,6 +47,8 @@ export default function GeneratePage() {
       setHardCourses,
       englishCourses, 
       setEnglishCourses,
+      virtualCourses, 
+      setVirtualCourses,
       requiredCapacities, 
       setRequiredCapacities,
       electiveCapacity, 
@@ -58,6 +60,7 @@ export default function GeneratePage() {
   const [isHardModalOpen, setIsHardModalOpen] = useState(false);
   const [isEnglishModalOpen, setIsEnglishModalOpen] = useState(false);
   const [showSemesterValidation, setShowSemesterValidation] = useState(false);
+  const [isVirtualModalOpen, setIsVirtualModalOpen] = useState(false);
 
 
   const handleAddManualAssignment = (newAssignment) => {
@@ -207,6 +210,7 @@ export default function GeneratePage() {
         manualAssignments, 
         hardCourseIds: hardCourses.map(c => c.courseId),
         englishCourseIds: englishCourses.map(c => c.courseId),
+        virtualCourseIds: virtualCourses.map(c => c.courseId),
         requiredCapacities, 
         electiveCapacity 
       };
@@ -406,6 +410,46 @@ export default function GeneratePage() {
               <div key={index} className="badge" style={{ background: "#e0e7ff", color: "#3730a3", padding: "8px 12px", borderRadius: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <span>{c.courseName}</span>
                 <span className="material-icons" style={{ fontSize: "16px", cursor: "pointer" }} onClick={() => setEnglishCourses(prev => prev.filter((_, i) => i !== index))}>close</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+
+      {/* Virtual Courses Section */}
+      <div className="generate-card">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <h3 style={{ margin: 0 }}>
+              <span className="material-icons">devices</span>
+              5. Virtual Courses (No Classroom Needed)
+            </h3>
+            <InfoButton 
+              title="What are Virtual Courses?"
+              description="Courses selected here will be scheduled with a time and lecturer, but will NOT be assigned a physical classroom. Use this for Zoom-only or remote learning courses."
+            />
+          </div>
+          <Button 
+            variant="secondary" 
+            onClick={() => semester ? setIsVirtualModalOpen(true) : setShowSemesterValidation(true)}
+          >
+            + Add Virtual Course
+          </Button>
+        </div>
+        
+        {virtualCourses.length > 0 && (
+          <div style={{ marginTop: "15px", display: "flex", flexWrap: "wrap", gap: "10px" }}>
+            {virtualCourses.map((c, index) => (
+              <div key={index} className="badge" style={{ background: "#f1f5f9", color: "#475569", padding: "8px 12px", borderRadius: "20px", display: "flex", alignItems: "center", gap: "8px", border: "1px solid #e2e8f0" }}>
+                <span>{c.courseName}</span>
+                <span 
+                  className="material-icons" 
+                  style={{ fontSize: "16px", cursor: "pointer" }} 
+                  onClick={() => setVirtualCourses(prev => prev.filter((_, i) => i !== index))}
+                >
+                  close
+                </span>
               </div>
             ))}
           </div>
@@ -732,6 +776,18 @@ export default function GeneratePage() {
         actionText="Add Course"
         description="These courses will be prioritized for Friday mornings or weekday afternoons."
       />
+
+      <HardCourseModal 
+        isOpen={isVirtualModalOpen} 
+        onClose={() => setIsVirtualModalOpen(false)} 
+        onSave={(c) => setVirtualCourses(prev => [...prev, c])}
+        currentSemester={semester}
+        title="Select Virtual Course"
+        actionText="Confirm Virtual"
+        description="This course will be scheduled without a physical classroom allocation."
+      />
+
+
 
       <Modal
         isOpen={showCancelConfirm}

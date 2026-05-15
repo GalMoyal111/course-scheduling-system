@@ -106,6 +106,8 @@ public class TimetableAlgorithmService {
     	List<String> englishCourseIds= request.getEnglishCourseIds();
     	if(englishCourseIds == null) englishCourseIds = new ArrayList<>();
     	
+    	List<String> virtualCourseIds = request.getVirtualCourseIds();
+    	
     	Map<LessonType, Integer> capacities = request.getRequiredCapacities();
     	for (Map.Entry<LessonType, Integer> entry : capacities.entrySet()) {
     	    System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
@@ -119,7 +121,7 @@ public class TimetableAlgorithmService {
 
 
         // Step 1: Build variables from semester data
-        List<Variable> variables = variableBuilder.createVariables(semester, capacities, hardCourseIds, englishCourseIds, electiveCapacity);
+        List<Variable> variables = variableBuilder.createVariables(semester, capacities, hardCourseIds, englishCourseIds,virtualCourseIds, electiveCapacity);
         
      
         // Step 2: Apply constraints to variables

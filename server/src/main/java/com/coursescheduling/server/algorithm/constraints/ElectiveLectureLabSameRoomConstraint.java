@@ -14,7 +14,12 @@ import java.util.List;
 public class ElectiveLectureLabSameRoomConstraint {
 
     public boolean isValid(Variable var, Classroom candidateRoom,Map<Variable, AssignedValue> assignment,List<Variable> allVariables){
-        if(!isElectiveCourse(var)) {
+        
+    	if (var.isVirtual()) {
+            return true; 
+        }
+    	
+    	if(!isElectiveCourse(var)) {
             return true; 
         }
 
