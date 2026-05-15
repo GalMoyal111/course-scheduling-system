@@ -52,6 +52,7 @@ public class VariableBuilder {
 	
 
 	private Variable mapLessonToVariable(Lesson lesson, Map<LessonType, Integer> requiredCapacitiesMap, List<String> hardCourseIds, List<String> englishCourseIds,List<String> virtualCourseIds,  Integer electiveCapacity) {		
+		
 		Variable v = new Variable();
 
 		v.setLessonId(lesson.getLessonId());
@@ -62,6 +63,14 @@ public class VariableBuilder {
 		v.setDuration(lesson.getDuration());
 		v.setSplitGroupId(lesson.getSplitGroupId());
 		v.setCredits(lesson.getCredits());
+		
+		if (v.isEnglishCourse()) {
+		    System.out.println("🔍 English Var Created: " + v.getCourseId() + 
+		                       " | LessonID: " + v.getLessonId() + 
+		                       " | SplitID: " + v.getSplitGroupId());
+		}
+		
+		
 
 		if (hardCourseIds != null && hardCourseIds.contains(lesson.getCourseId()) && lesson.getType() == LessonType.LECTURE) {
 			v.setIsHardCourse(true);
