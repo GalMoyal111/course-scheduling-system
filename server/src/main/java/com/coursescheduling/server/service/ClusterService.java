@@ -7,7 +7,9 @@ import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ClusterService {
@@ -16,7 +18,14 @@ public class ClusterService {
     private List<Cluster> cachedClusters = null;
     private long lastFetchTime = 0;
     private static final long CACHE_DURATION = 60 * 60 * 1000;
-
+    
+    private List<Map<String, Integer>> cachedSystemSlots = null;
+    private long lastSystemSlotsFetchTime = 0;
+    
+    private static final String SETTINGS_COLLECTION = "system_settings";
+    private static final String AVAILABILITY_DOC = "global_availability";
+    
+    
     public List<Cluster> getAllClusters() throws Exception {
     	
     	if (cachedClusters != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
@@ -91,4 +100,53 @@ public class ClusterService {
         }
         batch.commit().get();
     }
+    
+    
+    
+    public List<Map<String, Integer>> getSystemAvailability() throws Exception {
+        if (cachedSystemSlots != null && (System.currentTimeMillis() - lastSystemSlotsFetchTime < CACHE_DURATION)) {
+            System.out.println("Returning System Availability from Server Cache");
+            return cachedSystemSlots;
+        }
+
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentSnapshot doc = db.collection(SETTINGS_COLLECTION).document(AVAILABILITY_DOC).get().get();
+
+        cachedSystemSlots = new ArrayList<>();
+
+        if (doc.exists() && doc.contains("blockedSlots")) {
+            List<Map<String, Object>> rawSlots = (List<Map<String, Object>>) doc.get("blockedSlots");
+            
+            if (rawSlots != null) {
+                for (Map<String, Object> rawSlot : rawSlots) {
+                    Map<String, Integer> cleanSlot = new HashMap<>();
+                    
+                    if (rawSlot.containsKey("day") && rawSlot.get("day") != null) {
+                        cleanSlot.put("day", ((Number) rawSlot.get("day")).intValue());
+                    }
+                    if (rawSlot.containsKey("startFrame") && rawSlot.get("startFrame") != null) {
+                        cleanSlot.put("startFrame", ((Number) rawSlot.get("startFrame")).intValue());
+                    }
+                    
+                    cachedSystemSlots.add(cleanSlot);
+                }
+            }
+        }
+
+        this.lastSystemSlotsFetchTime = System.currentTimeMillis();
+        return cachedSystemSlots;
+    }
+
+    public void updateSystemAvailability(List<Map<String, Integer>> blockedSlots) throws Exception {
+        
+        Firestore db = FirestoreClient.getFirestore();
+        
+        Map<String, Object> data = new HashMap<>();
+        data.put("blockedSlots", blockedSlots);
+        
+        db.collection(SETTINGS_COLLECTION).document(AVAILABILITY_DOC).set(data).get();
+        this.cachedSystemSlots = null; 
+    }
+    
+    
 }

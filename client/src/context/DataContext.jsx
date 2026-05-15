@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useMemo } from "react";
-import { getAllCourses, getAllLessons, getAllClassrooms, getAllLecturers, getTimetableHistory, getTimetableById , getAllClusters} from "../services/api";
+import { getAllCourses, getAllLessons, getAllClassrooms, getAllLecturers, getTimetableHistory, getTimetableById , getAllClusters , getSystemAvailability} from "../services/api";
 
 const DataContext = createContext();
 
@@ -16,6 +16,8 @@ export function DataProvider({ children }) {
   const [history, setHistory] = useState([]);
   const [clusters, setClusters] = useState([]);
   const [electiveCapacity, setElectiveCapacity] = useState(25);
+  const [systemBlockedSlots, setSystemBlockedSlots] = useState([]);
+  const [systemBlockedSlotsTimestamp, setSystemBlockedSlotsTimestamp] = useState(null);
   
 
   const [generatorWeights, setGeneratorWeights] = useState({
@@ -53,7 +55,8 @@ export function DataProvider({ children }) {
     classrooms: false,
     lecturers: false,
     history: false,
-    clusters: false
+    clusters: false,
+    systemBlockedSlots: false
   });
 
   const updateCoursesLocally = useCallback((newCourses) => {
@@ -92,6 +95,10 @@ export function DataProvider({ children }) {
     setClustersTimestamp(null);
   }, []);
 
+  const invalidateSystemSlotsCache = useCallback(() => {
+    setSystemBlockedSlotsTimestamp(null);
+  }, []);
+
 
   // Invalidate all caches
   const invalidateAllCache = useCallback(() => {
@@ -101,6 +108,7 @@ export function DataProvider({ children }) {
     setLecturersTimestamp(null);
     setHistoryTimestamp(null);
     setClustersTimestamp(null);
+    setSystemBlockedSlotsTimestamp(null);
   }, []);
 
   const fetchCoursesIfNeeded = useCallback(async (caller = "Unknown", forceFetch = false) => {
@@ -238,6 +246,29 @@ export function DataProvider({ children }) {
   }, [clusters.length, clustersTimestamp, isCacheValid, isFetching.clusters]);
 
 
+  const fetchSystemBlockedSlotsIfNeeded = useCallback(async (caller = "Unknown", forceFetch = false) => {
+    if (isFetching.systemBlockedSlots) return;
+
+    if (!forceFetch && isCacheValid(systemBlockedSlotsTimestamp)) {
+      console.log(`[Cache] System blocked slots are fresh, skipping fetch for: ${caller}`);
+      return;
+    }
+
+    setIsFetching(prev => ({ ...prev, systemBlockedSlots: true }));
+    console.warn(`[API GET] Fetching system blocked slots for: ${caller}`);
+
+    try {
+      const data = await getSystemAvailability(caller);
+      setSystemBlockedSlots(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Failed to fetch system blocked slots:", err);
+    } finally {
+      setSystemBlockedSlotsTimestamp(Date.now()); 
+      setIsFetching(prev => ({ ...prev, systemBlockedSlots: false }));
+    }
+  }, [systemBlockedSlotsTimestamp, isCacheValid]); 
+
+
   const loadTimetableFromHistory = useCallback(async (id, caller = "Unknown") => {
     try {
       const fullSchedule = await getTimetableById(id, caller);
@@ -289,6 +320,9 @@ export function DataProvider({ children }) {
     clusters,
     setClusters,
     clusterMappings,
+    systemBlockedSlots,
+    setSystemBlockedSlots,
+    
 
     generatorWeights, setGeneratorWeights,
     manualAssignments, setManualAssignments,
@@ -310,6 +344,9 @@ export function DataProvider({ children }) {
     setHistoryTimestamp,
     clustersTimestamp,
     setClustersTimestamp,
+    systemBlockedSlotsTimestamp, 
+    setSystemBlockedSlotsTimestamp,
+
 
     
     // Cache invalidation
@@ -320,6 +357,7 @@ export function DataProvider({ children }) {
     invalidateAllCache,
     invalidateHistoryCache,
     invalidateClustersCache,
+    invalidateSystemSlotsCache,
 
 
     // Fetching state
@@ -329,7 +367,8 @@ export function DataProvider({ children }) {
     fetchClassroomsIfNeeded,
     fetchHistoryIfNeeded,
     updateCoursesLocally,
-    fetchClustersIfNeeded
+    fetchClustersIfNeeded,
+    fetchSystemBlockedSlotsIfNeeded
   }), [
     lessons, courses, classrooms, lecturers, schedule, currentTimetableMetadata, history,
     lessonsTimestamp, coursesTimestamp, classroomsTimestamp, lecturersTimestamp, historyTimestamp,
@@ -338,7 +377,8 @@ export function DataProvider({ children }) {
     invalidateClassroomsCache, invalidateLecturersCache, invalidateHistoryCache, invalidateAllCache,
     fetchCoursesIfNeeded, fetchLessonsIfNeeded, fetchLecturersIfNeeded, fetchClassroomsIfNeeded, fetchHistoryIfNeeded, loadTimetableFromHistory, updateCoursesLocally,
     clusters, clustersTimestamp, clusterMappings, invalidateClustersCache, fetchClustersIfNeeded,
-    generatorWeights, manualAssignments, hardCourses, requiredCapacities, electiveCapacity
+    generatorWeights, manualAssignments, hardCourses, requiredCapacities, electiveCapacity,
+    systemBlockedSlots, systemBlockedSlotsTimestamp, invalidateSystemSlotsCache, fetchSystemBlockedSlotsIfNeeded
   ]);
 
   return (

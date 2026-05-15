@@ -1,17 +1,22 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
-import { updatePassword } from "firebase/auth";import { ROLES } from "../constants/roles";
-import { useEffect, useState } from "react";
-import { getAllUsers } from "../services/api";
-import { updateUserRole } from "../services/api";
-import { createUser } from "../services/api";
-import { deleteUser } from "../services/api";
+import { updatePassword } from "firebase/auth";
+import { ROLES } from "../constants/roles";
+import { 
+    getAllUsers, 
+    updateUserRole, 
+    createUser, 
+    deleteUser, 
+    addCluster, 
+    deleteClusters,
+    updateSystemAvailability 
+} from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
 import { useData } from "../context/DataContext";
-import { addCluster, deleteClusters } from "../services/api";
 import Modal from "../components/ui/Modal";
 import Toast, { useToast } from "../components/ui/Toast"; 
+import "./LecturersPage.css";
 
 
 
@@ -27,11 +32,66 @@ export default function SettingsPage({ user }) {
     const [pendingCourse, setPendingCourse] = useState(null);
     const { toast, showSuccess, showError, closeToast } = useToast();
 
-    const { clusters, setClusters, fetchClustersIfNeeded, invalidateClustersCache } = useData();
+    const { 
+        clusters, setClusters, fetchClustersIfNeeded, invalidateClustersCache,
+        systemBlockedSlots, setSystemBlockedSlots, fetchSystemBlockedSlotsIfNeeded, invalidateSystemSlotsCache 
+    } = useData();
     const [isClusterModalOpen, setIsClusterModalOpen] = useState(false);
     const [newClusterName, setNewClusterName] = useState("");
     const [isDeleteClusterConfirmOpen, setIsDeleteClusterConfirmOpen] = useState(false);
     const [clusterToDelete, setClusterToDelete] = useState(null);
+
+    const [localSlots, setLocalSlots] = useState([]);
+    const [hasSlotsChanges, setHasSlotsChanges] = useState(false);
+    const [isSavingSlots, setIsSavingSlots] = useState(false);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                if (!auth.currentUser) return;
+                const token = await auth.currentUser.getIdToken();
+                const data = await getAllUsers(token);
+                setUsers(data);
+            } catch (err) {
+                console.error("Failed to fetch users", err);
+            }
+        };
+
+        if (user?.role === ROLES.ADMIN) {
+            fetchUsers();
+        }
+
+        fetchClustersIfNeeded();
+        fetchSystemBlockedSlotsIfNeeded("SettingsPage");
+
+    }, [user, fetchClustersIfNeeded, fetchSystemBlockedSlotsIfNeeded]);
+
+    useEffect(() => {
+        setLocalSlots(systemBlockedSlots || []);
+        setHasSlotsChanges(false);
+    }, [systemBlockedSlots]);
+
+
+    const hebrewDays = [
+        { name: "ראשון", index: 1 }, { name: "שני", index: 2 }, { name: "שלישי", index: 3 },
+        { name: "רביעי", index: 4 }, { name: "חמישי", index: 5 }, { name: "שישי", index: 6 },
+    ];
+
+    const times = [
+        { range: "08:30-09:20", frame: 1, isBreak: false },
+        { range: "09:30-10:20", frame: 2, isBreak: false },
+        { range: "10:30-11:20", frame: 3, isBreak: false },
+        { range: "11:30-12:20", frame: 4, isBreak: false },
+        { range: "12:20-12:50", frame: null, isBreak: true }, 
+        { range: "12:50-13:40", frame: 5, isBreak: false },
+        { range: "13:50-14:40", frame: 6, isBreak: false },
+        { range: "14:50-15:40", frame: 7, isBreak: false },
+        { range: "15:50-16:40", frame: 8, isBreak: false },
+        { range: "16:50-17:40", frame: 9, isBreak: false },
+        { range: "17:50-18:40", frame: 10, isBreak: false },
+        { range: "18:50-19:40", frame: 11, isBreak: false },
+        { range: "19:50-20:40", frame: 12, isBreak: false },
+    ];
 
 
 
@@ -171,33 +231,33 @@ export default function SettingsPage({ user }) {
         }
     };
 
-
-
-
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                if (!auth.currentUser) return;
-
-                const token = await auth.currentUser.getIdToken();
-                const data = await getAllUsers(token);
-
-                setUsers(data);
-            } catch (err) {
-                console.error("Failed to fetch users", err);
-            }
-        };
-
-        if (user?.role === ROLES.ADMIN) {
-            fetchUsers();
+    const handleToggleSlot = (dayIndex, startFrame) => {
+        const isBlocked = localSlots.some(s => s.day === dayIndex && s.startFrame === startFrame);
+        let newSlots;
+        if (isBlocked) {
+            newSlots = localSlots.filter(s => !(s.day === dayIndex && s.startFrame === startFrame));
+        } else {
+            newSlots = [...localSlots, { day: dayIndex, startFrame: startFrame }];
         }
+        setLocalSlots(newSlots);
+        setHasSlotsChanges(true);
+    };
 
-        fetchClustersIfNeeded();
-
-
-    }, [user, fetchClustersIfNeeded]);
-
-
+    const handleSaveSystemSlots = async () => {
+        setIsSavingSlots(true);
+        try {
+            await updateSystemAvailability(localSlots);
+            setSystemBlockedSlots(localSlots);
+            invalidateSystemSlotsCache();
+            showSuccess("System blocks saved successfully!");
+            setHasSlotsChanges(false);
+        } catch (err) {
+            console.error(err);
+            showError("Failed to save system blocks.");
+        } finally {
+            setIsSavingSlots(false);
+        }
+    };
 
 
     return (
@@ -434,6 +494,74 @@ export default function SettingsPage({ user }) {
                         )}
                     </div>
                 </div>
+
+
+                {/* NEW: Global System Constraints Section */}
+                <div className="settings-section">
+                    <div className="settings-section-header">
+                        <span className="material-icons settings-section-icon">event_busy</span>
+                        <div>
+                            <h2 className="settings-section-title">Global System Constraints</h2>
+                            <p className="settings-section-desc">Select slots that should be completely blocked for all courses (e.g., Active Breaks)</p>
+                        </div>
+                    </div>
+                    <div className="settings-section-content">
+                        <div style={{ marginBottom: "16px", display: "flex", justifyContent: "flex-end" }}>
+                            <button 
+                                onClick={handleSaveSystemSlots}
+                                className="ui-btn ui-btn--primary"
+                                disabled={!hasSlotsChanges || isSavingSlots}
+                                style={{
+                                    backgroundColor: hasSlotsChanges ? "#10b981" : "",
+                                    borderColor: hasSlotsChanges ? "#10b981" : "",
+                                    opacity: (!hasSlotsChanges || isSavingSlots) ? 0.6 : 1
+                                }}
+                            >
+                                <span className="material-icons btn-icon">save</span>
+                                {isSavingSlots ? "Saving..." : "Save Constraints"}
+                            </button>
+                        </div>
+
+                        <div className="availability-table-wrapper" style={{ border: "1px solid #e2e8f0", borderRadius: "10px", padding: "8px", background: "white" }}>
+                            <table className="availability-table">
+                                <thead>
+                                    <tr>
+                                        <th className="time-column">Time</th>
+                                        {hebrewDays.map((day) => (
+                                            <th key={day.index} className="day-column">
+                                                <div className="day-hebrew">{day.name}</div>
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {times.map((timeItem) => (
+                                        <tr key={timeItem.range} className={timeItem.isBreak ? "break-row" : ""}>
+                                            <td className={`time-cell ${timeItem.isBreak ? "break-time" : ""}`}>{timeItem.range}</td>
+                                            {hebrewDays.map((day) => {
+                                                if (timeItem.isBreak) {
+                                                    return <td key={`${day.index}-${timeItem.range}`} className="availability-cell break-cell">Break</td>;
+                                                }
+                                                
+                                                const isBlocked = localSlots.some(s => s.day === day.index && s.startFrame === timeItem.frame);
+                                                const cellClass = isBlocked ? "unavailable" : "available";
+
+                                                return (
+                                                    <td
+                                                        key={`${day.index}-${timeItem.frame}`}
+                                                        className={`availability-cell ${cellClass}`}
+                                                        onClick={() => handleToggleSlot(day.index, timeItem.frame)}
+                                                    />
+                                                );
+                                            })}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
 
             </div>
 

@@ -26,6 +26,7 @@ import com.coursescheduling.server.model.ManualAssignmentDTO;
 import com.coursescheduling.server.model.RoomType;
 import com.coursescheduling.server.model.Semester;
 import com.coursescheduling.server.service.ClassroomService;
+import com.coursescheduling.server.service.ClusterService;
 import com.coursescheduling.server.service.CourseService;
 
 import java.util.Map;
@@ -56,14 +57,30 @@ public class TimetableAlgorithmService {
     @Autowired
     private CourseService courseService;
     
+    @Autowired
+    private ClusterService clusterService;
+    
     private final Random random = new Random();
     
     private List<DomainValue> getGlobalBlockedSlots() {
-	    return List.of(
-	        new DomainValue(3, 5),
-	        new DomainValue(3, 6)
-	    );
-	}
+        try {
+            List<Map<String, Integer>> blockedSlots = clusterService.getSystemAvailability();
+            List<DomainValue> globalSlots = new ArrayList<>();
+            
+            for (Map<String, Integer> slot : blockedSlots) {
+                if (slot.containsKey("day") && slot.containsKey("startFrame")) {
+                    globalSlots.add(new DomainValue(slot.get("day"), slot.get("startFrame")));
+                }
+            }
+            
+            System.out.println("🔒 Applied " + globalSlots.size() + " global blocked slots from settings.");
+            return globalSlots;
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error fetching global blocked slots from Firestore: " + e.getMessage());
+            return new ArrayList<>(); 
+        }
+    }
     
     
     private List<Classroom> getRealClassroomsFromDB() {

@@ -19,6 +19,8 @@ import com.coursescheduling.server.service.ClassroomService;
 import com.coursescheduling.server.service.CourseService;
 
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -369,6 +371,17 @@ public class FileUploadController {
         } catch (Exception e) {
             throw new RuntimeException("Failed to export lecturers template", e);
         }
+    }
+    
+    @GetMapping("/settings/availability")
+    public List<Map<String, Integer>> getSystemAvailability() throws Exception {
+        return clusterService.getSystemAvailability();
+    }
+
+    @PostMapping("/settings/availability")
+    public String updateSystemAvailability(@RequestBody List<Map<String, Integer>> blockedSlots) throws Exception {
+        clusterService.updateSystemAvailability(blockedSlots);
+        return "System availability updated successfully";
     }
     
     

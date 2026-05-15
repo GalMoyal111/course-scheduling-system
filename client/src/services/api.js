@@ -705,3 +705,37 @@ export async function exportSavedToExcel(timetableId) {
 
   return await res.blob();
 }
+
+export async function getSystemAvailability(caller = "Unknown") {
+  const res = await fetch(`${BASE_URL}/settings/availability`, {
+    method: "GET",
+    headers: {
+      "X-Caller": caller,
+      "Accept": "application/json"
+    }
+  });
+  
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch system availability: ${res.status} ${text}`);
+  }
+  
+  return res.json();
+}
+
+export async function updateSystemAvailability(blockedSlots) {
+  const res = await fetch(`${BASE_URL}/settings/availability`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(blockedSlots),
+  });
+  
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to update system availability: ${res.status} ${text}`);
+  }
+  
+  return res.text();
+}
