@@ -32,7 +32,7 @@ public class InconvenientTimingConstraint implements SoftConstraint {
 
         for (int frame = startFrame; frame <= endFrame; frame++) {
             if (frame == 12) {
-                penalty += 15.0; 
+                penalty += 5.0; 
             }
         }
 

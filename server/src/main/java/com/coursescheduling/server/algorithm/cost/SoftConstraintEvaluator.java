@@ -29,6 +29,7 @@ public class SoftConstraintEvaluator {
                 continue;
             }
         	
+        	
         	double rawPenalty = constraint.calculatePenalty(variable, value, currentAssignment);
         	double maxPenalty = constraint.getMaxPenalty();
         	
@@ -38,6 +39,10 @@ public class SoftConstraintEvaluator {
             }
             
             normalizedPenalty = Math.min(normalizedPenalty, 10.0);
+            
+            if (constraint.getName() == "InconvenientTiming") {
+            	normalizedPenalty = normalizedPenalty*3; 
+        	}
             
             
             double finalPenalty = normalizedPenalty * userWeight;
