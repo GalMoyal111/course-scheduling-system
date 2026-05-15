@@ -26,13 +26,13 @@ public class VariableBuilder {
 	@Autowired
     private LessonService lessonService;
 	
-	public List<Variable> createVariables(Semester semester, Map<LessonType, Integer> requiredCapacitiesMap, List<String> hardCourseIds , Integer electiveCapacity){		
+	public List<Variable> createVariables(Semester semester, Map<LessonType, Integer> requiredCapacitiesMap, List<String> hardCourseIds , List<String> englishCourseIds, Integer electiveCapacity){		
 		
 		List<Lesson> lessons = getSupportedLessonsFromDB(semester);
 		List <Variable> variables = new ArrayList<>();
 		
 		for (Lesson lesson : lessons) {
-			Variable v = mapLessonToVariable(lesson, requiredCapacitiesMap, hardCourseIds, electiveCapacity);
+			Variable v = mapLessonToVariable(lesson, requiredCapacitiesMap, hardCourseIds, englishCourseIds, electiveCapacity);
 	        variables.add(v);
 	    }
 		
@@ -51,7 +51,7 @@ public class VariableBuilder {
 	
 	
 
-	private Variable mapLessonToVariable(Lesson lesson, Map<LessonType, Integer> requiredCapacitiesMap, List<String> hardCourseIds, Integer electiveCapacity) {		
+	private Variable mapLessonToVariable(Lesson lesson, Map<LessonType, Integer> requiredCapacitiesMap, List<String> hardCourseIds, List<String> englishCourseIds, Integer electiveCapacity) {		
 		Variable v = new Variable();
 
 		v.setLessonId(lesson.getLessonId());
@@ -69,6 +69,11 @@ public class VariableBuilder {
 			v.setIsHardCourse(false);
 		}
 		
+		if (englishCourseIds != null && englishCourseIds.contains(lesson.getCourseId())) {
+			v.setEnglishCourse(true);
+		} else {
+			v.setEnglishCourse(false);
+		}
 		
 		if (lesson.getCluster() >= 9) {
             v.setRequiredCapacity(electiveCapacity != null ? electiveCapacity : 25);

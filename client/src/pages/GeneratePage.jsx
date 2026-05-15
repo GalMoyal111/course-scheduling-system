@@ -24,7 +24,7 @@ export default function GeneratePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [semester, setSemester] = useState("A");
+  const [semester, setSemester] = useState("");
   const [isCancelling, setIsCancelling] = useState(false);
   const isCancellingRef = useRef(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -35,6 +35,8 @@ export default function GeneratePage() {
       fetchLecturersIfNeeded, 
       fetchClassroomsIfNeeded,
       fetchCoursesIfNeeded,
+      courses,
+      lessons,
       
       generatorWeights: weights, 
       setGeneratorWeights: setWeights,
@@ -42,6 +44,8 @@ export default function GeneratePage() {
       setManualAssignments,
       hardCourses, 
       setHardCourses,
+      englishCourses, 
+      setEnglishCourses,
       requiredCapacities, 
       setRequiredCapacities,
       electiveCapacity, 
@@ -51,6 +55,8 @@ export default function GeneratePage() {
 
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
   const [isHardModalOpen, setIsHardModalOpen] = useState(false);
+  const [isEnglishModalOpen, setIsEnglishModalOpen] = useState(false);
+  const [showSemesterValidation, setShowSemesterValidation] = useState(false);
 
 
   const handleAddManualAssignment = (newAssignment) => {
@@ -148,8 +154,44 @@ export default function GeneratePage() {
       }
   };
 
+  const handleSemesterChange = (e) => {
+    const selectedSem = e.target.value;
+    setSemester(selectedSem);
+    
+    // מנקים הגדרות של סמסטר קודם
+    setManualAssignments([]);
+    setHardCourses([]);
+
+    if (selectedSem && courses.length > 0) {
+      const ENGLISH_IDS = ["11360", "11064", "11063", "11361", "11060"];
+      
+      // אוספים את כל ה-ID של הקורסים שיש להם שיעורים בסמסטר שנבחר
+      const activeIdsInSemester = new Set(
+          lessons.filter(l => l.semester === selectedSem).map(l => l.courseId)
+      );
+
+      // מוצאים מתוך כל הקורסים את קורסי האנגלית ששייכים לסמסטר הזה
+      const autoEnglishCourses = courses.filter(c => 
+          ENGLISH_IDS.includes(c.courseId) && 
+          (c.semester === selectedSem || activeIdsInSemester.has(c.courseId))
+      );
+
+      setEnglishCourses(autoEnglishCourses);
+    } else {
+      setEnglishCourses([]);
+    }
+  };
+
   const handleWeightChange = (constraintName, value) => {
     setWeights((prev) => ({ ...prev, [constraintName]: parseFloat(value) }));
+  };
+
+  const handleGenerateClick = () => {
+    if (!semester) {
+      setShowSemesterValidation(true); // מקפיץ את המודל אם הסמסטר ריק
+    } else {
+      handleGenerate(); // ממשיך ליצירת המערכת אם הכל תקין
+    }
   };
 
   const handleGenerate = async () => {
@@ -163,6 +205,7 @@ export default function GeneratePage() {
         softConstraintWeights: weights, 
         manualAssignments, 
         hardCourseIds: hardCourses.map(c => c.courseId),
+        englishCourseIds: englishCourses.map(c => c.courseId),
         requiredCapacities, 
         electiveCapacity 
       };
@@ -261,8 +304,9 @@ export default function GeneratePage() {
           <select 
             className="semester-select"
             value={semester} 
-            onChange={(e) => {setSemester(e.target.value); setManualAssignments([]);}}
+            onChange={handleSemesterChange}
           >
+            <option value="" disabled>-- Select Semester --</option>
             <option value="A">Semester A</option>
             <option value="B">Semester B</option>
           </select>
@@ -333,6 +377,34 @@ export default function GeneratePage() {
               <div key={index} className="badge" style={{ background: "#fee2e2", color: "#991b1b", padding: "8px 12px", borderRadius: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <span>{c.courseName}</span>
                 <span className="material-icons" style={{ fontSize: "16px", cursor: "pointer" }} onClick={() => setHardCourses(prev => prev.filter((_, i) => i !== index))}>close</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* English Courses Section */}
+      <div className="generate-card">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <h3 style={{ margin: 0 }}>
+              <span className="material-icons">language</span>
+              English Courses (Friday / Afternoon Preference)
+            </h3>
+            <InfoButton 
+              title="What are English Courses?"
+              description="These courses will be specifically targeted to be scheduled on Fridays or late afternoons."
+            />
+          </div>
+          <Button variant="secondary" onClick={() => setIsEnglishModalOpen(true)}>+ Add Course</Button>
+        </div>
+        
+        {englishCourses.length > 0 && (
+          <div style={{ marginTop: "15px", display: "flex", flexWrap: "wrap", gap: "10px" }}>
+            {englishCourses.map((c, index) => (
+              <div key={index} className="badge" style={{ background: "#e0e7ff", color: "#3730a3", padding: "8px 12px", borderRadius: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>{c.courseName}</span>
+                <span className="material-icons" style={{ fontSize: "16px", cursor: "pointer" }} onClick={() => setEnglishCourses(prev => prev.filter((_, i) => i !== index))}>close</span>
               </div>
             ))}
           </div>
@@ -583,15 +655,14 @@ export default function GeneratePage() {
       {/* Primary Action Button */}
       <div className="generate-footer">
         <Button 
-          onClick={handleGenerate} 
-          disabled={loading} 
+          onClick={handleGenerateClick} /* <-- שינינו לפונקציה החדשה */
+          disabled={loading} /* <-- החזרנו רק לטעינה */
           variant="primary"
           className="generate-big-button"
         >
-           {/* הורדנו את הטעינה מפה, הכפתור תמיד יראה אותו דבר, פשוט יהיה לחוץ/חסום */}
            <div className="button-label">
-                <span>Generate Optimal Schedule</span>
-                <span className="material-icons">rocket_launch</span>
+               <span>Generate Optimal Schedule</span>
+               <span className="material-icons">rocket_launch</span>
            </div>
         </Button>
       </div>
@@ -647,6 +718,13 @@ export default function GeneratePage() {
         currentSemester={semester}
       />
 
+      <HardCourseModal 
+        isOpen={isEnglishModalOpen} 
+        onClose={() => setIsEnglishModalOpen(false)} 
+        onSave={(c) => setEnglishCourses(prev => [...prev, c])}
+        currentSemester={semester}
+      />
+
       <Modal
         isOpen={showCancelConfirm}
         onClose={() => setShowCancelConfirm(false)}
@@ -669,6 +747,27 @@ export default function GeneratePage() {
           Any progress will be lost.
         </p>
       </Modal>
+
+
+      <Modal
+        isOpen={showSemesterValidation}
+        onClose={() => setShowSemesterValidation(false)}
+        title="Missing Information"
+        variant="warning"
+        centerContent={true}
+        footer={
+          <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+            <Button variant="primary" onClick={() => setShowSemesterValidation(false)}>
+              Got it
+            </Button>
+          </div>
+        }
+      >
+        <p style={{ textAlign: "center", fontSize: "16px", margin: 0, color: "#334155" }}>
+          Please select a <strong>Target Semester</strong> (A or B) at the top of the page before generating the schedule.
+        </p>
+      </Modal>
+      
 
 
 

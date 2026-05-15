@@ -11,7 +11,6 @@ public class InconvenientTimingConstraint implements SoftConstraint {
 
     private static final String CONSTRAINT_NAME = "InconvenientTiming";
 
-    private static final List<String> ENGLISH_COURSE_IDS = Arrays.asList("11063", "11064" ,"11360" ,"11060");
     
     @Override
     public String getName() {
@@ -25,7 +24,7 @@ public class InconvenientTimingConstraint implements SoftConstraint {
         int startFrame = value.getStartFrame();
         int endFrame = startFrame + variable.getDuration() - 1;
 
-        boolean isEnglishCourse = ENGLISH_COURSE_IDS.contains(variable.getCourseId());
+        boolean isEnglishCourse = variable.isEnglishCourse();
         
         if (day == 6 && !isEnglishCourse) {
             penalty += 15;

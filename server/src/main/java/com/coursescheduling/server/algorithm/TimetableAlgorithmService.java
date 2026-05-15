@@ -103,7 +103,8 @@ public class TimetableAlgorithmService {
     	
     	Semester semester = request.getSemester();
     	Map<String, Double> userWeights = request.getSoftConstraintWeights();
-    	
+    	List<String> englishCourseIds= request.getEnglishCourseIds();
+    	if(englishCourseIds == null) englishCourseIds = new ArrayList<>();
     	
     	Map<LessonType, Integer> capacities = request.getRequiredCapacities();
     	for (Map.Entry<LessonType, Integer> entry : capacities.entrySet()) {
@@ -118,7 +119,7 @@ public class TimetableAlgorithmService {
 
 
         // Step 1: Build variables from semester data
-        List<Variable> variables = variableBuilder.createVariables(semester, capacities, hardCourseIds, electiveCapacity);        
+        List<Variable> variables = variableBuilder.createVariables(semester, capacities, hardCourseIds, englishCourseIds, electiveCapacity);
         
      
         // Step 2: Apply constraints to variables

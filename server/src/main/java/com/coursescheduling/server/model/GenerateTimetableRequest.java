@@ -11,6 +11,7 @@ public class GenerateTimetableRequest {
     private List<String> hardCourseIds;
     private Map<LessonType, Integer> requiredCapacities;
     private Integer electiveCapacity;
+    private List<String> englishCourseIds;
 
     public List<String> getHardCourseIds() {
 		return hardCourseIds;
@@ -63,5 +64,12 @@ public class GenerateTimetableRequest {
         this.electiveCapacity = electiveCapacity;
     }
     
+    public List<String> getEnglishCourseIds() {
+        return englishCourseIds;
+    }
+
+    public void setEnglishCourseIds(List<String> englishCourseIds) {
+        this.englishCourseIds = englishCourseIds;
+    }
     
 }

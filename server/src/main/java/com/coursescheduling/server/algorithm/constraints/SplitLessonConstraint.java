@@ -13,7 +13,6 @@ import java.util.Map;
 @Component
 public class SplitLessonConstraint {
 	
-	private static final List<String> ENGLISH_COURSE_IDS = Arrays.asList("11063", "11064", "11360","11060");
 	
 
 	public boolean isSplitPartAlreadyScheduledToday(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment) {
@@ -23,7 +22,7 @@ public class SplitLessonConstraint {
             return false;
         }
 
-        boolean isEnglishCourse = ENGLISH_COURSE_IDS.contains(var.getCourseId());
+        boolean isEnglishCourse = var.isEnglishCourse();
 
         for (Map.Entry<Variable, AssignedValue> entry : assignment.entrySet()) {
             Variable assignedVar = entry.getKey();

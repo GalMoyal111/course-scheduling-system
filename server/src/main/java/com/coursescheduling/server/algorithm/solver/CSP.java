@@ -267,7 +267,7 @@ public class CSP {
                 String futureSplitId = futureVar.getSplitGroupId();
                 if (currentSplitId != null && !currentSplitId.isEmpty() && currentSplitId.equals(futureSplitId)) {
                 	
-                	boolean isEnglish = var.getCourseId().equals("11063") || var.getCourseId().equals("11064") || var.getCourseId().equals("11360") || var.getCourseId().equals("11060");
+                	boolean isEnglish = var.isEnglishCourse();
                 	
                     for (DomainValue futureValue : futureVar.getDomain().getValues()) {
                         if (futureValue.getDay() == value.getDay()) {

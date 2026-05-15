@@ -21,6 +21,7 @@ public class Variable {
 	
 	private List<DomainValue> nonPreferredSlots = new ArrayList<>();
 	private int requiredCapacity;
+	private boolean isEnglishCourse = false;
 	
 	
 	
@@ -107,5 +108,12 @@ public class Variable {
 	    this.nonPreferredSlots = nonPreferredSlots;
 	}
 	
+	public boolean isEnglishCourse() {
+        return isEnglishCourse;
+    }
+
+    public void setEnglishCourse(boolean englishCourse) {
+        isEnglishCourse = englishCourse;
+    }
 	
 }
