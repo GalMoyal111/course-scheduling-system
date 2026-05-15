@@ -214,3 +214,41 @@
   opacity: 0.3;
 }
 
+/* =========================================
+   הגדרות הדפסה - תצוגת טבלה בלבד!
+   ========================================= */
+@media print {
+  /* 1. מעלים את כל האלמנטים באתר לחלוטין */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* 2. אומר לדפדפן: תציג אך ורק את הקונטיינר של הטבלה ואת מה שבתוכו */
+  .timetable-container, .timetable-container * {
+    visibility: visible !important;
+  }
+
+  /* 3. שולף את הטבלה ומדביק אותה בדיוק בפינה העליונה של נייר ההדפסה */
+  .timetable-container {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important; /* מונע חיתוך של הטבלה */
+  }
+
+  /* 4. ביטול רוחב מינימלי כדי שהטבלה תתאים לדף */
+  .timetable-table {
+    min-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* 5. מניעת חיתוך שורות באמצע בעת מעבר לעמוד הבא בהדפסה */
+  .timetable-table tr {
+    page-break-inside: avoid !important;
+  }
+}
