@@ -4,7 +4,7 @@ import Button from "./ui/Button";
 import Modal from "./ui/Modal";
 
 
-export default function HardCourseModal({ isOpen, onClose, onSave, currentSemester }) {
+export default function HardCourseModal({ isOpen, onClose, onSave, currentSemester, title ="Select Course", actionText = "Mark as Hard",description = "Selected courses will be prioritized accordingly." }) {
   const { lessons, clusterMappings } = useData();
 
   const clusterMapping = clusterMappings.numToName;
@@ -55,6 +55,25 @@ export default function HardCourseModal({ isOpen, onClose, onSave, currentSemest
         <p style={{ fontSize: "14px", color: "#64748b" }}>
           Selected courses will have their <strong>Lectures</strong> prioritized for morning slots (8:30 - 12:30).
         </p>
+
+        <div style={{ 
+          display: "flex", 
+          alignItems: "center", 
+          gap: "10px", 
+          fontSize: "14px", 
+          color: "#0747a6", // כחול כהה מאוד (קריא מאוד)
+          background: "#deebff", // רקע תכלת בולט יותר
+          padding: "12px", 
+          borderRadius: "8px",
+          border: "1px solid #b3d4ff",
+          marginBottom: "10px"
+        }}>
+          <span className="material-icons" style={{ color: "#5688d3ff" }}>info</span>
+          <span style={{ lineHeight: "1.4" }}>
+            <strong>List empty?</strong> Please make sure you have selected 
+            <strong> Semester {currentSemester || 'A or B'}</strong> at the top of the main page.
+          </span>
+        </div>
         
         <div className="form-field">
           <label>Cluster</label>
@@ -76,7 +95,9 @@ export default function HardCourseModal({ isOpen, onClose, onSave, currentSemest
       </div>
       <div className="modal-actions" style={{ padding: "15px", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
         <Button variant="ghost" onClick={onClose}>Cancel</Button>
-        <Button variant="primary" onClick={handleSave} disabled={!selectedCourseId}>Mark as Hard</Button>
+        <Button variant="primary" onClick={handleSave} disabled={!selectedCourseId}>
+          {actionText}
+        </Button>
       </div>
     </Modal>
   );

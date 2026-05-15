@@ -24,7 +24,6 @@ export default function GeneratePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [semester, setSemester] = useState("");
   const [isCancelling, setIsCancelling] = useState(false);
   const isCancellingRef = useRef(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -37,6 +36,8 @@ export default function GeneratePage() {
       fetchCoursesIfNeeded,
       courses,
       lessons,
+      semester,
+      setSemester,
       
       generatorWeights: weights, 
       setGeneratorWeights: setWeights,
@@ -716,13 +717,20 @@ export default function GeneratePage() {
         onClose={() => setIsHardModalOpen(false)} 
         onSave={(c) => setHardCourses(prev => [...prev, c])}
         currentSemester={semester}
+        title="Add Challenging Course"
+        actionText="Mark as Hard"
+        description="Selected courses will have their Lectures prioritized for morning slots (8:30 - 12:30)."
       />
+
 
       <HardCourseModal 
         isOpen={isEnglishModalOpen} 
         onClose={() => setIsEnglishModalOpen(false)} 
         onSave={(c) => setEnglishCourses(prev => [...prev, c])}
         currentSemester={semester}
+        title="Add English Course"
+        actionText="Add Course"
+        description="These courses will be prioritized for Friday mornings or weekday afternoons."
       />
 
       <Modal
@@ -767,7 +775,7 @@ export default function GeneratePage() {
           Please select a <strong>Target Semester</strong> (A or B) at the top of the page before generating the schedule.
         </p>
       </Modal>
-      
+
 
 
 

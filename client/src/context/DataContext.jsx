@@ -37,6 +37,7 @@ export function DataProvider({ children }) {
   });
   const [manualAssignments, setManualAssignments] = useState([]);
   const [hardCourses, setHardCourses] = useState([]);
+  const [semester, setSemester] = useState("");
   const [englishCourses, setEnglishCourses] = useState([]);
   const [requiredCapacities, setRequiredCapacities] = useState({LECTURE: 60,TUTORIAL: 40,LAB: 20,PHYSICS_LAB: 15,NETWORKING_LAB: 12});
 
@@ -328,6 +329,8 @@ export function DataProvider({ children }) {
     generatorWeights, setGeneratorWeights,
     manualAssignments, setManualAssignments,
     hardCourses, setHardCourses,
+    semester,
+  setSemester,
     englishCourses, setEnglishCourses,
     requiredCapacities, setRequiredCapacities,
     electiveCapacity, setElectiveCapacity,
@@ -380,7 +383,7 @@ export function DataProvider({ children }) {
     fetchCoursesIfNeeded, fetchLessonsIfNeeded, fetchLecturersIfNeeded, fetchClassroomsIfNeeded, fetchHistoryIfNeeded, loadTimetableFromHistory, updateCoursesLocally,
     clusters, clustersTimestamp, clusterMappings, invalidateClustersCache, fetchClustersIfNeeded,
     generatorWeights, manualAssignments, hardCourses, requiredCapacities, electiveCapacity,
-    systemBlockedSlots, systemBlockedSlotsTimestamp, invalidateSystemSlotsCache, fetchSystemBlockedSlotsIfNeeded, englishCourses, setEnglishCourses
+    systemBlockedSlots, systemBlockedSlotsTimestamp, invalidateSystemSlotsCache, fetchSystemBlockedSlotsIfNeeded, englishCourses, setEnglishCourses, semester, setSemester
   ]);
 
   return (
