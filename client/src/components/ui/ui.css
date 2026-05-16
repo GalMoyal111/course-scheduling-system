@@ -37,12 +37,13 @@
 /* Buttons */
 .ui-btn{border-radius:10px;padding:.5rem .9rem;border:0;font-weight:700;cursor:pointer;background:transparent;color:var(--text);transition:transform .12s ease,box-shadow .12s ease,background .15s ease;font-size:0.95rem}
 .ui-btn--primary{background:var(--accent);color:white;box-shadow:0 8px 20px rgba(124,58,237,0.12)}
-.ui-btn--primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 28px rgba(124,58,237,0.18)}
-.ui-btn--primary:active:not(:disabled){transform:translateY(0)}
+.ui-btn--primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 32px rgba(124,58,237,0.25)}
+.ui-btn--primary:active:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 12px rgba(124,58,237,0.2)}
 .ui-btn--accent{background:var(--accent);color:white;box-shadow:0 8px 24px rgba(79,70,229,0.12)}
-.ui-btn--accent:hover:not(:disabled){transform:translateY(-1px)}
-.ui-btn--ghost{background:transparent;border:1px solid rgba(15,23,36,0.06);color:var(--muted);transition:background-color .15s ease,border-color .15s ease,color .15s ease}
-.ui-btn--ghost:hover:not(:disabled){background:rgba(15,23,36,0.03);border-color:rgba(15,23,36,0.1);color:var(--text)}
+.ui-btn--accent:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 32px rgba(79,70,229,0.25)}
+.ui-btn--accent:active:not(:disabled){transform:translateY(-1px)}
+.ui-btn--ghost{background:transparent;border:1px solid rgba(15,23,36,0.06);color:var(--muted);transition:background-color .15s ease,border-color .15s ease,color .15s ease,box-shadow .12s ease}
+.ui-btn--ghost:hover:not(:disabled){background:rgba(15,23,36,0.03);border-color:rgba(15,23,36,0.1);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,0.06)}
 .ui-btn--ghost:active:not(:disabled){transform:translateY(0)}
 .ui-btn:active{transform:translateY(1px)}
 .ui-btn:disabled{opacity:.6;cursor:not-allowed}
@@ -59,11 +60,12 @@
 /* Modal & form styles (bright, matching app tokens) */
 
 .form-field{display:flex;flex-direction:column;margin-bottom:12px}
-.form-field label{font-size:0.86rem;color:var(--muted);margin-bottom:6px}
+.form-field label{font-size:0.86rem;color:var(--muted);margin-bottom:6px;font-weight:500}
 .ui-input{padding:10px 12px;border-radius:8px;border:1px solid rgba(15,23,36,0.08);background:var(--card);font-size:0.95rem;color:var(--text);transition:border-color .2s ease,box-shadow .2s ease,background-color .2s ease}
 .ui-input::placeholder{color:var(--muted);opacity:0.7}
-.ui-input:focus{outline:none;box-shadow:0 6px 18px rgba(79,70,229,0.08);border-color:rgba(124,58,237,0.22);background:var(--card)}
+.ui-input:focus{outline:none;box-shadow:0 0 0 3px rgba(79,70,229,0.1);border-color:rgba(124,58,237,0.4);background:var(--card)}
 .ui-input:disabled{background:rgba(15,23,36,0.03);cursor:not-allowed;opacity:.6}
+.ui-input:hover:not(:disabled){border-color:rgba(15,23,36,0.12);background:rgba(15,23,36,0.02)}
 .ui-select {
   appearance: none;
   -webkit-appearance: none;
@@ -78,11 +80,14 @@
   background-position: right 12px center;
   background-size: 18px;
   font-size: 0.95rem;
+  transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
 }
 .ui-select, .ui-select option{color:var(--text)}
 .ui-select option{background:var(--card)}
 .ui-select option:hover, .ui-select option:checked{background:var(--accent-start);color:white}
 .ui-select::-ms-expand{display:none}
+.ui-select:focus{outline:none;box-shadow:0 0 0 3px rgba(79,70,229,0.1);border-color:rgba(124,58,237,0.4)}
+.ui-select:hover:not(:disabled){border-color:rgba(15,23,36,0.12);background-color:rgba(15,23,36,0.02)}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px}
 
 
@@ -119,10 +124,11 @@
 }
 
 /* Simple table styling for lists */
-.data-table{width:100%;font-size:0.95rem;border-spacing:0}
-.data-table th,.data-table td{padding:10px 12px;border-bottom:1px solid rgba(15,23,36,0.06);text-align:left}
-.data-table thead th{font-weight:700;color:var(--muted);background:transparent}
-.data-table tbody tr:hover{background:rgba(79,70,229,0.03)}
+.data-table{width:100%;font-size:0.95rem;border-spacing:8px;border-collapse:separate}
+.data-table th,.data-table td{padding:12px;border-bottom:1px solid rgba(15,23,36,0.06);text-align:left}
+.data-table thead th{font-weight:700;color:var(--muted);background:transparent;border-bottom:2px solid rgba(15,23,36,0.08)}
+.data-table tbody tr{cursor:pointer;transition:background-color .15s ease,box-shadow .15s ease}
+.data-table tbody tr:hover{background:rgba(79,70,229,0.04);border-radius:6px}
 
 /* Make table rows feel clickable when selecting */
 .data-table tbody tr{cursor:pointer}
@@ -133,6 +139,8 @@
   width:13px;
   height:13px;
   margin:0;
+  cursor:pointer;
+  accent-color:#4f46e5;
 }
 
 .data-table th input[type="checkbox"], .data-table thead input[type="checkbox"]{
@@ -140,14 +148,17 @@
 }
 
 /* Toolbar */
-.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;padding:12px;background:rgba(79,70,229,0.03);border-radius:10px;border:1px solid rgba(79,70,229,0.08);transition:all .2s ease}
+.toolbar:hover{background:rgba(79,70,229,0.06);border-color:rgba(79,70,229,0.15)}
 .toolbar .left{display:flex;align-items:center;gap:8px}
 .toolbar .right{display:flex;align-items:center;gap:8px}
-.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;border:0;background:transparent;cursor:pointer;color:var(--text)}
 .icon-btn{
   display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;border:0;background:transparent;cursor:pointer;color:var(--text);
   transition:background-color .16s ease, transform .08s ease, box-shadow .12s ease;
 }
+.icon-btn:hover:not(:disabled){background-color:rgba(79,70,229,0.08);transform:scale(1.05);box-shadow:0 2px 8px rgba(79,70,229,0.15)}
+.icon-btn:active:not(:disabled){transform:scale(0.98)}
+.icon-btn:disabled{opacity:.5;cursor:not-allowed}
 .icon-btn:hover{background:linear-gradient(180deg, rgba(79,70,229,0.06), rgba(124,58,237,0.02));transform:translateY(-1px)}
 .icon-btn svg{display:block;color:inherit;width:16px;height:16px}
 /* Ensure SVG strokes/fills inherit the button color so icons are visible

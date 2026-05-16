@@ -60,6 +60,11 @@
 .add-lecturer-btn:hover {
   background: #4f46e5;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.add-lecturer-btn:active {
+  transform: translateY(0);
 }
 
 .lecturers-list {
@@ -72,21 +77,24 @@
   padding: 0.75rem 1rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.05s ease, border-color 0.05s ease, box-shadow 0.05s ease;
+  transition: all 0.15s ease;
   border: 1px solid transparent;
+  background: #ffffff;
 }
 
 .lecturer-item:hover {
-  background-color: #f1f5f9; /* רקע טיפה יותר מודגש מקודם */
-  border-color: #e2e8f0; /* מוסיף מסגרת עדינה שממסגרת את השורה */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02); /* צל עדין שנותן עומק */
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  transform: translateX(-2px);
 }
 
 .lecturer-item.active {
-  background-color: #eff6ff;
-  border-color: #bfdbfe;
-  color: #1d4ed8;
+  background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+  border-color: #0284c7;
+  color: #0c4a6e;
   font-weight: 600;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.1);
 }
 
 .lecturer-name {
@@ -115,14 +123,14 @@
   margin: 0;
 }
 
-/* עיצוב כפתור העריכה החדש (אייקון בלבד) */
+/* عيצוב כפתור העריכה החדש (אייקון בלבד) */
 .edit-icon-btn {
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: #94a3b8;
   cursor: pointer;
-  padding: 6px;
-  border-radius: 50%;
+  padding: 8px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -131,7 +139,13 @@
 
 .edit-icon-btn:hover {
   background: #f1f5f9;
-  color: #3b82f6;
+  color: #0e7490;
+  border-color: #bae6fd;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.15);
+}
+
+.edit-icon-btn:active {
+  transform: scale(0.95);
 }
 
 .edit-icon-btn .material-icons {
@@ -172,6 +186,32 @@
   border-radius: 12px;
   border: 1px solid #eaecf0;
   background: #ffffff;
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar styling for horizontal and vertical scroll */
+.availability-table-wrapper::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.availability-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.availability-table-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.availability-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.availability-table-wrapper::-webkit-scrollbar-corner {
+  background: #f1f5f9;
 }
 
 .availability-table {
