@@ -4,16 +4,20 @@ import ConfirmModal from "../components/ConfirmModal";
 import ClassroomList from "../components/ClassroomList";
 import Button from "../components/ui/Button";
 import Toast, { useToast } from "../components/ui/Toast";
-import { uploadRooms, exportRooms, addRoom, deleteClassrooms, updateClassroom } from "../services/api";
+import {
+  uploadRooms,
+  exportRooms,
+  addRoom,
+  deleteClassrooms,
+  updateClassroom,
+} from "../services/api";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useData } from "../context/DataContext";
 import Modal from "../components/ui/Modal";
 import { useLocation } from "react-router-dom";
 
-
 function UploadRoomsPage() {
   const { toast, showSuccess, showError, closeToast } = useToast();
-
 
   const handleUpload = async (file) => {
     // show confirmation before performing destructive upload
@@ -22,14 +26,14 @@ function UploadRoomsPage() {
   };
 
   const [exporting, setExporting] = useState(false);
-  const { 
-  classrooms, 
-  setClassrooms, 
-  fetchClassroomsIfNeeded, 
-  setClassroomsTimestamp,  
-  invalidateClassroomsCache,
-  invalidateCoursesCache
-} = useData();
+  const {
+    classrooms,
+    setClassrooms,
+    fetchClassroomsIfNeeded,
+    setClassroomsTimestamp,
+    invalidateClassroomsCache,
+    invalidateCoursesCache,
+  } = useData();
 
   const handleExport = async () => {
     try {
@@ -61,7 +65,12 @@ function UploadRoomsPage() {
   const [pendingFile, setPendingFile] = useState(null);
 
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
-  const [uploadSummary, setUploadSummary] = useState({ totalRows: 0, savedClassrooms: 0, invalidRows: [], warningRows: [] });
+  const [uploadSummary, setUploadSummary] = useState({
+    totalRows: 0,
+    savedClassrooms: 0,
+    invalidRows: [],
+    warningRows: [],
+  });
   const location = useLocation();
   const [isHighlightUpload, setIsHighlightUpload] = useState(false);
 
@@ -70,7 +79,7 @@ function UploadRoomsPage() {
       setIsHighlightUpload(true);
       window.scrollTo({
         top: 0,
-        behavior: "auto" // אפשר גם "auto" אם אתה רוצה מיידי
+        behavior: "auto",
       });
 
       window.history.replaceState({}, document.title);
@@ -91,7 +100,7 @@ function UploadRoomsPage() {
 
     try {
       const result = await uploadRooms(fileToUpload);
-      
+
       setUploadSummary(result);
       setIsSummaryModalOpen(true);
 
@@ -130,25 +139,36 @@ function UploadRoomsPage() {
 
   const performDelete = async () => {
     if (!pendingDelete) return;
-    
+
     try {
       if (Array.isArray(pendingDelete)) {
-        const payload = pendingDelete.map((c) => ({ building: c.building, classroomName: c.classroomName }));
+        const payload = pendingDelete.map((c) => ({
+          building: c.building,
+          classroomName: c.classroomName,
+        }));
         await deleteClassrooms(payload);
       } else {
-        await deleteClassrooms([{ building: pendingDelete.building, classroomName: pendingDelete.classroomName }]);
+        await deleteClassrooms([
+          {
+            building: pendingDelete.building,
+            classroomName: pendingDelete.classroomName,
+          },
+        ]);
       }
 
-      const toDeleteArray = Array.isArray(pendingDelete) ? pendingDelete : [pendingDelete];
-      const deletedNames = new Set(toDeleteArray.map(c => c.classroomName));
+      const toDeleteArray = Array.isArray(pendingDelete)
+        ? pendingDelete
+        : [pendingDelete];
+      const deletedNames = new Set(toDeleteArray.map((c) => c.classroomName));
 
-      setClassrooms(prev => prev.filter(c => !deletedNames.has(c.classroomName)));
+      setClassrooms((prev) =>
+        prev.filter((c) => !deletedNames.has(c.classroomName)),
+      );
 
       setClassroomsTimestamp(Date.now());
       setDeleteConfirmOpen(false);
       setPendingDelete(null);
       setSelectedClassrooms([]);
-
     } catch (err) {
       console.error(err);
       showError("Failed to delete classroom(s)");
@@ -166,16 +186,16 @@ function UploadRoomsPage() {
 
         await updateClassroom(req);
 
-        setClassrooms(prev => 
-          prev.map(c => 
-            c.classroomName === editingClassroom.classroomName ? classroom : c
-          )
+        setClassrooms((prev) =>
+          prev.map((c) =>
+            c.classroomName === editingClassroom.classroomName ? classroom : c,
+          ),
         );
 
         showSuccess("Classroom updated successfully");
       } else {
         await addRoom(classroom);
-        setClassrooms(prev => [...prev, classroom]);
+        setClassrooms((prev) => [...prev, classroom]);
         showSuccess("Classroom added successfully");
       }
 
@@ -184,7 +204,11 @@ function UploadRoomsPage() {
       setEditingClassroom(null);
     } catch (err) {
       console.error(err);
-      showError(editingClassroom ? "Failed to update classroom" : "Failed to add classroom");
+      showError(
+        editingClassroom
+          ? "Failed to update classroom"
+          : "Failed to add classroom",
+      );
     }
   };
 
@@ -200,29 +224,30 @@ function UploadRoomsPage() {
 
   const filteredClassrooms = useMemo(() => {
     let listToRender = classrooms;
-    
+
     if (query) {
       const q = query.toLowerCase();
-      listToRender = listToRender.filter((c) =>
-        (c.building && c.building.toLowerCase().includes(q)) ||
-        (c.classroomName && c.classroomName.toLowerCase().includes(q)) ||
-        (c.type && c.type.toLowerCase().includes(q))
+      listToRender = listToRender.filter(
+        (c) =>
+          (c.building && c.building.toLowerCase().includes(q)) ||
+          (c.classroomName && c.classroomName.toLowerCase().includes(q)) ||
+          (c.type && c.type.toLowerCase().includes(q)),
       );
     }
 
     return [...listToRender].sort((a, b) => {
       const buildingA = a.building || "";
       const buildingB = b.building || "";
-      
-      const buildingCompare = buildingA.localeCompare(buildingB, 'he');
-      
+
+      const buildingCompare = buildingA.localeCompare(buildingB, "he");
+
       if (buildingCompare !== 0) {
         return buildingCompare;
       }
-      
+
       const nameA = a.classroomName || "";
       const nameB = b.classroomName || "";
-      return nameA.localeCompare(nameB, 'he');
+      return nameA.localeCompare(nameB, "he");
     });
   }, [classrooms, query]);
 
@@ -231,29 +256,106 @@ function UploadRoomsPage() {
       <div className="toolbar">
         <div className="left">
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2" />
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M21 21l-4.35-4.35"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle
+                cx="11"
+                cy="11"
+                r="6"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
             </svg>
-            <input className="search-input" placeholder="Search by building, name or type" onChange={(e)=> setQuery(e.target.value)} />
+            <input
+              className="search-input"
+              placeholder="Search by building, name or type"
+              onChange={(e) => setQuery(e.target.value)}
+            />
           </div>
         </div>
 
         <div className="right">
-          <button className="icon-btn" title="Refresh list" onClick={(e) => { e.currentTarget.blur(); invalidateCoursesCache(); loadClassrooms(); }} aria-label="Refresh">
-            <span className="material-icons" aria-hidden>refresh</span>
+          <button
+            className="icon-btn"
+            title="Refresh list"
+            onClick={(e) => {
+              e.currentTarget.blur();
+              invalidateCoursesCache();
+              loadClassrooms();
+            }}
+            aria-label="Refresh"
+          >
+            <span className="material-icons" aria-hidden>
+              refresh
+            </span>
           </button>
-          <Button onClick={() => { setEditingClassroom(null); setIsModalOpen(true); }} variant="secondary">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden style={{ marginRight: 8 }}>
-              <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <Button
+            onClick={() => {
+              setEditingClassroom(null);
+              setIsModalOpen(true);
+            }}
+            variant="secondary"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+              style={{ marginRight: 8 }}
+            >
+              <path
+                d="M12 5v14M5 12h14"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
             Add Room
           </Button>
           <Button onClick={handleExport} disabled={exporting}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden style={{ marginRight: 8 }}>
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M7 10l5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M12 5v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+              style={{ marginRight: 8 }}
+            >
+              <path
+                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M7 10l5-5 5 5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M12 5v12"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
             {exporting ? "Exporting..." : "Export"}
           </Button>
@@ -271,7 +373,14 @@ function UploadRoomsPage() {
           onDelete={handleDeleteRoom}
           onSelectionChange={(arr) => setSelectedClassrooms(arr)}
         />
-        <div style={{ marginTop: 8, display: "flex", justifyContent: "flex-start", gap: 8 }}>
+        <div
+          style={{
+            marginTop: 8,
+            display: "flex",
+            justifyContent: "flex-start",
+            gap: 8,
+          }}
+        >
           <Button
             variant="ghost"
             onClick={() => handleBulkDelete(selectedClassrooms)}
@@ -284,7 +393,16 @@ function UploadRoomsPage() {
         </div>
       </div>
 
-  <AddRoomModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingClassroom(null); }} onSave={handleAddRoom} initialClassroom={editingClassroom} existingClassrooms={classrooms} />
+      <AddRoomModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingClassroom(null);
+        }}
+        onSave={handleAddRoom}
+        initialClassroom={editingClassroom}
+        existingClassrooms={classrooms}
+      />
       <ConfirmModal
         isOpen={confirmOpen}
         title="Upload will overwrite existing data"
@@ -300,23 +418,40 @@ function UploadRoomsPage() {
 
       <ConfirmModal
         isOpen={deleteConfirmOpen}
-        title={Array.isArray(pendingDelete) ? "Delete selected classrooms" : "Delete classroom"}
-        message={Array.isArray(pendingDelete)
-          ? `Are you sure you want to delete ${pendingDelete.length} selected classroom(s)? This action cannot be undone.`
-          : "Are you sure you want to delete this classroom?"}
-        fileName={Array.isArray(pendingDelete)
-          ? (pendingDelete.length <= 5 ? pendingDelete.map((c) => `${c.building} — ${c.classroomName}`).join("; ") : `${pendingDelete.length} classrooms`)
-          : (pendingDelete ? `${pendingDelete.building} — ${pendingDelete.classroomName}` : "")}
+        title={
+          Array.isArray(pendingDelete)
+            ? "Delete selected classrooms"
+            : "Delete classroom"
+        }
+        message={
+          Array.isArray(pendingDelete)
+            ? `Are you sure you want to delete ${pendingDelete.length} selected classroom(s)? This action cannot be undone.`
+            : "Are you sure you want to delete this classroom?"
+        }
+        fileName={
+          Array.isArray(pendingDelete)
+            ? pendingDelete.length <= 5
+              ? pendingDelete
+                  .map((c) => `${c.building} — ${c.classroomName}`)
+                  .join("; ")
+              : `${pendingDelete.length} classrooms`
+            : pendingDelete
+              ? `${pendingDelete.building} — ${pendingDelete.classroomName}`
+              : ""
+        }
         onConfirm={performDelete}
-        onCancel={() => { setDeleteConfirmOpen(false); setPendingDelete(null); }}
+        onCancel={() => {
+          setDeleteConfirmOpen(false);
+          setPendingDelete(null);
+        }}
         confirmLabel="Yes, delete"
         cancelLabel="No, keep"
       />
 
-      <RoomUploadSummaryModal 
-        isOpen={isSummaryModalOpen} 
-        summary={uploadSummary} 
-        onClose={() => setIsSummaryModalOpen(false)} 
+      <RoomUploadSummaryModal
+        isOpen={isSummaryModalOpen}
+        summary={uploadSummary}
+        onClose={() => setIsSummaryModalOpen(false)}
       />
 
       <Toast toast={toast} onClose={closeToast} />
@@ -330,7 +465,11 @@ function RoomUploadSummaryModal({ isOpen, summary, onClose }) {
   if (!isOpen) return null;
 
   const footer = (
-    <Button variant="primary" onClick={onClose} style={{ width: '100%', padding: '10px', fontWeight: '600' }}>
+    <Button
+      variant="primary"
+      onClick={onClose}
+      style={{ width: "100%", padding: "10px", fontWeight: "600" }}
+    >
       Close Summary
     </Button>
   );
@@ -343,26 +482,57 @@ function RoomUploadSummaryModal({ isOpen, summary, onClose }) {
       size="normal"
       footer={footer}
     >
-      <div style={{ textAlign: 'center', backgroundColor: '#f0fdf4', padding: '15px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #dcfce7' }}>
-        <div style={{ color: '#166534', fontWeight: '700', fontSize: '18px' }}>
+      <div
+        style={{
+          textAlign: "center",
+          backgroundColor: "#f0fdf4",
+          padding: "15px",
+          borderRadius: "8px",
+          marginBottom: "24px",
+          border: "1px solid #dcfce7",
+        }}
+      >
+        <div style={{ color: "#166534", fontWeight: "700", fontSize: "18px" }}>
           ✓ {summary.savedClassrooms} Classrooms Saved
         </div>
-        <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+        <div style={{ fontSize: "13px", color: "#666", marginTop: "4px" }}>
           Out of {summary.totalRows} rows processed
         </div>
       </div>
 
       {summary.warningRows && summary.warningRows.length > 0 && (
-        <div className="summary-section" style={{ marginBottom: '20px' }}>
-          <h4 style={{
-            fontSize: '14px', color: '#b45309', textTransform: 'uppercase',
-            borderBottom: '1px solid #fde68a', paddingBottom: '4px', marginBottom: '8px', textAlign: 'left'
-          }}>
+        <div className="summary-section" style={{ marginBottom: "20px" }}>
+          <h4
+            style={{
+              fontSize: "14px",
+              color: "#b45309",
+              textTransform: "uppercase",
+              borderBottom: "1px solid #fde68a",
+              paddingBottom: "4px",
+              marginBottom: "8px",
+              textAlign: "left",
+            }}
+          >
             Warnings (Saved Once)
           </h4>
-          <div style={{ maxHeight: '120px', overflowY: 'auto', paddingLeft: '5px' }}>
+          <div
+            style={{
+              maxHeight: "120px",
+              overflowY: "auto",
+              paddingLeft: "5px",
+            }}
+          >
             {summary.warningRows.map((issue, idx) => (
-              <div key={idx} style={{ fontSize: '13px', marginBottom: '4px', color: '#4b5563', direction: 'ltr', textAlign: 'left' }}>
+              <div
+                key={idx}
+                style={{
+                  fontSize: "13px",
+                  marginBottom: "4px",
+                  color: "#4b5563",
+                  direction: "ltr",
+                  textAlign: "left",
+                }}
+              >
                 • {issue}
               </div>
             ))}
@@ -371,16 +541,38 @@ function RoomUploadSummaryModal({ isOpen, summary, onClose }) {
       )}
 
       {summary.invalidRows && summary.invalidRows.length > 0 && (
-        <div className="summary-section" style={{ marginBottom: '20px' }}>
-          <h4 style={{ 
-            fontSize: '14px', color: '#b45309', textTransform: 'uppercase', 
-            borderBottom: '1px solid #fde68a', paddingBottom: '4px', marginBottom: '8px', textAlign: 'left' 
-          }}>
+        <div className="summary-section" style={{ marginBottom: "20px" }}>
+          <h4
+            style={{
+              fontSize: "14px",
+              color: "#b45309",
+              textTransform: "uppercase",
+              borderBottom: "1px solid #fde68a",
+              paddingBottom: "4px",
+              marginBottom: "8px",
+              textAlign: "left",
+            }}
+          >
             Format Errors (Skipped)
           </h4>
-          <div style={{ maxHeight: '120px', overflowY: 'auto', paddingLeft: '5px' }}>
+          <div
+            style={{
+              maxHeight: "120px",
+              overflowY: "auto",
+              paddingLeft: "5px",
+            }}
+          >
             {summary.invalidRows.map((issue, idx) => (
-              <div key={idx} style={{ fontSize: '13px', marginBottom: '4px', color: '#4b5563', direction: 'ltr', textAlign: 'left' }}>
+              <div
+                key={idx}
+                style={{
+                  fontSize: "13px",
+                  marginBottom: "4px",
+                  color: "#4b5563",
+                  direction: "ltr",
+                  textAlign: "left",
+                }}
+              >
                 • {issue}
               </div>
             ))}
@@ -389,7 +581,14 @@ function RoomUploadSummaryModal({ isOpen, summary, onClose }) {
       )}
 
       {summary.savedClassrooms === 0 && (
-        <p style={{ color: '#ef4444', textAlign: 'center', fontSize: '14px', fontWeight: '500' }}>
+        <p
+          style={{
+            color: "#ef4444",
+            textAlign: "center",
+            fontSize: "14px",
+            fontWeight: "500",
+          }}
+        >
           No classrooms were imported. Please fix the errors above.
         </p>
       )}

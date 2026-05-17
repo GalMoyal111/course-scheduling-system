@@ -6,7 +6,13 @@ import ConfirmModal from "../components/ConfirmModal";
 import CourseList from "../components/CourseList";
 import Button from "../components/ui/Button";
 import Toast, { useToast } from "../components/ui/Toast";
-import { uploadCourses, exportCourses, addCourse, deleteCourses, updateCourse } from "../services/api";
+import {
+  uploadCourses,
+  exportCourses,
+  addCourse,
+  deleteCourses,
+  updateCourse,
+} from "../services/api";
 import { useData } from "../context/DataContext";
 import Modal from "../components/ui/Modal";
 
@@ -32,19 +38,26 @@ export default function UploadCoursesPage() {
   const [uploadSavedCount, setUploadSavedCount] = useState(0);
   const [modalContext, setModalContext] = useState("upload"); // "upload" or "add"
   const [pendingCourse, setPendingCourse] = useState(null);
-  const { courses, setCourses, fetchCoursesIfNeeded, setCoursesTimestamp, invalidateCoursesCache, clusters, clusterMappings } = useData();
+  const {
+    courses,
+    setCourses,
+    fetchCoursesIfNeeded,
+    setCoursesTimestamp,
+    invalidateCoursesCache,
+    clusters,
+    clusterMappings,
+  } = useData();
 
   const location = useLocation();
   const [isHighlightUpload, setIsHighlightUpload] = useState(false);
 
-
   useEffect(() => {
     if (location.state?.highlightUpload) {
       setIsHighlightUpload(true);
-      
+
       window.scrollTo({
         top: 0,
-        behavior: "auto"
+        behavior: "auto",
       });
 
       window.history.replaceState({}, document.title);
@@ -57,11 +70,10 @@ export default function UploadCoursesPage() {
     }
   }, [location]);
 
-
   // Build dynamic semester range from DataContext
   const semesterRange = useMemo(() => {
     const nums = new Set([1, 2, 3, 4, 5, 6, 7, 8]); // Default range
-    clusters.forEach(c => {
+    clusters.forEach((c) => {
       if (c.number && c.number < 9) {
         nums.add(c.number);
       }
@@ -90,13 +102,13 @@ export default function UploadCoursesPage() {
 
     try {
       const result = await uploadCourses(fileToUpload);
-      
+
       setUploadSavedCount(result.savedCount || 0);
       setInvalidCourses(result.invalidCourses || []);
       setAdjustedCourses(result.adjustedCourses || []);
       setModalContext("upload");
       setInvalidCoursesModalOpen(true);
-      
+
       invalidateCoursesCache();
       await fetchCoursesIfNeeded("UploadCoursesPage", true);
     } catch (err) {
@@ -131,19 +143,19 @@ export default function UploadCoursesPage() {
       showError("Export failed");
     }
   };
-
+  // When adding a course, if editingCourse is set, it means we are in edit mode and should update the existing course instead of adding a new one. In both cases, we need to check for invalid prerequisites and show the warning modal if there are any. After successfully adding or updating a course, we update the local courses state and show a success toast.
   const handleAddCourse = async (course) => {
     try {
+      const properClusterName =
+        clusterMappings.numToName[course.cluster] || `סמסטר ${course.cluster}`;
 
-      const properClusterName = clusterMappings.numToName[course.cluster] || `סמסטר ${course.cluster}`;
-      
       const formattedCourse = {
         ...course,
-        clusterName: (semesterRange.includes(course.cluster)) 
-          ? `סמסטר ${course.cluster}` 
-          : course.clusterName
+        clusterName: semesterRange.includes(course.cluster)
+          ? `סמסטר ${course.cluster}`
+          : course.clusterName,
       };
-      
+
       if (editingCourse) {
         const oldCoursePayload = {
           ...editingCourse,
@@ -153,16 +165,21 @@ export default function UploadCoursesPage() {
           ...formattedCourse,
           courseId: String(course.courseId || "").trim(),
         };
-        await updateCourse({ oldCourse: oldCoursePayload, newCourse: newCoursePayload });
+        await updateCourse({
+          oldCourse: oldCoursePayload,
+          newCourse: newCoursePayload,
+        });
 
-        setCourses(prevCourses => prevCourses.map(c => 
-          (c.courseId === oldCoursePayload.courseId && c.cluster === oldCoursePayload.cluster) 
-          ? newCoursePayload 
-          : c
-        ));
+        setCourses((prevCourses) =>
+          prevCourses.map((c) =>
+            c.courseId === oldCoursePayload.courseId &&
+            c.cluster === oldCoursePayload.cluster
+              ? newCoursePayload
+              : c,
+          ),
+        );
 
         showSuccess("Course updated successfully");
-
       } else {
         // Check for invalid prerequisites before adding
         const coursePrerequisites = (course.prerequisiteCourseNumber || "")
@@ -172,7 +189,7 @@ export default function UploadCoursesPage() {
 
         const validCourseIds = new Set(courses.map((c) => c.courseId));
         const invalidPrereqs = coursePrerequisites.filter(
-          (prereqId) => !validCourseIds.has(prereqId)
+          (prereqId) => !validCourseIds.has(prereqId),
         );
 
         if (invalidPrereqs.length > 0) {
@@ -191,22 +208,24 @@ export default function UploadCoursesPage() {
           setInvalidCoursesModalOpen(true);
           return;
         }
-        
+
         await addCourse(course);
-        setCourses(prevCourses => [...prevCourses, formattedCourse]);
+        setCourses((prevCourses) => [...prevCourses, formattedCourse]);
         showSuccess("Course added successfully");
       }
-      
+
       setCoursesTimestamp(Date.now());
       setIsModalOpen(false);
       setEditingCourse(null);
-    
     } catch (err) {
       console.error(err);
-      showError(editingCourse ? "Failed to update course" : "Failed to add course");
+      showError(
+        editingCourse ? "Failed to update course" : "Failed to add course",
+      );
     }
   };
 
+  /* When editing a course, we set the editingCourse state to the course being edited and open the AddCourseModal. The AddCourseModal will detect that editingCourse is set and pre-fill the form with the course data. When the user saves the changes, handleAddCourse will check if editingCourse is set and perform an update instead of an add. After updating, it will refresh the courses list and show a success message. */
   const handleEditCourse = (course) => {
     setEditingCourse(course || null);
     setIsModalOpen(true);
@@ -219,7 +238,9 @@ export default function UploadCoursesPage() {
 
   const performDeleteCourses = async () => {
     if (!pendingDelete) return;
-    const toDelete = Array.isArray(pendingDelete) ? pendingDelete : [pendingDelete];
+    const toDelete = Array.isArray(pendingDelete)
+      ? pendingDelete
+      : [pendingDelete];
 
     const payload = toDelete.map((course) => ({
       courseId: course.courseId,
@@ -232,12 +253,13 @@ export default function UploadCoursesPage() {
     try {
       await deleteCourses(payload);
 
-      const deletedIds = new Set(toDelete.map(c => c.courseId));
-      setCourses(prevCourses => prevCourses.filter(c => !deletedIds.has(c.courseId)));
+      const deletedIds = new Set(toDelete.map((c) => c.courseId));
+      setCourses((prevCourses) =>
+        prevCourses.filter((c) => !deletedIds.has(c.courseId)),
+      );
 
       setCoursesTimestamp(Date.now());
       setSelectedCourses([]);
-
     } catch (err) {
       console.error(err);
       showError("Failed to delete course(s). Check console for details.");
@@ -268,24 +290,48 @@ export default function UploadCoursesPage() {
     }
 
     if (aSem !== bSem) {
-      return aSem.localeCompare(bSem, undefined, { numeric: true, sensitivity: "base" });
+      return aSem.localeCompare(bSem, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      });
     }
 
-    return String(a.courseId || "").localeCompare(String(b.courseId || ""), undefined, {
-      numeric: true,
-      sensitivity: "base",
-    });
+    return String(a.courseId || "").localeCompare(
+      String(b.courseId || ""),
+      undefined,
+      {
+        numeric: true,
+        sensitivity: "base",
+      },
+    );
   });
 
   return (
     <div>
-
       <div className="toolbar">
         <div className="left">
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2" />
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M21 21l-4.35-4.35"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle
+                cx="11"
+                cy="11"
+                r="6"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
             </svg>
             <input
               className="search-input"
@@ -297,27 +343,79 @@ export default function UploadCoursesPage() {
         </div>
 
         <div className="right">
-          <button className="icon-btn" title="Refresh list" onClick={(e) => { e.currentTarget.blur(); invalidateCoursesCache(); loadCourses(); }} aria-label="Refresh">
-            <span className="material-icons" aria-hidden>refresh</span>
+          <button
+            className="icon-btn"
+            title="Refresh list"
+            onClick={(e) => {
+              e.currentTarget.blur();
+              invalidateCoursesCache();
+              loadCourses();
+            }}
+            aria-label="Refresh"
+          >
+            <span className="material-icons" aria-hidden>
+              refresh
+            </span>
           </button>
           <Button onClick={() => setIsModalOpen(true)} variant="secondary">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden style={{ marginRight: 8 }}>
-              <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+              style={{ marginRight: 8 }}
+            >
+              <path
+                d="M12 5v14M5 12h14"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
             Add Course
           </Button>
           <Button onClick={handleExport} disabled={exporting}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden style={{ marginRight: 8 }}>
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M7 10l5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M12 5v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+              style={{ marginRight: 8 }}
+            >
+              <path
+                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M7 10l5-5 5 5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M12 5v12"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
             {exporting ? "Exporting..." : "Export"}
           </Button>
         </div>
       </div>
 
-      <div className={isHighlightUpload ? "upload-highlight-active" : ""} style={{ transition: 'all 0.3s' }}>
+      <div
+        className={isHighlightUpload ? "upload-highlight-active" : ""}
+        style={{ transition: "all 0.3s" }}
+      >
         <UploadForm onUpload={handleUpload} />
       </div>
 
@@ -329,7 +427,14 @@ export default function UploadCoursesPage() {
           onSelectionChange={setSelectedCourses}
           title="Courses"
         />
-        <div style={{ marginTop: 8, display: "flex", justifyContent: "flex-start", gap: 8 }}>
+        <div
+          style={{
+            marginTop: 8,
+            display: "flex",
+            justifyContent: "flex-start",
+            gap: 8,
+          }}
+        >
           <Button
             variant="ghost"
             onClick={() => {
@@ -348,7 +453,10 @@ export default function UploadCoursesPage() {
 
       <AddCourseModal
         isOpen={isModalOpen}
-        onClose={() => { setIsModalOpen(false); setEditingCourse(null); }}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingCourse(null);
+        }}
         onSave={handleAddCourse}
         initialCourse={editingCourse}
         allCourses={courses}
@@ -373,14 +481,19 @@ export default function UploadCoursesPage() {
         fileName={
           Array.isArray(pendingDelete)
             ? pendingDelete.length > 0
-              ? pendingDelete.map((p) => `${p.courseId} - ${p.courseName}`).join(", ")
+              ? pendingDelete
+                  .map((p) => `${p.courseId} - ${p.courseName}`)
+                  .join(", ")
               : ""
             : pendingDelete
-            ? `${pendingDelete.courseId} - ${pendingDelete.courseName}`
-            : ""
+              ? `${pendingDelete.courseId} - ${pendingDelete.courseName}`
+              : ""
         }
         onConfirm={performDeleteCourses}
-        onCancel={() => { setDeleteConfirmOpen(false); setPendingDelete(null); }}
+        onCancel={() => {
+          setDeleteConfirmOpen(false);
+          setPendingDelete(null);
+        }}
         confirmLabel="Yes, delete"
         cancelLabel="No, keep"
       />
@@ -404,15 +517,18 @@ export default function UploadCoursesPage() {
 
               const formattedPending = {
                 ...pendingCourse,
-                clusterName: (pendingCourse.cluster >= 1 && pendingCourse.cluster <= 8) 
-                  ? `סמסטר ${pendingCourse.cluster}` 
-                  : pendingCourse.clusterName
+                clusterName:
+                  pendingCourse.cluster >= 1 && pendingCourse.cluster <= 8
+                    ? `סמסטר ${pendingCourse.cluster}`
+                    : pendingCourse.clusterName,
               };
 
-              setCourses(prev => [...prev, formattedPending]);
+              setCourses((prev) => [...prev, formattedPending]);
 
               setCoursesTimestamp(Date.now());
-              showSuccess("Course added successfully (with non-existing prerequisites)");
+              showSuccess(
+                "Course added successfully (with non-existing prerequisites)",
+              );
 
               setIsModalOpen(false);
               setEditingCourse(null);
@@ -433,14 +549,24 @@ export default function UploadCoursesPage() {
   );
 }
 
-function InvalidCoursesModal({ isOpen, invalidCourses, adjustedCourses, savedCount, context = "upload", onClose, onContinueAnyway }) {
+function InvalidCoursesModal({
+  isOpen,
+  invalidCourses,
+  adjustedCourses,
+  savedCount,
+  context = "upload",
+  onClose,
+  onContinueAnyway,
+}) {
   if (!isOpen) return null;
 
   const hasInvalidCourses = invalidCourses && invalidCourses.length > 0;
   const hasAdjustedCourses = adjustedCourses && adjustedCourses.length > 0;
   const isAddContext = context === "add";
 
-  const modalTitle = isAddContext ? "Missing Prerequisites Warning" : "Upload Completed";
+  const modalTitle = isAddContext
+    ? "Missing Prerequisites Warning"
+    : "Upload Completed";
 
   const modalFooter = isAddContext ? (
     <>
@@ -466,32 +592,83 @@ function InvalidCoursesModal({ isOpen, invalidCourses, adjustedCourses, savedCou
       footer={modalFooter}
     >
       <div className="invalid-courses-modal-body" style={{ textAlign: "left" }}>
-        
-        {/* הודעת הצלחה - מוצגת רק בהעלאה */}
+        {/* success*/}
         {!isAddContext && (
-          <div style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px", color: "#10b981", fontSize: "16px", fontWeight: "600" }}>
+          <div
+            style={{
+              marginBottom: "20px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              color: "#10b981",
+              fontSize: "16px",
+              fontWeight: "600",
+            }}
+          >
             <span className="material-icons">check_circle</span>
             {savedCount} course(s) uploaded successfully
           </div>
         )}
 
-        {/* רשימת שגיאות קריטיות (קורסים שלא נשמרו) */}
+        {/* warning about invalid courses - shown in both contexts, but with different messaging. In upload context, these courses were skipped entirely. In add course context, these courses will be added but without the invalid prerequisites. */}
         {hasInvalidCourses && (
           <div style={{ marginBottom: "24px" }}>
-            <p style={{ color: "#ef4444", fontWeight: "600", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+            <p
+              style={{
+                color: "#ef4444",
+                fontWeight: "600",
+                marginBottom: "12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
               <span className="material-icons">error</span>
               {invalidCourses.length} course(s) skipped:
             </p>
 
-            <div className="invalid-courses-list" style={{ maxHeight: "200px", overflowY: "auto", paddingRight: "8px" }}>
+            <div
+              className="invalid-courses-list"
+              style={{
+                maxHeight: "200px",
+                overflowY: "auto",
+                paddingRight: "8px",
+              }}
+            >
               {invalidCourses.map((course, index) => (
-                <div key={index} className="invalid-course-item" style={{ background: "#fee2e2", padding: "12px", borderRadius: "8px", marginBottom: "8px", border: "1px solid #fca5a5" }}>
-                  <div style={{ fontWeight: "bold", color: "#991b1b" }}>{course.courseName || "(No name)"}</div>
-                  <div style={{ fontSize: "0.9em", color: "#b91c1c", marginTop: "4px" }}>Course Code: {course.courseId}</div>
-                  
-                  {/* כאן אנחנו מדפיסים את הסיבה שהוספנו בשרת! */}
+                <div
+                  key={index}
+                  className="invalid-course-item"
+                  style={{
+                    background: "#fee2e2",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    marginBottom: "8px",
+                    border: "1px solid #fca5a5",
+                  }}
+                >
+                  <div style={{ fontWeight: "bold", color: "#991b1b" }}>
+                    {course.courseName || "(No name)"}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "0.9em",
+                      color: "#b91c1c",
+                      marginTop: "4px",
+                    }}
+                  >
+                    Course Code: {course.courseId}
+                  </div>
+
                   {course.reason && (
-                    <div style={{ fontSize: "0.9em", color: "#dc2626", marginTop: "4px", fontWeight: "500" }}>
+                    <div
+                      style={{
+                        fontSize: "0.9em",
+                        color: "#dc2626",
+                        marginTop: "4px",
+                        fontWeight: "500",
+                      }}
+                    >
                       Reason: {course.reason}
                     </div>
                   )}
@@ -501,21 +678,67 @@ function InvalidCoursesModal({ isOpen, invalidCourses, adjustedCourses, savedCou
           </div>
         )}
 
-        {/* רשימת שגיאות אזהרה (קורסים שנשמרו אבל הקדמים שלהם לא קיימים) */}
         {hasAdjustedCourses && (
           <div>
-            <p style={{ color: "#f59e0b", fontWeight: "600", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+            <p
+              style={{
+                color: "#f59e0b",
+                fontWeight: "600",
+                marginBottom: "12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
               <span className="material-icons">warning</span>
-              {adjustedCourses.length} course(s) {isAddContext ? "will be added, but missing prerequisites:" : "saved, but missing prerequisites removed:"}
+              {adjustedCourses.length} course(s){" "}
+              {isAddContext
+                ? "will be added, but missing prerequisites:"
+                : "saved, but missing prerequisites removed:"}
             </p>
 
-            <div className="invalid-courses-list" style={{ maxHeight: "200px", overflowY: "auto", paddingRight: "8px" }}>
+            <div
+              className="invalid-courses-list"
+              style={{
+                maxHeight: "200px",
+                overflowY: "auto",
+                paddingRight: "8px",
+              }}
+            >
               {adjustedCourses.map((course, index) => (
-                <div key={index} className="invalid-course-item" style={{ background: "#fef3c7", padding: "12px", borderRadius: "8px", marginBottom: "8px", border: "1px solid #fcd34d" }}>
-                  <div style={{ fontWeight: "bold", color: "#b45309" }}>{course.courseName || "(No name)"}</div>
-                  <div style={{ fontSize: "0.9em", color: "#d97706", marginTop: "4px" }}>Course Code: {course.courseId}</div>
-                  <div style={{ fontSize: "0.9em", color: "#d97706", marginTop: "4px", fontWeight: "500" }}>
-                    Missing Prerequisites: {course.removedPrerequisites.join(", ")}
+                <div
+                  key={index}
+                  className="invalid-course-item"
+                  style={{
+                    background: "#fef3c7",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    marginBottom: "8px",
+                    border: "1px solid #fcd34d",
+                  }}
+                >
+                  <div style={{ fontWeight: "bold", color: "#b45309" }}>
+                    {course.courseName || "(No name)"}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "0.9em",
+                      color: "#d97706",
+                      marginTop: "4px",
+                    }}
+                  >
+                    Course Code: {course.courseId}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "0.9em",
+                      color: "#d97706",
+                      marginTop: "4px",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Missing Prerequisites:{" "}
+                    {course.removedPrerequisites.join(", ")}
                   </div>
                 </div>
               ))}

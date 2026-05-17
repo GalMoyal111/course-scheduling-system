@@ -1,36 +1,43 @@
-:root{
+:root {
   --bg: #f6f8fb;
   --card: #ffffff;
   --muted: #6b7280;
-  --accent: linear-gradient(135deg,#647eff,#9b8cff);
-  --primary:#4f46e5;
+  --accent: linear-gradient(135deg, #647eff, #9b8cff);
+  --primary: #4f46e5;
 }
 
-.upload-page{
+.upload-page {
   min-height: 100vh;
   background: var(--bg);
   padding: 3rem 1.25rem;
   color: #111827;
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial;
 }
 
-.upload-hero{
+.upload-hero {
   text-align: center;
   margin-bottom: 2rem;
 }
 
-.upload-hero h1{
+.upload-hero h1 {
   margin: 0;
   font-size: 1.75rem;
   letter-spacing: -0.02em;
 }
 
-.upload-hero .lead{
-  margin-top: .5rem;
+.upload-hero .lead {
+  margin-top: 0.5rem;
   color: var(--muted);
 }
 
-.upload-content{
+.upload-content {
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: 1.5rem;
@@ -39,36 +46,38 @@
   align-items: start;
 }
 
-.upload-card{
+.upload-card {
   background: var(--card);
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 6px 18px rgba(16,24,40,0.08);
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
 }
 
-.card-title{
-  margin: 0 0 .25rem 0;
+.card-title {
+  margin: 0 0 0.25rem 0;
   font-size: 1.125rem;
 }
 
-.card-sub{
+.card-sub {
   margin: 0 0 1rem 0;
   color: var(--muted);
-  font-size: .9rem;
+  font-size: 0.9rem;
 }
 
-.upload-help{
+.upload-help {
   background: transparent;
   color: var(--muted);
-  font-size: .95rem;
+  font-size: 0.95rem;
 }
 
-.upload-help h3{margin:0 0 .5rem 0}
+.upload-help h3 {
+  margin: 0 0 0.5rem 0;
+}
 
-.upload-footer{
-  text-align:center;
-  margin-top:2rem;
-  color:var(--muted);
+.upload-footer {
+  text-align: center;
+  margin-top: 2rem;
+  color: var(--muted);
 }
 
 /* Upload form / dropzone - now styled in UploadForm.css */
@@ -153,9 +162,13 @@
   color: #6b7280;
 }
 
-@media (max-width:900px){
-  .upload-content{grid-template-columns:1fr;}
-  .upload-help{order:2}
+@media (max-width: 900px) {
+  .upload-content {
+    grid-template-columns: 1fr;
+  }
+  .upload-help {
+    order: 2;
+  }
 }
 
 /* Invalid Courses Modal */
@@ -233,6 +246,10 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
