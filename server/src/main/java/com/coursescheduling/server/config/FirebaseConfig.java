@@ -19,27 +19,26 @@ public class FirebaseConfig {
     @PostConstruct
     public void initialize() {
         try {
-            // קודם כל, נבדוק אם כבר יש אפליקציה מאותחלת (מונע שגיאות כפולות)
+            // Check if Firebase app is already initialized
             if (!FirebaseApp.getApps().isEmpty()) {
                 return;
             }
 
             InputStream serviceAccount = null;
 
-            // 1. ננסה לחפש משתנה סביבה (מתאים לענן - Render)
+            // Try to get Firebase key from environment variable
             String firebaseKey = System.getenv("FIREBASE_SERVICE_ACCOUNT");
             if (firebaseKey != null && !firebaseKey.trim().isEmpty()) {
                 serviceAccount = new ByteArrayInputStream(firebaseKey.getBytes(StandardCharsets.UTF_8));
                 System.out.println("✅ Using Firebase key from Environment Variable.");
             } else {
-                // 2. אם אין משתנה סביבה, ננסה למצוא את הקובץ הפיזי (מתאים לפיתוח מקומי)
+                // Fallback to local file path
                 serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase/serviceAccountKey.json");
                 if (serviceAccount != null) {
                     System.out.println("✅ Using Firebase key from local JSON file.");
                 }
             }
 
-            // 3. אם גם הקובץ לא נמצא, רק אז נזרוק שגיאה שעוצרת הכל
             if (serviceAccount == null) {
                 throw new IllegalStateException("❌ Firebase service account key not found! Missing environment variable or local file.");
             }

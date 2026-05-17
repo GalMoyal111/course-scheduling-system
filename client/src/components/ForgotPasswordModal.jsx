@@ -40,7 +40,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
       isOpen={isOpen}
       onClose={onClose}
       title="Reset Password"
-      centerContent={success} // משתמש במנגנון המרכוז של האבא
+      centerContent={success}
       footer={
         success ? (
           <Button onClick={onClose} variant="primary">Close</Button>

@@ -62,7 +62,7 @@ export default function LecturersPage() {
       
       window.scrollTo({
         top: 0,
-        behavior: "auto" // אפשר גם "auto" אם אתה רוצה מיידי
+        behavior: "auto"
       });
       window.history.replaceState({}, document.title);
 
@@ -162,7 +162,6 @@ export default function LecturersPage() {
     }
   };
 
-  // פתיחת מודל המחיקה
   const handleDeleteClick = (e, lecturer) => {
     e.stopPropagation();
     setLecturerToPendingDelete(lecturer);
@@ -469,7 +468,7 @@ const handleExport = async () => {
                     display: "flex", 
                     justifyContent: "space-between", 
                     alignItems: "center", 
-                    direction: "rtl" // קובע שהכל זורם מימין לשמאל טבעי
+                    direction: "rtl"
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>

@@ -162,19 +162,19 @@ export default function GeneratePage() {
     const selectedSem = e.target.value;
     setSemester(selectedSem);
     
-    // מנקים הגדרות של סמסטר קודם
+    // Clear previous semester settings
     setManualAssignments([]);
     setHardCourses([]);
 
     if (selectedSem && courses.length > 0) {
       const ENGLISH_IDS = ["11360", "11064", "11063", "11361", "11060"];
       
-      // אוספים את כל ה-ID של הקורסים שיש להם שיעורים בסמסטר שנבחר
+      // Collect active course IDs for selected semester
       const activeIdsInSemester = new Set(
           lessons.filter(l => l.semester === selectedSem).map(l => l.courseId)
       );
 
-      // מוצאים מתוך כל הקורסים את קורסי האנגלית ששייכים לסמסטר הזה
+      // Find English courses for this semester
       const autoEnglishCourses = courses.filter(c => 
           ENGLISH_IDS.includes(c.courseId) && 
           (c.semester === selectedSem || activeIdsInSemester.has(c.courseId))
@@ -192,9 +192,9 @@ export default function GeneratePage() {
 
   const handleGenerateClick = () => {
     if (!semester) {
-      setShowSemesterValidation(true); // מקפיץ את המודל אם הסמסטר ריק
+      setShowSemesterValidation(true);
     } else {
-      handleGenerate(); // ממשיך ליצירת המערכת אם הכל תקין
+      handleGenerate();
     }
   };
 
@@ -228,7 +228,7 @@ export default function GeneratePage() {
         setLoading(false);
         setIsCancelling(false);
         isCancellingRef.current = false;
-        return; // עוצרים נקי בלי הודעת שגיאה
+        return;
       }
 
       let friendlyMessage = "We couldn't find a valid schedule with the current constraints.";
@@ -700,8 +700,8 @@ export default function GeneratePage() {
       {/* Primary Action Button */}
       <div className="generate-footer">
         <Button 
-          onClick={handleGenerateClick} /* <-- שינינו לפונקציה החדשה */
-          disabled={loading} /* <-- החזרנו רק לטעינה */
+          onClick={handleGenerateClick}
+          disabled={loading} 
           variant="primary"
           className="generate-big-button"
         >
@@ -729,7 +729,7 @@ export default function GeneratePage() {
           {!isCancelling && (
             <Button 
               variant="secondary"
-              onClick={() => setShowCancelConfirm(true)} // פותח את המודל במקום לבטל ישר
+              onClick={() => setShowCancelConfirm(true)}
               style={{ 
                 marginTop: "24px", 
                 backgroundColor: "rgba(255, 255, 255, 0.1)", 

@@ -64,7 +64,7 @@ export function DataProvider({ children }) {
 
   const updateCoursesLocally = useCallback((newCourses) => {
     setCourses(newCourses);
-    setCoursesTimestamp(Date.now()); // מעדכן גם את החותמת כדי שה-Cache ייחשב טרי
+    setCoursesTimestamp(Date.now());
   }, []);
   
   // Check if cache is still valid
@@ -299,10 +299,6 @@ export function DataProvider({ children }) {
     return { numToName, nameToNum };
   }, [clusters]);
 
-
-
-
-  // הפתרון: שימוש ב-useMemo כדי למנוע יצירת אובייקט חדש בכל רינדור
   const contextValue = useMemo(() => ({
     // Data
     lessons,

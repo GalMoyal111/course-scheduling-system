@@ -86,7 +86,7 @@ export default function AddLecturerModal({
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. ד״ר שרה כהן"
             autoFocus
-            dir="rtl" // הקלט עצמו נשאר מימין לשמאל כי השם בעברית
+            dir="rtl"
           />
           {errors.name && (
             <span className="error-message" style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>

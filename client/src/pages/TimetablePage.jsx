@@ -87,7 +87,6 @@ export default function TimetablePage() {
     return options;
   }, [schedule, semesterRange, clusterMapping]);
 
-  // פונקציית תרגום לסוג השיעור
   const translateType = (type) => {
     const types = {
       "LECTURE": "הרצאה",

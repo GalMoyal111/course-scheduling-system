@@ -57,7 +57,7 @@ function UploadPage() {
 
       window.scrollTo({
         top: 0,
-        behavior: "auto" // אפשר גם "auto" אם אתה רוצה מיידי
+        behavior: "auto"
       });
       
       window.history.replaceState({}, document.title);
@@ -239,14 +239,14 @@ function UploadPage() {
       // 🟢 מקבלים מהשרת רק את השיעורים החדשים (1 או 2 במידה ופוצל)
       const newlySavedLessons = await addLesson(newLesson);
       
-      // 🟢 מעדכנים את הרשימה המקומית בזהירות
+      // Update local state carefully
       setLessons(prev => {
-        // אם זה עריכה, נוריד את הגרסה הישנה מהרשימה
+        // If editing, remove old version
         const filtered = oldLesson 
           ? prev.filter(l => l.lessonId !== oldLesson.lessonId) 
           : prev;
         
-        // נוסיף את מה שקיבלנו מהשרת
+        // Add new lessons from server
         return [...filtered, ...newlySavedLessons];
       });
       

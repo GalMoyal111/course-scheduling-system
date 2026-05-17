@@ -44,7 +44,7 @@ export default function UploadCoursesPage() {
       
       window.scrollTo({
         top: 0,
-        behavior: "auto" // אפשר גם "auto" אם אתה רוצה מיידי
+        behavior: "auto"
       });
 
       window.history.replaceState({}, document.title);
@@ -440,10 +440,8 @@ function InvalidCoursesModal({ isOpen, invalidCourses, adjustedCourses, savedCou
   const hasAdjustedCourses = adjustedCourses && adjustedCourses.length > 0;
   const isAddContext = context === "add";
 
-  // הגדרת הכותרת למודל האחיד
   const modalTitle = isAddContext ? "Missing Prerequisites Warning" : "Upload Completed";
 
-  // הגדרת הכפתורים למטה (Footer) למודל האחיד
   const modalFooter = isAddContext ? (
     <>
       <Button variant="ghost" onClick={onClose}>

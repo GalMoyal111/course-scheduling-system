@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Button from "./ui/Button";
 import Toast, { useToast } from "./ui/Toast";
 import "./ui/ui.css";
-import { useData } from "../context/DataContext"; // שימוש ב-Context
+import { useData } from "../context/DataContext";
 import Modal from "./ui/Modal";
 
 const TYPE_TO_HOUR_FIELD = {
@@ -170,7 +170,6 @@ export default function AddLessonModal({
   const computedCredits = useMemo(() => {
     if (!computedDuration) return 0;
     const durationNum = parseFloat(computedDuration);
-    // הרצאה = 1 ל-1, כל השאר = חצי
     return type === "lecture" ? durationNum : durationNum * 0.5;
   }, [computedDuration, type]);
 
