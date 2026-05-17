@@ -4,22 +4,22 @@ import Footer from "../components/ui/Footer";
 import { useData } from "../context/DataContext";
 import Toast, { useToast } from "../components/ui/Toast";
 import "./TimetablePage.css";
-import Modal from "../components/ui/Modal"; 
+import Modal from "../components/ui/Modal";
 import { saveTimetable, exportCurrentToExcel } from "../services/api";
 
 export default function TimetablePage() {
-  const { schedule, clusters, invalidateHistoryCache, clusterMappings } = useData();
+  const { schedule, clusters, invalidateHistoryCache, clusterMappings } =
+    useData();
   const { toast, showSuccess, showError, closeToast } = useToast();
   const [selectedCluster, setSelectedCluster] = useState("ALL");
   const [isExporting, setIsExporting] = useState(false);
-
 
   const clusterMapping = clusterMappings.numToName;
 
   // Determine the range of semester numbers (typically 1-8)
   const semesterRange = useMemo(() => {
     const nums = new Set([1, 2, 3, 4, 5, 6, 7, 8]); // Default range
-    clusters.forEach(c => {
+    clusters.forEach((c) => {
       if (c.number && c.number < 9) {
         nums.add(c.number);
       }
@@ -27,20 +27,22 @@ export default function TimetablePage() {
     return Array.from(nums).sort((a, b) => a - b);
   }, [clusters]);
 
-
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
   const [saveSemester, setSaveSemester] = useState("A");
   const [isSaving, setIsSaving] = useState(false);
-
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const hebrewDays = [
-    { name: "ראשון", index: 1 }, { name: "שני", index: 2 }, { name: "שלישי", index: 3 },
-    { name: "רביעי", index: 4 }, { name: "חמישי", index: 5 }, { name: "שישי", index: 6 },
+    { name: "ראשון", index: 1 },
+    { name: "שני", index: 2 },
+    { name: "שלישי", index: 3 },
+    { name: "רביעי", index: 4 },
+    { name: "חמישי", index: 5 },
+    { name: "שישי", index: 6 },
   ];
 
   const times = [
@@ -48,7 +50,7 @@ export default function TimetablePage() {
     { range: "09:30-10:20", frame: 2, isBreak: false },
     { range: "10:30-11:20", frame: 3, isBreak: false },
     { range: "11:30-12:20", frame: 4, isBreak: false },
-    { range: "12:20-12:50", frame: null, isBreak: true }, 
+    { range: "12:20-12:50", frame: null, isBreak: true },
     { range: "12:50-13:40", frame: 5, isBreak: false },
     { range: "13:50-14:40", frame: 6, isBreak: false },
     { range: "14:50-15:40", frame: 7, isBreak: false },
@@ -69,8 +71,11 @@ export default function TimetablePage() {
       new Set(
         schedule
           .map((lesson) => Number(lesson.cluster))
-          .filter((cluster) => Number.isInteger(cluster) && semesterRange.includes(cluster))
-      )
+          .filter(
+            (cluster) =>
+              Number.isInteger(cluster) && semesterRange.includes(cluster),
+          ),
+      ),
     ).sort((a, b) => a - b);
 
     const options = [{ value: "ALL", label: "All clusters" }];
@@ -87,14 +92,15 @@ export default function TimetablePage() {
     return options;
   }, [schedule, semesterRange, clusterMapping]);
 
+  // Translates lesson types from English to Hebrew for display in the timetable. If the type is not recognized, it returns the original type string.
   const translateType = (type) => {
     const types = {
-      "LECTURE": "הרצאה",
-      "TUTORIAL": "תרגול",
-      "LAB": "מעבדה",
-      "PHYSICS_LAB": "מעבדת פיזיקה",
-      "NETWORKING_LAB": "מעבדת תקשורת",
-      "PBL": "PBL"
+      LECTURE: "הרצאה",
+      TUTORIAL: "תרגול",
+      LAB: "מעבדה",
+      PHYSICS_LAB: "מעבדת פיזיקה",
+      NETWORKING_LAB: "מעבדת תקשורת",
+      PBL: "PBL",
     };
     return types[type] || type;
   };
@@ -113,7 +119,9 @@ export default function TimetablePage() {
     }
 
     const clusterNumber = Number(selectedCluster);
-    return schedule.filter((lesson) => Number(lesson.cluster) === clusterNumber);
+    return schedule.filter(
+      (lesson) => Number(lesson.cluster) === clusterNumber,
+    );
   }, [schedule, selectedCluster]);
 
   const getVisibleLessonsForSlot = (day, frame) => {
@@ -130,25 +138,26 @@ export default function TimetablePage() {
     setIsSaveModalOpen(true);
   };
 
-
+  // Handles the confirmation of saving the timetable. Validates that a name is entered, then sends the save request to the backend. Shows success or error messages based on the result, and invalidates the history cache to ensure the new timetable appears in the history page.
   const handleConfirmSave = async () => {
     if (!saveName.trim()) {
       showError("Please enter a name for the timetable.");
       return;
     }
 
+    // Additional validation can be added here if needed (e.g., check for duplicate names, validate semester selection, etc.)
     setIsSaving(true);
     try {
       const requestData = {
         name: saveName.trim(),
         semester: saveSemester,
-        schedule: schedule
+        schedule: schedule,
       };
 
       await saveTimetable(requestData);
-      
+
       invalidateHistoryCache();
-      
+
       setIsSaveModalOpen(false);
       setSaveName("");
       showSuccess("Timetable saved successfully!");
@@ -160,27 +169,27 @@ export default function TimetablePage() {
     }
   };
 
-
+  // Handles exporting the current timetable to an Excel file. Validates that there is a schedule to export, then calls the export API and triggers a download of the generated file. Shows success or error messages based on the result.
   const handleExportExcel = async () => {
     if (!schedule || schedule.length === 0) return;
-    
+
     setIsExporting(true);
     try {
       const blob = await exportCurrentToExcel(schedule);
-      
+
       const url = window.URL.createObjectURL(new Blob([blob]));
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      
+
       const fileName = `Timetable_Export_${new Date().toLocaleDateString()}.xlsx`;
-      link.setAttribute('download', fileName);
-      
+      link.setAttribute("download", fileName);
+
       document.body.appendChild(link);
       link.click();
-      
+
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
+
       showSuccess("Excel file downloaded successfully!");
     } catch (error) {
       console.error("Export error:", error);
@@ -190,23 +199,21 @@ export default function TimetablePage() {
     }
   };
 
-
   return (
     <div className="timetable-page">
       <div className="timetable-header">
         <h1>Created time schedule</h1>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          
-          <Button 
-            onClick={handleExportExcel} 
-            variant="secondary" 
+          <Button
+            onClick={handleExportExcel}
+            variant="secondary"
             disabled={isExporting}
             style={{ display: "flex", alignItems: "center", gap: "8px" }}
           >
             <span className="material-icons">table_view</span>
             {isExporting ? "Exporting..." : "Excel Export"}
           </Button>
-          
+
           <button
             onClick={handleSaveClick}
             title="Save system in history"
@@ -220,7 +227,7 @@ export default function TimetablePage() {
               alignItems: "center",
               gap: "8px",
               transition: "all 0.2s ease",
-              color: "var(--text)"
+              color: "var(--text)",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = "rgba(79, 70, 229, 0.08)";
@@ -231,10 +238,14 @@ export default function TimetablePage() {
               e.currentTarget.style.borderColor = "rgba(79, 70, 229, 0.2)";
             }}
           >
-            <span className="material-icons" style={{ fontSize: "1.3rem" }}>save</span>
+            <span className="material-icons" style={{ fontSize: "1.3rem" }}>
+              save
+            </span>
           </button>
           <Button onClick={() => window.print()} variant="secondary">
-            <span className="material-icons" style={{ marginRight: 8 }}>print</span>
+            <span className="material-icons" style={{ marginRight: 8 }}>
+              print
+            </span>
             Printing system
           </Button>
         </div>
@@ -261,8 +272,8 @@ export default function TimetablePage() {
       <div className="timetable-container">
         {visibleSchedule.length === 0 ? (
           <div className="empty-state">
-             <span className="material-icons">calendar_today</span>
-             <p>No timetable found for the selected cluster.</p>
+            <span className="material-icons">calendar_today</span>
+            <p>No timetable found for the selected cluster.</p>
           </div>
         ) : (
           <table className="timetable-table">
@@ -276,10 +287,16 @@ export default function TimetablePage() {
             </thead>
             <tbody>
               {times.map((timeItem, idx) => (
-                <tr key={idx} className={timeItem.isBreak ? "break-row-style" : ""}>
+                <tr
+                  key={idx}
+                  className={timeItem.isBreak ? "break-row-style" : ""}
+                >
                   <td className="time-cell-label">{timeItem.range}</td>
                   {hebrewDays.map((day) => {
-                    const lessons = getVisibleLessonsForSlot(day.index, timeItem.frame);
+                    const lessons = getVisibleLessonsForSlot(
+                      day.index,
+                      timeItem.frame,
+                    );
                     return (
                       <td key={`${day.index}-${idx}`} className="slot-cell">
                         {timeItem.isBreak ? (
@@ -288,19 +305,34 @@ export default function TimetablePage() {
                           lessons.map((l, i) => (
                             <div key={i} className="lesson-card">
                               <div className="lesson-header">
-                                <span className="lesson-course" title={l.courseName}>
+                                <span
+                                  className="lesson-course"
+                                  title={l.courseName}
+                                >
                                   {l.courseName || l.courseId}
                                 </span>
-                                <span className="lesson-type">{translateType(l.type)}</span>
+                                <span className="lesson-type">
+                                  {translateType(l.type)}
+                                </span>
                               </div>
                               <div className="lesson-lecturer">
-                                <span style={{ fontWeight: 'bold', marginLeft: '4px' }}>{l.courseId}</span> 
+                                <span
+                                  style={{
+                                    fontWeight: "bold",
+                                    marginLeft: "4px",
+                                  }}
+                                >
+                                  {l.courseId}
+                                </span>
                                 • {l.lecturer}
                               </div>
                               {l.room && (
                                 <div className="lesson-room">
-                                  <span className="material-icons">location_on</span>
-                                  {l.room.classroomName} {/* <--- כאן שינינו ל-classroomName */}
+                                  <span className="material-icons">
+                                    location_on
+                                  </span>
+                                  {l.room.classroomName}{" "}
+                                  {/* <--- כאן שינינו ל-classroomName */}
                                 </div>
                               )}
                             </div>
@@ -322,8 +354,17 @@ export default function TimetablePage() {
         title="Save Timetable"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setIsSaveModalOpen(false)}>Cancel</Button>
-            <Button variant="primary" onClick={handleConfirmSave} disabled={isSaving}>
+            <Button
+              variant="secondary"
+              onClick={() => setIsSaveModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleConfirmSave}
+              disabled={isSaving}
+            >
               {isSaving ? "Saving..." : "Save"}
             </Button>
           </>
@@ -339,11 +380,11 @@ export default function TimetablePage() {
             onChange={(e) => setSaveName(e.target.value)}
           />
         </div>
-        <div className="form-field" style={{ marginTop: '15px' }}>
+        <div className="form-field" style={{ marginTop: "15px" }}>
           <label>Semester</label>
-          <select 
-            className="ui-select" 
-            value={saveSemester} 
+          <select
+            className="ui-select"
+            value={saveSemester}
             onChange={(e) => setSaveSemester(e.target.value)}
           >
             <option value="A">Semester A</option>

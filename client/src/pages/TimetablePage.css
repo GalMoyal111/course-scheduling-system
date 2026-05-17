@@ -47,7 +47,9 @@
   color: #0f172a;
   background: white;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .timetable-semester-select:focus {
@@ -114,7 +116,7 @@
   border-radius: 6px;
   padding: 6px 8px;
   margin-bottom: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   font-size: 0.8rem;
   color: #1e293b;
   text-align: right;
@@ -151,7 +153,7 @@
   border-radius: 8px;
   padding: 8px;
   margin-bottom: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   text-align: right;
   direction: rtl;
   display: flex;
@@ -172,7 +174,6 @@
   font-size: 0.8rem;
   color: #475467;
   font-weight: 700;
-  
 }
 
 .lesson-type {
@@ -224,7 +225,8 @@
   }
 
   /* 2. אומר לדפדפן: תציג אך ורק את הקונטיינר של הטבלה ואת מה שבתוכו */
-  .timetable-container, .timetable-container * {
+  .timetable-container,
+  .timetable-container * {
     visibility: visible !important;
   }
 
