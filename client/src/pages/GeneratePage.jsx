@@ -59,6 +59,7 @@ export default function GeneratePage() {
     fetchLecturersIfNeeded,
     fetchClassroomsIfNeeded,
     fetchCoursesIfNeeded,
+    fetchClassroomSizeSettingsIfNeeded,
     courses,
     lessons,
     semester,
@@ -75,9 +76,7 @@ export default function GeneratePage() {
     virtualCourses,
     setVirtualCourses,
     requiredCapacities,
-    setRequiredCapacities,
     electiveCapacity,
-    setElectiveCapacity,
   } = useData();
 
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
@@ -119,6 +118,7 @@ export default function GeneratePage() {
           fetchLecturersIfNeeded("GeneratePage"),
           fetchClassroomsIfNeeded("GeneratePage"),
           fetchCoursesIfNeeded("GeneratePage"),
+          fetchClassroomSizeSettingsIfNeeded("GeneratePage"),
         ]);
       } catch (err) {
         console.error("Failed to load data for generator:", err);
@@ -131,6 +131,7 @@ export default function GeneratePage() {
     fetchLecturersIfNeeded,
     fetchClassroomsIfNeeded,
     fetchCoursesIfNeeded,
+    fetchClassroomSizeSettingsIfNeeded,
   ]);
 
   // Define the details for each constraint that can be configured in the timetable generation process. This includes a user-friendly label and a description that explains the purpose of each constraint. This information can be used to display tooltips or info modals to help users understand the impact of their choices when configuring the generator.
@@ -686,230 +687,8 @@ export default function GeneratePage() {
         )}
       </div>
 
-      {/* Step 3: Lesson Capacity Requirements */}
-      <div className="generate-card">
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <h3 style={{ margin: 0 }}>
-            <span className="material-icons">groups</span>
-            4. Classroom Size Requirements
-          </h3>
-          <InfoButton
-            title="Why Specify Class Sizes?"
-            description="Different lesson types need different room sizes. A lecture for 100 students needs a large hall, while a lab for 20 students needs a smaller space. The algorithm will automatically select appropriate classrooms based on these numbers."
-          />
-        </div>
-        <p className="hint-text">
-          Tell us the expected number of students for each lesson type, and
-          we'll find suitable classrooms automatically.
-        </p>
 
-        <div
-          className="capacity-grid"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "16px",
-            marginTop: "20px",
-          }}
-        >
-          {Object.entries(requiredCapacities).map(([type, value]) => {
-            const typeIcons = {
-              LECTURE: "school",
-              TUTORIAL: "groups",
-              LAB: "science",
-              PHYSICS_LAB: "bolt",
-              NETWORKING_LAB: "router",
-              PBL: "lightbulb",
-            };
-            const typeColors = {
-              LECTURE: "#3b82f6",
-              TUTORIAL: "#10b981",
-              LAB: "#f59e0b",
-              PHYSICS_LAB: "#8b5cf6",
-              NETWORKING_LAB: "#ec4899",
-              PBL: "#f97316",
-            };
-
-            return (
-              <div
-                key={type}
-                style={{
-                  background:
-                    "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
-                  border: `2px solid ${typeColors[type]}20`,
-                  borderRadius: "12px",
-                  padding: "16px",
-                  transition: "all 0.2s ease",
-                  cursor: "pointer",
-                  "&:hover": {
-                    borderColor: typeColors[type],
-                    boxShadow: `0 4px 12px ${typeColors[type]}15`,
-                  },
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    marginBottom: "12px",
-                  }}
-                >
-                  <span
-                    className="material-icons"
-                    style={{
-                      color: typeColors[type],
-                      fontSize: "24px",
-                    }}
-                  >
-                    {typeIcons[type]}
-                  </span>
-                  <label
-                    style={{
-                      fontSize: "0.9rem",
-                      color: "#1e293b",
-                      fontWeight: "700",
-                      margin: 0,
-                      textTransform: "capitalize",
-                    }}
-                  >
-                    {type.replace("_", " ").toLowerCase()}
-                  </label>
-                </div>
-
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                >
-                  <input
-                    type="number"
-                    style={{
-                      width: "100%",
-                      padding: "12px",
-                      border: `2px solid ${typeColors[type]}40`,
-                      borderRadius: "8px",
-                      fontSize: "0.95rem",
-                      fontWeight: "600",
-                      color: typeColors[type],
-                      backgroundColor: "#fff",
-                      transition: "all 0.2s ease",
-                      outline: "none",
-                    }}
-                    value={value}
-                    min="1"
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value) || 1;
-                      setRequiredCapacities((prev) => ({
-                        ...prev,
-                        [type]: val,
-                      }));
-                    }}
-                    onFocus={(e) =>
-                      (e.target.style.borderColor = typeColors[type])
-                    }
-                    onBlur={(e) =>
-                      (e.target.style.borderColor = `${typeColors[type]}40`)
-                    }
-                  />
-                  <span
-                    style={{
-                      fontSize: "0.75rem",
-                      color: "#64748b",
-                      fontWeight: "600",
-                      whiteSpace: "nowrap",
-                      padding: "4px 8px",
-                      backgroundColor: `${typeColors[type]}10`,
-                      borderRadius: "6px",
-                    }}
-                  >
-                    students
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Elective Course Capacity */}
-          <div
-            style={{
-              background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
-              border: "2px solid #a78bfa20",
-              borderRadius: "12px",
-              padding: "16px",
-              transition: "all 0.2s ease",
-              cursor: "pointer",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                marginBottom: "12px",
-              }}
-            >
-              <span
-                className="material-icons"
-                style={{
-                  color: "#a78bfa",
-                  fontSize: "24px",
-                }}
-              >
-                star
-              </span>
-              <label
-                style={{
-                  fontSize: "0.9rem",
-                  color: "#1e293b",
-                  fontWeight: "700",
-                  margin: 0,
-                }}
-              >
-                Elective courses
-              </label>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <input
-                type="number"
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  border: "2px solid #a78bfa40",
-                  borderRadius: "8px",
-                  fontSize: "0.95rem",
-                  fontWeight: "600",
-                  color: "#a78bfa",
-                  backgroundColor: "#fff",
-                  transition: "all 0.2s ease",
-                  outline: "none",
-                }}
-                value={electiveCapacity}
-                min="1"
-                onChange={(e) => {
-                  const val = parseInt(e.target.value) || 1;
-                  setElectiveCapacity(val);
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#a78bfa")}
-                onBlur={(e) => (e.target.style.borderColor = "#a78bfa40")}
-              />
-              <span
-                style={{
-                  fontSize: "0.75rem",
-                  color: "#64748b",
-                  fontWeight: "600",
-                  whiteSpace: "nowrap",
-                  padding: "4px 8px",
-                  backgroundColor: "#a78bfa10",
-                  borderRadius: "6px",
-                }}
-              >
-                students
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
+{/* //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
       {/* Step 2 */}
       <div className="generate-card">
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>

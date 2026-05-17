@@ -739,3 +739,37 @@ export async function updateSystemAvailability(blockedSlots) {
   
   return res.text();
 }
+
+export async function getClassroomSizeSettings(caller = "Unknown") {
+  const res = await fetch(`${BASE_URL}/settings/classroom-sizes`, {
+    method: "GET",
+    headers: {
+      "X-Caller": caller,
+      "Accept": "application/json"
+    }
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch classroom size settings: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}
+
+export async function updateClassroomSizeSettings(settings) {
+  const res = await fetch(`${BASE_URL}/settings/classroom-sizes`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(settings),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to update classroom size settings: ${res.status} ${text}`);
+  }
+
+  return res.text();
+}

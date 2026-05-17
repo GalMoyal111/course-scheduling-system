@@ -17,10 +17,13 @@ import com.coursescheduling.server.model.Lecturer;
 import com.coursescheduling.server.model.ClusterCoursesList;
 import com.coursescheduling.server.service.ClassroomService;
 import com.coursescheduling.server.service.CourseService;
+import com.coursescheduling.server.model.ClassroomSizeSettings;
+import com.coursescheduling.server.service.ClassroomSizeSettingsService;
 
 import java.util.List;
 import java.util.Map;
 
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,6 +64,9 @@ public class FileUploadController {
     
     @Autowired
     private ClusterService clusterService;
+
+    @Autowired
+    private ClassroomSizeSettingsService classroomSizeSettingsService;
     
     
     // @Autowired
@@ -382,6 +388,17 @@ public class FileUploadController {
     public String updateSystemAvailability(@RequestBody List<Map<String, Integer>> blockedSlots) throws Exception {
         clusterService.updateSystemAvailability(blockedSlots);
         return "System availability updated successfully";
+    }
+
+    @GetMapping("/settings/classroom-sizes")
+    public ClassroomSizeSettings getClassroomSizeSettings() throws Exception {
+        return classroomSizeSettingsService.getClassroomSizeSettings();
+    }
+
+    @PostMapping("/settings/classroom-sizes")
+    public String updateClassroomSizeSettings(@RequestBody ClassroomSizeSettings settings) throws Exception {
+        classroomSizeSettingsService.updateClassroomSizeSettings(settings);
+        return "Classroom size settings updated successfully";
     }
     
     

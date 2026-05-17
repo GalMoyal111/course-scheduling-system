@@ -3,14 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import { updatePassword } from "firebase/auth";
 import { ROLES } from "../constants/roles";
-import {
-  getAllUsers,
-  updateUserRole,
-  createUser,
-  deleteUser,
-  addCluster,
-  deleteClusters,
-  updateSystemAvailability,
+import { 
+    getAllUsers, 
+    updateUserRole, 
+    createUser, 
+    deleteUser, 
+    addCluster, 
+    deleteClusters,
+    updateSystemAvailability,
+    updateClassroomSizeSettings
 } from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
 import { useData } from "../context/DataContext";
@@ -30,25 +31,25 @@ export default function SettingsPage({ user }) {
   const [pendingCourse, setPendingCourse] = useState(null);
   const { toast, showSuccess, showError, closeToast } = useToast();
 
-  const {
-    clusters,
-    setClusters,
-    fetchClustersIfNeeded,
-    invalidateClustersCache,
-    systemBlockedSlots,
-    setSystemBlockedSlots,
-    fetchSystemBlockedSlotsIfNeeded,
-    invalidateSystemSlotsCache,
-  } = useData();
-  const [isClusterModalOpen, setIsClusterModalOpen] = useState(false);
-  const [newClusterName, setNewClusterName] = useState("");
-  const [isDeleteClusterConfirmOpen, setIsDeleteClusterConfirmOpen] =
-    useState(false);
-  const [clusterToDelete, setClusterToDelete] = useState(null);
+    const { 
+        clusters, setClusters, fetchClustersIfNeeded, invalidateClustersCache,
+        systemBlockedSlots, setSystemBlockedSlots, fetchSystemBlockedSlotsIfNeeded, invalidateSystemSlotsCache,
+        requiredCapacities, setRequiredCapacities, electiveCapacity, setElectiveCapacity,
+        fetchClassroomSizeSettingsIfNeeded, invalidateClassroomSizeSettingsCache
+    } = useData();
+    const [isClusterModalOpen, setIsClusterModalOpen] = useState(false);
+    const [newClusterName, setNewClusterName] = useState("");
+    const [isDeleteClusterConfirmOpen, setIsDeleteClusterConfirmOpen] = useState(false);
+    const [clusterToDelete, setClusterToDelete] = useState(null);
 
-  const [localSlots, setLocalSlots] = useState([]);
-  const [hasSlotsChanges, setHasSlotsChanges] = useState(false);
-  const [isSavingSlots, setIsSavingSlots] = useState(false);
+    const [localSlots, setLocalSlots] = useState([]);
+    const [hasSlotsChanges, setHasSlotsChanges] = useState(false);
+    const [isSavingSlots, setIsSavingSlots] = useState(false);
+
+    const [localRequiredCapacities, setLocalRequiredCapacities] = useState(requiredCapacities);
+    const [localElectiveCapacity, setLocalElectiveCapacity] = useState(electiveCapacity);
+    const [hasCapacityChanges, setHasCapacityChanges] = useState(false);
+    const [isSavingCapacities, setIsSavingCapacities] = useState(false);
 
   // Fetch users if admin, and always fetch clusters and system blocked slots on mount
   useEffect(() => {
@@ -67,14 +68,22 @@ export default function SettingsPage({ user }) {
       fetchUsers();
     }
 
-    fetchClustersIfNeeded();
-    fetchSystemBlockedSlotsIfNeeded("SettingsPage");
-  }, [user, fetchClustersIfNeeded, fetchSystemBlockedSlotsIfNeeded]);
+        fetchClustersIfNeeded();
+        fetchSystemBlockedSlotsIfNeeded("SettingsPage");
+        fetchClassroomSizeSettingsIfNeeded("SettingsPage");
+
+    }, [user, fetchClustersIfNeeded, fetchSystemBlockedSlotsIfNeeded, fetchClassroomSizeSettingsIfNeeded]);
 
   useEffect(() => {
     setLocalSlots(systemBlockedSlots || []);
     setHasSlotsChanges(false);
   }, [systemBlockedSlots]);
+
+    useEffect(() => {
+        setLocalRequiredCapacities(requiredCapacities);
+        setLocalElectiveCapacity(electiveCapacity);
+        setHasCapacityChanges(false);
+    }, [requiredCapacities, electiveCapacity]);
 
   // Define the days of the week in Hebrew along with their corresponding indices. This array is used to render the table headers and to identify which day is being interacted with when toggling availability or setting whole day states.
   const hebrewDays = [
@@ -257,21 +266,51 @@ export default function SettingsPage({ user }) {
     setHasSlotsChanges(true);
   };
 
-  const handleSaveSystemSlots = async () => {
-    setIsSavingSlots(true);
-    try {
-      await updateSystemAvailability(localSlots);
-      setSystemBlockedSlots(localSlots);
-      invalidateSystemSlotsCache();
-      showSuccess("System blocks saved successfully!");
-      setHasSlotsChanges(false);
-    } catch (err) {
-      console.error(err);
-      showError("Failed to save system blocks.");
-    } finally {
-      setIsSavingSlots(false);
-    }
-  };
+    const handleSaveSystemSlots = async () => {
+        setIsSavingSlots(true);
+        try {
+            await updateSystemAvailability(localSlots);
+            setSystemBlockedSlots(localSlots);
+            invalidateSystemSlotsCache();
+            showSuccess("System blocks saved successfully!");
+            setHasSlotsChanges(false);
+        } catch (err) {
+            console.error(err);
+            showError("Failed to save system blocks.");
+        } finally {
+            setIsSavingSlots(false);
+        }
+    };
+
+    const handleSaveClassroomSizes = async () => {
+        setIsSavingCapacities(true);
+
+        try {
+            const settings = {
+                lectureSize: localRequiredCapacities.LECTURE,
+                tutorialSize: localRequiredCapacities.TUTORIAL,
+                labSize: localRequiredCapacities.LAB,
+                physicsLabSize: localRequiredCapacities.PHYSICS_LAB,
+                networkingLabSize: localRequiredCapacities.NETWORKING_LAB,
+                electiveCourseSize: localElectiveCapacity,
+            };
+
+            await updateClassroomSizeSettings(settings);
+
+            setRequiredCapacities(localRequiredCapacities);
+            setElectiveCapacity(localElectiveCapacity);
+            invalidateClassroomSizeSettingsCache();
+
+            showSuccess("Classroom size settings saved successfully!");
+            setHasCapacityChanges(false);
+        } catch (err) {
+            console.error(err);
+            showError("Failed to save classroom size settings.");
+        } finally {
+            setIsSavingCapacities(false);
+        }
+    };
+
 
   return (
     <div className="settings-page">
@@ -544,29 +583,227 @@ export default function SettingsPage({ user }) {
               </button>
             </div>
 
-            {clusters.length === 0 ? (
-              <p className="settings-empty">No clusters found. Add one!</p>
-            ) : (
-              <div className="prereq-chips">
-                {clusters.map((c) => (
-                  <div key={c.id} className="prereq-chip">
-                    <span>{c.name}</span>
-                    <button
-                      onClick={() => {
-                        setClusterToDelete(c);
-                        setIsDeleteClusterConfirmOpen(true);
-                      }}
-                      className="prereq-chip-remove"
-                      title="Delete Cluster"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+                        {clusters.length === 0 ? (
+                            <p className="settings-empty">No clusters found. Add one!</p>
+                        ) : (
+                            <div className="prereq-chips">
+                                {clusters.map((c) => (
+                                    <div 
+                                        key={c.id} 
+                                        className="prereq-chip"
+                                    >
+                                        <span>{c.name}</span>
+                                        <button 
+                                            onClick={() => { 
+                                                setClusterToDelete(c); 
+                                                setIsDeleteClusterConfirmOpen(true); 
+                                            }} 
+                                            className="prereq-chip-remove"
+                                            title="Delete Cluster"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Default Classroom Size Requirements Section */}
+                    <div className="settings-section">
+                        <div className="settings-section-header">
+                            <span className="material-icons settings-section-icon">groups</span>
+                            <div>
+                                <h2 className="settings-section-title">Default Classroom Size Requirements</h2>
+                                <p className="settings-section-desc">
+                                    Define the default number of students for each lesson type. These values are used by the scheduling algorithm unless a course-specific override is defined.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="settings-section-content">
+                            <div style={{ marginBottom: "16px", display: "flex", justifyContent: "flex-end" }}>
+                                <button
+                                    onClick={handleSaveClassroomSizes}
+                                    className="ui-btn ui-btn--primary"
+                                    disabled={!hasCapacityChanges || isSavingCapacities}
+                                    style={{
+                                        backgroundColor: hasCapacityChanges ? "#10b981" : "",
+                                        borderColor: hasCapacityChanges ? "#10b981" : "",
+                                        opacity: (!hasCapacityChanges || isSavingCapacities) ? 0.6 : 1
+                                    }}
+                                >
+                                    <span className="material-icons btn-icon">save</span>
+                                    {isSavingCapacities ? "Saving..." : "Save Classroom Sizes"}
+                                </button>
+                            </div>
+
+                            <div
+                                className="capacity-grid"
+                                style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                                    gap: "16px",
+                                    marginTop: "20px",
+                                }}
+                            >
+                                {Object.entries(localRequiredCapacities).map(([type, value]) => {
+                                    const typeIcons = {
+                                        LECTURE: "school",
+                                        TUTORIAL: "groups",
+                                        LAB: "science",
+                                        PHYSICS_LAB: "bolt",
+                                        NETWORKING_LAB: "router",
+                                    };
+
+                                    const typeColors = {
+                                        LECTURE: "#3b82f6",
+                                        TUTORIAL: "#10b981",
+                                        LAB: "#f59e0b",
+                                        PHYSICS_LAB: "#8b5cf6",
+                                        NETWORKING_LAB: "#ec4899",
+                                    };
+
+                                    return (
+                                        <div
+                                            key={type}
+                                            style={{
+                                                background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+                                                border: `2px solid ${typeColors[type]}20`,
+                                                borderRadius: "12px",
+                                                padding: "16px",
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: "10px",
+                                                    marginBottom: "12px",
+                                                }}
+                                            >
+                                                <span
+                                                    className="material-icons"
+                                                    style={{
+                                                        color: typeColors[type],
+                                                        fontSize: "24px",
+                                                    }}
+                                                >
+                                                    {typeIcons[type]}
+                                                </span>
+
+                                                <label
+                                                    style={{
+                                                        fontSize: "0.9rem",
+                                                        color: "#1e293b",
+                                                        fontWeight: "700",
+                                                        margin: 0,
+                                                        textTransform: "capitalize",
+                                                    }}
+                                                >
+                                                    {type.replace("_", " ").toLowerCase()}
+                                                </label>
+                                            </div>
+
+                                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                                <input
+                                                    type="number"
+                                                    className="settings-input"
+                                                    value={value}
+                                                    min="1"
+                                                    onChange={(e) => {
+                                                        const val = parseInt(e.target.value) || 1;
+                                                        setLocalRequiredCapacities((prev) => ({
+                                                            ...prev,
+                                                            [type]: val,
+                                                        }));
+                                                        setHasCapacityChanges(true);
+                                                    }}
+                                                />
+
+                                                <span
+                                                    style={{
+                                                        fontSize: "0.75rem",
+                                                        color: "#64748b",
+                                                        fontWeight: "600",
+                                                        whiteSpace: "nowrap",
+                                                    }}
+                                                >
+                                                    students
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+
+                                <div
+                                    style={{
+                                        background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+                                        border: "2px solid #a78bfa20",
+                                        borderRadius: "12px",
+                                        padding: "16px",
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "10px",
+                                            marginBottom: "12px",
+                                        }}
+                                    >
+                                        <span
+                                            className="material-icons"
+                                            style={{
+                                                color: "#a78bfa",
+                                                fontSize: "24px",
+                                            }}
+                                        >
+                                            star
+                                        </span>
+
+                                        <label
+                                            style={{
+                                                fontSize: "0.9rem",
+                                                color: "#1e293b",
+                                                fontWeight: "700",
+                                                margin: 0,
+                                            }}
+                                        >
+                                            Elective courses
+                                        </label>
+                                    </div>
+
+                                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                        <input
+                                            type="number"
+                                            className="settings-input"
+                                            value={localElectiveCapacity}
+                                            min="1"
+                                            onChange={(e) => {
+                                                const val = parseInt(e.target.value) || 1;
+                                                setLocalElectiveCapacity(val);
+                                                setHasCapacityChanges(true);
+                                            }}
+                                        />
+
+                                        <span
+                                            style={{
+                                                fontSize: "0.75rem",
+                                                color: "#64748b",
+                                                fontWeight: "600",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            students
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
 
         {/* NEW: Global System Constraints Section */}
         <div className="settings-section">
