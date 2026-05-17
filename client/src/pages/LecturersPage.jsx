@@ -891,6 +891,7 @@ function LecturerUploadSummaryModal({ isOpen, summary, onClose }) {
 }
 
 function AvailabilityTable({ lecturer, onToggle, onSetWholeDay }) {
+  // Define the days of the week in Hebrew along with their corresponding indices. This array is used to render the table headers and to identify which day is being interacted with when toggling availability or setting whole day states.
   const hebrewDays = [
     { name: "ראשון", index: 1 },
     { name: "שני", index: 2 },
@@ -900,6 +901,7 @@ function AvailabilityTable({ lecturer, onToggle, onSetWholeDay }) {
     { name: "שישי", index: 6 },
   ];
 
+  // Define the time slots for each frame of the day, along with a flag to indicate if the slot is a break. This array is used to render the rows of the availability table and to determine how to handle interactions for each time slot.
   const times = [
     { range: "08:30-09:20", frame: 1, isBreak: false },
     { range: "09:30-10:20", frame: 2, isBreak: false },
@@ -926,7 +928,6 @@ function AvailabilityTable({ lecturer, onToggle, onSetWholeDay }) {
               <th key={day.index} className="day-column">
                 <div className="day-hebrew">{day.name}</div>
 
-                {/* התוספת החדשה: עיגולי הבחירה הגורפים ליום */}
                 <div className="day-actions">
                   <div
                     className="custom-tooltip"
