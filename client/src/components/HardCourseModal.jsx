@@ -3,33 +3,41 @@ import { useData } from "../context/DataContext";
 import Button from "./ui/Button";
 import Modal from "./ui/Modal";
 
-
-export default function HardCourseModal({ isOpen, onClose, onSave, currentSemester, title ="Select Course", actionText = "Mark as Hard",description = "Selected courses will be prioritized accordingly." }) {
+export default function HardCourseModal({
+  isOpen,
+  onClose,
+  onSave,
+  currentSemester,
+  title = "Select Course",
+  actionText = "Mark as Hard",
+  description = "Selected courses will be prioritized accordingly.",
+}) {
   const { lessons, clusterMappings } = useData();
 
   const clusterMapping = clusterMappings.numToName;
   const [selectedCluster, setSelectedCluster] = useState("");
   const [selectedCourseId, setSelectedCourseId] = useState("");
 
-  // סינון שיעורים לפי סמסטר
-  const semesterLessons = useMemo(() => 
-    lessons.filter(l => l.semester === currentSemester), 
-  [lessons, currentSemester]);
+  //list of lessons for the selected semester
+  const semesterLessons = useMemo(
+    () => lessons.filter((l) => l.semester === currentSemester),
+    [lessons, currentSemester],
+  );
 
-  // רשימת אשכולות
+  //list of unique clusters for the selected semester
   const availableClusters = useMemo(() => {
     const clusters = new Set();
-    semesterLessons.forEach(l => clusters.add(l.cluster));
+    semesterLessons.forEach((l) => clusters.add(l.cluster));
     return Array.from(clusters).sort((a, b) => a - b);
   }, [semesterLessons]);
 
-  // רשימת קורסים (ייחודיים) לפי אשכול
+  //list of unique courses for the selected cluster
   const filteredCourses = useMemo(() => {
     if (!selectedCluster) return [];
     const coursesMap = new Map();
     semesterLessons
-      .filter(l => l.cluster.toString() === selectedCluster.toString())
-      .forEach(l => coursesMap.set(l.courseId, l.courseName));
+      .filter((l) => l.cluster.toString() === selectedCluster.toString())
+      .forEach((l) => coursesMap.set(l.courseId, l.courseName));
     return Array.from(coursesMap.entries()).map(([id, name]) => ({ id, name }));
   }, [semesterLessons, selectedCluster]);
 
@@ -42,7 +50,7 @@ export default function HardCourseModal({ isOpen, onClose, onSave, currentSemest
 
   const handleSave = () => {
     if (!selectedCourseId) return;
-    const course = filteredCourses.find(c => c.id === selectedCourseId);
+    const course = filteredCourses.find((c) => c.id === selectedCourseId);
     onSave({ courseId: course.id, courseName: course.name });
     onClose();
   };
@@ -50,52 +58,102 @@ export default function HardCourseModal({ isOpen, onClose, onSave, currentSemest
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Define Hard Course (Morning Priority)">
-      <div className="modal-body" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "15px" }}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Define Hard Course (Morning Priority)"
+    >
+      <div
+        className="modal-body"
+        style={{
+          padding: "20px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "15px",
+        }}
+      >
         <p style={{ fontSize: "14px", color: "#64748b" }}>
-          Selected courses will have their <strong>Lectures</strong> prioritized for morning slots (8:30 - 12:30).
+          Selected courses will have their <strong>Lectures</strong> prioritized
+          for morning slots (8:30 - 12:30).
         </p>
 
-        <div style={{ 
-          display: "flex", 
-          alignItems: "center", 
-          gap: "10px", 
-          fontSize: "14px", 
-          color: "#0747a6", // כחול כהה מאוד (קריא מאוד)
-          background: "#deebff", // רקע תכלת בולט יותר
-          padding: "12px", 
-          borderRadius: "8px",
-          border: "1px solid #b3d4ff",
-          marginBottom: "10px"
-        }}>
-          <span className="material-icons" style={{ color: "#5688d3ff" }}>info</span>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            fontSize: "14px",
+            color: "#0747a6",
+            background: "#deebff",
+            padding: "12px",
+            borderRadius: "8px",
+            border: "1px solid #b3d4ff",
+            marginBottom: "10px",
+          }}
+        >
+          <span className="material-icons" style={{ color: "#5688d3ff" }}>
+            info
+          </span>
           <span style={{ lineHeight: "1.4" }}>
-            <strong>List empty?</strong> Please make sure you have selected 
-            <strong> Semester {currentSemester || 'A or B'}</strong> at the top of the main page.
+            <strong>List empty?</strong> Please make sure you have selected
+            <strong> Semester {currentSemester || "A or B"}</strong> at the top
+            of the main page.
           </span>
         </div>
-        
+
         <div className="form-field">
           <label>Cluster</label>
-          <select className="ui-select" value={selectedCluster} onChange={(e) => setSelectedCluster(e.target.value)}>
+          <select
+            className="ui-select"
+            value={selectedCluster}
+            onChange={(e) => setSelectedCluster(e.target.value)}
+          >
             <option value="">-- Select Cluster --</option>
-            {availableClusters.map(c => (
-              <option key={c} value={c}>{clusterMapping[c] || `Cluster ${c}`}</option>
+            {availableClusters.map((c) => (
+              <option key={c} value={c}>
+                {clusterMapping[c] || `Cluster ${c}`}
+              </option>
             ))}
           </select>
         </div>
 
-        <div className="form-field" style={{ opacity: selectedCluster ? 1 : 0.5 }}>
+        <div
+          className="form-field"
+          style={{ opacity: selectedCluster ? 1 : 0.5 }}
+        >
           <label>Course</label>
-          <select className="ui-select" value={selectedCourseId} onChange={(e) => setSelectedCourseId(e.target.value)} disabled={!selectedCluster}>
+          <select
+            className="ui-select"
+            value={selectedCourseId}
+            onChange={(e) => setSelectedCourseId(e.target.value)}
+            disabled={!selectedCluster}
+          >
             <option value="">-- Select Course --</option>
-            {filteredCourses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            {filteredCourses.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
           </select>
         </div>
       </div>
-      <div className="modal-actions" style={{ padding: "15px", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-        <Button variant="ghost" onClick={onClose}>Cancel</Button>
-        <Button variant="primary" onClick={handleSave} disabled={!selectedCourseId}>
+      <div
+        className="modal-actions"
+        style={{
+          padding: "15px",
+          display: "flex",
+          justifyContent: "flex-end",
+          gap: "10px",
+        }}
+      >
+        <Button variant="ghost" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button
+          variant="primary"
+          onClick={handleSave}
+          disabled={!selectedCourseId}
+        >
           {actionText}
         </Button>
       </div>

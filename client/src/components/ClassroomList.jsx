@@ -5,27 +5,34 @@ import { typeBadge } from "./ui/typeUtils";
 // Map type codes to display labels (matching typeBadge logic)
 function getTypeLabel(type) {
   const typeMap = {
-    "PHYSICS_LAB": "Physics Lab",
-    "NETWORKING_LAB": "Networking Lab",
-    "LAB": "Laboratory",
-    "LECTURE": "Lecture",
-    "TUTORIAL": "Practice",
-    "NORMAL": "Normal",
-    "PBL": "PBL",
-    "PROJECT": "Project",
-    "AUDITORIUM": "Auditorium",
+    PHYSICS_LAB: "Physics Lab",
+    NETWORKING_LAB: "Networking Lab",
+    LAB: "Laboratory",
+    LECTURE: "Lecture",
+    TUTORIAL: "Practice",
+    NORMAL: "Normal",
+    PBL: "PBL",
+    PROJECT: "Project",
+    AUDITORIUM: "Auditorium",
   };
   return typeMap[type] || type;
 }
 
-  const capacityRanges = [
-    { label: "Up to 20", min: 0, max: 20 },
-    { label: "21 - 40", min: 21, max: 40 },
-    { label: "41 - 60", min: 41, max: 60 },
-    { label: "More than 60", min: 61, max: Infinity },
-  ];
+// Predefined capacity ranges for filtering
+const capacityRanges = [
+  { label: "Up to 20", min: 0, max: 20 },
+  { label: "21 - 40", min: 21, max: 40 },
+  { label: "41 - 60", min: 41, max: 60 },
+  { label: "More than 60", min: 61, max: Infinity },
+];
 
-export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSelectionChange, title = "Classrooms" }) {
+export default function ClassroomList({
+  classrooms = [],
+  onEdit,
+  onDelete,
+  onSelectionChange,
+  title = "Classrooms",
+}) {
   const [selectedBuildings, setSelectedBuildings] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [selectedCapacityRanges, setSelectedCapacityRanges] = useState([]);
@@ -35,30 +42,34 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
 
   // Extract unique buildings and types from classrooms
   const uniqueBuildings = useMemo(() => {
-    const buildings = Array.from(new Set(classrooms.map(c => c.building).filter(Boolean)))
-      .sort((a, b) => a.localeCompare(b, 'he'));
+    const buildings = Array.from(
+      new Set(classrooms.map((c) => c.building).filter(Boolean)),
+    ).sort((a, b) => a.localeCompare(b, "he"));
     return buildings;
   }, [classrooms]);
 
   const uniqueTypes = useMemo(() => {
     const types = classrooms
-      .map(c => c.type)
+      .map((c) => c.type)
       .filter((t, idx, arr) => t && arr.indexOf(t) === idx)
-      .sort((a, b) => a.localeCompare(b, 'he'));
+      .sort((a, b) => a.localeCompare(b, "he"));
     return types;
   }, [classrooms]);
 
-
-
   // Filter classrooms based on selected filters
   const filteredClassrooms = useMemo(() => {
-    return classrooms.filter(c => {
-      if (selectedBuildings.length > 0 && !selectedBuildings.includes(c.building)) return false;
-      if (selectedTypes.length > 0 && !selectedTypes.includes(c.type)) return false;
+    return classrooms.filter((c) => {
+      if (
+        selectedBuildings.length > 0 &&
+        !selectedBuildings.includes(c.building)
+      )
+        return false;
+      if (selectedTypes.length > 0 && !selectedTypes.includes(c.type))
+        return false;
       if (selectedCapacityRanges.length > 0) {
         const capacity = Number(c.capacity);
-        const matchesCapacity = selectedCapacityRanges.some(rangeLabel => {
-          const range = capacityRanges.find(r => r.label === rangeLabel);
+        const matchesCapacity = selectedCapacityRanges.some((rangeLabel) => {
+          const range = capacityRanges.find((r) => r.label === rangeLabel);
           return range && capacity >= range.min && capacity <= range.max;
         });
         if (!matchesCapacity) return false;
@@ -71,21 +82,35 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
     return (
       <div className="ui-card">
         <div className="empty-illustration">
-          <svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+          <svg
+            viewBox="0 0 120 90"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden
+          >
             <rect x="8" y="20" width="104" height="56" rx="6" fill="#eef2ff" />
             <rect x="18" y="30" width="40" height="8" rx="2" fill="#c7d2fe" />
             <rect x="18" y="44" width="74" height="6" rx="2" fill="#e0e7ff" />
             <rect x="18" y="54" width="30" height="6" rx="2" fill="#e0e7ff" />
           </svg>
-          <div style={{ marginTop: 12, fontWeight: 700 }}>No classrooms yet</div>
-          <div style={{ color: "var(--muted)", marginTop: 6 }}>Upload an Excel file or add a classroom manually.</div>
+          <div style={{ marginTop: 12, fontWeight: 700 }}>
+            No classrooms yet
+          </div>
+          <div style={{ color: "var(--muted)", marginTop: 6 }}>
+            Upload an Excel file or add a classroom manually.
+          </div>
         </div>
       </div>
     );
   }
 
-  const hasActiveFilters = selectedBuildings.length > 0 || selectedTypes.length > 0 || selectedCapacityRanges.length > 0;
-  const displayCount = hasActiveFilters ? filteredClassrooms.length : classrooms.length;
+  // Determine if any filters are active and calculate the count to display in the title
+  const hasActiveFilters =
+    selectedBuildings.length > 0 ||
+    selectedTypes.length > 0 ||
+    selectedCapacityRanges.length > 0;
+  const displayCount = hasActiveFilters
+    ? filteredClassrooms.length
+    : classrooms.length;
 
   const getSelectedBuildingsText = () => {
     if (selectedBuildings.length === 0) return "All Buildings";
@@ -105,58 +130,94 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
     return `${selectedCapacityRanges.length} Capacity ranges selected`;
   };
 
+  // Toggle capacity range selection
   const toggleCapacityRange = (rangeLabel) => {
     setSelectedCapacityRanges((current) =>
       current.includes(rangeLabel)
         ? current.filter((item) => item !== rangeLabel)
-        : [...current, rangeLabel]
+        : [...current, rangeLabel],
     );
   };
 
   return (
     <div className="ui-card">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <div style={{ 
-          fontWeight: 700, 
-          fontSize: "1.05rem",
-          background: "linear-gradient(135deg, var(--accent-start), var(--accent-end))",
-          backgroundClip: "text",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          display: "inline-block"
-        }}>
-          {title} 
-          <span style={{ 
-            color: "var(--text)", 
-            WebkitTextFillColor: "var(--text)",
-            marginLeft: "8px",
-            fontSize: "0.95rem",
-            fontWeight: 600,
-            opacity: hasActiveFilters ? 1 : 0.7
-          }}>
-            ({displayCount}{hasActiveFilters ? `/${classrooms.length}` : ""})
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 16,
+        }}
+      >
+        <div
+          style={{
+            fontWeight: 700,
+            fontSize: "1.05rem",
+            background:
+              "linear-gradient(135deg, var(--accent-start), var(--accent-end))",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            display: "inline-block",
+          }}
+        >
+          {title}
+          <span
+            style={{
+              color: "var(--text)",
+              WebkitTextFillColor: "var(--text)",
+              marginLeft: "8px",
+              fontSize: "0.95rem",
+              fontWeight: 600,
+              opacity: hasActiveFilters ? 1 : 0.7,
+            }}
+          >
+            ({displayCount}
+            {hasActiveFilters ? `/${classrooms.length}` : ""})
           </span>
         </div>
       </div>
 
       {/* Filter Controls */}
-      <div style={{ 
-        display: "flex", 
-        gap: 20, 
-        marginBottom: 16, 
-        flexWrap: "wrap",
-        alignItems: "center",
-        padding: "16px 16px",
-        backgroundColor: "rgba(79, 70, 229, 0.02)",
-        borderRadius: "8px",
-        border: "1px solid rgba(79, 70, 229, 0.1)"
-      }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 20,
+          marginBottom: 16,
+          flexWrap: "wrap",
+          alignItems: "center",
+          padding: "16px 16px",
+          backgroundColor: "rgba(79, 70, 229, 0.02)",
+          borderRadius: "8px",
+          border: "1px solid rgba(79, 70, 229, 0.1)",
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Filters:</span>
+          <span
+            style={{
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              color: "var(--muted)",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+            }}
+          >
+            Filters:
+          </span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
-          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            position: "relative",
+          }}
+        >
+          <span
+            className="material-icons"
+            style={{ fontSize: "1.1rem", color: "var(--muted)" }}
+          >
             apartment
           </span>
 
@@ -171,7 +232,10 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
               padding: "8px 12px",
               borderRadius: "6px",
               border: "1px solid rgba(15, 23, 36, 0.12)",
-              backgroundColor: selectedBuildings.length > 0 ? "rgba(79, 70, 229, 0.08)" : "white",
+              backgroundColor:
+                selectedBuildings.length > 0
+                  ? "rgba(79, 70, 229, 0.08)"
+                  : "white",
               color: "var(--text)",
               fontSize: "0.95rem",
               cursor: "pointer",
@@ -180,7 +244,7 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: "8px"
+              gap: "8px",
             }}
           >
             {getSelectedBuildingsText()}
@@ -204,10 +268,10 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
                 padding: "8px",
                 display: "flex",
                 flexDirection: "column",
-                gap: "6px"
+                gap: "6px",
               }}
             >
-              {uniqueBuildings.map(building => (
+              {uniqueBuildings.map((building) => (
                 <label
                   key={building}
                   style={{
@@ -220,7 +284,7 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
                     fontSize: "0.9rem",
                     backgroundColor: selectedBuildings.includes(building)
                       ? "rgba(79, 70, 229, 0.08)"
-                      : "transparent"
+                      : "transparent",
                   }}
                 >
                   <input
@@ -230,7 +294,9 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
                       if (e.target.checked) {
                         setSelectedBuildings([...selectedBuildings, building]);
                       } else {
-                        setSelectedBuildings(selectedBuildings.filter(b => b !== building));
+                        setSelectedBuildings(
+                          selectedBuildings.filter((b) => b !== building),
+                        );
                       }
                     }}
                   />
@@ -241,9 +307,19 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
           )}
         </div>
 
-
-        <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
-          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>
+        {/* Type Filter Dropdown */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            position: "relative",
+          }}
+        >
+          <span
+            className="material-icons"
+            style={{ fontSize: "1.1rem", color: "var(--muted)" }}
+          >
             label
           </span>
 
@@ -258,7 +334,8 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
               padding: "8px 12px",
               borderRadius: "6px",
               border: "1px solid rgba(15, 23, 36, 0.12)",
-              backgroundColor: selectedTypes.length > 0 ? "rgba(79, 70, 229, 0.08)" : "white",
+              backgroundColor:
+                selectedTypes.length > 0 ? "rgba(79, 70, 229, 0.08)" : "white",
               color: "var(--text)",
               fontSize: "0.95rem",
               cursor: "pointer",
@@ -267,7 +344,7 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: "8px"
+              gap: "8px",
             }}
           >
             {getSelectedTypesText()}
@@ -275,7 +352,7 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
               expand_more
             </span>
           </button>
-
+          {/* Types dropdown menu */}
           {isTypesDropdownOpen && (
             <div
               style={{
@@ -291,10 +368,10 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
                 padding: "8px",
                 display: "flex",
                 flexDirection: "column",
-                gap: "6px"
+                gap: "6px",
               }}
             >
-              {uniqueTypes.map(type => (
+              {uniqueTypes.map((type) => (
                 <label
                   key={type}
                   style={{
@@ -307,7 +384,7 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
                     fontSize: "0.9rem",
                     backgroundColor: selectedTypes.includes(type)
                       ? "rgba(79, 70, 229, 0.08)"
-                      : "transparent"
+                      : "transparent",
                   }}
                 >
                   <input
@@ -317,7 +394,9 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
                       if (e.target.checked) {
                         setSelectedTypes([...selectedTypes, type]);
                       } else {
-                        setSelectedTypes(selectedTypes.filter(t => t !== type));
+                        setSelectedTypes(
+                          selectedTypes.filter((t) => t !== type),
+                        );
                       }
                     }}
                   />
@@ -327,8 +406,19 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
             </div>
           )}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
-          <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>
+        {/* Capacity Filter Dropdown */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            position: "relative",
+          }}
+        >
+          <span
+            className="material-icons"
+            style={{ fontSize: "1.1rem", color: "var(--muted)" }}
+          >
             groups
           </span>
 
@@ -343,7 +433,10 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
               padding: "8px 12px",
               borderRadius: "6px",
               border: "1px solid rgba(15, 23, 36, 0.12)",
-              backgroundColor: selectedCapacityRanges.length > 0 ? "rgba(79, 70, 229, 0.08)" : "white",
+              backgroundColor:
+                selectedCapacityRanges.length > 0
+                  ? "rgba(79, 70, 229, 0.08)"
+                  : "white",
               color: "var(--text)",
               fontSize: "0.95rem",
               cursor: "pointer",
@@ -352,7 +445,7 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: "8px"
+              gap: "8px",
             }}
           >
             {getSelectedCapacityText()}
@@ -360,7 +453,7 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
               expand_more
             </span>
           </button>
-
+          {/* Capacity dropdown menu */}
           {isCapacityDropdownOpen && (
             <div
               style={{
@@ -376,10 +469,11 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
                 padding: "8px",
                 display: "flex",
                 flexDirection: "column",
-                gap: "6px"
+                gap: "6px",
               }}
             >
-              {capacityRanges.map(range => (
+              {/* We use the predefined capacityRanges to render checkboxes for each range */}
+              {capacityRanges.map((range) => (
                 <label
                   key={range.label}
                   style={{
@@ -390,9 +484,11 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
                     borderRadius: "6px",
                     cursor: "pointer",
                     fontSize: "0.9rem",
-                    backgroundColor: selectedCapacityRanges.includes(range.label)
+                    backgroundColor: selectedCapacityRanges.includes(
+                      range.label,
+                    )
                       ? "rgba(79, 70, 229, 0.08)"
-                      : "transparent"
+                      : "transparent",
                   }}
                 >
                   <input
@@ -406,7 +502,7 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
             </div>
           )}
         </div>
-
+        {/* Clear Filters Button */}
         {hasActiveFilters && (
           <button
             onClick={() => {
@@ -427,7 +523,7 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
               transition: "all 0.2s ease",
               display: "flex",
               alignItems: "center",
-              gap: "6px"
+              gap: "6px",
             }}
             onMouseEnter={(e) => {
               e.target.style.backgroundColor = "rgba(239, 68, 68, 0.12)";
@@ -438,7 +534,12 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
               e.target.style.borderColor = "rgba(239, 68, 68, 0.2)";
             }}
           >
-            <span className="material-icons" style={{ fontSize: "1rem", lineHeight: "1" }}>close</span>
+            <span
+              className="material-icons"
+              style={{ fontSize: "1rem", lineHeight: "1" }}
+            >
+              close
+            </span>
             Clear Filters
           </button>
         )}
@@ -456,6 +557,8 @@ export default function ClassroomList({ classrooms = [], onEdit, onDelete, onSel
   );
 }
 
+/* SelectableTable is a memoized table component that manages selection state internally. It accepts the list of classrooms and handler functions as props, and provides callbacks when selection changes. The table header includes a "select all" checkbox, and each row has its own checkbox for individual selection. The component uses stable keys to avoid resetting selection when the parent re-renders with a new array reference but the same classroom data.*/
+
 function SelectableTable({ classrooms, onEdit, onDelete, onSelectionChange }) {
   const [selectedMap, setSelectedMap] = useState({});
 
@@ -471,13 +574,20 @@ function SelectableTable({ classrooms, onEdit, onDelete, onSelectionChange }) {
     onSelectionChange && onSelectionChange([]);
   }, [stableKey]);
 
-  console.debug && console.debug("SelectableTable render", { count: classrooms.length, selected: Object.keys(selectedMap).length });
+  console.debug &&
+    console.debug("SelectableTable render", {
+      count: classrooms.length,
+      selected: Object.keys(selectedMap).length,
+    });
   // We'll keep the latest handler functions in refs and pass refs to memoized rows
   const onEditRef = React.useRef(onEdit);
   const onDeleteRef = React.useRef(onDelete);
   const onToggleRef = React.useRef();
 
-  useEffect(() => { onEditRef.current = onEdit; onDeleteRef.current = onDelete; }, [onEdit, onDelete]);
+  useEffect(() => {
+    onEditRef.current = onEdit;
+    onDeleteRef.current = onDelete;
+  }, [onEdit, onDelete]);
 
   const toggleRow = (c) => {
     const k = keyFor(c);
@@ -486,15 +596,23 @@ function SelectableTable({ classrooms, onEdit, onDelete, onSelectionChange }) {
     else next[k] = c;
     setSelectedMap(next);
     onSelectionChange && onSelectionChange(Object.values(next));
-    console.debug && console.debug("toggleRow", { key: k, totalSelected: Object.keys(next).length });
+    console.debug &&
+      console.debug("toggleRow", {
+        key: k,
+        totalSelected: Object.keys(next).length,
+      });
   };
 
   // keep pointer to latest toggle handler so memoized rows can call it without
   // requiring re-renders when the parent re-creates handler identities
-  useEffect(() => { onToggleRef.current = toggleRow; });
+  useEffect(() => {
+    onToggleRef.current = toggleRow;
+  });
 
-  const allSelected = classrooms.length > 0 && classrooms.every((c) => selectedMap[keyFor(c)]);
+  const allSelected =
+    classrooms.length > 0 && classrooms.every((c) => selectedMap[keyFor(c)]);
 
+  // Toggle select all/clear all. We compute the new selected map based on the current classrooms, so it works even if the parent passes a new array reference with the same classroom data.
   const toggleSelectAll = () => {
     if (allSelected) {
       setSelectedMap({});
@@ -505,12 +623,19 @@ function SelectableTable({ classrooms, onEdit, onDelete, onSelectionChange }) {
       classrooms.forEach((c) => (map[keyFor(c)] = c));
       setSelectedMap(map);
       onSelectionChange && onSelectionChange(Object.values(map));
-      console.debug && console.debug("toggleSelectAll", { action: "selectAll", total: Object.keys(map).length });
+      console.debug &&
+        console.debug("toggleSelectAll", {
+          action: "selectAll",
+          total: Object.keys(map).length,
+        });
     }
   };
 
   return (
-    <table className="data-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+    <table
+      className="data-table"
+      style={{ width: "100%", borderCollapse: "collapse" }}
+    >
       <thead>
         <tr>
           <th style={{ width: 40 }}>
@@ -551,54 +676,68 @@ function SelectableTable({ classrooms, onEdit, onDelete, onSelectionChange }) {
 // Individual row component. Memoized to avoid re-rendering every row when only
 // one row's selection state changes. The comparator only checks the fields we
 // display and the `checked` state.
-const ClassroomRow = React.memo(function ClassroomRow({ c, checked, onToggleRef, onEditRef, onDeleteRef }) {
-  const k = `${c.building}||${c.classroomName}`;
+const ClassroomRow = React.memo(
+  function ClassroomRow({ c, checked, onToggleRef, onEditRef, onDeleteRef }) {
+    const k = `${c.building}||${c.classroomName}`;
 
-  return (
-    <tr onClick={() => onToggleRef.current && onToggleRef.current(c)}>
-      <td>
-        <input
-          type="checkbox"
-          aria-label={`Select ${c.building} ${c.classroomName}`}
-          checked={checked}
-          onChange={(e) => { e.stopPropagation(); onToggleRef.current && onToggleRef.current(c); }}
-          onClick={(e) => e.stopPropagation()} /* prevent double toggle when clicking checkbox */
-        />
-      </td>
-      <td>{c.building}</td>
-      <td>{c.classroomName}</td>
-      <td>{c.capacity}</td>
-      <td>{typeBadge(c.type)}</td>
-      <td>
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-          <button
-            type="button"
-            className="icon-btn icon-btn--edit"
-            title="Edit"
-            onClick={(e) => { e.stopPropagation(); onEditRef.current && onEditRef.current(c); }}
-          >
-            <span className="material-icons">edit</span>
-          </button>
+    return (
+      <tr onClick={() => onToggleRef.current && onToggleRef.current(c)}>
+        <td>
+          <input
+            type="checkbox"
+            aria-label={`Select ${c.building} ${c.classroomName}`}
+            checked={checked}
+            onChange={(e) => {
+              e.stopPropagation();
+              onToggleRef.current && onToggleRef.current(c);
+            }}
+            onClick={(e) =>
+              e.stopPropagation()
+            } /* prevent double toggle when clicking checkbox */
+          />
+        </td>
+        <td>{c.building}</td>
+        <td>{c.classroomName}</td>
+        <td>{c.capacity}</td>
+        <td>{typeBadge(c.type)}</td>
+        <td>
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <button
+              type="button"
+              className="icon-btn icon-btn--edit"
+              title="Edit"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditRef.current && onEditRef.current(c);
+              }}
+            >
+              <span className="material-icons">edit</span>
+            </button>
 
-          <button
-            type="button"
-            className="icon-btn icon-btn--delete"
-            title="Delete"
-            onClick={(e) => { e.stopPropagation(); onDeleteRef.current && onDeleteRef.current(c); }}
-          >
-            <span className="material-icons">delete</span>
-          </button>
-        </div>
-      </td>
-    </tr>
-  );
-}, (prev, next) => {
-  // Only re-render when the displayed data or the checked state changes.
-  return (
-    prev.checked === next.checked &&
-    prev.c.building === next.c.building &&
-    prev.c.classroomName === next.c.classroomName &&
-    prev.c.capacity === next.c.capacity &&
-    prev.c.type === next.c.type
-  );
-});
+            <button
+              type="button"
+              className="icon-btn icon-btn--delete"
+              title="Delete"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteRef.current && onDeleteRef.current(c);
+              }}
+            >
+              <span className="material-icons">delete</span>
+            </button>
+          </div>
+        </td>
+      </tr>
+    );
+  },
+  (prev, next) => {
+    // Only re-render when the displayed data or the checked state changes.
+    return (
+      prev.checked === next.checked &&
+      prev.c.building === next.c.building &&
+      prev.c.classroomName === next.c.classroomName &&
+      prev.c.capacity === next.c.capacity &&
+      prev.c.type === next.c.type
+    );
+  },
+);

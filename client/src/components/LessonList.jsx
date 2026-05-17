@@ -5,21 +5,27 @@ import { typeBadge } from "./ui/typeUtils";
 // Map type codes to display labels (matching typeBadge logic)
 function getTypeLabel(type) {
   const typeMap = {
-    "PHYSICS_LAB": "Physics Lab",
-    "NETWORKING_LAB": "Networking Lab",
-    "LAB": "Laboratory",
-    "LECTURE": "Lecture",
-    "TUTORIAL": "Practice",
-    "NORMAL": "Normal",
-    "PBL": "PBL",
-    "PROJECT": "Project",
-    "AUDITORIUM": "Auditorium",
+    PHYSICS_LAB: "Physics Lab",
+    NETWORKING_LAB: "Networking Lab",
+    LAB: "Laboratory",
+    LECTURE: "Lecture",
+    TUTORIAL: "Practice",
+    NORMAL: "Normal",
+    PBL: "PBL",
+    PROJECT: "Project",
+    AUDITORIUM: "Auditorium",
   };
   return typeMap[type] || type;
 }
 
-
-export default function LessonList({ lessons = [], clusters = [], onEdit, onDelete, onSelectionChange, title = "Lessons" }) {
+export default function LessonList({
+  lessons = [],
+  clusters = [],
+  onEdit,
+  onDelete,
+  onSelectionChange,
+  title = "Lessons",
+}) {
   const [selectedCourseNames, setSelectedCourseNames] = useState([]);
   const [selectedLecturers, setSelectedLecturers] = useState([]);
   const [selectedClusters, setSelectedClusters] = useState([]);
@@ -29,104 +35,157 @@ export default function LessonList({ lessons = [], clusters = [], onEdit, onDele
 
   const [openFilter, setOpenFilter] = useState(null);
 
+  // Create a mapping from cluster number to cluster name for easy lookup
   const clusterNameByNumber = useMemo(() => {
     return new Map(
-      clusters.map(cluster => [
-        Number(cluster.number),
-        cluster.name
-      ])
+      clusters.map((cluster) => [Number(cluster.number), cluster.name]),
     );
   }, [clusters]);
 
+  // Enrich lessons with cluster names using the mapping. If a lesson already has a clusterName, use it; otherwise, look it up using the cluster number. If no name is found, fallback to using the cluster number as a string.
   const lessonsWithClusterNames = useMemo(() => {
-    return lessons.map(lesson => ({
+    return lessons.map((lesson) => ({
       ...lesson,
       clusterName:
         lesson.clusterName ||
         clusterNameByNumber.get(Number(lesson.cluster)) ||
-        String(lesson.cluster)
+        String(lesson.cluster),
     }));
   }, [lessons, clusterNameByNumber]);
 
   // Extract unique values for each filter
   const uniqueCourseNames = useMemo(() => {
-    const names = Array.from(new Set(lessons.map(l => l.courseName).filter(Boolean)))
-      .sort((a, b) => a.localeCompare(b, 'he'));
+    const names = Array.from(
+      new Set(lessons.map((l) => l.courseName).filter(Boolean)),
+    ).sort((a, b) => a.localeCompare(b, "he"));
     return names;
   }, [lessons]);
 
+  // For lecturers, we also filter out any falsy values (like null or empty strings) to avoid showing them as filter options. The same is done for course names and types.
   const uniqueLecturers = useMemo(() => {
-    const lecturers = Array.from(new Set(lessonsWithClusterNames.map(l => l.lecturer).filter(Boolean)))
-      .sort((a, b) => a.localeCompare(b, 'he'));
+    const lecturers = Array.from(
+      new Set(lessonsWithClusterNames.map((l) => l.lecturer).filter(Boolean)),
+    ).sort((a, b) => a.localeCompare(b, "he"));
     return lecturers;
   }, [lessonsWithClusterNames]);
 
+  // For clusters, we first extract the cluster names from the enriched lessons. We filter out any null or empty values to avoid showing them as filter options. Then we create a unique set of cluster names and sort them alphabetically.
   const uniqueClusters = useMemo(() => {
     const clusters = Array.from(
       new Set(
         lessonsWithClusterNames
-          .map(l => l.clusterName)
-          .filter(name => name != null && name !== "")
-      )
+          .map((l) => l.clusterName)
+          .filter((name) => name != null && name !== ""),
+      ),
     ).sort((a, b) => a.localeCompare(b, "he"));
 
     return clusters;
   }, [lessonsWithClusterNames]);
 
   const uniqueTypes = useMemo(() => {
-    const types = Array.from(new Set(lessons.map(l => l.type).filter(Boolean)))
-      .sort((a, b) => a.localeCompare(b, 'he'));
+    const types = Array.from(
+      new Set(lessons.map((l) => l.type).filter(Boolean)),
+    ).sort((a, b) => a.localeCompare(b, "he"));
     return types;
   }, [lessons]);
 
   const uniqueSemesters = useMemo(() => {
-    const semesters = Array.from(new Set(lessons.map(l => l.semester).filter(s => s != null)))
-      .sort((a, b) => {
-        // Define semester order: A, B
-        const semesterOrder = { "A": 1, "B": 2 };
-        return (semesterOrder[a] || 99) - (semesterOrder[b] || 99);
-      });
+    const semesters = Array.from(
+      new Set(lessons.map((l) => l.semester).filter((s) => s != null)),
+    ).sort((a, b) => {
+      // Define semester order: A, B
+      const semesterOrder = { A: 1, B: 2 };
+      return (semesterOrder[a] || 99) - (semesterOrder[b] || 99);
+    });
     return semesters;
   }, [lessons]);
 
   const uniqueCreditsValues = useMemo(() => {
-    const credits = Array.from(new Set(lessons.map(l => l.credits).filter(c => c != null)))
-      .sort((a, b) => a - b);
+    const credits = Array.from(
+      new Set(lessons.map((l) => l.credits).filter((c) => c != null)),
+    ).sort((a, b) => a - b);
     return credits;
   }, [lessons]);
 
   // Filter lessons based on selected filters
   const filteredLessons = useMemo(() => {
-    return lessonsWithClusterNames.filter(l => {
-      if (selectedCourseNames.length > 0 &&!selectedCourseNames.includes(l.courseName)) {return false;}
-      if (selectedLecturers.length > 0 &&!selectedLecturers.includes(l.lecturer)) {return false;}
-      if (selectedClusters.length > 0 && !selectedClusters.includes(l.clusterName)) {return false;}
-      if (selectedTypes.length > 0 &&!selectedTypes.includes(l.type)) {return false;}
-      if (selectedSemesters.length > 0 &&!selectedSemesters.includes(l.semester)) {return false;}
-      if (selectedCredits.length > 0 &&!selectedCredits.includes(l.credits)) {return false;}
+    return lessonsWithClusterNames.filter((l) => {
+      if (
+        selectedCourseNames.length > 0 &&
+        !selectedCourseNames.includes(l.courseName)
+      ) {
+        return false;
+      }
+      if (
+        selectedLecturers.length > 0 &&
+        !selectedLecturers.includes(l.lecturer)
+      ) {
+        return false;
+      }
+      if (
+        selectedClusters.length > 0 &&
+        !selectedClusters.includes(l.clusterName)
+      ) {
+        return false;
+      }
+      if (selectedTypes.length > 0 && !selectedTypes.includes(l.type)) {
+        return false;
+      }
+      if (
+        selectedSemesters.length > 0 &&
+        !selectedSemesters.includes(l.semester)
+      ) {
+        return false;
+      }
+      if (selectedCredits.length > 0 && !selectedCredits.includes(l.credits)) {
+        return false;
+      }
       return true;
     });
-  }, [lessonsWithClusterNames ,selectedCourseNames,selectedLecturers,selectedClusters,selectedTypes,selectedSemesters,selectedCredits]);
+  }, [
+    lessonsWithClusterNames,
+    selectedCourseNames,
+    selectedLecturers,
+    selectedClusters,
+    selectedTypes,
+    selectedSemesters,
+    selectedCredits,
+  ]);
 
+  // If there are no lessons, show an empty state with an illustration and a message prompting the user to add lessons.
   if (!lessons || lessons.length === 0) {
     return (
       <div className="ui-card">
         <div className="empty-illustration">
-          <svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+          <svg
+            viewBox="0 0 120 90"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden
+          >
             <rect x="8" y="20" width="104" height="56" rx="6" fill="#eef2ff" />
             <rect x="18" y="30" width="40" height="8" rx="2" fill="#c7d2fe" />
             <rect x="18" y="44" width="74" height="6" rx="2" fill="#e0e7ff" />
             <rect x="18" y="54" width="30" height="6" rx="2" fill="#e0e7ff" />
           </svg>
           <div style={{ marginTop: 12, fontWeight: 700 }}>No lessons yet</div>
-          <div style={{ color: "var(--muted)", marginTop: 6 }}>Upload an Excel file or add a lesson manually.</div>
+          <div style={{ color: "var(--muted)", marginTop: 6 }}>
+            Upload an Excel file or add a lesson manually.
+          </div>
         </div>
       </div>
     );
   }
 
-  const hasActiveFilters = selectedCourseNames.length > 0 || selectedLecturers.length > 0 || selectedClusters.length > 0 || selectedTypes.length > 0 || selectedSemesters.length > 0 || selectedCredits.length > 0;
-  const displayCount = hasActiveFilters ? filteredLessons.length : lessons.length;
+  const hasActiveFilters =
+    selectedCourseNames.length > 0 ||
+    selectedLecturers.length > 0 ||
+    selectedClusters.length > 0 ||
+    selectedTypes.length > 0 ||
+    selectedSemesters.length > 0 ||
+    selectedCredits.length > 0;
+  const displayCount = hasActiveFilters
+    ? filteredLessons.length
+    : lessons.length;
 
   const clearAllFilters = () => {
     setSelectedCourseNames([]);
@@ -142,50 +201,76 @@ export default function LessonList({ lessons = [], clusters = [], onEdit, onDele
     setter((current) =>
       current.includes(value)
         ? current.filter((item) => item !== value)
-        : [...current, value]
+        : [...current, value],
     );
   };
 
   return (
     <div className="ui-card">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <div style={{ 
-          fontWeight: 700, 
-          fontSize: "1.05rem",
-          background: "linear-gradient(135deg, var(--accent-start), var(--accent-end))",
-          backgroundClip: "text",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          display: "inline-block"
-        }}>
-          {title} 
-          <span style={{ 
-            color: "var(--text)", 
-            WebkitTextFillColor: "var(--text)",
-            marginLeft: "8px",
-            fontSize: "0.95rem",
-            fontWeight: 600,
-            opacity: hasActiveFilters ? 1 : 0.7
-          }}>
-            ({displayCount}{hasActiveFilters ? `/${lessons.length}` : ""})
+      {/* Header with title and count */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 16,
+        }}
+      >
+        <div
+          style={{
+            fontWeight: 700,
+            fontSize: "1.05rem",
+            background:
+              "linear-gradient(135deg, var(--accent-start), var(--accent-end))",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            display: "inline-block",
+          }}
+        >
+          {title}
+          <span
+            style={{
+              color: "var(--text)",
+              WebkitTextFillColor: "var(--text)",
+              marginLeft: "8px",
+              fontSize: "0.95rem",
+              fontWeight: 600,
+              opacity: hasActiveFilters ? 1 : 0.7,
+            }}
+          >
+            ({displayCount}
+            {hasActiveFilters ? `/${lessons.length}` : ""})
           </span>
         </div>
       </div>
 
       {/* Filter Controls */}
-      <div style={{ 
-        display: "flex", 
-        gap: 16, 
-        marginBottom: 16, 
-        flexWrap: "wrap",
-        alignItems: "center",
-        padding: "16px 16px",
-        backgroundColor: "rgba(79, 70, 229, 0.02)",
-        borderRadius: "8px",
-        border: "1px solid rgba(79, 70, 229, 0.1)"
-      }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 16,
+          marginBottom: 16,
+          flexWrap: "wrap",
+          alignItems: "center",
+          padding: "16px 16px",
+          backgroundColor: "rgba(79, 70, 229, 0.02)",
+          borderRadius: "8px",
+          border: "1px solid rgba(79, 70, 229, 0.1)",
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Filters:</span>
+          <span
+            style={{
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              color: "var(--muted)",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+            }}
+          >
+            Filters:
+          </span>
         </div>
 
         <DropdownFilter
@@ -276,7 +361,7 @@ export default function LessonList({ lessons = [], clusters = [], onEdit, onDele
               transition: "all 0.2s ease",
               display: "flex",
               alignItems: "center",
-              gap: "6px"
+              gap: "6px",
             }}
             onMouseEnter={(e) => {
               e.target.style.backgroundColor = "rgba(239, 68, 68, 0.12)";
@@ -287,7 +372,12 @@ export default function LessonList({ lessons = [], clusters = [], onEdit, onDele
               e.target.style.borderColor = "rgba(239, 68, 68, 0.2)";
             }}
           >
-            <span className="material-icons" style={{ fontSize: "1rem", lineHeight: "1" }}>close</span>
+            <span
+              className="material-icons"
+              style={{ fontSize: "1rem", lineHeight: "1" }}
+            >
+              close
+            </span>
             Clear Filters
           </button>
         )}
@@ -305,6 +395,7 @@ export default function LessonList({ lessons = [], clusters = [], onEdit, onDele
   );
 }
 
+// DropdownFilter component for reusable filter dropdowns in the header. It displays a button with the filter label and an icon, and when clicked, shows a dropdown with options that can be toggled on or off. The button text updates based on the selected options, and the dropdown is positioned relative to the button.
 function DropdownFilter({
   icon,
   label,
@@ -325,8 +416,18 @@ function DropdownFilter({
   };
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
-      <span className="material-icons" style={{ fontSize: "1.1rem", color: "var(--muted)" }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        position: "relative",
+      }}
+    >
+      <span
+        className="material-icons"
+        style={{ fontSize: "1.1rem", color: "var(--muted)" }}
+      >
         {icon}
       </span>
 
@@ -337,7 +438,8 @@ function DropdownFilter({
           padding: "8px 12px",
           borderRadius: "6px",
           border: "1px solid rgba(15, 23, 36, 0.12)",
-          backgroundColor: selectedValues.length > 0 ? "rgba(79, 70, 229, 0.08)" : "white",
+          backgroundColor:
+            selectedValues.length > 0 ? "rgba(79, 70, 229, 0.08)" : "white",
           color: "var(--text)",
           fontSize: "0.95rem",
           cursor: "pointer",
@@ -346,7 +448,7 @@ function DropdownFilter({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: "8px"
+          gap: "8px",
         }}
       >
         {getButtonText()}
@@ -372,10 +474,10 @@ function DropdownFilter({
             padding: "8px",
             display: "flex",
             flexDirection: "column",
-            gap: "6px"
+            gap: "6px",
           }}
         >
-          {options.map(option => (
+          {options.map((option) => (
             <label
               key={option}
               style={{
@@ -388,7 +490,7 @@ function DropdownFilter({
                 fontSize: "0.9rem",
                 backgroundColor: selectedValues.includes(option)
                   ? "rgba(79, 70, 229, 0.08)"
-                  : "transparent"
+                  : "transparent",
               }}
             >
               <input
@@ -426,7 +528,8 @@ function SelectableTable({ lessons, onEdit, onDelete, onSelectionChange }) {
     onSelectionChange && onSelectionChange(Object.values(next));
   };
 
-  const allSelected = lessons.length > 0 && lessons.every((c) => selectedMap[keyFor(c)]);
+  const allSelected =
+    lessons.length > 0 && lessons.every((c) => selectedMap[keyFor(c)]);
 
   const toggleSelectAll = () => {
     if (allSelected) {
@@ -441,7 +544,10 @@ function SelectableTable({ lessons, onEdit, onDelete, onSelectionChange }) {
   };
 
   return (
-    <table className="data-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+    <table
+      className="data-table"
+      style={{ width: "100%", borderCollapse: "collapse" }}
+    >
       <thead>
         <tr>
           <th style={{ width: 40 }}>
@@ -474,7 +580,10 @@ function SelectableTable({ lessons, onEdit, onDelete, onSelectionChange }) {
                   type="checkbox"
                   aria-label={`Select ${l.courseId} ${l.courseName}`}
                   checked={checked}
-                  onChange={(e) => {e.stopPropagation(); toggleRow(l);}}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    toggleRow(l);
+                  }}
                   onClick={(e) => e.stopPropagation()}
                 />
               </td>
@@ -487,12 +596,21 @@ function SelectableTable({ lessons, onEdit, onDelete, onSelectionChange }) {
               <td>{l.semester ? String(l.semester) : ""}</td>
               <td>{l.credits}</td>
               <td>
-                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    justifyContent: "flex-end",
+                  }}
+                >
                   <button
                     type="button"
                     className="icon-btn icon-btn--edit"
                     title="Edit"
-                    onClick={(e) => { e.stopPropagation(); onEdit && onEdit(l); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit && onEdit(l);
+                    }}
                   >
                     <span className="material-icons">edit</span>
                   </button>
@@ -501,7 +619,10 @@ function SelectableTable({ lessons, onEdit, onDelete, onSelectionChange }) {
                     type="button"
                     className="icon-btn icon-btn--delete"
                     title="Delete"
-                    onClick={(e) => { e.stopPropagation(); onDelete && onDelete(l); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete && onDelete(l);
+                    }}
                   >
                     <span className="material-icons">delete</span>
                   </button>

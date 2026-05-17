@@ -4,7 +4,7 @@ import Modal from "./ui/Modal";
 import Toast, { useToast } from "./ui/Toast";
 import "./ui/ui.css";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../firebase"; 
+import { auth } from "../firebase";
 
 export default function ForgotPasswordModal({ isOpen, onClose }) {
   const { showError } = useToast();
@@ -13,6 +13,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
   const [success, setSuccess] = useState(false);
   const emailInputRef = useRef(null);
 
+  // When the modal opens, reset the form and focus the email input.
   useEffect(() => {
     if (isOpen) {
       setEmail("");
@@ -22,6 +23,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
     }
   }, [isOpen]);
 
+  // Handle form submission. Sends a password reset email using Firebase Auth. Shows success message on success, or an error toast on failure.
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -30,7 +32,9 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
       setSuccess(true);
     } catch (error) {
       console.error(error);
-      showError("Failed to send reset email. Please check the email address and try again.");
+      showError(
+        "Failed to send reset email. Please check the email address and try again.",
+      );
       setLoading(false);
     }
   };
@@ -43,7 +47,9 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
       centerContent={success}
       footer={
         success ? (
-          <Button onClick={onClose} variant="primary">Close</Button>
+          <Button onClick={onClose} variant="primary">
+            Close
+          </Button>
         ) : (
           <>
             <Button variant="ghost" onClick={onClose} disabled={loading}>
@@ -58,23 +64,54 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
     >
       {success ? (
         <>
-          <div style={{ 
-            width: "64px", height: "64px", borderRadius: "50%", 
-            background: "#dbfde5", display: "flex", alignItems: "center", 
-            justifyContent: "center", marginBottom: "1.5rem" 
-          }}>
-            <span className="material-icons" style={{ color: "#166534", fontSize: "36px" }}>
+          <div
+            style={{
+              width: "64px",
+              height: "64px",
+              borderRadius: "50%",
+              background: "#dbfde5",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <span
+              className="material-icons"
+              style={{ color: "#166534", fontSize: "36px" }}
+            >
               check_circle
             </span>
           </div>
-          <h4 style={{ margin: "0 0 8px 0", color: "#166534", fontSize: "1.2rem", fontWeight: "700" }}>
+          <h4
+            style={{
+              margin: "0 0 8px 0",
+              color: "#166534",
+              fontSize: "1.2rem",
+              fontWeight: "700",
+            }}
+          >
             Email sent successfully!
           </h4>
-          <p style={{ margin: "0 0 16px 0", color: "#6b7280", fontSize: "0.95rem" }}>
+          <p
+            style={{
+              margin: "0 0 16px 0",
+              color: "#6b7280",
+              fontSize: "0.95rem",
+            }}
+          >
             Check your inbox for the password reset link.
           </p>
-          <p style={{ fontSize: "0.8rem", color: "#6b7280", fontStyle: "italic", margin: 0 }}>
-            💡 If you don't see the email, please check your trash or spam folder.
+          <p
+            style={{
+              fontSize: "0.8rem",
+              color: "#6b7280",
+              fontStyle: "italic",
+              margin: 0,
+            }}
+          >
+            💡 If you don't see the email, please check your trash or spam
+            folder.
           </p>
         </>
       ) : (
@@ -92,7 +129,13 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
               disabled={loading}
             />
           </div>
-          <p style={{ fontSize: "0.85rem", color: "var(--muted)", marginTop: "12px" }}>
+          <p
+            style={{
+              fontSize: "0.85rem",
+              color: "var(--muted)",
+              marginTop: "12px",
+            }}
+          >
             We'll send you a link to reset your password.
           </p>
         </form>

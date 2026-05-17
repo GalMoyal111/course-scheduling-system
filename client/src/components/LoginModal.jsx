@@ -9,68 +9,74 @@ import { getUserRole } from "../services/api";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 
 export default function LoginModal({ isOpen, onClose, onLogin }) {
-    const { showError } = useToast();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [isForgotOpen, setIsForgotOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const emailInputRef = useRef(null);
+  const { showError } = useToast();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isForgotOpen, setIsForgotOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const emailInputRef = useRef(null);
 
-    useEffect(() => {
-        if (isOpen) {
-            setEmail("");
-            setPassword("");
-            setLoading(false);
-            // Focus email input when modal opens
-            setTimeout(() => emailInputRef.current?.focus(), 100);
-        }
-    }, [isOpen]);
+  // When the modal opens, reset the form and focus the email input.
+  useEffect(() => {
+    if (isOpen) {
+      setEmail("");
+      setPassword("");
+      setLoading(false);
+      // Focus email input when modal opens
+      setTimeout(() => emailInputRef.current?.focus(), 100);
+    }
+  }, [isOpen]);
 
-    useEffect(() => {
-        if (!isOpen) return;
-        const onKey = (e) => {
-            if (e.key === "Escape") {
-                e.preventDefault();
-                onClose();
-            }
-        };
-
-        window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
-    }, [isOpen, onClose]);
-
-    if (!isOpen) return null;
-
-    const handleSubmit = async(e) => {
+  // Close the modal when the user presses the Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") {
         e.preventDefault();
-        
-        // Validate password length
-        if (password.length < 6) {
-            showError("Password must be at least 6 characters long");
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth,email,password);
-
-            const user = userCredential.user;
-            const token = await user.getIdToken();
-            const data = await getUserRole(token);
-
-            onLogin({email: user.email,role : data.role, });  
-            onClose();
-
-        } catch (error) {
-            console.error(error);
-            showError("Login failed. Please check your email and password.");
-            setLoading(false);
-        }
+        onClose();
+      }
     };
 
-    return (
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  // Handle form submission. Validates the password length, then attempts to sign in with Firebase Auth. On success, retrieves the user's role and calls onLogin with the user info. On failure, shows an error toast.
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validate password length
+    if (password.length < 6) {
+      showError("Password must be at least 6 characters long");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+
+      const user = userCredential.user;
+      const token = await user.getIdToken();
+      const data = await getUserRole(token);
+
+      onLogin({ email: user.email, role: data.role });
+      onClose();
+    } catch (error) {
+      console.error(error);
+      showError("Login failed. Please check your email and password.");
+      setLoading(false);
+    }
+  };
+
+  return (
     <>
       <Modal
         isOpen={isOpen}
@@ -78,18 +84,10 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
         title="Login"
         footer={
           <>
-            <Button 
-              variant="ghost" 
-              onClick={onClose} 
-              disabled={loading}
-            >
+            <Button variant="ghost" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={loading} 
-              onClick={handleSubmit}
-            >
+            <Button type="submit" disabled={loading} onClick={handleSubmit}>
               {loading ? "Logging in..." : "Login"}
             </Button>
           </>
@@ -146,7 +144,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
                 background: "none",
                 border: "none",
                 padding: "0",
-                fontWeight: "500"
+                fontWeight: "500",
               }}
               onClick={() => setIsForgotOpen(true)}
               disabled={loading}
@@ -157,10 +155,9 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
         </form>
       </Modal>
 
-      {/* מודל שחזור סיסמה */}
-      <ForgotPasswordModal 
-        isOpen={isForgotOpen} 
-        onClose={() => setIsForgotOpen(false)} 
+      <ForgotPasswordModal
+        isOpen={isForgotOpen}
+        onClose={() => setIsForgotOpen(false)}
       />
     </>
   );

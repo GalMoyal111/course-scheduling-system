@@ -8,6 +8,8 @@ function UploadForm({ onUpload }) {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
 
+
+  // Handle form submission. Validates that a file is selected, then calls onUpload with the selected file.
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!file) return showError("Please select a file first.");

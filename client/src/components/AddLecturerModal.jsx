@@ -11,6 +11,7 @@ export default function AddLecturerModal({
   const [name, setName] = useState("");
   const [errors, setErrors] = useState({});
 
+  // When the modal opens, if there's an initial lecturer (for editing), pre-fill the form. Otherwise, reset it for adding a new lecturer.
   useEffect(() => {
     if (initialLecturer) {
       setName(initialLecturer.name);
@@ -24,6 +25,8 @@ export default function AddLecturerModal({
     setErrors({});
   };
 
+
+  // Validate the form fields. Currently only checks that the name is not empty, but can be extended with more complex validation if needed.
   const validateForm = () => {
     const newErrors = {};
 
@@ -35,6 +38,8 @@ export default function AddLecturerModal({
     return Object.keys(newErrors).length === 0;
   };
 
+
+  // Handle form submission. Validates the form, constructs a lecturer object, and calls onSave with the lecturer data. Then resets the form.
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -52,6 +57,7 @@ export default function AddLecturerModal({
     resetForm();
   };
 
+  // If the modal is not open, don't render anything.
   const modalFooter = (
     <>
       <Button variant="ghost" onClick={onClose} type="button">
@@ -72,10 +78,13 @@ export default function AddLecturerModal({
       variant="primary"
       footer={modalFooter}
     >
-      {/* הוסר dir="rtl" */}
+      {/* removed dir="rtl" since it caused issues with the error message display */}
       <form onSubmit={handleSubmit} style={{ width: "100%" }}>
         <div className="form-field">
-          <label htmlFor="name" style={{ display: "block", marginBottom: "8px", fontWeight: "600" }}>
+          <label
+            htmlFor="name"
+            style={{ display: "block", marginBottom: "8px", fontWeight: "600" }}
+          >
             Lecturer Name (Hebrew)
           </label>
           <input
@@ -89,7 +98,15 @@ export default function AddLecturerModal({
             dir="rtl"
           />
           {errors.name && (
-            <span className="error-message" style={{ color: "#ef4444", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>
+            <span
+              className="error-message"
+              style={{
+                color: "#ef4444",
+                fontSize: "0.85rem",
+                marginTop: "4px",
+                display: "block",
+              }}
+            >
               {errors.name}
             </span>
           )}
