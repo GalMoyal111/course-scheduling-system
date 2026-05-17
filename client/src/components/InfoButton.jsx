@@ -1,29 +1,25 @@
 import React, { useState } from "react";
-import Modal from "./ui/Modal";
 import "./InfoButton.css";
 
 export default function InfoButton({ title, description }) {
-  const [showModal, setShowModal] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   return (
-    <div className="info-button-wrapper">
-      <button
-        className="info-button"
-        onClick={() => setShowModal(true)}
-        title="Click for more information"
-        aria-label="More information"
-      >
+    <div 
+      className="info-button-wrapper"
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <span className="info-icon">
         <span className="material-icons">help_outline</span>
-      </button>
+      </span>
 
-      <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title={title}
-        size="normal"
-      >
-        <p>{description}</p>
-      </Modal>
+      {showTooltip && (
+        <div className="tooltip">
+          {description}
+          <div className="tooltip-arrow"></div>
+        </div>
+      )}
     </div>
   );
 }
