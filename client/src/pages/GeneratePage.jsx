@@ -330,7 +330,7 @@ export default function GeneratePage() {
               description="Use this if you have specific lessons that MUST be scheduled at an exact time and room. The algorithm will lock them in place and build the rest of the schedule around them."
             />
           </div>
-          <Button variant="secondary" onClick={() => setIsManualModalOpen(true)}>
+          <Button variant="secondary" onClick={() => semester ? setIsManualModalOpen(true) : setShowSemesterValidation(true)}>
             + Add Assignment
           </Button>
         </div>
@@ -373,7 +373,7 @@ export default function GeneratePage() {
               description="Difficult courses require maximum student focus. By scheduling them in the morning when students are most alert and energized, they learn better. Use this for demanding subjects like advanced math, physics, or programming."
             />
           </div>
-          <Button variant="secondary" onClick={() => setIsHardModalOpen(true)}>+ Add Course</Button>
+          <Button variant="secondary" onClick={() => semester ? setIsHardModalOpen(true) : setShowSemesterValidation(true)}>+ Add Course</Button>
         </div>
         
         {hardCourses.length > 0 && (
@@ -401,7 +401,7 @@ export default function GeneratePage() {
               description="These courses will be specifically targeted to be scheduled on Fridays or late afternoons."
             />
           </div>
-          <Button variant="secondary" onClick={() => setIsEnglishModalOpen(true)}>+ Add Course</Button>
+          <Button variant="secondary" onClick={() => semester ? setIsEnglishModalOpen(true) : setShowSemesterValidation(true)}>+ Add Course</Button>
         </div>
         
         {englishCourses.length > 0 && (
