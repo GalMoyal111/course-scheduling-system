@@ -12,11 +12,14 @@ export default function Topbar({ user, onLogin, onLogout }) {
   const location = useLocation();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
+
+  // Handle user logout by signing out from Firebase and calling the onLogout callback
   const handleLogout = async () => {
     await signOut(auth);
     onLogout();
   };
 
+  // Map of route paths to friendly page names
   const map = {
     "/": "Dashboard",
     "/lecturers": "Lecturers",
@@ -30,6 +33,7 @@ export default function Topbar({ user, onLogin, onLogout }) {
     "/help": "Help & Information",
   };
 
+  // Get the current page name based on the route, defaulting to "Dashboard" if not found
   const pageName = map[location.pathname] || "Dashboard";
 
   // derive a friendly username from email if available

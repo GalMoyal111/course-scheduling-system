@@ -18,6 +18,7 @@ export function useToast() {
     }, 2500);
   };
 
+  // Show error messages until the user dismisses them
   const showError = (message) => {
     setToast({
       type: "error",
@@ -26,13 +27,18 @@ export function useToast() {
     });
   };
 
+
+  // Function to manually close the toast (used for error messages)
   const closeToast = () => {
     setToast(null);
   };
 
+  // Automatically clear the toast after 2.5 seconds for success messages
   return { toast, showSuccess, showError, closeToast };
 }
 
+
+// Toast component that displays the toast message in a modal
 export default function Toast({ toast, onClose }) {
   if (!toast) return null;
 

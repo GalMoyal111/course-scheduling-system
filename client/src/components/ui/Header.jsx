@@ -13,7 +13,6 @@ export default function Header({ page, onNavigate, serverMsg }) {
       <div className="ui-header__brand">
         <img src={logo} alt="Unisched logo" className="ui-logo-large" />
       </div>
-
       <nav className="ui-nav" aria-label="Main navigation">
         <Button variant={page === "lessons" ? "accent" : "ghost"} onClick={() => onNavigate("lessons")}>
           Upload Lessons

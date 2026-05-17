@@ -4,6 +4,7 @@ import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import "./ui.css";
 
+// Main layout component that wraps the entire app. It includes the sidebar, topbar, and a content area for the current page.
 export default function Layout({ children , user , onLogin, onLogout}) {
   return (
     <div style={{ display: "flex" }}>

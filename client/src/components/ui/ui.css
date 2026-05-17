@@ -183,6 +183,7 @@
 }
 
 
+/* Specific colors for different icon button types, with hover states */
 .icon-btn--edit{color:var(--muted)}
 .icon-btn--edit:hover{color:var(--text);background:rgba(79,70,229,0.06)}
 .icon-btn--delete{color:#ef4444}
@@ -229,6 +230,7 @@
   margin: 16px;
 }
 
+/* Make the sidebar collapse into a top navigation bar on smaller screens */
 .sidebar-logo {
   cursor: pointer;
   margin-bottom: 20px;
