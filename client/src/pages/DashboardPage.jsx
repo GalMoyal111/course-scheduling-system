@@ -6,7 +6,6 @@ import Modal from "../components/ui/Modal";
 import "./DashboardPage.css";
 import LoginRequiredModal from "../components/LoginRequiredModal";
 
-
 export default function DashboardPage({ user }) {
   const navigate = useNavigate();
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -14,12 +13,13 @@ export default function DashboardPage({ user }) {
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
+  // Handle clicks on the primary action buttons. If the user is not logged in, show the login required modal. Otherwise, open the corresponding modal based on the action type.
   const handleActionClick = (action) => {
     if (!user) {
       setShowLoginModal(true);
       return;
     }
-    
+
     if (action === "import") {
       setImportModalOpen(true);
     } else if (action === "export") {
@@ -43,7 +43,9 @@ export default function DashboardPage({ user }) {
       <section className="dashboard-section welcome-section">
         <div className="welcome-content">
           <h1 className="welcome-title">Welcome to UniSched</h1>
-          <p className="welcome-subtitle">University Course Timetabling System</p>
+          <p className="welcome-subtitle">
+            University Course Timetabling System
+          </p>
         </div>
       </section>
 
@@ -51,7 +53,11 @@ export default function DashboardPage({ user }) {
       <section className="dashboard-section about-section">
         <h2 className="dashboard-section-title">What is UniSched?</h2>
         <div className="about-content">
-          <p>UniSched helps you create the perfect class schedule. Simply add your courses, lessons, classrooms, and teachers, and the system will automatically arrange them in the best possible way.</p>
+          <p>
+            UniSched helps you create the perfect class schedule. Simply add
+            your courses, lessons, classrooms, and teachers, and the system will
+            automatically arrange them in the best possible way.
+          </p>
         </div>
       </section>
 
@@ -81,7 +87,9 @@ export default function DashboardPage({ user }) {
       <section className="dashboard-section credits-section">
         <h2 className="dashboard-section-title">Created By</h2>
         <div className="credits-content">
-          <p><strong>Gal Moyal</strong> & <strong>Eden Furman</strong></p>
+          <p>
+            <strong>Gal Moyal</strong> & <strong>Eden Furman</strong>
+          </p>
         </div>
       </section>
 
@@ -94,7 +102,9 @@ export default function DashboardPage({ user }) {
               <span className="material-icons action-icon">upload</span>
               <h3>Import Information</h3>
             </div>
-            <p>Upload Excel files for lessons, courses, classrooms, or lecturers</p>
+            <p>
+              Upload Excel files for lessons, courses, classrooms, or lecturers
+            </p>
             <Button
               variant="primary"
               onClick={() => handleActionClick("import")}
@@ -109,7 +119,10 @@ export default function DashboardPage({ user }) {
               <span className="material-icons action-icon">download</span>
               <h3>Export Information</h3>
             </div>
-            <p>Download Excel files for lessons, courses, classrooms, or lecturers</p>
+            <p>
+              Download Excel files for lessons, courses, classrooms, or
+              lecturers
+            </p>
             <Button
               variant="primary"
               onClick={() => handleActionClick("export")}
@@ -124,7 +137,9 @@ export default function DashboardPage({ user }) {
               <span className="material-icons action-icon">description</span>
               <h3>Get Templates</h3>
             </div>
-            <p>Download blank Excel templates to easily fill in your system data</p>
+            <p>
+              Download blank Excel templates to easily fill in your system data
+            </p>
             <Button
               variant="primary"
               onClick={() => handleActionClick("template")}

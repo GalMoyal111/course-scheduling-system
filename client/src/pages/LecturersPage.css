@@ -14,7 +14,7 @@
   gap: 1.5rem;
   height: 100%;
   /* שינוי קריטי 1: כדי למנוע גלישה, אנחנו נותנים לקונטיינר להגביל את הילדים */
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 /* Sidebar */
@@ -114,7 +114,7 @@
   height: 100%;
   border: 1px solid #f2f4f7;
   /* שינוי קריטי 2: לאפשר לפאנל הפנימי להיגלל אם הטבלה גדולה מדי */
-  overflow-y: auto; 
+  overflow-y: auto;
 }
 
 .details-header h1 {
@@ -158,7 +158,7 @@
   flex-direction: column;
   flex: 1;
   /* שינוי קריטי 3: מונע גלישה בלתי נשלטת של Flexbox */
-  min-height: 0; 
+  min-height: 0;
 }
 
 .availability-header-row {
@@ -220,7 +220,7 @@
   border-spacing: 4px;
   font-size: 0.8rem;
   direction: ltr;
-  table-layout: fixed; 
+  table-layout: fixed;
   min-width: 850px;
 }
 
@@ -251,7 +251,7 @@
 .availability-cell {
   height: 44px;
   cursor: pointer;
-  border-radius: 10px; 
+  border-radius: 10px;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid transparent;
   position: relative;
@@ -271,8 +271,10 @@
 .availability-cell:hover:not(.break-cell) {
   transform: scale(1.08);
   z-index: 10;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-color: #6366f1; 
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-color: #6366f1;
 }
 
 .availability-cell.available:hover {
@@ -306,12 +308,12 @@
 }
 
 .availability-cell.non-preferred {
-  background-color: #ffedd5; /* צבע כתום בהיר */
+  background-color: #ffedd5;
   border-color: #fdba74;
 }
 
 .availability-cell.non-preferred:hover {
-  background-color: #fed7aa; /* צבע כתום קצת יותר כהה בהובר */
+  background-color: #fed7aa;
 }
 
 /* --- Day Column Header Actions --- */
@@ -329,27 +331,29 @@
   border: 1px solid rgba(0, 0, 0, 0.1);
   cursor: pointer;
   padding: 0;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition:
+    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .day-action-btn:hover {
   transform: scale(1.3);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .day-action-btn.green {
-  background-color: #72f6a0; /* צבע זהה לגבול של המשבצת הפנויה */
+  background-color: #72f6a0;
   border-color: #22c55e;
 }
 
 .day-action-btn.orange {
-  background-color: #fdba74; /* צבע זהה לגבול של ה-non preferred */
+  background-color: #fdba74;
   border-color: #f97316;
 }
 
 .day-action-btn.red {
-  background-color: #f86262; /* צבע זהה לגבול של ה-unavailable */
+  background-color: #f86262;
   border-color: #ef4444;
 }
 
@@ -359,34 +363,32 @@
   display: inline-flex;
 }
 
-/* העיצוב של הריבוע השחור עם הטקסט */
 .custom-tooltip::after {
   content: attr(data-tooltip);
   position: absolute;
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%) translateY(0px);
-  background-color: #1e293b; /* צבע אפור כהה/שחור מודרני */
+  background-color: #1e293b;
   color: white;
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
-  pointer-events: none; /* מונע מהטולטיפ לחסום לחיצות עכבר */
-  
-  /* מתחיל כמוסתר */
+  pointer-events: none;
+
   opacity: 0;
   visibility: hidden;
-  
-  /* אנימציה מהירה במיוחד של 0.15 שניות */
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  /* adding a subtle fade and slide effect */
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
   z-index: 100;
 }
 
-/* מה קורה כשהעכבר עובר מעל */
 .custom-tooltip:hover::after {
   opacity: 1;
   visibility: visible;
-  transform: translateX(-50%) translateY(-6px); /* קופץ קצת למעלה */
+  transform: translateX(-50%) translateY(-6px);
 }

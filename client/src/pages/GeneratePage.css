@@ -259,7 +259,7 @@
 }
 
 
-/* שכבת חסימת מסך לטעינת אלגוריתם ה-AI */
+/* Uploading Overlay Styling */
 .uploading-overlay {
   position: fixed;
   top: 0;
@@ -274,10 +274,10 @@
   justify-content: center;
 }
 
-/* אנימציית הספינר */
+/* spinner styling */
 .spinner {
   border: 6px solid rgba(255, 255, 255, 0.2);
-  border-top: 6px solid #3b82f6; /* צבע כחול שמתאים ל-AI */
+  border-top: 6px solid #3b82f6; 
   border-radius: 50%;
   width: 60px;
   height: 60px;
@@ -290,18 +290,18 @@
 }
 
 
-/* אoverlay כהה על כל המסך */
+/* Error Modal Styling */
 .error-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(15, 23, 42, 0.75); /* רקע כהה שקוף */
+    background: rgba(15, 23, 42, 0.75); 
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000; /* מעל ה-loading ומעל הכל */
+    z-index: 2000; 
     backdrop-filter: blur(4px);
 }
 

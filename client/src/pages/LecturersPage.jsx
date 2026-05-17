@@ -3,29 +3,34 @@ import Button from "../components/ui/Button";
 import AddLecturerModal from "../components/AddLecturerModal";
 import UploadForm from "../components/UploadForm";
 import { useData } from "../context/DataContext";
-import { addLecturer, deleteLecturers, updateLecturer, uploadLecturersExcel, exportLecturersExcel } from "../services/api";
+import {
+  addLecturer,
+  deleteLecturers,
+  updateLecturer,
+  uploadLecturersExcel,
+  exportLecturersExcel,
+} from "../services/api";
 import Toast, { useToast } from "../components/ui/Toast";
 import "./LecturersPage.css";
 import ConfirmModal from "../components/ConfirmModal";
 import Modal from "../components/ui/Modal";
 import { useLocation } from "react-router-dom";
 
-
 export default function LecturersPage() {
-  const { 
-    lecturers, 
-    setLecturers, 
-    fetchLecturersIfNeeded, 
-    setLecturersTimestamp ,
-    invalidateLecturersCache
+  const {
+    lecturers,
+    setLecturers,
+    fetchLecturersIfNeeded,
+    setLecturersTimestamp,
+    invalidateLecturersCache,
   } = useData();
 
   const { toast, showSuccess, showError, closeToast } = useToast();
-  
+
   const [selectedLecturerId, setSelectedLecturerId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLecturer, setEditingLecturer] = useState(null);
-  
+
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -38,7 +43,11 @@ export default function LecturersPage() {
   const [isMultiDeleteModalOpen, setIsMultiDeleteModalOpen] = useState(false);
 
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
-  const [uploadSummary, setUploadSummary] = useState({ totalRows: 0, savedLecturers: 0, invalidSlots: [] });
+  const [uploadSummary, setUploadSummary] = useState({
+    totalRows: 0,
+    savedLecturers: 0,
+    invalidSlots: [],
+  });
 
   const location = useLocation();
   const [isHighlightUpload, setIsHighlightUpload] = useState(false);
@@ -50,19 +59,17 @@ export default function LecturersPage() {
     await fetchLecturersIfNeeded("LecturersPage");
   }, [fetchLecturersIfNeeded]);
 
-
   useEffect(() => {
     loadLecturers();
   }, [loadLecturers]);
 
-
   useEffect(() => {
     if (location.state?.highlightUpload) {
       setIsHighlightUpload(true);
-      
+
       window.scrollTo({
         top: 0,
-        behavior: "auto"
+        behavior: "auto",
       });
       window.history.replaceState({}, document.title);
 
@@ -79,23 +86,25 @@ export default function LecturersPage() {
   const filteredLecturers = useMemo(() => {
     const q = (searchQuery || "").trim().toLowerCase();
 
-    let listToRender = !q 
-      ? lecturers 
+    let listToRender = !q
+      ? lecturers
       : lecturers.filter((l) => (l.name || "").toLowerCase().includes(q));
 
-    return [...listToRender].sort((a, b) => 
-      (a.name || "").localeCompare(b.name || "", 'he')
+    return [...listToRender].sort((a, b) =>
+      (a.name || "").localeCompare(b.name || "", "he"),
     );
   }, [lecturers, searchQuery]);
 
-
+  // Handle adding a new lecturer. First checks for duplicates by comparing the trimmed name against existing lecturers. If a duplicate is found, shows an error toast and aborts. If not, calls the API to add the lecturer, then updates the local state with the new lecturer returned from the server, shows a success toast, and closes the modal.
   const handleAddLecturer = async (newLecturer) => {
     const isDuplicate = lecturers.some(
-      (l) => l.name.trim() === newLecturer.name.trim()
+      (l) => l.name.trim() === newLecturer.name.trim(),
     );
 
     if (isDuplicate) {
-      showError(`The lecturer "${newLecturer.name}" already exists in the system.`);
+      showError(
+        `The lecturer "${newLecturer.name}" already exists in the system.`,
+      );
       return;
     }
 
@@ -103,7 +112,7 @@ export default function LecturersPage() {
       const addedLecturerFromServer = await addLecturer(newLecturer);
       showSuccess("Lecturer added successfully!");
 
-      setLecturers(prev => [...prev, addedLecturerFromServer]);
+      setLecturers((prev) => [...prev, addedLecturerFromServer]);
       setLecturersTimestamp(Date.now());
 
       setIsModalOpen(false);
@@ -118,29 +127,32 @@ export default function LecturersPage() {
   //     await updateLecturer(updatedLecturer);
   //     showSuccess("Lecturer updated successfully!");
 
-  //     setLecturers(prev => 
+  //     setLecturers(prev =>
   //       prev.map(l => l.id === updatedLecturer.id ? updatedLecturer : l)
   //     );
 
   //     setIsModalOpen(false);
   //     setEditingLecturer(null);
   //     setLecturersTimestamp(Date.now());
-      
+
   //   } catch (err) {
   //     console.error(err);
   //     showError("Error updating lecturer");
   //   }
   // };
 
+  // Handle editing an existing lecturer. First checks for duplicates by comparing the trimmed name against existing lecturers, excluding the lecturer being edited. If a duplicate is found, shows an error toast and aborts. If not, calls the API to update the lecturer, then updates the local state with the modified lecturer, shows a success toast, and closes the modal.
   const handleEditLecturer = async (updatedLecturer) => {
     const isDuplicate = lecturers.some(
       (l) =>
         l.id !== updatedLecturer.id &&
-        l.name.trim() === updatedLecturer.name.trim()
+        l.name.trim() === updatedLecturer.name.trim(),
     );
 
     if (isDuplicate) {
-      showError(`The lecturer "${updatedLecturer.name}" already exists in the system.`);
+      showError(
+        `The lecturer "${updatedLecturer.name}" already exists in the system.`,
+      );
       return;
     }
 
@@ -148,20 +160,20 @@ export default function LecturersPage() {
       await updateLecturer(updatedLecturer);
       showSuccess("Lecturer updated successfully!");
 
-      setLecturers(prev => 
-        prev.map(l => l.id === updatedLecturer.id ? updatedLecturer : l)
+      setLecturers((prev) =>
+        prev.map((l) => (l.id === updatedLecturer.id ? updatedLecturer : l)),
       );
 
       setIsModalOpen(false);
       setEditingLecturer(null);
       setLecturersTimestamp(Date.now());
-      
     } catch (err) {
       console.error(err);
       showError("Error updating lecturer");
     }
   };
 
+  // Handle delete button click for a lecturer. Sets the lecturer to be potentially deleted in state and opens the delete confirmation modal. The actual deletion is performed in the performDelete function, which is called when the user confirms the deletion in the modal.
   const handleDeleteClick = (e, lecturer) => {
     e.stopPropagation();
     setLecturerToPendingDelete(lecturer);
@@ -175,16 +187,18 @@ export default function LecturersPage() {
       await deleteLecturers([lecturerToPendingDelete]);
       showSuccess("Lecturer deleted successfully!");
       invalidateLecturersCache();
-      
+
       const keyToDelete = keyFor(lecturerToPendingDelete);
-      const updatedList = lecturers.filter(l => keyFor(l) !== keyToDelete);
-      
+      const updatedList = lecturers.filter((l) => keyFor(l) !== keyToDelete);
+
       setLecturers(updatedList);
       setLecturersTimestamp(Date.now());
 
       if (selectedLecturer && keyFor(selectedLecturer) === keyToDelete) {
         setHasUnsavedChanges(false);
-        setSelectedLecturerId(updatedList.length > 0 ? updatedList[0].id : null);
+        setSelectedLecturerId(
+          updatedList.length > 0 ? updatedList[0].id : null,
+        );
       }
     } catch (err) {
       console.error(err);
@@ -195,7 +209,7 @@ export default function LecturersPage() {
     }
   };
 
-
+  // Handle multi-delete action for selected lecturers. If no lecturers are selected, it simply returns. Otherwise, it calls the API to delete all selected lecturers, shows a success toast, and updates the local state by removing the deleted lecturers from the list. It also checks if the currently selected lecturer was among those deleted, and if so, it clears the selection or selects another lecturer if available. Finally, it closes the multi-delete confirmation modal.
   const performMultiDelete = async () => {
     if (selectedLecturers.length === 0) return;
 
@@ -203,17 +217,19 @@ export default function LecturersPage() {
       await deleteLecturers(selectedLecturers);
       showSuccess("Selected lecturers deleted successfully!");
       invalidateLecturersCache();
-      
+
       const deletedKeys = new Set(selectedLecturers.map(keyFor));
-      const updatedList = lecturers.filter(l => !deletedKeys.has(keyFor(l)));
-      
+      const updatedList = lecturers.filter((l) => !deletedKeys.has(keyFor(l)));
+
       setLecturers(updatedList);
       setLecturersTimestamp(Date.now());
       setSelectedLecturers([]);
-      
+
       if (selectedLecturer && deletedKeys.has(keyFor(selectedLecturer))) {
         setHasUnsavedChanges(false);
-        setSelectedLecturerId(updatedList.length > 0 ? updatedList[0].id : null);
+        setSelectedLecturerId(
+          updatedList.length > 0 ? updatedList[0].id : null,
+        );
       }
     } catch (err) {
       console.error(err);
@@ -223,8 +239,7 @@ export default function LecturersPage() {
     }
   };
 
-
-
+  // This function toggles the availability of a specific time slot for the selected lecturer. It checks if the slot is currently marked as hard (unavailable) or soft (non-preferred) and updates the lecturer's unavailableSlots and nonPreferredSlots accordingly. The logic follows a cycle: if the slot is currently available, it becomes non-preferred; if it's non-preferred, it becomes unavailable; if it's unavailable, it becomes available again. After updating the slots, it marks that there are unsaved changes.
   const handleToggleAvailability = (dayIndex, startFrame) => {
     setLecturers(
       lecturers.map((lecturer) => {
@@ -232,8 +247,12 @@ export default function LecturersPage() {
           const hardSlots = lecturer.unavailableSlots || [];
           const softSlots = lecturer.nonPreferredSlots || [];
 
-          const isHard = hardSlots.some(slot => slot.day === dayIndex && slot.startFrame === startFrame);
-          const isSoft = softSlots.some(slot => slot.day === dayIndex && slot.startFrame === startFrame);
+          const isHard = hardSlots.some(
+            (slot) => slot.day === dayIndex && slot.startFrame === startFrame,
+          );
+          const isSoft = softSlots.some(
+            (slot) => slot.day === dayIndex && slot.startFrame === startFrame,
+          );
 
           let newHardSlots = [...hardSlots];
           let newSoftSlots = [...softSlots];
@@ -244,21 +263,32 @@ export default function LecturersPage() {
             newSoftSlots.push({ day: dayIndex, startFrame: startFrame });
           } else if (isSoft) {
             // Move from Soft to Hard
-            newSoftSlots = newSoftSlots.filter(slot => !(slot.day === dayIndex && slot.startFrame === startFrame));
+            newSoftSlots = newSoftSlots.filter(
+              (slot) =>
+                !(slot.day === dayIndex && slot.startFrame === startFrame),
+            );
             newHardSlots.push({ day: dayIndex, startFrame: startFrame });
           } else if (isHard) {
             // Move from Hard to Available
-            newHardSlots = newHardSlots.filter(slot => !(slot.day === dayIndex && slot.startFrame === startFrame));
+            newHardSlots = newHardSlots.filter(
+              (slot) =>
+                !(slot.day === dayIndex && slot.startFrame === startFrame),
+            );
           }
 
-          setHasUnsavedChanges(true); 
-          return { ...lecturer, unavailableSlots: newHardSlots, nonPreferredSlots: newSoftSlots };
+          setHasUnsavedChanges(true);
+          return {
+            ...lecturer,
+            unavailableSlots: newHardSlots,
+            nonPreferredSlots: newSoftSlots,
+          };
         }
         return lecturer;
-      })
+      }),
     );
   };
 
+  // This function handles setting the availability for an entire day. It first removes any existing hard or soft slots for that day, then if the new state is not "available", it adds the appropriate slots for the whole day. For "unavailable", it adds hard slots for all frames of that day (except system-blocked slots). For "non-preferred", it adds soft slots for all frames of that day (except system-blocked slots). Finally, it updates the lecturer's availability and marks that there are unsaved changes.
   const handleSetWholeDay = (dayIndex, state) => {
     setLecturers(
       lecturers.map((lecturer) => {
@@ -266,29 +296,38 @@ export default function LecturersPage() {
           let newHardSlots = [...(lecturer.unavailableSlots || [])];
           let newSoftSlots = [...(lecturer.nonPreferredSlots || [])];
 
-          newHardSlots = newHardSlots.filter(slot => slot.day !== dayIndex);
-          newSoftSlots = newSoftSlots.filter(slot => slot.day !== dayIndex);
+          newHardSlots = newHardSlots.filter((slot) => slot.day !== dayIndex);
+          newSoftSlots = newSoftSlots.filter((slot) => slot.day !== dayIndex);
 
-          if (state !== 'available') {
-            const framesToAdd = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].filter(frame => {
-              const isBlockedSystemSlot = dayIndex === 6 && frame >= 5; 
-              return !isBlockedSystemSlot;
-            });
+          if (state !== "available") {
+            const framesToAdd = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].filter(
+              (frame) => {
+                const isBlockedSystemSlot = dayIndex === 6 && frame >= 5;
+                return !isBlockedSystemSlot;
+              },
+            );
 
-            const newSlots = framesToAdd.map(frame => ({ day: dayIndex, startFrame: frame }));
+            const newSlots = framesToAdd.map((frame) => ({
+              day: dayIndex,
+              startFrame: frame,
+            }));
 
-            if (state === 'unavailable') {
+            if (state === "unavailable") {
               newHardSlots.push(...newSlots);
-            } else if (state === 'non-preferred') {
+            } else if (state === "non-preferred") {
               newSoftSlots.push(...newSlots);
             }
           }
 
-          setHasUnsavedChanges(true); 
-          return { ...lecturer, unavailableSlots: newHardSlots, nonPreferredSlots: newSoftSlots };
+          setHasUnsavedChanges(true);
+          return {
+            ...lecturer,
+            unavailableSlots: newHardSlots,
+            nonPreferredSlots: newSoftSlots,
+          };
         }
         return lecturer;
-      })
+      }),
     );
   };
 
@@ -303,7 +342,6 @@ export default function LecturersPage() {
     } catch (err) {
       console.error(err);
       showError("Error saving availability");
-
     } finally {
       setIsSaving(false);
     }
@@ -311,7 +349,9 @@ export default function LecturersPage() {
 
   const handleSelectLecturer = (id) => {
     if (hasUnsavedChanges) {
-      const confirmLeave = window.confirm("You have unsaved changes. Switch anyway?");
+      const confirmLeave = window.confirm(
+        "You have unsaved changes. Switch anyway?",
+      );
       if (!confirmLeave) return;
       setHasUnsavedChanges(false);
       loadLecturers();
@@ -320,20 +360,23 @@ export default function LecturersPage() {
     setSelectedLecturerId(id);
 
     setTimeout(() => {
-      lecturerPanelRef.current?.scrollIntoView({behavior: "smooth",block: "start"});}, 0);
+      lecturerPanelRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
   };
-
 
   const toggleLecturerSelection = (e, lecturer) => {
     e.stopPropagation();
     const key = keyFor(lecturer);
-    
-    setSelectedLecturers(prev => {
-      const isSelected = prev.some(l => keyFor(l) === key);
+
+    setSelectedLecturers((prev) => {
+      const isSelected = prev.some((l) => keyFor(l) === key);
       if (isSelected) {
-        return prev.filter(l => keyFor(l) !== key); 
+        return prev.filter((l) => keyFor(l) !== key);
       } else {
-        return [...prev, lecturer]; 
+        return [...prev, lecturer];
       }
     });
   };
@@ -358,7 +401,6 @@ export default function LecturersPage() {
 
       invalidateLecturersCache();
       await fetchLecturersIfNeeded("LecturersPage", true);
-
     } catch (err) {
       console.error("Detailed upload error:", err);
       showError("Error uploading file");
@@ -370,13 +412,13 @@ export default function LecturersPage() {
     setPendingFile(null);
   };
 
-const handleExport = async () => {
+  const handleExport = async () => {
     try {
       const blob = await exportLecturersExcel();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = 'lecturers_availability.xlsx';
+      a.download = "lecturers_availability.xlsx";
       a.click();
     } catch (err) {
       showError("Error exporting file");
@@ -387,115 +429,220 @@ const handleExport = async () => {
     <div className="lecturers-page">
       {/* Top upload + actions section */}
       <div className="lecturers-top-section" style={{ marginBottom: 12 }}>
-        <div className="toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div
+          className="toolbar"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <div />
           <div style={{ display: "flex", gap: 8 }}>
-            <Button onClick={() => { setIsModalOpen(true); setEditingLecturer(null); }} variant="secondary">
-              <span className="material-icons" style={{ fontSize: 18, marginRight: 8 }}>add</span>
+            <Button
+              onClick={() => {
+                setIsModalOpen(true);
+                setEditingLecturer(null);
+              }}
+              variant="secondary"
+            >
+              <span
+                className="material-icons"
+                style={{ fontSize: 18, marginRight: 8 }}
+              >
+                add
+              </span>
               Add a lecturer
             </Button>
             <Button onClick={handleExport} variant="primary">
-              <span className="material-icons" style={{ fontSize: 18, marginRight: 8 }}>download</span>
+              <span
+                className="material-icons"
+                style={{ fontSize: 18, marginRight: 8 }}
+              >
+                download
+              </span>
               Export
             </Button>
           </div>
         </div>
 
         <div style={{ marginTop: 12 }}>
-          <div className={isHighlightUpload ? "upload-highlight-active" : ""} style={{ transition: 'all 0.3s' }}>
+          <div
+            className={isHighlightUpload ? "upload-highlight-active" : ""}
+            style={{ transition: "all 0.3s" }}
+          >
             <UploadForm onUpload={handleUpload} />
           </div>
         </div>
       </div>
 
       <div className="lecturers-container">
-        
         {/* Sidebar */}
         <div className="lecturers-sidebar">
           <div className="lecturers-header" />
 
           <div className="lecturers-list">
             {/* Search input */}
-            <div style={{ padding: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div
+              style={{
+                padding: 8,
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+              }}
+            >
               <input
                 type="text"
                 placeholder="Search lecturers..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ flex: 1, padding: '6px 8px', borderRadius: 6, border: '1px solid #cbd5e1' }}
+                style={{
+                  flex: 1,
+                  padding: "6px 8px",
+                  borderRadius: 6,
+                  border: "1px solid #cbd5e1",
+                }}
               />
               {searchQuery && (
                 <button
                   className="icon-btn"
                   onClick={() => setSearchQuery("")}
                   title="Clear"
-                  style={{ padding: '6px 8px' }}
+                  style={{ padding: "6px 8px" }}
                 >
                   <span className="material-icons">close</span>
                 </button>
               )}
             </div>
 
-            
-
             {lecturers.length === 0 ? (
-              <div className="empty-state-sidebar" style={{ textAlign: "center", padding: "20px", color: "#64748b" }}>
-                <span className="material-icons" style={{ fontSize: "48px", color: "#e2e8f0", marginBottom: "12px" }}>
+              <div
+                className="empty-state-sidebar"
+                style={{
+                  textAlign: "center",
+                  padding: "20px",
+                  color: "#64748b",
+                }}
+              >
+                <span
+                  className="material-icons"
+                  style={{
+                    fontSize: "48px",
+                    color: "#e2e8f0",
+                    marginBottom: "12px",
+                  }}
+                >
                   person_off
                 </span>
-                <p style={{ fontSize: "0.9rem", fontWeight: "600", margin: "0" }}>No lecturers yet</p>
-                <p style={{ fontSize: "0.8rem", marginTop: "4px" }}>Add your first lecturer to start.</p>
+                <p
+                  style={{ fontSize: "0.9rem", fontWeight: "600", margin: "0" }}
+                >
+                  No lecturers yet
+                </p>
+                <p style={{ fontSize: "0.8rem", marginTop: "4px" }}>
+                  Add your first lecturer to start.
+                </p>
               </div>
             ) : filteredLecturers.length === 0 ? (
-              <div className="empty-state-sidebar" style={{ textAlign: "center", padding: "20px", color: "#64748b" }}>
-                <span className="material-icons" style={{ fontSize: "48px", color: "#e2e8f0", marginBottom: "12px" }}>
+              <div
+                className="empty-state-sidebar"
+                style={{
+                  textAlign: "center",
+                  padding: "20px",
+                  color: "#64748b",
+                }}
+              >
+                <span
+                  className="material-icons"
+                  style={{
+                    fontSize: "48px",
+                    color: "#e2e8f0",
+                    marginBottom: "12px",
+                  }}
+                >
                   search_off
                 </span>
-                <p style={{ fontSize: "0.9rem", fontWeight: "600", margin: "0" }}>No results</p>
-                <p style={{ fontSize: "0.8rem", marginTop: "4px" }}>Try a different search term.</p>
+                <p
+                  style={{ fontSize: "0.9rem", fontWeight: "600", margin: "0" }}
+                >
+                  No results
+                </p>
+                <p style={{ fontSize: "0.8rem", marginTop: "4px" }}>
+                  Try a different search term.
+                </p>
               </div>
             ) : (
               filteredLecturers.map((lecturer) => {
                 const key = keyFor(lecturer);
-                const isChecked = selectedLecturers.some(l => keyFor(l) === key);
-                
+                const isChecked = selectedLecturers.some(
+                  (l) => keyFor(l) === key,
+                );
+
                 return (
-                <div
-                  key={key}
-                  className={`lecturer-item ${selectedLecturerId === lecturer.id ? "active" : ""}`}
-                  onClick={() => handleSelectLecturer(lecturer.id)}
-                  style={{ 
-                    display: "flex", 
-                    justifyContent: "space-between", 
-                    alignItems: "center", 
-                    direction: "rtl"
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={(e) => toggleLecturerSelection(e, lecturer)}
-                      onClick={(e) => e.stopPropagation()}
-                      style={{ cursor: "pointer", width: "16px", height: "16px", margin: 0 }}
-                    />
-                    <p className="lecturer-name" style={{ margin: 0 }}>{lecturer.name}</p>
-                  </div>
-
-                  <button
-                    className="icon-btn icon-btn--delete"
-                    onClick={(e) => handleDeleteClick(e, lecturer)}
-                    title="Delete"
-                    style={{ padding: "4px" }}
+                  <div
+                    key={key}
+                    className={`lecturer-item ${selectedLecturerId === lecturer.id ? "active" : ""}`}
+                    onClick={() => handleSelectLecturer(lecturer.id)}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      direction: "rtl",
+                    }}
                   >
-                    <span className="material-icons" style={{ fontSize: '18px' }}>delete</span>
-                  </button>
-                </div>
-              );
-              }))
-            } 
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => toggleLecturerSelection(e, lecturer)}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          cursor: "pointer",
+                          width: "16px",
+                          height: "16px",
+                          margin: 0,
+                        }}
+                      />
+                      <p className="lecturer-name" style={{ margin: 0 }}>
+                        {lecturer.name}
+                      </p>
+                    </div>
 
-            <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-start", gap: 8, paddingBottom: 8, borderTop: "1px solid #f1f5f9", paddingTop: 16 }}>
+                    <button
+                      className="icon-btn icon-btn--delete"
+                      onClick={(e) => handleDeleteClick(e, lecturer)}
+                      title="Delete"
+                      style={{ padding: "4px" }}
+                    >
+                      <span
+                        className="material-icons"
+                        style={{ fontSize: "18px" }}
+                      >
+                        delete
+                      </span>
+                    </button>
+                  </div>
+                );
+              })
+            )}
+
+            <div
+              style={{
+                marginTop: 16,
+                display: "flex",
+                justifyContent: "flex-start",
+                gap: 8,
+                paddingBottom: 8,
+                borderTop: "1px solid #f1f5f9",
+                paddingTop: 16,
+              }}
+            >
               <Button
                 variant="ghost"
                 onClick={() => setIsMultiDeleteModalOpen(true)}
@@ -506,7 +653,6 @@ const handleExport = async () => {
                 Delete selected ({selectedLecturers?.length || 0})
               </Button>
             </div>
-
           </div>
         </div>
 
@@ -514,9 +660,18 @@ const handleExport = async () => {
         {selectedLecturer ? (
           <div className="lecturer-details-panel" ref={lecturerPanelRef}>
             <div className="details-header">
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "12px" }}
+              >
                 <h1 dir="rtl">{selectedLecturer.name}</h1>
-                <button className="edit-icon-btn" onClick={() => { setEditingLecturer(selectedLecturer); setIsModalOpen(true); }} title="Edit Name">
+                <button
+                  className="edit-icon-btn"
+                  onClick={() => {
+                    setEditingLecturer(selectedLecturer);
+                    setIsModalOpen(true);
+                  }}
+                  title="Edit Name"
+                >
                   <span className="material-icons">edit</span>
                 </button>
               </div>
@@ -526,18 +681,26 @@ const handleExport = async () => {
               <div className="availability-header-row">
                 <div>
                   <h3>Weekly Availability</h3>
-                  <p className="availability-hint">Click to toggle: Green = Available ➔ Orange = Prefer Not To ➔ Red = Blocked.</p>
+                  <p className="availability-hint">
+                    Click to toggle: Green = Available ➔ Orange = Prefer Not To
+                    ➔ Red = Blocked.
+                  </p>
                 </div>
-                <Button 
-                  variant="primary" 
+                <Button
+                  variant="primary"
                   onClick={saveAvailabilityChanges}
                   disabled={isSaving || !hasUnsavedChanges}
-                  style={{ 
-                    backgroundColor: hasUnsavedChanges ? "#10b981" : "#94a3b8", 
-                    borderColor: hasUnsavedChanges ? "#10b981" : "#94a3b8"
+                  style={{
+                    backgroundColor: hasUnsavedChanges ? "#10b981" : "#94a3b8",
+                    borderColor: hasUnsavedChanges ? "#10b981" : "#94a3b8",
                   }}
                 >
-                  <span className="material-icons" style={{ fontSize: "18px", marginRight: "6px" }}>save</span>
+                  <span
+                    className="material-icons"
+                    style={{ fontSize: "18px", marginRight: "6px" }}
+                  >
+                    save
+                  </span>
                   {isSaving ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
@@ -550,13 +713,25 @@ const handleExport = async () => {
             </div>
           </div>
         ) : (
-          <div className="lecturer-details-panel" style={{alignItems: "center", color: "#94a3b8", paddingTop: "90px" }}>
+          <div
+            className="lecturer-details-panel"
+            style={{
+              alignItems: "center",
+              color: "#94a3b8",
+              paddingTop: "90px",
+            }}
+          >
             <div style={{ textAlign: "center" }}>
-              <span className="material-icons" style={{ fontSize: "64px", marginBottom: "16px", opacity: 0.5 }}>
+              <span
+                className="material-icons"
+                style={{ fontSize: "64px", marginBottom: "16px", opacity: 0.5 }}
+              >
                 touch_app
               </span>
               <h2>Select a Lecturer</h2>
-              <p>Choose a lecturer from the sidebar to manage their availability.</p>
+              <p>
+                Choose a lecturer from the sidebar to manage their availability.
+              </p>
             </div>
           </div>
         )}
@@ -564,7 +739,10 @@ const handleExport = async () => {
 
       <AddLecturerModal
         isOpen={isModalOpen}
-        onClose={() => { setIsModalOpen(false); setEditingLecturer(null); }}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingLecturer(null);
+        }}
         onSave={editingLecturer ? handleEditLecturer : handleAddLecturer}
         initialLecturer={editingLecturer}
       />
@@ -585,7 +763,9 @@ const handleExport = async () => {
       <ConfirmModal
         isOpen={confirmOpen}
         title="Upload will overwrite existing data"
-        message={"Note: uploading a new file will completely delete everything that existed in the system."}
+        message={
+          "Note: uploading a new file will completely delete everything that existed in the system."
+        }
         fileName={pendingFile ? pendingFile.name : ""}
         onConfirm={performUpload}
         onCancel={cancelUpload}
@@ -604,10 +784,10 @@ const handleExport = async () => {
         cancelLabel="No, Cancel"
       />
 
-      <LecturerUploadSummaryModal 
-        isOpen={isSummaryModalOpen} 
-        summary={uploadSummary} 
-        onClose={() => setIsSummaryModalOpen(false)} 
+      <LecturerUploadSummaryModal
+        isOpen={isSummaryModalOpen}
+        summary={uploadSummary}
+        onClose={() => setIsSummaryModalOpen(false)}
       />
 
       <Toast toast={toast} onClose={closeToast} />
@@ -615,11 +795,16 @@ const handleExport = async () => {
   );
 }
 
+// This component displays a summary of the results after uploading lecturers via Excel. It shows how many lecturers were saved, how many rows were processed, and any format errors that caused certain rows to be skipped. The modal has a close button to dismiss the summary. The styling emphasizes the success of saved lecturers and highlights any errors in a clear way.
 function LecturerUploadSummaryModal({ isOpen, summary, onClose }) {
   if (!isOpen) return null;
 
   const footer = (
-    <Button variant="primary" onClick={onClose} style={{ width: '100%', padding: '10px', fontWeight: '600' }}>
+    <Button
+      variant="primary"
+      onClick={onClose}
+      style={{ width: "100%", padding: "10px", fontWeight: "600" }}
+    >
       Close Summary
     </Button>
   );
@@ -632,26 +817,56 @@ function LecturerUploadSummaryModal({ isOpen, summary, onClose }) {
       size="normal"
       footer={footer}
     >
-      <div style={{ textAlign: 'center', backgroundColor: '#f0fdf4', padding: '15px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #dcfce7' }}>
-        <div style={{ color: '#166534', fontWeight: '700', fontSize: '18px' }}>
+      <div
+        style={{
+          textAlign: "center",
+          backgroundColor: "#f0fdf4",
+          padding: "15px",
+          borderRadius: "8px",
+          marginBottom: "24px",
+          border: "1px solid #dcfce7",
+        }}
+      >
+        <div style={{ color: "#166534", fontWeight: "700", fontSize: "18px" }}>
           ✓ {summary.savedLecturers} Lecturers Saved
         </div>
-        <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+        <div style={{ fontSize: "13px", color: "#666", marginTop: "4px" }}>
           Out of {summary.totalRows} rows processed
         </div>
       </div>
 
       {summary.invalidSlots && summary.invalidSlots.length > 0 && (
-        <div className="summary-section" style={{ marginBottom: '20px' }}>
-          <h4 style={{ 
-            fontSize: '14px', color: '#b45309', textTransform: 'uppercase', 
-            borderBottom: '1px solid #fde68a', paddingBottom: '4px', marginBottom: '8px', textAlign: 'left'
-          }}>
+        <div className="summary-section" style={{ marginBottom: "20px" }}>
+          <h4
+            style={{
+              fontSize: "14px",
+              color: "#b45309",
+              textTransform: "uppercase",
+              borderBottom: "1px solid #fde68a",
+              paddingBottom: "4px",
+              marginBottom: "8px",
+              textAlign: "left",
+            }}
+          >
             Format Errors (Skipped)
           </h4>
-          <div style={{ maxHeight: '120px', overflowY: 'auto', paddingLeft: '5px', textAlign: 'left' }}>
+          <div
+            style={{
+              maxHeight: "120px",
+              overflowY: "auto",
+              paddingLeft: "5px",
+              textAlign: "left",
+            }}
+          >
             {summary.invalidSlots.map((issue, idx) => (
-              <div key={idx} style={{ fontSize: '13px', marginBottom: '4px', color: '#4b5563' }}>
+              <div
+                key={idx}
+                style={{
+                  fontSize: "13px",
+                  marginBottom: "4px",
+                  color: "#4b5563",
+                }}
+              >
                 • {issue}
               </div>
             ))}
@@ -660,7 +875,14 @@ function LecturerUploadSummaryModal({ isOpen, summary, onClose }) {
       )}
 
       {summary.savedLecturers === 0 && (
-        <p style={{ color: '#ef4444', textAlign: 'center', fontSize: '14px', fontWeight: '500' }}>
+        <p
+          style={{
+            color: "#ef4444",
+            textAlign: "center",
+            fontSize: "14px",
+            fontWeight: "500",
+          }}
+        >
           No lecturers were imported. Please fix the errors above.
         </p>
       )}
@@ -668,12 +890,14 @@ function LecturerUploadSummaryModal({ isOpen, summary, onClose }) {
   );
 }
 
-
-
 function AvailabilityTable({ lecturer, onToggle, onSetWholeDay }) {
   const hebrewDays = [
-    { name: "ראשון", index: 1 }, { name: "שני", index: 2 }, { name: "שלישי", index: 3 },
-    { name: "רביעי", index: 4 }, { name: "חמישי", index: 5 }, { name: "שישי", index: 6 },
+    { name: "ראשון", index: 1 },
+    { name: "שני", index: 2 },
+    { name: "שלישי", index: 3 },
+    { name: "רביעי", index: 4 },
+    { name: "חמישי", index: 5 },
+    { name: "שישי", index: 6 },
   ];
 
   const times = [
@@ -681,7 +905,7 @@ function AvailabilityTable({ lecturer, onToggle, onSetWholeDay }) {
     { range: "09:30-10:20", frame: 2, isBreak: false },
     { range: "10:30-11:20", frame: 3, isBreak: false },
     { range: "11:30-12:20", frame: 4, isBreak: false },
-    { range: "12:20-12:50", frame: null, isBreak: true }, 
+    { range: "12:20-12:50", frame: null, isBreak: true },
     { range: "12:50-13:40", frame: 5, isBreak: false },
     { range: "13:50-14:40", frame: 6, isBreak: false },
     { range: "14:50-15:40", frame: 7, isBreak: false },
@@ -704,22 +928,31 @@ function AvailabilityTable({ lecturer, onToggle, onSetWholeDay }) {
 
                 {/* התוספת החדשה: עיגולי הבחירה הגורפים ליום */}
                 <div className="day-actions">
-                  <div className="custom-tooltip" data-tooltip="marke as available for the whole day">
+                  <div
+                    className="custom-tooltip"
+                    data-tooltip="marke as available for the whole day"
+                  >
                     <button
                       className="day-action-btn green"
-                      onClick={() => onSetWholeDay(day.index, 'available')}
+                      onClick={() => onSetWholeDay(day.index, "available")}
                     />
                   </div>
-                  <div className="custom-tooltip" data-tooltip="prefer not to have lessons for the whole day">
+                  <div
+                    className="custom-tooltip"
+                    data-tooltip="prefer not to have lessons for the whole day"
+                  >
                     <button
                       className="day-action-btn orange"
-                      onClick={() => onSetWholeDay(day.index, 'non-preferred')}
+                      onClick={() => onSetWholeDay(day.index, "non-preferred")}
                     />
                   </div>
-                  <div className="custom-tooltip" data-tooltip="mark as unavailable for the whole day">
+                  <div
+                    className="custom-tooltip"
+                    data-tooltip="mark as unavailable for the whole day"
+                  >
                     <button
                       className="day-action-btn red"
-                      onClick={() => onSetWholeDay(day.index, 'unavailable')}
+                      onClick={() => onSetWholeDay(day.index, "unavailable")}
                     />
                   </div>
                 </div>
@@ -729,20 +962,43 @@ function AvailabilityTable({ lecturer, onToggle, onSetWholeDay }) {
         </thead>
         <tbody>
           {times.map((timeItem) => (
-            <tr key={timeItem.range} className={timeItem.isBreak ? "break-row" : ""}>
-              <td className={`time-cell ${timeItem.isBreak ? "break-time" : ""}`}>{timeItem.range}</td>
+            <tr
+              key={timeItem.range}
+              className={timeItem.isBreak ? "break-row" : ""}
+            >
+              <td
+                className={`time-cell ${timeItem.isBreak ? "break-time" : ""}`}
+              >
+                {timeItem.range}
+              </td>
               {hebrewDays.map((day) => {
-                const isTuesdayAfternoon = day.index === 6 && timeItem.frame >= 5;
+                const isTuesdayAfternoon =
+                  day.index === 6 && timeItem.frame >= 5;
                 if (timeItem.isBreak || isTuesdayAfternoon) {
-                  return <td key={`${day.index}-${timeItem.range}`} className="availability-cell break-cell">{timeItem.isBreak ? "Break" : "No Class"}</td>;
+                  return (
+                    <td
+                      key={`${day.index}-${timeItem.range}`}
+                      className="availability-cell break-cell"
+                    >
+                      {timeItem.isBreak ? "Break" : "No Class"}
+                    </td>
+                  );
                 }
-                
+
                 const hardSlots = lecturer.unavailableSlots || [];
                 const softSlots = lecturer.nonPreferredSlots || [];
-                
-                const isUnavailable = hardSlots.some(slot => slot.day === day.index && slot.startFrame === timeItem.frame);
-                const isNonPreferred = softSlots.some(slot => slot.day === day.index && slot.startFrame === timeItem.frame);
-                
+
+                const isUnavailable = hardSlots.some(
+                  (slot) =>
+                    slot.day === day.index &&
+                    slot.startFrame === timeItem.frame,
+                );
+                const isNonPreferred = softSlots.some(
+                  (slot) =>
+                    slot.day === day.index &&
+                    slot.startFrame === timeItem.frame,
+                );
+
                 let cellClass = "available";
                 if (isUnavailable) cellClass = "unavailable";
                 else if (isNonPreferred) cellClass = "non-preferred";

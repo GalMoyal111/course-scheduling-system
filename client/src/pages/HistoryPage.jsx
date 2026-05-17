@@ -11,7 +11,7 @@ export default function HistoryPage() {
   const { history, fetchHistoryIfNeeded, loadTimetableFromHistory } = useData();
   const { toast, showError, showSuccess, closeToast } = useToast();
   const navigate = useNavigate();
-  const [loadingId, setLoadingId] = useState(null); 
+  const [loadingId, setLoadingId] = useState(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState({ id: null, name: "" });
 
@@ -20,6 +20,7 @@ export default function HistoryPage() {
   const [renameValue, setRenameValue] = useState("");
   const renameInputRef = useRef(null);
 
+  // On component mount, fetch the history data if it's not already loaded. The dependency array includes fetchHistoryIfNeeded to ensure it only runs when that function reference changes (which should be stable due to context).
   useEffect(() => {
     fetchHistoryIfNeeded("HistoryPage");
   }, [fetchHistoryIfNeeded]);
@@ -28,7 +29,7 @@ export default function HistoryPage() {
     setLoadingId(id);
     const success = await loadTimetableFromHistory(id, "HistoryPage");
     setLoadingId(null);
-    
+
     if (success) {
       navigate("/timetable");
     } else {
@@ -36,11 +37,13 @@ export default function HistoryPage() {
     }
   };
 
+  // When the user clicks the delete button, open the confirmation modal and set the target timetable to be deleted.
   const handleDelete = (id, name) => {
     setDeleteTarget({ id, name });
     setDeleteOpen(true);
   };
 
+  // When the user confirms deletion, call the API to delete the timetable, show a success message, and refresh the history list. If there's an error, show an error message.
   const confirmDelete = async () => {
     const { id } = deleteTarget;
     setDeleteOpen(false);
@@ -54,11 +57,12 @@ export default function HistoryPage() {
     }
   };
 
+  // If the user cancels deletion, simply close the modal and reset the target.
   const cancelDelete = () => {
     setDeleteOpen(false);
     setDeleteTarget({ id: null, name: "" });
   };
-
+  //  When the user clicks the rename button, open the rename modal, set the target timetable to be renamed, and pre-fill the input with the current name. After a short delay, focus the input field for better UX.
   const handleRename = (id, currentName) => {
     setRenameTarget({ id, name: currentName });
     setRenameValue(currentName);
@@ -74,7 +78,9 @@ export default function HistoryPage() {
     }
     setRenameOpen(false);
     try {
-      await (await import("../services/api")).renameTimetable(renameTarget.id, newName);
+      await (
+        await import("../services/api")
+      ).renameTimetable(renameTarget.id, newName);
       showSuccess("Timetable renamed");
       await fetchHistoryIfNeeded("HistoryPage", true);
     } catch (err) {
@@ -89,6 +95,7 @@ export default function HistoryPage() {
     setRenameValue("");
   };
 
+  // Helper function to format the timestamp of when the timetable was created. It converts the timestamp to a localized string in Hebrew format, showing the date and time in a readable way.
   const formatDate = (timestamp) => {
     return new Date(timestamp).toLocaleString("he-IL", {
       year: "numeric",
@@ -124,8 +131,8 @@ export default function HistoryPage() {
                 </div>
               </div>
               <div className="history-card-actions">
-                <Button 
-                  onClick={() => handleLoadTimetable(item.id)} 
+                <Button
+                  onClick={() => handleLoadTimetable(item.id)}
                   disabled={loadingId === item.id}
                   variant="primary"
                 >
@@ -172,8 +179,10 @@ export default function HistoryPage() {
         title="Rename Timetable"
         size="normal"
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <label style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>New name</label>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <label style={{ fontSize: "0.9rem", color: "var(--muted)" }}>
+            New name
+          </label>
           <input
             ref={renameInputRef}
             className="ui-input"
@@ -182,9 +191,20 @@ export default function HistoryPage() {
             placeholder="Enter new timetable name"
           />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-          <Button variant="ghost" onClick={cancelRename}>Cancel</Button>
-          <Button variant="primary" onClick={confirmRename}>Save</Button>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: 8,
+            marginTop: 16,
+          }}
+        >
+          <Button variant="ghost" onClick={cancelRename}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={confirmRename}>
+            Save
+          </Button>
         </div>
       </Modal>
 
