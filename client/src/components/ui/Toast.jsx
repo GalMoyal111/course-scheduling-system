@@ -1,3 +1,4 @@
+// Toast notification component and hook
 import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
 import "./Toast.css";

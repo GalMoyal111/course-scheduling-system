@@ -1,3 +1,4 @@
+// Sidebar navigation for main app sections
 import React, { useState } from "react";
 import logo from "../../assets/logo.png";
 import Modal from "./Modal";
@@ -42,12 +43,10 @@ export default function Sidebar({ user }) {
 
   return (
     <div className="sidebar">
-      {/* לוגו */}
       <div className="sidebar-logo" onClick={() => navigate("/")}>
         <img src={logo} alt="logo" />
       </div>
 
-      {/* תפריט */}
       <div className="sidebar-menu">
         {items.map((item) => (
           <div

@@ -1,16 +1,16 @@
+// Reusable modal dialog component
 import React, { useEffect } from "react";
 import "./Modal.css";
 
 /**
- * מודל אחיד לכל המערכת
- * @param {boolean} isOpen - האם המודל פתוח
- * @param {function} onClose - פונקציה לסגירה
- * @param {string} title - כותרת המודל
+ * @param {boolean} isOpen 
+ * @param {function} onClose 
+ * @param {string} title
  * @param {string} size - 'normal' | 'wide'
  * @param {string} variant - 'primary' | 'warning' | 'danger'
- * @param {boolean} centerContent - האם למרכז את התוכן (מעולה להודעות הצלחה)
- * @param {ReactNode} children - תוכן המודל
- * @param {ReactNode} footer - כפתורי פעולה בתחתית
+ * @param {boolean} centerContent
+ * @param {ReactNode} children 
+ * @param {ReactNode} footer
  */
 export default function Modal({ 
     isOpen, 

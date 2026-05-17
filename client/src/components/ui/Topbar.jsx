@@ -1,3 +1,4 @@
+// Topbar with page title and user actions
 import React from "react";
 import { useLocation } from "react-router-dom";
 import "./ui.css";

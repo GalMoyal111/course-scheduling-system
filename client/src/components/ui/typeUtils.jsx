@@ -4,11 +4,12 @@ import React from "react";
 // maps known keywords to consistent labels and CSS classes.
 export function typeBadge(type) {
   const raw = String(type || "").trim();
-  const t = raw.toUpperCase(); // עובדים עם UpperCase כדי להתאים ל-Enum ב-Java
+  // Use uppercase to match Java enums
+  const t = raw.toUpperCase();
 
   if (!t) return <span className="type-badge type-normal">Unknown</span>;
 
-  // 1. בדיקת התאמה מדויקת ל-Enums (עדיפות עליונה)
+  // 1. Check for exact enum matches (highest priority)
   const exactMatch = {
     "PHYSICS_LAB": { label: "Physics Lab", className: "type-physics" },
     "NETWORKING_LAB": { label: "Networking Lab", className: "type-network" },
@@ -29,7 +30,7 @@ export function typeBadge(type) {
     );
   }
 
-  // 2. לוגיקת "חילוץ" במקרה שהטקסט מגיע בפורמט אחר (למשל מהאקסל הישן)
+  // 2. Extraction logic for alternate formats (e.g., old Excel input)
   const lower = t.toLowerCase();
 
   if (lower.includes("physics")) 
@@ -50,7 +51,7 @@ export function typeBadge(type) {
   if (lower.includes("pbl") || lower.includes("project")) 
     return <span className="type-badge type-pbl">PBL</span>;
 
-  // 3. ברירת מחדל: מציג את הטקסט הגולמי עם אות גדולה בהתחלה
+  // 3. Default: show the raw text with capitalization
   const capitalized = raw
     .toLowerCase()
     .split(/_|\s/)

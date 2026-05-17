@@ -1,3 +1,4 @@
+// Layout wrapper for sidebar, topbar, and main content
 import React from "react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
