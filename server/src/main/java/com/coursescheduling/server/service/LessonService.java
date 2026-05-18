@@ -17,6 +17,7 @@ import com.coursescheduling.server.model.Course;
 import com.coursescheduling.server.model.Lesson;
 import com.coursescheduling.server.model.LessonType;
 import com.coursescheduling.server.model.Semester;
+import com.coursescheduling.server.service.ExcelProcessingService.LessonUploadSummary;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
@@ -41,7 +42,7 @@ public class LessonService {
 	
 	private List<ClusterCoursesList> cachedGroupedCourses = null;
 	private long lastGroupedFetchTime = 0;
-	
+	private LessonUploadSummary cachedSummary = null;
 
     public LessonService(CourseService courseService) {
         this.courseService = courseService;
@@ -501,7 +502,36 @@ public class LessonService {
 	
 	
 	
+	public void saveSummary(LessonUploadSummary summary) {
+		this.cachedSummary = summary;
+		
+		Firestore db = FirestoreClient.getFirestore();
+	    ObjectMapper mapper = new ObjectMapper();
+	    
+	    Map<String, Object> summaryMap = mapper.convertValue(summary, Map.class);
+	    db.collection("system_data").document("lastLessonUploadSummary").set(summaryMap);
+	}
 	
+	
+	public LessonUploadSummary getLatestSummary() {
+	    if (this.cachedSummary != null) {
+	        return this.cachedSummary;
+	    }
+	    
+	    Firestore db = FirestoreClient.getFirestore();
+	    try {
+	        var doc = db.collection("system_data").document("lastLessonUploadSummary").get().get();
+	        if (doc.exists()) {
+	            ObjectMapper mapper = new ObjectMapper();
+	            this.cachedSummary = mapper.convertValue(doc.getData(), LessonUploadSummary.class);
+	            return this.cachedSummary;
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    
+	    return null; 
+	}
 	
 	
 	

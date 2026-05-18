@@ -48,6 +48,8 @@ public class ExcelProcessingService {
 	    public String identifier;
 	    public List<Integer> rows = new ArrayList<>(); 
 
+	    public ValidationIssue() {}
+	    
 	    public ValidationIssue(String identifier, int row) {
 	        this.identifier = identifier;
 	        this.rows.add(row);
@@ -182,6 +184,8 @@ public class ExcelProcessingService {
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
+	    
+	    lessonService.saveSummary(summary);
 	    return summary;
 	}
 	

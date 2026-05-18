@@ -401,5 +401,16 @@ public class FileUploadController {
         return "Classroom size settings updated successfully";
     }
     
+    @GetMapping("/lessons/upload-summary")
+	public ResponseEntity<ExcelProcessingService.LessonUploadSummary> getLatestUploadSummary() {
+	    ExcelProcessingService.LessonUploadSummary summary = lessonService.getLatestSummary();
+	    
+	    if (summary == null) {
+	        return ResponseEntity.noContent().build();
+	    }
+	    
+	    return ResponseEntity.ok(summary);
+	}
+    
     
 }

@@ -4,6 +4,7 @@ import {
   exportLessons,
   addLesson,
   deleteLessons,
+  getLatestLessonUploadSummary,
 } from "../services/api";
 import ConfirmModal from "../components/ConfirmModal";
 import LessonList from "../components/LessonList";
@@ -274,6 +275,22 @@ function UploadPage() {
     }
   };
 
+
+  const handleShowLatestSummary = async () => {
+    try {
+      const summary = await getLatestLessonUploadSummary();
+      if (!summary) {
+        alert("No recent upload summary found."); 
+        return;
+      }
+      setUploadSummary(summary);
+      setSummaryModalOpen(true);
+    } catch (error) {
+      showError("Failed to load summary.");
+    }
+  };
+
+
   return (
     <div>
       <div className="toolbar">
@@ -349,6 +366,30 @@ function UploadPage() {
             </svg>
             Add Lesson
           </Button>
+
+          <Button
+            onClick={handleShowLatestSummary}
+            variant="secondary"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+              style={{ marginRight: 8 }}
+            >
+              <path
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Latest Summary
+          </Button>
+          
           <Button
             onClick={async () => {
               try {
