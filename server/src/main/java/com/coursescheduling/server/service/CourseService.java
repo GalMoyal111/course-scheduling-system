@@ -83,6 +83,9 @@ public class CourseService {
             data.put("projectHours", course.getProjectHours());
             data.put("credits", course.getCredits());
             data.put("clusterName", normalizedClusterName);
+            data.put("lectureNumberStudents", course.getLectureNumberStudents());
+            data.put("tutorialNumberStudents", course.getTutorialNumberStudents());
+            data.put("labNumberStudents", course.getLabNumberStudents());
 
             DocumentReference docRef = db.collection("courses").document(course.getCourseId());
             batch.set(docRef, data);
@@ -115,6 +118,9 @@ public class CourseService {
         data.put("projectHours", course.getProjectHours());
         data.put("credits", course.getCredits());
         data.put("clusterName", normalizedClusterName);
+        data.put("lectureNumberStudents", course.getLectureNumberStudents());
+        data.put("tutorialNumberStudents", course.getTutorialNumberStudents());
+        data.put("labNumberStudents", course.getLabNumberStudents());
 
         db.collection("courses").document(normalizedCourseId).set(data);
     	this.cachedCourses = null;
@@ -175,6 +181,9 @@ public class CourseService {
             float credits = ((Number) courseData.get("credits")).floatValue();
 
             String clusterName = (String) courseData.get("clusterName");
+            int lectureNumberStudents = ((Number) courseData.get("lectureNumberStudents")).intValue();
+            int tutorialNumberStudents = ((Number) courseData.get("tutorialNumberStudents")).intValue();
+            int labNumberStudents = ((Number) courseData.get("labNumberStudents")).intValue();
 
             Course course = new Course();
 
@@ -189,6 +198,9 @@ public class CourseService {
             course.setProjectHours(projectHours);
             course.setCredits(credits);
             course.setClusterName(normalizeClusterName(cluster, clusterName));
+            course.setLectureNumberStudents(lectureNumberStudents);
+            course.setTutorialNumberStudents(tutorialNumberStudents);
+            course.setLabNumberStudents(labNumberStudents);
 
             courses.add(course);
         }
@@ -239,6 +251,9 @@ public class CourseService {
         data.put("projectHours", newCourse.getProjectHours());
         data.put("credits", newCourse.getCredits());
         data.put("clusterName", normalizedClusterName);
+        data.put("lectureNumberStudents", newCourse.getLectureNumberStudents());
+        data.put("tutorialNumberStudents", newCourse.getTutorialNumberStudents());
+        data.put("labNumberStudents", newCourse.getLabNumberStudents());
 
         batch.set(newDoc, data);
 

@@ -11,11 +11,15 @@ public class Course {
     private int projectHours;
     private float credits;
     private String clusterName;
+    private int lectureNumberStudents;
+    private int tutorialNumberStudents;
+    private int labNumberStudents;
 
     public Course() {}
 
     public Course(int cluster, String courseId, String courseName, String prerequisiteCourseNumber,
-                  int lectureHours, int tutorialHours, int labHours, int projectHours, float credits, String clusterName) {
+                  int lectureHours, int tutorialHours, int labHours, int projectHours, float credits, String clusterName,
+                  int lectureNumberStudents, int tutorialNumberStudents, int labNumberStudents) {
         this.cluster = cluster;
         this.courseId = courseId;
         this.courseName = courseName;
@@ -26,6 +30,9 @@ public class Course {
         this.projectHours = projectHours;
         this.credits = credits;
         this.clusterName = clusterName;
+        this.lectureNumberStudents = lectureNumberStudents;
+        this.tutorialNumberStudents = tutorialNumberStudents;
+        this.labNumberStudents = labNumberStudents;
     }
 
   
@@ -112,5 +119,29 @@ public class Course {
 
     public void setClusterName(String clusterName) {
         this.clusterName = clusterName;
+    }
+
+    public int getLectureNumberStudents() {
+        return lectureNumberStudents;
+    }
+
+    public void setLectureNumberStudents(int lectureNumberStudents) {
+        this.lectureNumberStudents = lectureNumberStudents;
+    }
+
+    public int getTutorialNumberStudents() {
+        return tutorialNumberStudents;
+    }
+
+    public void setTutorialNumberStudents(int tutorialNumberStudents) {
+        this.tutorialNumberStudents = tutorialNumberStudents;
+    }
+
+    public int getLabNumberStudents() {
+        return labNumberStudents;
+    }
+
+    public void setLabNumberStudents(int labNumberStudents) {
+        this.labNumberStudents = labNumberStudents;
     }
 }

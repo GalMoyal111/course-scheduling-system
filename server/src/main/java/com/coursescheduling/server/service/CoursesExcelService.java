@@ -2,8 +2,11 @@ package com.coursescheduling.server.service;
 
 import com.coursescheduling.server.model.Cluster;
 import com.coursescheduling.server.model.Course;
+import com.coursescheduling.server.model.ClassroomSizeSettings;
+import com.coursescheduling.server.service.ClassroomSizeSettingsService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.checkerframework.checker.units.qual.A;
 
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
@@ -32,6 +35,9 @@ public class CoursesExcelService {
     
     @Autowired
     private ClusterService clusterService;
+
+    @Autowired
+    private ClassroomSizeSettingsService classroomSizeSettingsService;
 
     private static final String COURSE_ID_PATTERN = "^\\d{5,6}$";
     
@@ -143,6 +149,8 @@ public class CoursesExcelService {
         try (Workbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
 
+            ClassroomSizeSettings defaultSizes = classroomSizeSettingsService.getClassroomSizeSettings();
+
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null || isRowEmpty(row, formatter)) continue;
@@ -164,6 +172,9 @@ public class CoursesExcelService {
                     }
 
                     String clusterName = formatter.formatCellValue(row.getCell(8)).trim();
+                    int lectureNumberStudents = parseStudentCountCell(row.getCell(9),formatter,defaultSizes.getLectureSize(),"Lecture Number Students");
+                    int tutorialNumberStudents = parseStudentCountCell(row.getCell(10),formatter,defaultSizes.getTutorialSize(),"Tutorial Number Students");
+                    int labNumberStudents = parseStudentCountCell(row.getCell(11),formatter,defaultSizes.getLabSize(),"Lab Number Students");
 
                     Course course = new Course(
                             0,
@@ -175,7 +186,10 @@ public class CoursesExcelService {
                             labHours,
                             projectHours,
                             credits,
-                            clusterName
+                            clusterName,
+                            lectureNumberStudents,
+                            tutorialNumberStudents,
+                            labNumberStudents
                     );
 
                     courses.add(course);
@@ -204,7 +218,7 @@ public class CoursesExcelService {
     }
 
     private boolean isRowEmpty(Row row, DataFormatter formatter) {
-        for (int cellIndex = 0; cellIndex <= 8; cellIndex++) {
+        for (int cellIndex = 0; cellIndex <= 11; cellIndex++) {
             String cellValue = formatter.formatCellValue(row.getCell(cellIndex)).trim();
             if (!cellValue.isEmpty()) {
                 return false;
@@ -223,6 +237,30 @@ public class CoursesExcelService {
             return (int) Double.parseDouble(value);
         } catch (NumberFormatException e) {
             throw new RuntimeException("Invalid numeric value in Excel cell: " + value);
+        }
+    }
+
+    private int parseStudentCountCell(Cell cell, DataFormatter formatter, int defaultValue, String fieldName) {
+        if (cell == null) {
+            return defaultValue;
+        }
+
+        String value = formatter.formatCellValue(cell).trim();
+
+        if (value.isEmpty()) {
+            return defaultValue;
+        }
+
+        try {
+            int parsedValue = (int) Double.parseDouble(value);
+
+            if (parsedValue <= 0) {
+                throw new RuntimeException(fieldName + " must be greater than 0");
+            }
+
+            return parsedValue;
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Invalid numeric value in " + fieldName + ": " + value);
         }
     }
 
@@ -380,6 +418,9 @@ public class CoursesExcelService {
             header.createCell(6).setCellValue("Project Hours");
             header.createCell(7).setCellValue("Credits");
             header.createCell(8).setCellValue("Cluster Name");
+            header.createCell(9).setCellValue("Lecture Number Students");
+            header.createCell(10).setCellValue("Tutorial Number Students");
+            header.createCell(11).setCellValue("Lab Number Students");
 
             int rowIndex = 1;
 
@@ -397,6 +438,9 @@ public class CoursesExcelService {
                 row.createCell(6).setCellValue(asDouble(data.get("projectHours")));
                 row.createCell(7).setCellValue(asDouble(data.get("credits")));
                 row.createCell(8).setCellValue(asString(data.get("clusterName")));
+                row.createCell(9).setCellValue(asDouble(data.get("lectureNumberStudents")));
+                row.createCell(10).setCellValue(asDouble(data.get("tutorialNumberStudents")));
+                row.createCell(11).setCellValue(asDouble(data.get("labNumberStudents")));
             }
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -476,6 +520,9 @@ public class CoursesExcelService {
         header.createCell(6).setCellValue("Project Hours");
         header.createCell(7).setCellValue("Credits");
         header.createCell(8).setCellValue("Cluster Name");
+        header.createCell(9).setCellValue("Lecture Number Students");
+        header.createCell(10).setCellValue("Tutorial Number Students");
+        header.createCell(11).setCellValue("Lab Number Students");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         workbook.write(out);
