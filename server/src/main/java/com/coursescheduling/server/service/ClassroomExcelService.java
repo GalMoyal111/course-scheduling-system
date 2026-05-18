@@ -119,6 +119,7 @@ public class ClassroomExcelService {
 	            classroomService.saveClassroomsToFirebase(classrooms);
 	        }
 
+	        classroomService.saveSummary(summary);
 	        return summary;
 	        
 	    } catch (Exception e) {

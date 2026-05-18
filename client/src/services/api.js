@@ -814,3 +814,25 @@ export async function getLatestLecturerUploadSummary() {
 
   return res.json();
 }
+
+
+export async function getLatestRoomUploadSummary() {
+
+  const res = await fetch(`${BASE_URL}/rooms/upload-summary`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+    },
+  });
+
+  if (res.status === 204) {
+    return null;
+  }
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch upload summary: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}

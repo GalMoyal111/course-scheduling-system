@@ -10,6 +10,7 @@ import {
   addRoom,
   deleteClassrooms,
   updateClassroom,
+  getLatestRoomUploadSummary,
 } from "../services/api";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useData } from "../context/DataContext";
@@ -251,6 +252,23 @@ function UploadRoomsPage() {
     });
   }, [classrooms, query]);
 
+  const handleShowLatestSummary = async () => {
+    try {
+      const summary = await getLatestRoomUploadSummary();
+
+      if (!summary) {
+        showError("No recent upload summary found.");
+        return;
+      }
+
+      setUploadSummary(summary);
+      setIsSummaryModalOpen(true);
+    } catch (error) {
+      console.error(error);
+      showError("Failed to load summary.");
+    }
+  };
+
   return (
     <div>
       <div className="toolbar">
@@ -326,6 +344,17 @@ function UploadRoomsPage() {
             </svg>
             Add Room
           </Button>
+
+          <Button onClick={handleShowLatestSummary} variant="secondary">
+            <span
+              className="material-icons"
+              style={{ fontSize: 18, marginRight: 8 }}
+            >
+              history
+            </span>
+            Latest Summary
+          </Button>
+
           <Button onClick={handleExport} disabled={exporting}>
             <svg
               width="14"

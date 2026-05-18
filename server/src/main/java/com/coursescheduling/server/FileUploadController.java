@@ -425,5 +425,21 @@ public class FileUploadController {
         return ResponseEntity.ok(summary);
     }
     
+    @GetMapping("/rooms/upload-summary")
+    public ResponseEntity<ClassroomExcelService.ClassroomUploadSummary>
+    getLatestRoomUploadSummary() {
+
+        ClassroomExcelService.ClassroomUploadSummary summary =
+                classroomService.getLatestSummary();
+
+        if (summary == null) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(summary);
+    }
+    
+    
+    
     
 }

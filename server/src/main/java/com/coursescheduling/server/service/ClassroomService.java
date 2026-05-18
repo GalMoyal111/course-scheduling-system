@@ -8,6 +8,7 @@ import com.google.firebase.cloud.FirestoreClient;
 import com.google.api.core.ApiFuture;
 import org.springframework.stereotype.Service;
 import java.util.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class ClassroomService {
@@ -15,7 +16,7 @@ public class ClassroomService {
 	private List<Classroom> cachedClassrooms = null;
 	private long lastFetchTime = 0;
 	private static final long CACHE_DURATION = 60 * 60 * 1000;
-	
+	private ClassroomExcelService.ClassroomUploadSummary cachedSummary = null;
 
     public void saveClassroomsToFirebase(List<Classroom> classrooms) throws Exception {
  	
@@ -199,6 +200,57 @@ public class ClassroomService {
 
     }
     
+    
+    public void saveSummary(ClassroomExcelService.ClassroomUploadSummary summary) {
+
+        this.cachedSummary = summary;
+
+        Firestore db = FirestoreClient.getFirestore();
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        Map<String, Object> summaryMap = mapper.convertValue(summary, Map.class);
+
+        db.collection("system_data")
+          .document("lastClassroomUploadSummary")
+          .set(summaryMap);
+    }
+    
+    
+    public ClassroomExcelService.ClassroomUploadSummary getLatestSummary() {
+
+        if (this.cachedSummary != null) {
+            return this.cachedSummary;
+        }
+
+        Firestore db = FirestoreClient.getFirestore();
+
+        try {
+
+            var doc = db.collection("system_data")
+                    .document("lastClassroomUploadSummary")
+                    .get()
+                    .get();
+
+            if (doc.exists()) {
+
+                ObjectMapper mapper = new ObjectMapper();
+
+                this.cachedSummary =
+                        mapper.convertValue(
+                                doc.getData(),
+                                ClassroomExcelService.ClassroomUploadSummary.class
+                        );
+
+                return this.cachedSummary;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
     
     
 }
