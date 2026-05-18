@@ -280,7 +280,7 @@ function UploadPage() {
     try {
       const summary = await getLatestLessonUploadSummary();
       if (!summary) {
-        alert("No recent upload summary found."); 
+        showError("No recent upload summary found."); 
         return;
       }
       setUploadSummary(summary);

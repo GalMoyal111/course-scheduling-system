@@ -9,6 +9,7 @@ import {
   updateLecturer,
   uploadLecturersExcel,
   exportLecturersExcel,
+  getLatestLecturerUploadSummary,
 } from "../services/api";
 import Toast, { useToast } from "../components/ui/Toast";
 import "./LecturersPage.css";
@@ -425,6 +426,29 @@ export default function LecturersPage() {
     }
   };
 
+
+  const handleShowLatestSummary = async () => {
+
+  try {
+
+    const summary = await getLatestLecturerUploadSummary();
+
+    if (!summary) {
+      showError("No recent upload summary found.");
+      return;
+    }
+
+    setUploadSummary(summary);
+    setIsSummaryModalOpen(true);
+
+  } catch (error) {
+    console.error(error);
+    showError("Failed to load summary.");
+  }
+};
+
+
+
   return (
     <div className="lecturers-page">
       {/* Top upload + actions section */}
@@ -453,6 +477,20 @@ export default function LecturersPage() {
                 add
               </span>
               Add a lecturer
+            </Button>
+
+            <Button
+              onClick={handleShowLatestSummary}
+              variant="secondary"
+            >
+              <span
+                className="material-icons"
+                style={{ fontSize: 18, marginRight: 8 }}
+              >
+                history
+              </span>
+
+              Latest Summary
             </Button>
             <Button onClick={handleExport} variant="primary">
               <span

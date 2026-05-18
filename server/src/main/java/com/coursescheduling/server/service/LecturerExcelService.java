@@ -173,6 +173,8 @@ public class LecturerExcelService {
                 lecturerService.deleteAllLecturers(); 
                 lecturerService.saveLecturersBatch(lecturersToSave);
             }
+            
+            lecturerService.saveSummary(summary);
 
             return summary;
 

@@ -353,7 +353,6 @@ public class FileUploadController {
     @GetMapping("/lessons/template")
     public ResponseEntity<byte[]> exportLessonsTemplate() {
         try {
-            // שימי לב שכאן זה קורא ל-excelProcessingService לפי הקוד ששלחת
             byte[] excelData = excelProcessingService.exportLessonsTemplate();
 
             return ResponseEntity.ok()
@@ -411,6 +410,20 @@ public class FileUploadController {
 	    
 	    return ResponseEntity.ok(summary);
 	}
+    
+    @GetMapping("/lecturers/upload-summary")
+    public ResponseEntity<LecturerExcelService.LecturerUploadSummary>
+    getLatestLecturerUploadSummary() {
+
+        LecturerExcelService.LecturerUploadSummary summary =
+                lecturerService.getLatestSummary();
+
+        if (summary == null) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(summary);
+    }
     
     
 }

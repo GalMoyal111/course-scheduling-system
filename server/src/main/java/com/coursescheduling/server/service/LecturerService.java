@@ -1,6 +1,7 @@
 package com.coursescheduling.server.service;
 
 import com.coursescheduling.server.model.Lecturer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class LecturerService {
@@ -20,7 +22,8 @@ public class LecturerService {
     private List<Lecturer> cachedLecturers = null;
     private long lastFetchTime = 0;
     private static final long CACHE_DURATION = 60 * 60 * 1000;
-
+    private LecturerExcelService.LecturerUploadSummary cachedSummary = null;
+    
     public List<Lecturer> getAllLecturers() throws Exception {
         if (cachedLecturers != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
             System.out.println("Returning Lecturers from Server Cache");
@@ -131,4 +134,56 @@ public class LecturerService {
 
         }
     }
+    
+    public void saveSummary(LecturerExcelService.LecturerUploadSummary summary) {
+
+        this.cachedSummary = summary;
+
+        Firestore db = FirestoreClient.getFirestore();
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        Map<String, Object> summaryMap = mapper.convertValue(summary, Map.class);
+
+        db.collection("system_data")
+          .document("lastLecturerUploadSummary")
+          .set(summaryMap);
+    }
+    
+    public LecturerExcelService.LecturerUploadSummary getLatestSummary() {
+
+        if (this.cachedSummary != null) {
+            return this.cachedSummary;
+        }
+
+        Firestore db = FirestoreClient.getFirestore();
+
+        try {
+
+            var doc = db.collection("system_data")
+                    .document("lastLecturerUploadSummary")
+                    .get()
+                    .get();
+
+            if (doc.exists()) {
+
+                ObjectMapper mapper = new ObjectMapper();
+
+                this.cachedSummary =
+                        mapper.convertValue(
+                                doc.getData(),
+                                LecturerExcelService.LecturerUploadSummary.class
+                        );
+
+                return this.cachedSummary;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+    
+    
 }
