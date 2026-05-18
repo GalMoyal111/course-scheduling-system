@@ -1,6 +1,7 @@
 package com.coursescheduling.server.service;
 
 import java.util.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
@@ -23,7 +24,7 @@ public class CourseService {
     private List<Course> cachedCourses = null;
     private long lastFetchTime = 0;
     private static final long CACHE_DURATION = 60 * 60 * 1000;
-    
+    private CoursesExcelService.CourseUploadSummary cachedSummary = null;
 
     @Autowired
     @Lazy   
@@ -271,6 +272,57 @@ public class CourseService {
         }
     }
     
+    
+    public void saveSummary(CoursesExcelService.CourseUploadSummary summary) {
+
+        this.cachedSummary = summary;
+
+        Firestore db = FirestoreClient.getFirestore();
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        Map<String, Object> summaryMap =
+                mapper.convertValue(summary, Map.class);
+
+        db.collection("system_data")
+          .document("lastCourseUploadSummary")
+          .set(summaryMap);
+    }
+    
+    public CoursesExcelService.CourseUploadSummary getLatestSummary() {
+
+        if (this.cachedSummary != null) {
+            return this.cachedSummary;
+        }
+
+        Firestore db = FirestoreClient.getFirestore();
+
+        try {
+
+            var doc = db.collection("system_data")
+                    .document("lastCourseUploadSummary")
+                    .get()
+                    .get();
+
+            if (doc.exists()) {
+
+                ObjectMapper mapper = new ObjectMapper();
+
+                this.cachedSummary =
+                        mapper.convertValue(
+                                doc.getData(),
+                                CoursesExcelService.CourseUploadSummary.class
+                        );
+
+                return this.cachedSummary;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
    
 }
    

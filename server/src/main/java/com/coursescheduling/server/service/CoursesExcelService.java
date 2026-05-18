@@ -124,6 +124,9 @@ public class CoursesExcelService {
             List<Course> courses = readCoursesFromExcel(file.getInputStream());
             CourseUploadSummary summary = validateAndSaveCourses(courses);
             System.out.println("Finished processing courses Excel file");
+            
+            courseService.saveSummary(summary);
+
             return summary;
 
         } catch (Exception e) {

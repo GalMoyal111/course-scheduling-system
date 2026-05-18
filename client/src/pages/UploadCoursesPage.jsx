@@ -12,6 +12,7 @@ import {
   addCourse,
   deleteCourses,
   updateCourse,
+  getLatestCourseUploadSummary,
 } from "../services/api";
 import { useData } from "../context/DataContext";
 import Modal from "../components/ui/Modal";
@@ -33,9 +34,11 @@ export default function UploadCoursesPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [invalidCoursesModalOpen, setInvalidCoursesModalOpen] = useState(false);
-  const [invalidCourses, setInvalidCourses] = useState([]);
-  const [adjustedCourses, setAdjustedCourses] = useState([]);
-  const [uploadSavedCount, setUploadSavedCount] = useState(0);
+  const [uploadSummary, setUploadSummary] = useState({
+    savedCount: 0,
+    invalidCourses: [],
+    adjustedCourses: [],
+  });
   const [modalContext, setModalContext] = useState("upload"); // "upload" or "add"
   const [pendingCourse, setPendingCourse] = useState(null);
   const {
@@ -103,9 +106,11 @@ export default function UploadCoursesPage() {
     try {
       const result = await uploadCourses(fileToUpload);
 
-      setUploadSavedCount(result.savedCount || 0);
-      setInvalidCourses(result.invalidCourses || []);
-      setAdjustedCourses(result.adjustedCourses || []);
+      setUploadSummary({
+        savedCount: result.savedCount || 0,
+        invalidCourses: result.invalidCourses || [],
+        adjustedCourses: result.adjustedCourses || [],
+      });
       setModalContext("upload");
       setInvalidCoursesModalOpen(true);
 
@@ -195,15 +200,17 @@ export default function UploadCoursesPage() {
         if (invalidPrereqs.length > 0) {
           // Show warning modal for adding course with missing prerequisites
           setModalContext("add");
-          setInvalidCourses([]);
-          setAdjustedCourses([
-            {
-              courseId: course.courseId,
-              courseName: course.courseName,
-              removedPrerequisites: invalidPrereqs,
-            },
-          ]);
-          setUploadSavedCount(0);
+          setUploadSummary({
+            savedCount: 0,
+            invalidCourses: [],
+            adjustedCourses: [
+              {
+                courseId: course.courseId,
+                courseName: course.courseName,
+                removedPrerequisites: invalidPrereqs,
+              },
+            ],
+          });
           setPendingCourse(course);
           setInvalidCoursesModalOpen(true);
           return;
@@ -306,6 +313,23 @@ export default function UploadCoursesPage() {
     );
   });
 
+  const handleShowLatestSummary = async () => {
+    try {
+      const summary = await getLatestCourseUploadSummary();
+
+      if (!summary) {
+        showError("No recent upload summary found.");
+        return;
+      }
+
+      
+      setUploadSummary(summary);
+      setInvalidCoursesModalOpen(true);
+    } catch (error) {
+      showError("Failed to load summary.");
+    }
+  };
+
   return (
     <div>
       <div className="toolbar">
@@ -375,6 +399,15 @@ export default function UploadCoursesPage() {
               />
             </svg>
             Add Course
+          </Button>
+          <Button onClick={handleShowLatestSummary} variant="secondary">
+            <span
+              className="material-icons"
+              style={{ fontSize: 18, marginRight: 8 }}
+            >
+              history
+            </span>
+            Latest Summary
           </Button>
           <Button onClick={handleExport} disabled={exporting}>
             <svg
@@ -500,14 +533,17 @@ export default function UploadCoursesPage() {
 
       <InvalidCoursesModal
         isOpen={invalidCoursesModalOpen}
-        invalidCourses={invalidCourses}
-        adjustedCourses={adjustedCourses}
-        savedCount={uploadSavedCount}
+        invalidCourses={uploadSummary.invalidCourses}
+        adjustedCourses={uploadSummary.adjustedCourses}
+        savedCount={uploadSummary.savedCount}
         context={modalContext}
         onClose={() => {
           setInvalidCoursesModalOpen(false);
-          setInvalidCourses([]);
-          setAdjustedCourses([]);
+          setUploadSummary({
+            savedCount: 0,
+            invalidCourses: [],
+            adjustedCourses: [],
+          });
           setPendingCourse(null);
         }}
         onContinueAnyway={async () => {
@@ -537,8 +573,11 @@ export default function UploadCoursesPage() {
               showError("Failed to add course");
             }
             setInvalidCoursesModalOpen(false);
-            setInvalidCourses([]);
-            setAdjustedCourses([]);
+            setUploadSummary({
+              savedCount: 0,
+              invalidCourses: [],
+              adjustedCourses: [],
+            });
             setPendingCourse(null);
           }
         }}

@@ -439,6 +439,19 @@ public class FileUploadController {
         return ResponseEntity.ok(summary);
     }
     
+    @GetMapping("/courses/upload-summary")
+    public ResponseEntity<CoursesExcelService.CourseUploadSummary>
+    getLatestCourseUploadSummary() {
+
+        CoursesExcelService.CourseUploadSummary summary =
+                courseService.getLatestSummary();
+
+        if (summary == null) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(summary);
+    }
     
     
     
