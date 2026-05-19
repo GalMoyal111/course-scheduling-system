@@ -13,13 +13,14 @@ export default function AddCourseModal({
   initialCourse = null,
   allCourses = [],
 }) {
-  const { clusters, fetchClustersIfNeeded } = useData();
+  const { clusters, fetchClustersIfNeeded, requiredCapacities, fetchClassroomSizeSettingsIfNeeded } = useData();
   const { toast, showSuccess, showError, closeToast } = useToast();
 
   // Initialize clusters on mount
   useEffect(() => {
     fetchClustersIfNeeded("AddCourseModal");
-  }, [fetchClustersIfNeeded]);
+    fetchClassroomSizeSettingsIfNeeded("AddCourseModal");
+  }, [fetchClustersIfNeeded, fetchClassroomSizeSettingsIfNeeded]);
 
   // Build dynamic cluster mappings from DataContext
   const clusterMappings = useMemo(() => {
@@ -46,6 +47,12 @@ export default function AddCourseModal({
   const [lectureHours, setLectureHours] = useState("");
   const [tutorialHours, setTutorialHours] = useState("");
   const [labHours, setLabHours] = useState("");
+  const [lectureNumberStudents, setLectureNumberStudents] = useState("");
+  const [tutorialNumberStudents, setTutorialNumberStudents] = useState("");
+  const [labNumberStudents, setLabNumberStudents] = useState("");
+  const [isLectureStudentsEditable, setIsLectureStudentsEditable] = useState(false);
+  const [isTutorialStudentsEditable, setIsTutorialStudentsEditable] = useState(false);
+  const [isLabStudentsEditable, setIsLabStudentsEditable] = useState(false);
   const [projectHours, setProjectHours] = useState("");
   const [credits, setCredits] = useState("");
   const [isCreditsEditable, setIsCreditsEditable] = useState(false);
@@ -55,6 +62,8 @@ export default function AddCourseModal({
   const [duplicateCourseWarning, setDuplicateCourseWarning] = useState(null);
   const [pendingCourse, setPendingCourse] = useState(null);
   const [creditsEditWarningOpen, setCreditsEditWarningOpen] = useState(false);
+  const [studentsEditWarningOpen, setStudentsEditWarningOpen] = useState(false);
+  const [pendingStudentsField, setPendingStudentsField] = useState(null);
 
   // Helper function to reset form state to initial values
   const resetForm = () => {
@@ -65,6 +74,12 @@ export default function AddCourseModal({
     setLectureHours("");
     setTutorialHours("");
     setLabHours("");
+    setLectureNumberStudents("");
+    setTutorialNumberStudents("");
+    setLabNumberStudents("");
+    setIsLectureStudentsEditable(false);
+    setIsTutorialStudentsEditable(false);
+    setIsLabStudentsEditable(false);
     setProjectHours("");
     setCredits("");
     setIsCreditsEditable(false);
@@ -74,6 +89,8 @@ export default function AddCourseModal({
     setDuplicateCourseWarning(null);
     setPendingCourse(null);
     setCreditsEditWarningOpen(false);
+    setStudentsEditWarningOpen(false);
+    setPendingStudentsField(null);
   };
 
   // Initialize fields when modal opens or when initialCourse changes
@@ -112,6 +129,23 @@ export default function AddCourseModal({
       setLabHours(
         initialCourse.labHours != null ? String(initialCourse.labHours) : "",
       );
+      setLectureNumberStudents(
+        initialCourse.lectureNumberStudents != null
+          ? String(initialCourse.lectureNumberStudents)
+          : "",
+      );
+
+      setTutorialNumberStudents(
+        initialCourse.tutorialNumberStudents != null
+          ? String(initialCourse.tutorialNumberStudents)
+          : "",
+      );
+
+      setLabNumberStudents(
+        initialCourse.labNumberStudents != null
+          ? String(initialCourse.labNumberStudents)
+          : "",
+      );
       setProjectHours(
         initialCourse.projectHours != null
           ? String(initialCourse.projectHours)
@@ -121,6 +155,9 @@ export default function AddCourseModal({
         initialCourse.credits != null ? String(initialCourse.credits) : "",
       );
       setIsCreditsEditable(false);
+      setIsLectureStudentsEditable(false);
+      setIsTutorialStudentsEditable(false);
+      setIsLabStudentsEditable(false);
     } else {
       resetForm();
     }
@@ -166,6 +203,22 @@ export default function AddCourseModal({
         `Please enter a valid non-negative number for ${fieldName}.`,
       );
     }
+    return parsed;
+  };
+
+  const toPositiveIntOrDefault = (value, defaultValue, fieldName) => {
+    const trimmed = String(value ?? "").trim();
+
+    if (trimmed === "") {
+      return defaultValue;
+    }
+
+    const parsed = parseInt(trimmed, 10);
+
+    if (isNaN(parsed) || parsed <= 0) {
+      throw new Error(`Please enter a valid positive number for ${fieldName}.`);
+    }
+
     return parsed;
   };
 
@@ -248,6 +301,29 @@ export default function AddCourseModal({
     setCreditsEditWarningOpen(false);
   };
 
+  const enableStudentsEdit = (field) => {
+  setPendingStudentsField(field);
+  setStudentsEditWarningOpen(true);
+};
+
+  const confirmStudentsEdit = () => {
+    if (pendingStudentsField === "lecture") {
+      setIsLectureStudentsEditable(true);
+    } else if (pendingStudentsField === "tutorial") {
+      setIsTutorialStudentsEditable(true);
+    } else if (pendingStudentsField === "lab") {
+      setIsLabStudentsEditable(true);
+    }
+
+    setStudentsEditWarningOpen(false);
+    setPendingStudentsField(null);
+  };
+
+  const cancelStudentsEdit = () => {
+    setStudentsEditWarningOpen(false);
+    setPendingStudentsField(null);
+  };
+
   const handleRemovePrerequisite = (codeToRemove) => {
     setPrerequisiteCourseNumbers((prev) =>
       prev.filter((code) => code !== codeToRemove),
@@ -290,6 +366,9 @@ export default function AddCourseModal({
         lectureHours: toNonNegativeInt(lectureHours, "lecture hours"),
         tutorialHours: toNonNegativeInt(tutorialHours, "tutorial hours"),
         labHours: toNonNegativeInt(labHours, "lab hours"),
+        lectureNumberStudents: toPositiveIntOrDefault(lectureNumberStudents, requiredCapacities.LECTURE, "lecture number of students"),
+        tutorialNumberStudents: toPositiveIntOrDefault(tutorialNumberStudents, requiredCapacities.TUTORIAL, "tutorial number of students"),
+        labNumberStudents: toPositiveIntOrDefault(labNumberStudents, requiredCapacities.LAB, "lab number of students"),
         projectHours: toNonNegativeInt(projectHours, "project hours"),
         credits: toNonNegativeFloat(credits, "credits"),
         clusterName: clusterName.trim(), // <--- השם של האשכול (סמסטר 1, מדעים וכו')
@@ -400,6 +479,32 @@ export default function AddCourseModal({
         }
       >
         <p>Automatic credits calculation will be turned off. Are you sure?</p>
+      </Modal>
+    );
+  }
+
+  if (studentsEditWarningOpen) {
+    return (
+      <Modal
+        isOpen={true}
+        onClose={cancelStudentsEdit}
+        title="⚠️ Edit Number of Students?"
+        variant="warning"
+        footer={
+          <>
+            <Button variant="ghost" onClick={cancelStudentsEdit}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={confirmStudentsEdit}>
+              Yes, Edit Manually
+            </Button>
+          </>
+        }
+      >
+        <p>
+          This value is usually taken from the default classroom size settings.
+          Are you sure you want to edit it manually for this course?
+        </p>
       </Modal>
     );
   }
@@ -555,6 +660,119 @@ export default function AddCourseModal({
               value={labHours}
               onChange={(e) => setLabHours(keepDigitsOnly(e.target.value))}
               required
+            />
+          </div>
+
+          <div className="form-field">
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "8px",
+              }}
+            >
+              Lecture Number Students
+              {!isLectureStudentsEditable && (
+                <button
+                  type="button"
+                  onClick={() => enableStudentsEdit("lecture")}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    color: "#4f46e5",
+                    display: "inline-flex",
+                    padding: 0,
+                  }}
+                >
+                  <span className="material-icons" style={{ fontSize: 18 }}>
+                    edit
+                  </span>
+                </button>
+              )}
+            </label>
+
+            <input
+              className="ui-input"
+              value={lectureNumberStudents}
+              readOnly={!isLectureStudentsEditable}
+              onChange={(e) => setLectureNumberStudents(keepDigitsOnly(e.target.value))}
+            />
+          </div>
+
+          <div className="form-field">
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "8px",
+              }}
+            >
+              Tutorial Number Students
+              {!isTutorialStudentsEditable && (
+                <button
+                  type="button"
+                  onClick={() => enableStudentsEdit("tutorial")}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    color: "#4f46e5",
+                    display: "inline-flex",
+                    padding: 0,
+                  }}
+                >
+                  <span className="material-icons" style={{ fontSize: 18 }}>
+                    edit
+                  </span>
+                </button>
+              )}
+            </label>
+
+            <input
+              className="ui-input"
+              value={tutorialNumberStudents}
+              readOnly={!isTutorialStudentsEditable}
+              onChange={(e) => setTutorialNumberStudents(keepDigitsOnly(e.target.value))}
+            />
+          </div>
+
+          <div className="form-field">
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "8px",
+              }}
+            >
+              Lab Number Students
+              {!isLabStudentsEditable && (
+                <button
+                  type="button"
+                  onClick={() => enableStudentsEdit("lab")}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    color: "#4f46e5",
+                    display: "inline-flex",
+                    padding: 0,
+                  }}
+                >
+                  <span className="material-icons" style={{ fontSize: 18 }}>
+                    edit
+                  </span>
+                </button>
+              )}
+            </label>
+            <input
+              className="ui-input"
+              value={labNumberStudents}
+              readOnly={!isLabStudentsEditable}
+              onChange={(e) => setLabNumberStudents(keepDigitsOnly(e.target.value))}
             />
           </div>
 
