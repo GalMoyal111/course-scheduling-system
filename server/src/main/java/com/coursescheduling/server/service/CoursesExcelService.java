@@ -510,6 +510,7 @@ public class CoursesExcelService {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Courses");
 
+        
         Row header = sheet.createRow(0);
         header.createCell(0).setCellValue("Course Code");
         header.createCell(1).setCellValue("Course Name");
@@ -523,6 +524,35 @@ public class CoursesExcelService {
         header.createCell(9).setCellValue("Lecture Number Students");
         header.createCell(10).setCellValue("Tutorial Number Students");
         header.createCell(11).setCellValue("Lab Number Students");
+        
+        Row example = sheet.createRow(1);
+        example.createCell(0).setCellValue("111111");
+        example.createCell(1).setCellValue("אלגורימתמים");
+        example.createCell(2).setCellValue("");
+        example.createCell(3).setCellValue("4");
+        example.createCell(4).setCellValue("2");
+        example.createCell(5).setCellValue("0");
+        example.createCell(6).setCellValue("0");
+        example.createCell(7).setCellValue("5");
+        example.createCell(8).setCellValue("סמסטר 4");
+        example.createCell(9).setCellValue("");
+        example.createCell(10).setCellValue("");
+        example.createCell(11).setCellValue("");
+
+        Row example2 = sheet.createRow(2);
+        example2.createCell(0).setCellValue("222222");
+        example2.createCell(1).setCellValue("מערכות הפעלה");
+        example2.createCell(2).setCellValue("");
+        example2.createCell(3).setCellValue("4");
+        example2.createCell(4).setCellValue("2");
+        example2.createCell(5).setCellValue("0");
+        example2.createCell(6).setCellValue("0");
+        example2.createCell(7).setCellValue("5");
+        example2.createCell(8).setCellValue("סמסטר 4");
+        example2.createCell(9).setCellValue("40");
+        example2.createCell(10).setCellValue("");
+        example2.createCell(11).setCellValue("");
+
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         workbook.write(out);

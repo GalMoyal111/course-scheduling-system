@@ -44,6 +44,10 @@ public class SoftConstraintEvaluator {
             	normalizedPenalty = normalizedPenalty*3; 
         	}
             
+            if(constraint.getName() == "MandatoryMorningPreferred") {
+            	normalizedPenalty = normalizedPenalty*2;
+            }
+            
             
             double finalPenalty = normalizedPenalty * userWeight;
             totalPenalty += finalPenalty;          

@@ -258,6 +258,12 @@ public class ClassroomExcelService {
 	    header.createCell(1).setCellValue("Classroom");
 	    header.createCell(2).setCellValue("Capacity");
 	    header.createCell(3).setCellValue("Type");
+	    
+	    Row example = sheet.createRow(1);
+	    example.createCell(0).setCellValue("A");
+	    example.createCell(1).setCellValue("A100");
+	    example.createCell(2).setCellValue("50");
+	    example.createCell(3).setCellValue("NORMAL");
 
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
 	    workbook.write(out);

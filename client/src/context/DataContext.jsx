@@ -34,7 +34,8 @@ export function DataProvider({ children }) {
     "LecturerPreference": 5.0,
     "EnglishCourseTiming": 5.0,
     "LoadBalancing": 5.0,
-    "ClusterOverlap": 5.0
+    "ClusterOverlap": 5.0,
+    "ClusterCompactness": 5.0
   });
   const [manualAssignments, setManualAssignments] = useState([]);
   const [hardCourses, setHardCourses] = useState([]);

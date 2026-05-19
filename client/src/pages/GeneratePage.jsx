@@ -188,6 +188,10 @@ export default function GeneratePage() {
       label: "Cluster Overlap Avoidance",
       desc: "Crucial: Prevents scheduling two courses from the same track or semester at the same time, ensuring students can attend both.",
     },
+    ClusterCompactness: { 
+      label: "Minimize Student Windows",
+      desc: "Prevents annoying gaps (windows) between classes for students in the same semester, and aligns lessons to standard blocks.",
+    }
   };
 
   const handleSemesterChange = (e) => {

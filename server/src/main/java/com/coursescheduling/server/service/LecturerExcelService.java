@@ -238,6 +238,20 @@ public class LecturerExcelService {
 	    header.createCell(2).setCellValue("Hard Block Hour");
 	    header.createCell(3).setCellValue("Prefer Not Day");
 	    header.createCell(4).setCellValue("Prefer Not Hour");
+	    
+	    Row example = sheet.createRow(1);
+	    example.createCell(0).setCellValue("קרמר ילנה");
+	    example.createCell(1).setCellValue("1");
+	    example.createCell(2).setCellValue("1");
+	    example.createCell(3).setCellValue("");
+	    example.createCell(4).setCellValue("");
+	    
+	    Row example2 = sheet.createRow(2);
+	    example2.createCell(0).setCellValue("קרמר ילנה");
+	    example2.createCell(1).setCellValue("");
+	    example2.createCell(2).setCellValue("");
+	    example2.createCell(3).setCellValue("2");
+	    example2.createCell(4).setCellValue("1");
 
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
 	    workbook.write(out);

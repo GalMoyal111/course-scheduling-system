@@ -317,6 +317,16 @@ public class ExcelProcessingService {
 	    header.createCell(5).setCellValue("סמסטר");
 	    header.createCell(6).setCellValue("מחלקה");
 	    header.createCell(7).setCellValue("שע'");
+		
+		Row example = sheet.createRow(1);
+	    example.createCell(0).setCellValue("111111");
+	    example.createCell(1).setCellValue("אלגוריתמים");
+	    example.createCell(2).setCellValue("הרצאה");
+	    example.createCell(3).setCellValue("קרמר ילנה");
+	    example.createCell(4).setCellValue("");
+	    example.createCell(5).setCellValue("סמסטר א");
+	    example.createCell(6).setCellValue("");
+	    example.createCell(7).setCellValue("");
 
 	    
 
