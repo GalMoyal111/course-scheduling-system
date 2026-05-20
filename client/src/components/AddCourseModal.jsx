@@ -697,6 +697,7 @@ export default function AddCourseModal({
               className="ui-input"
               value={lectureNumberStudents}
               readOnly={!isLectureStudentsEditable}
+              placeholder={`Default: ${requiredCapacities.LECTURE}`}
               onChange={(e) => setLectureNumberStudents(keepDigitsOnly(e.target.value))}
             />
           </div>
@@ -735,6 +736,7 @@ export default function AddCourseModal({
               className="ui-input"
               value={tutorialNumberStudents}
               readOnly={!isTutorialStudentsEditable}
+              placeholder={`Default: ${requiredCapacities.TUTORIAL}`}
               onChange={(e) => setTutorialNumberStudents(keepDigitsOnly(e.target.value))}
             />
           </div>
@@ -772,6 +774,7 @@ export default function AddCourseModal({
               className="ui-input"
               value={labNumberStudents}
               readOnly={!isLabStudentsEditable}
+              placeholder={`Default: ${requiredCapacities.LAB}`}
               onChange={(e) => setLabNumberStudents(keepDigitsOnly(e.target.value))}
             />
           </div>
