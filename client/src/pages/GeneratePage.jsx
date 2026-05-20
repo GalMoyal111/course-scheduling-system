@@ -55,6 +55,7 @@ export default function GeneratePage() {
   // Extracting necessary data and functions from the DataContext
   const {
     setSchedule,
+    setCurrentTimetableMetadata,
     fetchLessonsIfNeeded,
     fetchLecturersIfNeeded,
     fetchClassroomsIfNeeded,
@@ -256,6 +257,7 @@ export default function GeneratePage() {
 
       const generatedSchedule = await generateTimetable(requestData);
       setSchedule(generatedSchedule);
+      setCurrentTimetableMetadata(null);
       navigate("/timetable");
     } catch (err) {
       console.error("Full Error Object:", err);

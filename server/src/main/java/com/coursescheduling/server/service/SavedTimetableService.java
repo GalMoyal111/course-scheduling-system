@@ -11,7 +11,7 @@ import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteBatch;
 import com.google.firebase.cloud.FirestoreClient;
-
+import com.google.cloud.firestore.FieldValue;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -123,6 +123,29 @@ public class SavedTimetableService {
         return mainDocRef.get().get().toObject(SavedTimetableMetadata.class);
     }
 
+    public SavedTimetableMetadata removeLessonFromTimetable(String timetableId, String lessonId) throws Exception {
+        Firestore db = FirestoreClient.getFirestore();
+
+        DocumentReference mainDocRef = db.collection(MAIN_COLLECTION).document(timetableId);
+
+        DocumentReference subDocRef = mainDocRef
+                .collection(SUB_COLLECTION)
+                .document("full_array");
+
+        subDocRef.update("removedLessonIds", FieldValue.arrayUnion(lessonId)).get();
+
+        if (timetableDataCache.containsKey(timetableId)) {
+            List<ScheduledLessonDTO> updatedSchedule = timetableDataCache.get(timetableId)
+                    .stream()
+                    .filter(lesson -> !lessonId.equals(lesson.getLessonId()))
+                    .collect(Collectors.toList());
+
+            timetableDataCache.put(timetableId, updatedSchedule);
+        }
+
+        return mainDocRef.get().get().toObject(SavedTimetableMetadata.class);
+    }
+
     public List<SavedTimetableMetadata> getAllSavedMetadata() throws Exception {
     	
     	if (cachedMetadata != null && (System.currentTimeMillis() - lastFetchTimeMetadata < CACHE_DURATION)) {
@@ -163,8 +186,17 @@ public class SavedTimetableService {
         ScheduleWrapper wrapper = subDocRef.get().get().toObject(ScheduleWrapper.class);
         
         if (wrapper != null && wrapper.getLessons() != null) {
-        	timetableDataCache.put(timetableId, wrapper.getLessons());
-            return wrapper.getLessons();
+            List<ScheduledLessonDTO> lessons = wrapper.getLessons();
+            List<String> removedLessonIds = wrapper.getRemovedLessonIds();
+
+            if (removedLessonIds != null && !removedLessonIds.isEmpty()) {
+                lessons = lessons.stream()
+                        .filter(lesson -> !removedLessonIds.contains(lesson.getLessonId()))
+                        .collect(Collectors.toList());
+            }
+
+            timetableDataCache.put(timetableId, lessons);
+            return lessons;
         }
         
         
@@ -175,11 +207,13 @@ public class SavedTimetableService {
     
     public static class ScheduleWrapper {
         private List<ScheduledLessonDTO> lessons;
+        private List<String> removedLessonIds;
 
         public ScheduleWrapper() {} 
 
         public ScheduleWrapper(List<ScheduledLessonDTO> lessons) {
             this.lessons = lessons;
+            this.removedLessonIds = new ArrayList<>();
         }
 
         public List<ScheduledLessonDTO> getLessons() {
@@ -188,6 +222,14 @@ public class SavedTimetableService {
 
         public void setLessons(List<ScheduledLessonDTO> lessons) {
             this.lessons = lessons;
+        }
+
+        public List<String> getRemovedLessonIds() {
+            return removedLessonIds;
+        }
+
+        public void setRemovedLessonIds(List<String> removedLessonIds) {
+            this.removedLessonIds = removedLessonIds;
         }
     }
 

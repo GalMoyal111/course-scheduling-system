@@ -264,7 +264,8 @@ public class TimetableAlgorithmService {
                     val.getStartFrame(),
                     var.getDuration(),
                     val.getRoom(),
-                    var.getCluster()
+                    var.getCluster(), 
+                    var.getLessonId()
                 );
                 results.add(dto);
             }

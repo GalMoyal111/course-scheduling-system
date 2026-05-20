@@ -1,18 +1,22 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Button from "../components/ui/Button";
 import Footer from "../components/ui/Footer";
+import ConfirmModal from "../components/ConfirmModal";
 import { useData } from "../context/DataContext";
 import Toast, { useToast } from "../components/ui/Toast";
 import "./TimetablePage.css";
 import Modal from "../components/ui/Modal";
-import { saveTimetable, exportCurrentToExcel } from "../services/api";
+import { saveTimetable, exportCurrentToExcel, removeLessonFromSavedTimetable } from "../services/api";
 
 export default function TimetablePage() {
-  const { schedule, clusters, invalidateHistoryCache, clusterMappings } =
+  const { schedule, clusters, invalidateHistoryCache, clusterMappings, currentTimetableMetadata } =
     useData();
   const { toast, showSuccess, showError, closeToast } = useToast();
   const [selectedCluster, setSelectedCluster] = useState("ALL");
   const [isExporting, setIsExporting] = useState(false);
+  const [editableSchedule, setEditableSchedule] = useState([]);
+  const [lessonToDelete, setLessonToDelete] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const clusterMapping = clusterMappings.numToName;
 
@@ -35,6 +39,10 @@ export default function TimetablePage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  useEffect(() => {
+    setEditableSchedule(Array.isArray(schedule) ? schedule : []);
+  }, [schedule]);
 
   const hebrewDays = [
     { name: "ראשון", index: 1 },
@@ -62,14 +70,14 @@ export default function TimetablePage() {
   ];
 
   const clusterOptions = useMemo(() => {
-    if (!Array.isArray(schedule) || schedule.length === 0) {
+    if (!Array.isArray(editableSchedule) || editableSchedule.length === 0) {
       return [{ value: "ALL", label: "All clusters" }];
     }
 
     // Filter for regular semester clusters (those in semesterRange)
     const regularClusters = Array.from(
       new Set(
-        schedule
+        editableSchedule
           .map((lesson) => Number(lesson.cluster))
           .filter(
             (cluster) =>
@@ -85,12 +93,12 @@ export default function TimetablePage() {
       options.push({ value: String(cluster), label });
     });
 
-    if (schedule.some((lesson) => Number(lesson.cluster) >= 9)) {
+    if (editableSchedule.some((lesson) => Number(lesson.cluster) >= 9)) {
       options.push({ value: "ELECTIVES", label: "Elective courses" });
     }
 
     return options;
-  }, [schedule, semesterRange, clusterMapping]);
+  }, [editableSchedule, semesterRange, clusterMapping]);
 
   // Translates lesson types from English to Hebrew for display in the timetable. If the type is not recognized, it returns the original type string.
   const translateType = (type) => {
@@ -106,23 +114,23 @@ export default function TimetablePage() {
   };
 
   const visibleSchedule = useMemo(() => {
-    if (!Array.isArray(schedule)) {
+    if (!Array.isArray(editableSchedule)) {
       return [];
     }
 
     if (selectedCluster === "ALL") {
-      return schedule;
+      return editableSchedule;
     }
 
     if (selectedCluster === "ELECTIVES") {
-      return schedule.filter((lesson) => Number(lesson.cluster) >= 9);
+      return editableSchedule.filter((lesson) => Number(lesson.cluster) >= 9);
     }
 
     const clusterNumber = Number(selectedCluster);
-    return schedule.filter(
+    return editableSchedule.filter(
       (lesson) => Number(lesson.cluster) === clusterNumber,
     );
-  }, [schedule, selectedCluster]);
+  }, [editableSchedule, selectedCluster]);
 
   const getVisibleLessonsForSlot = (day, frame) => {
     if (!frame) return [];
@@ -138,6 +146,37 @@ export default function TimetablePage() {
     setIsSaveModalOpen(true);
   };
 
+  const handleDeleteClick = (lesson) => {
+    setLessonToDelete(lesson);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!lessonToDelete?.lessonId) return;
+
+    const lessonId = lessonToDelete.lessonId;
+    const timetableId = currentTimetableMetadata?.id;
+
+    setEditableSchedule((prev) =>
+      prev.filter((lesson) => lesson.lessonId !== lessonId)
+    );
+
+    setIsDeleteModalOpen(false);
+    setLessonToDelete(null);
+
+    if (!timetableId) {
+      return;
+    }
+
+    try {
+      await removeLessonFromSavedTimetable(timetableId, lessonId);
+      showSuccess("Lesson removed successfully.");
+    } catch (error) {
+      console.error("Failed to remove lesson from saved timetable:", error);
+      showError("Failed to save lesson removal. Please refresh and try again.");
+    }
+  };
+
   // Handles the confirmation of saving the timetable. Validates that a name is entered, then sends the save request to the backend. Shows success or error messages based on the result, and invalidates the history cache to ensure the new timetable appears in the history page.
   const handleConfirmSave = async () => {
     if (!saveName.trim()) {
@@ -151,7 +190,7 @@ export default function TimetablePage() {
       const requestData = {
         name: saveName.trim(),
         semester: saveSemester,
-        schedule: schedule,
+        schedule: editableSchedule,
       };
 
       await saveTimetable(requestData);
@@ -171,11 +210,11 @@ export default function TimetablePage() {
 
   // Handles exporting the current timetable to an Excel file. Validates that there is a schedule to export, then calls the export API and triggers a download of the generated file. Shows success or error messages based on the result.
   const handleExportExcel = async () => {
-    if (!schedule || schedule.length === 0) return;
+    if (!editableSchedule || editableSchedule.length === 0) return;
 
     setIsExporting(true);
     try {
-      const blob = await exportCurrentToExcel(schedule);
+      const blob = await exportCurrentToExcel(editableSchedule);
 
       const url = window.URL.createObjectURL(new Blob([blob]));
       const link = document.createElement("a");
@@ -302,8 +341,22 @@ export default function TimetablePage() {
                         {timeItem.isBreak ? (
                           <div className="break-text">הפסקה</div>
                         ) : (
-                          lessons.map((l, i) => (
+                        lessons.map((l, i) => {
+                          const isFirstFrame = timeItem.frame === l.startFrame;
+
+                          return (
                             <div key={i} className="lesson-card">
+                              {isFirstFrame && (
+                                <button
+                                  type="button"
+                                  className="lesson-delete-btn"
+                                  title="Remove lesson"
+                                  onClick={() => handleDeleteClick(l)}
+                                >
+                                  ×
+                                </button>
+                              )}
+
                               <div className="lesson-header">
                                 <span
                                   className="lesson-course"
@@ -315,6 +368,7 @@ export default function TimetablePage() {
                                   {translateType(l.type)}
                                 </span>
                               </div>
+
                               <div className="lesson-lecturer">
                                 <span
                                   style={{
@@ -326,17 +380,18 @@ export default function TimetablePage() {
                                 </span>
                                 • {l.lecturer}
                               </div>
+
                               {l.room && (
                                 <div className="lesson-room">
                                   <span className="material-icons">
                                     location_on
                                   </span>
-                                  {l.room.classroomName}{" "}
-                                  {/* <--- כאן שינינו ל-classroomName */}
+                                  {l.room.classroomName}
                                 </div>
                               )}
                             </div>
-                          ))
+                          );
+                        })
                         )}
                       </td>
                     );
@@ -392,7 +447,20 @@ export default function TimetablePage() {
           </select>
         </div>
       </Modal>
-
+        <ConfirmModal
+          isOpen={isDeleteModalOpen}
+          title="Remove Lesson"
+          message="Are you sure you want to remove this lesson from the timetable? Once you confirm, it will be deleted and cannot be undone."
+          fileName={
+            lessonToDelete
+              ? `${lessonToDelete.courseName || lessonToDelete.courseId} - ${translateType(lessonToDelete.type)}`
+              : ""
+          }
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setIsDeleteModalOpen(false)}
+          confirmLabel="Remove"
+          cancelLabel="Cancel"
+        />
       <Toast toast={toast} onClose={closeToast} />
     </div>
   );

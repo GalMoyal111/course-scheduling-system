@@ -639,6 +639,27 @@ export async function deleteTimetable(id) {
   return res.text();
 }
 
+export async function removeLessonFromSavedTimetable(timetableId, lessonId) {
+  const res = await fetch(
+    `${BASE_URL}/timetable/history/${timetableId}/remove-lesson`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ lessonId }),
+    }
+  );
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to remove lesson from timetable: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}
+
 export async function renameTimetable(id, newName) {
   const res = await fetch(`${BASE_URL}/timetable/history/${id}/rename`, {
     method: "POST",

@@ -61,6 +61,20 @@ public class TimetableController {
         String newName = body.getOrDefault("name", "");
         return savedTimetableService.updateTimetableName(id, newName);
     }
+
+    @PostMapping("/history/{id}/remove-lesson")
+    public SavedTimetableMetadata removeLessonFromSavedTimetable(
+            @PathVariable String id,
+            @RequestBody Map<String, String> body
+    ) throws Exception {
+        String lessonId = body.get("lessonId");
+
+        if (lessonId == null || lessonId.isBlank()) {
+            throw new IllegalArgumentException("lessonId is required");
+        }
+
+        return savedTimetableService.removeLessonFromTimetable(id, lessonId);
+    }
     
     
     @PostMapping("/export/current")

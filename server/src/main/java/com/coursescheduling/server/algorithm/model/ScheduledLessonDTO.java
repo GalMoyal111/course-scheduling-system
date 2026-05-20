@@ -13,9 +13,11 @@ public class ScheduledLessonDTO {
     private int duration;
     private Classroom room;
 	private int cluster;
+	private String lessonId;
     
     
-	public ScheduledLessonDTO(String courseId,String courseName, String type, String lecturer, int day, int startFrame, int duration, Classroom room, int cluster) {
+	public ScheduledLessonDTO(String courseId,String courseName, String type, String lecturer, int day, 
+		int startFrame, int duration, Classroom room, int cluster, String lessonId) {
         this.courseId = courseId;
         this.courseName = courseName;
         this.type = type;
@@ -25,6 +27,7 @@ public class ScheduledLessonDTO {
         this.duration = duration;
         this.room = room;
 		this.cluster = cluster;
+		this.lessonId = lessonId;
     }
 
 	public ScheduledLessonDTO() {
@@ -115,6 +118,14 @@ public class ScheduledLessonDTO {
 
 	public void setCluster(int cluster) {
 		this.cluster = cluster;
+	}
+
+	public String getLessonId() {
+		return lessonId;
+	}
+
+	public void setLessonId(String lessonId) {
+		this.lessonId = lessonId;
 	}
 
 
