@@ -229,11 +229,6 @@ export default function GeneratePage() {
       constraints: [
         "PreferMorningForHardCourses",
         "InconvenientTiming",
-      ]
-    },
-    "Student Groups & Clusters": {
-      icon: "people_alt",
-      constraints: [
         "ClusterOverlap",
         "ClusterCompactness",
       ]
