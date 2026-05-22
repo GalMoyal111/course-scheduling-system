@@ -197,13 +197,7 @@ export default function GeneratePage() {
 
   // Group constraints by category for better organization
   const constraintCategories = {
-    "Lecturer Constraints": {
-      icon: "person",
-      constraints: [
-        "LecturerCompactSchedule",
-        "LecturerPreference",
-      ]
-    },
+    
     "Course Scheduling": {
       icon: "schedule",
       constraints: [
@@ -219,6 +213,15 @@ export default function GeneratePage() {
         "RoomSizeEfficiency",
         "ElectiveCourseInTheSameClassroom",
         "AvoidBuildingP",
+        "LoadBalancing",
+
+      ]
+    },
+    "Lecturer Constraints": {
+      icon: "person",
+      constraints: [
+        "LecturerCompactSchedule",
+        "LecturerPreference",
       ]
     },
     "Student Experience": {
@@ -226,7 +229,6 @@ export default function GeneratePage() {
       constraints: [
         "PreferMorningForHardCourses",
         "InconvenientTiming",
-        "LoadBalancing",
       ]
     },
     "Student Groups & Clusters": {
