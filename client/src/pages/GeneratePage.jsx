@@ -603,7 +603,7 @@ export default function GeneratePage() {
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <h3 style={{ margin: 0 }}>
               <span className="material-icons">language</span>
-              English Courses (Friday / Afternoon Preference)
+              4. English Courses (Friday / Afternoon Preference)
             </h3>
             <InfoButton
               title="What are English Courses?"
@@ -742,7 +742,7 @@ export default function GeneratePage() {
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <h3 style={{ margin: 0 }}>
             <span className="material-icons">settings_input_component</span>
-            5. Fine-Tune Scheduling Priorities
+            6. Fine-Tune Scheduling Priorities
           </h3>
           <InfoButton
             title="How to Use Sliders?"
