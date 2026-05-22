@@ -48,7 +48,7 @@ public class CoursesExcelService {
         private final String courseId;
         private final String courseName;
         private final String reason;
-
+        
         public InvalidCourse(String courseId, String courseName, String reason) {
             this.courseId = courseId;
             this.courseName = courseName;
@@ -66,6 +66,7 @@ public class CoursesExcelService {
         public String getReason() {
             return reason;
         }
+
     }
 
     public static class AdjustedCourse {
@@ -94,10 +95,13 @@ public class CoursesExcelService {
 
     public static class CourseUploadSummary {
         
-        private final int savedCount;
-        private final List<InvalidCourse> invalidCourses;
-        private final List<AdjustedCourse> adjustedCourses;
+        private int savedCount;
+        private List<InvalidCourse> invalidCourses;
+        private List<AdjustedCourse> adjustedCourses;
 
+        public CourseUploadSummary() {
+        }
+        
         public CourseUploadSummary(int savedCount, List<InvalidCourse> invalidCourses, List<AdjustedCourse> adjustedCourses) {
             this.savedCount = savedCount;
             this.invalidCourses = invalidCourses;
