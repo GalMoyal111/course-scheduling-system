@@ -6,64 +6,52 @@ export default function FAQAccordion() {
   const faqs = [
     {
       id: 1,
-      question: "How do I get started with the system?",
+      question: "How do I format my Excel files for uploading data?",
       answer:
-        "Start by logging in, then define your clusters (semesters/programs) in Settings. Next, upload your courses, classrooms, and lecturers using Excel files. Then create lessons and finally generate the timetable using the Generate page.",
+        "The best way is to go to the Dashboard and click 'Get Templates'. This will download properly formatted Excel files containing examples for Courses, Classrooms, Lecturers, and Lessons.",
     },
     {
       id: 2,
-      question: "What file formats are supported for importing?",
+      question: "Can I edit a generated timetable after it's created?",
       answer:
-        "The system supports Excel files (.xlsx format). Make sure your Excel file has proper headers and formatting before importing.",
+        "Yes. In the Timetable screen, you can manually delete specific assignments. If the schedule is already saved to the database, the saved version will update automatically when you make changes.",
     },
     {
       id: 3,
-      question: "Can I edit the timetable after it's generated?",
+      question: "What happens if the algorithm can't find a solution?",
       answer:
-        "Yes! You can make manual adjustments to the generated timetable. View it in the Timetable section and modify schedules as needed.",
+        "If no solution meets your 'Hard Constraints' (like unavailable lecturers), the system will notify you. Try modifying constraints, checking classroom capacities, or reducing slider priorities.",
     },
     {
       id: 4,
-      question: "What should I do if the timetable generation fails?",
+      question: "How do I review a schedule I generated last week?",
       answer:
-        "Check that all required data is complete and accurate. Verify that lecturers are assigned to courses, classrooms have capacity, and there are no conflicting constraints.",
+        "Go to the 'History' page from the side menu. There you will see a list of all saved timetables. Click 'Load Timetable' to open it back up in the main viewing screen.",
     },
     {
       id: 5,
-      question: "Can I have multiple administrators?",
+      question: "What is the difference between a Standard User and an Admin?",
       answer:
-        "Yes, administrators can create and manage other user accounts with different roles. Contact your system administrator to set up additional accounts.",
+        "Standard Users can input data, upload files, and generate timetables. Admins have all these permissions, plus access to User Management in Settings to add, delete, or change user roles.",
     },
     {
       id: 6,
-      question: "How do I export data?",
+      question: "What are 'Clusters' and why do I need them?",
       answer:
-        "Go to the Dashboard and click the Export button. Select which data you want to export and download it as an Excel file.",
+        "Clusters usually represent semesters or study groups (e.g., 'Semester 1'). The algorithm uses them to ensure two courses from the same cluster are never scheduled at the same time, allowing students to attend all their classes.",
     },
     {
       id: 7,
-      question: "Is there a way to backup my data?",
+      question: "I forgot my password. What do I do?",
       answer:
-        "Yes! Use the export feature on the Dashboard to create regular backups. Download your data as Excel files and store them safely.",
+        "Click the 'Forgot Password' link on the login screen. A reset link will be sent to your email. Be sure to check your Spam or Junk folder if you don't see it in your inbox.",
     },
     {
       id: 8,
-      question: "What are the different user roles?",
+      question: "Can I rename a timetable I already saved?",
       answer:
-        "Admin: Full system access and user management. Coordinator: Can manage courses, classrooms, and lecturers. User: Can view data and export timetables.",
-    },
-    {
-      id: 9,
-      question: "How do I change my password?",
-      answer:
-        "Go to Settings and look for the 'Change Password' option. You'll be asked to provide your current password and then set a new one.",
-    },
-    {
-      id: 10,
-      question: "What if I forget my password?",
-      answer:
-        "Click the 'Forgot Password' link on the login page. You'll receive an email with instructions to reset your password.",
-    },
+        "Yes! Navigate to the History page. From there, you can edit the name of any saved schedule or delete it entirely to keep your workspace clean.",
+    }
   ];
 
   const toggleFAQ = (id) => {
