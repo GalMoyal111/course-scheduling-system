@@ -112,6 +112,11 @@ public class TimetableController {
         return new ResponseEntity<>(content, headers, HttpStatus.OK);
     }
     
+    @PostMapping("/cancel")
+	public ResponseEntity<String> cancelGeneration() {
+	    algorithmService.cancelAlgorithm();
+	    return ResponseEntity.ok("Algorithm cancelled successfully");
+	}
     
 
 }
