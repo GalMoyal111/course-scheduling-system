@@ -59,7 +59,7 @@ export async function exportCourses() {
 }
 
 export async function addCourse(course) {
-  const res = await fetch(`${BASE_URL}/courses`, {
+  const res = await fetch(`${BASE_URL}/courses/add`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

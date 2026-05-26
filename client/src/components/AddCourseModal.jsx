@@ -37,6 +37,8 @@ export default function AddCourseModal({
     return { nameToNum, numToName, clusterNames: clusters.map((c) => c.name) };
   }, [clusters]);
 
+
+
   // Form state variables
   const [courseCode, setCourseCode] = useState("");
   const [courseName, setCourseName] = useState("");
@@ -65,6 +67,8 @@ export default function AddCourseModal({
   const [studentsEditWarningOpen, setStudentsEditWarningOpen] = useState(false);
   const [pendingStudentsField, setPendingStudentsField] = useState(null);
 
+  const selectedClusterNumber = clusterMappings.nameToNum[clusterName];
+  const isElectiveCourse = selectedClusterNumber > 8;
   // Helper function to reset form state to initial values
   const resetForm = () => {
     setCourseCode("");
@@ -182,6 +186,17 @@ export default function AddCourseModal({
     setCredits(formattedCredits);
   }, [lectureHours, tutorialHours, labHours, projectHours, isCreditsEditable]);
 
+  useEffect(() => {
+    if (!isElectiveCourse) {
+      return;
+    }
+
+    setTutorialNumberStudents("");
+    setLabNumberStudents("");
+    setIsTutorialStudentsEditable(false);
+    setIsLabStudentsEditable(false);
+  }, [isElectiveCourse]);
+
   if (!isOpen) return null;
 
   // Validation helper functions
@@ -206,11 +221,11 @@ export default function AddCourseModal({
     return parsed;
   };
 
-  const toPositiveIntOrDefault = (value, defaultValue, fieldName) => {
+  const toPositiveIntOrNull = (value, fieldName) => {
     const trimmed = String(value ?? "").trim();
 
     if (trimmed === "") {
-      return defaultValue;
+      return null;
     }
 
     const parsed = parseInt(trimmed, 10);
@@ -366,9 +381,9 @@ export default function AddCourseModal({
         lectureHours: toNonNegativeInt(lectureHours, "lecture hours"),
         tutorialHours: toNonNegativeInt(tutorialHours, "tutorial hours"),
         labHours: toNonNegativeInt(labHours, "lab hours"),
-        lectureNumberStudents: toPositiveIntOrDefault(lectureNumberStudents, requiredCapacities.LECTURE, "lecture number of students"),
-        tutorialNumberStudents: toPositiveIntOrDefault(tutorialNumberStudents, requiredCapacities.TUTORIAL, "tutorial number of students"),
-        labNumberStudents: toPositiveIntOrDefault(labNumberStudents, requiredCapacities.LAB, "lab number of students"),
+        lectureNumberStudents: toPositiveIntOrNull(lectureNumberStudents,"lecture number of students"),
+        tutorialNumberStudents: isElectiveCourse? null: toPositiveIntOrNull(tutorialNumberStudents,"tutorial number of students"),
+        labNumberStudents: isElectiveCourse? null: toPositiveIntOrNull(labNumberStudents,"lab number of students"),
         projectHours: toNonNegativeInt(projectHours, "project hours"),
         credits: toNonNegativeFloat(credits, "credits"),
         clusterName: clusterName.trim(), // <--- השם של האשכול (סמסטר 1, מדעים וכו')
@@ -697,7 +712,7 @@ export default function AddCourseModal({
               className="ui-input"
               value={lectureNumberStudents}
               readOnly={!isLectureStudentsEditable}
-              placeholder={`Default: ${requiredCapacities.LECTURE}`}
+              placeholder={isElectiveCourse ? `Default: ${requiredCapacities.ELECTIVE_COURSE}` : `Default: ${requiredCapacities.LECTURE}`}
               onChange={(e) => setLectureNumberStudents(keepDigitsOnly(e.target.value))}
             />
           </div>
@@ -712,7 +727,7 @@ export default function AddCourseModal({
               }}
             >
               Tutorial Number Students
-              {!isTutorialStudentsEditable && (
+              {!isElectiveCourse && !isTutorialStudentsEditable && (
                 <button
                   type="button"
                   onClick={() => enableStudentsEdit("tutorial")}
@@ -735,8 +750,8 @@ export default function AddCourseModal({
             <input
               className="ui-input"
               value={tutorialNumberStudents}
-              readOnly={!isTutorialStudentsEditable}
-              placeholder={`Default: ${requiredCapacities.TUTORIAL}`}
+              readOnly={isElectiveCourse || !isTutorialStudentsEditable}
+              placeholder={isElectiveCourse ? "Same as lecture for elective courses" : `Default: ${requiredCapacities.TUTORIAL}`}
               onChange={(e) => setTutorialNumberStudents(keepDigitsOnly(e.target.value))}
             />
           </div>
@@ -751,7 +766,7 @@ export default function AddCourseModal({
               }}
             >
               Lab Number Students
-              {!isLabStudentsEditable && (
+              {!isElectiveCourse && !isLabStudentsEditable && (
                 <button
                   type="button"
                   onClick={() => enableStudentsEdit("lab")}
@@ -773,8 +788,8 @@ export default function AddCourseModal({
             <input
               className="ui-input"
               value={labNumberStudents}
-              readOnly={!isLabStudentsEditable}
-              placeholder={`Default: ${requiredCapacities.LAB}`}
+              readOnly={isElectiveCourse || !isLabStudentsEditable}
+              placeholder={isElectiveCourse ? "Same as lecture for elective courses" : `Default: ${requiredCapacities.LAB}`}
               onChange={(e) => setLabNumberStudents(keepDigitsOnly(e.target.value))}
             />
           </div>

@@ -8,7 +8,7 @@ import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import com.coursescheduling.server.model.Course;
 import com.coursescheduling.server.model.CourseDeleteRequest;
-
+import com.coursescheduling.server.model.ClassroomSizeSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -29,6 +29,9 @@ public class CourseService {
     @Autowired
     @Lazy   
     private LessonService lessonService;
+
+    @Autowired
+    private ClassroomSizeSettingsService classroomSizeSettingsService;
     
     
 
@@ -70,7 +73,9 @@ public class CourseService {
         }
         deleteBatch.commit().get();
         WriteBatch batch = db.batch();
+        ClassroomSizeSettings settings = classroomSizeSettingsService.getClassroomSizeSettings();
         for (Course course : courses) {
+            normalizeStudentNumbers(course, settings);
             Map<String, Object> data = new HashMap<>();
             String normalizedClusterName = normalizeClusterName(course.getCluster(), course.getClusterName());
             data.put("cluster", course.getCluster());
@@ -98,13 +103,19 @@ public class CourseService {
     }
 
 
-    public void saveSingleCourse(Course course) {
+    public void saveSingleCourse(Course course) throws Exception {
     	
     	if (lessonService != null) 
     	    lessonService.invalidateGroupedCache();
     	
         Firestore db = FirestoreClient.getFirestore();
         String normalizedCourseId = normalizeAndValidateCourseId(course.getCourseId());
+        try {
+            ClassroomSizeSettings settings = classroomSizeSettingsService.getClassroomSizeSettings();
+            normalizeStudentNumbers(course, settings);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load classroom size settings", e);
+        }
 
         Map<String, Object> data = new HashMap<>();
         String normalizedClusterName = normalizeClusterName(course.getCluster(), course.getClusterName());
@@ -122,7 +133,7 @@ public class CourseService {
         data.put("tutorialNumberStudents", course.getTutorialNumberStudents());
         data.put("labNumberStudents", course.getLabNumberStudents());
 
-        db.collection("courses").document(normalizedCourseId).set(data);
+        db.collection("courses").document(normalizedCourseId).set(data).get();
     	this.cachedCourses = null;
     	this.lastFetchTime = 0;
 
@@ -164,7 +175,7 @@ public class CourseService {
 
         ApiFuture<QuerySnapshot> future = db.collection("courses").get();
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-
+        ClassroomSizeSettings settings = classroomSizeSettingsService.getClassroomSizeSettings();
         for (QueryDocumentSnapshot doc : documents) {
 
             Map<String, Object> courseData = doc.getData();
@@ -181,9 +192,9 @@ public class CourseService {
             float credits = ((Number) courseData.get("credits")).floatValue();
 
             String clusterName = (String) courseData.get("clusterName");
-            int lectureNumberStudents = ((Number) courseData.get("lectureNumberStudents")).intValue();
-            int tutorialNumberStudents = ((Number) courseData.get("tutorialNumberStudents")).intValue();
-            int labNumberStudents = ((Number) courseData.get("labNumberStudents")).intValue();
+            Integer lectureNumberStudents = getIntegerValue(courseData, "lectureNumberStudents");
+            Integer tutorialNumberStudents = getIntegerValue(courseData, "tutorialNumberStudents");
+            Integer labNumberStudents = getIntegerValue(courseData, "labNumberStudents");
 
             Course course = new Course();
 
@@ -201,6 +212,8 @@ public class CourseService {
             course.setLectureNumberStudents(lectureNumberStudents);
             course.setTutorialNumberStudents(tutorialNumberStudents);
             course.setLabNumberStudents(labNumberStudents);
+            
+            normalizeStudentNumbers(course, settings);
 
             courses.add(course);
         }
@@ -233,6 +246,8 @@ public class CourseService {
         }
 
         newCourseId = normalizeAndValidateCourseId(newCourseId);
+        ClassroomSizeSettings settings = classroomSizeSettingsService.getClassroomSizeSettings();
+        normalizeStudentNumbers(newCourse, settings);
 
         DocumentReference oldDoc = db.collection("courses").document(oldCourseId);
         batch.delete(oldDoc);
@@ -337,6 +352,55 @@ public class CourseService {
         }
 
         return null;
+    }
+
+    private Integer getIntegerValue(Map<String, Object> data, String key) {
+        Object value = data.get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        return ((Number) value).intValue();
+    }
+
+    private boolean isElectiveCourse(Course course) {
+        return course.getCluster() > 8;
+    }
+
+    private boolean isMissingStudentNumber(Integer value) {
+        return value == null || value <= 0;
+    }
+
+    private void normalizeStudentNumbers(Course course, ClassroomSizeSettings settings) {
+        if (course == null || settings == null) {
+            return;
+        }
+
+        if (isElectiveCourse(course)) {
+            Integer students = course.getLectureNumberStudents();
+
+            if (isMissingStudentNumber(students)) {
+                students = settings.getElectiveCourseSize();
+            }
+
+            course.setLectureNumberStudents(students);
+            course.setTutorialNumberStudents(students);
+            course.setLabNumberStudents(students);
+            return;
+        }
+
+        if (isMissingStudentNumber(course.getLectureNumberStudents())) {
+            course.setLectureNumberStudents(settings.getLectureSize());
+        }
+
+        if (isMissingStudentNumber(course.getTutorialNumberStudents())) {
+            course.setTutorialNumberStudents(settings.getTutorialSize());
+        }
+
+        if (isMissingStudentNumber(course.getLabNumberStudents())) {
+            course.setLabNumberStudents(settings.getLabSize());
+        }
     }
    
 }

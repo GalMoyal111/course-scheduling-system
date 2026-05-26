@@ -11,15 +11,15 @@ public class Course {
     private int projectHours;
     private float credits;
     private String clusterName;
-    private int lectureNumberStudents;
-    private int tutorialNumberStudents;
-    private int labNumberStudents;
+    private Integer lectureNumberStudents;
+    private Integer tutorialNumberStudents;
+    private Integer labNumberStudents;
 
     public Course() {}
 
     public Course(int cluster, String courseId, String courseName, String prerequisiteCourseNumber,
                   int lectureHours, int tutorialHours, int labHours, int projectHours, float credits, String clusterName,
-                  int lectureNumberStudents, int tutorialNumberStudents, int labNumberStudents) {
+                  Integer lectureNumberStudents, Integer tutorialNumberStudents, Integer labNumberStudents) {
         this.cluster = cluster;
         this.courseId = courseId;
         this.courseName = courseName;
@@ -121,27 +121,27 @@ public class Course {
         this.clusterName = clusterName;
     }
 
-    public int getLectureNumberStudents() {
+    public Integer getLectureNumberStudents() {
         return lectureNumberStudents;
     }
 
-    public void setLectureNumberStudents(int lectureNumberStudents) {
+    public void setLectureNumberStudents(Integer lectureNumberStudents) {
         this.lectureNumberStudents = lectureNumberStudents;
     }
 
-    public int getTutorialNumberStudents() {
+    public Integer getTutorialNumberStudents() {
         return tutorialNumberStudents;
     }
 
-    public void setTutorialNumberStudents(int tutorialNumberStudents) {
+    public void setTutorialNumberStudents(Integer tutorialNumberStudents) {
         this.tutorialNumberStudents = tutorialNumberStudents;
     }
 
-    public int getLabNumberStudents() {
+    public Integer getLabNumberStudents() {
         return labNumberStudents;
     }
 
-    public void setLabNumberStudents(int labNumberStudents) {
+    public void setLabNumberStudents(Integer labNumberStudents) {
         this.labNumberStudents = labNumberStudents;
     }
 }

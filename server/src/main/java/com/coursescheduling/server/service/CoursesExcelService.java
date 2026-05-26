@@ -2,11 +2,8 @@ package com.coursescheduling.server.service;
 
 import com.coursescheduling.server.model.Cluster;
 import com.coursescheduling.server.model.Course;
-import com.coursescheduling.server.model.ClassroomSizeSettings;
-import com.coursescheduling.server.service.ClassroomSizeSettingsService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.checkerframework.checker.units.qual.A;
 
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
@@ -35,9 +32,6 @@ public class CoursesExcelService {
     
     @Autowired
     private ClusterService clusterService;
-
-    @Autowired
-    private ClassroomSizeSettingsService classroomSizeSettingsService;
 
     private static final String COURSE_ID_PATTERN = "^\\d{5,6}$";
     
@@ -69,6 +63,30 @@ public class CoursesExcelService {
 
     }
 
+    public static class ElectiveStudentCountAdjustedCourse {
+        private final String courseId;
+        private final String courseName;
+        private final List<String> ignoredFields;
+
+        public ElectiveStudentCountAdjustedCourse(String courseId, String courseName, List<String> ignoredFields) {
+            this.courseId = courseId;
+            this.courseName = courseName;
+            this.ignoredFields = ignoredFields;
+        }
+
+        public String getCourseId() {
+            return courseId;
+        }
+
+        public String getCourseName() {
+            return courseName;
+        }
+
+        public List<String> getIgnoredFields() {
+            return ignoredFields;
+        }
+    }
+
     public static class AdjustedCourse {
         private final String courseId;
         private final String courseName;
@@ -98,14 +116,16 @@ public class CoursesExcelService {
         private int savedCount;
         private List<InvalidCourse> invalidCourses;
         private List<AdjustedCourse> adjustedCourses;
+        private List<ElectiveStudentCountAdjustedCourse> electiveStudentCountAdjustedCourses;
 
         public CourseUploadSummary() {
         }
         
-        public CourseUploadSummary(int savedCount, List<InvalidCourse> invalidCourses, List<AdjustedCourse> adjustedCourses) {
+        public CourseUploadSummary(int savedCount, List<InvalidCourse> invalidCourses, List<AdjustedCourse> adjustedCourses, List<ElectiveStudentCountAdjustedCourse> electiveStudentCountAdjustedCourses) {
             this.savedCount = savedCount;
             this.invalidCourses = invalidCourses;
             this.adjustedCourses = adjustedCourses;
+            this.electiveStudentCountAdjustedCourses = electiveStudentCountAdjustedCourses;
         }
 
         public int getSavedCount() {
@@ -119,6 +139,10 @@ public class CoursesExcelService {
         public List<AdjustedCourse> getAdjustedCourses() {
             return adjustedCourses;
         }
+
+        public List<ElectiveStudentCountAdjustedCourse> getElectiveStudentCountAdjustedCourses() {
+            return electiveStudentCountAdjustedCourses;
+        }
     }
 
     public CourseUploadSummary process(MultipartFile file) {
@@ -128,7 +152,7 @@ public class CoursesExcelService {
             if (clusters == null || clusters.isEmpty()) {
                 List<InvalidCourse> errors = new ArrayList<>();
                 errors.add(new InvalidCourse("", "", "No clusters defined. Please go to Settings and define clusters before uploading courses."));
-                return new CourseUploadSummary(0, errors, new ArrayList<>());
+                return new CourseUploadSummary(0, errors, new ArrayList<>(), new ArrayList<>());
             }
 
             List<Course> courses = readCoursesFromExcel(file.getInputStream());
@@ -153,7 +177,6 @@ public class CoursesExcelService {
         try (Workbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
 
-            ClassroomSizeSettings defaultSizes = classroomSizeSettingsService.getClassroomSizeSettings();
 
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
@@ -176,9 +199,9 @@ public class CoursesExcelService {
                     }
 
                     String clusterName = formatter.formatCellValue(row.getCell(8)).trim();
-                    int lectureNumberStudents = parseStudentCountCell(row.getCell(9),formatter,defaultSizes.getLectureSize(),"Lecture Number Students");
-                    int tutorialNumberStudents = parseStudentCountCell(row.getCell(10),formatter,defaultSizes.getTutorialSize(),"Tutorial Number Students");
-                    int labNumberStudents = parseStudentCountCell(row.getCell(11),formatter,defaultSizes.getLabSize(),"Lab Number Students");
+                    Integer lectureNumberStudents = parseStudentCountCell(row.getCell(9),formatter,"Lecture Number Students");
+                    Integer tutorialNumberStudents = parseStudentCountCell(row.getCell(10),formatter,"Tutorial Number Students");
+                    Integer labNumberStudents = parseStudentCountCell(row.getCell(11),formatter,"Lab Number Students");
 
                     Course course = new Course(
                             0,
@@ -244,15 +267,15 @@ public class CoursesExcelService {
         }
     }
 
-    private int parseStudentCountCell(Cell cell, DataFormatter formatter, int defaultValue, String fieldName) {
+    private Integer parseStudentCountCell(Cell cell, DataFormatter formatter, String fieldName) {
         if (cell == null) {
-            return defaultValue;
+            return null;
         }
 
         String value = formatter.formatCellValue(cell).trim();
 
         if (value.isEmpty()) {
-            return defaultValue;
+            return null;
         }
 
         try {
@@ -356,8 +379,30 @@ public class CoursesExcelService {
         }
 
         List<AdjustedCourse> adjustedCourses = new ArrayList<>();
+        List<ElectiveStudentCountAdjustedCourse> electiveStudentCountAdjustedCourses = new ArrayList<>();
 
         for (Course course : validCourses) {
+            if (course.getCluster() > 8) {
+                List<String> ignoredFields = new ArrayList<>();
+
+                if (course.getTutorialNumberStudents() != null) {
+                    ignoredFields.add("Tutorial Number Students");
+                }
+
+                if (course.getLabNumberStudents() != null) {
+                    ignoredFields.add("Lab Number Students");
+                }
+
+                if (!ignoredFields.isEmpty()) {
+                    electiveStudentCountAdjustedCourses.add(
+                            new ElectiveStudentCountAdjustedCourse(
+                                    course.getCourseId(),
+                                    course.getCourseName() == null ? "" : course.getCourseName(),
+                                    ignoredFields
+                            )
+                    );
+                }
+            }
             List<String> prerequisiteIds = parsePrerequisiteIds(course.getPrerequisiteCourseNumber());
             List<String> validPrerequisites = new ArrayList<>();
             List<String> removedPrerequisites = new ArrayList<>();
@@ -399,7 +444,7 @@ public class CoursesExcelService {
             }
         }
 
-        return new CourseUploadSummary(validCourses.size(), invalidCourseDetails, adjustedCourses);
+        return new CourseUploadSummary(validCourses.size(), invalidCourseDetails, adjustedCourses, electiveStudentCountAdjustedCourses);
     }
 
     public byte[] exportCoursesToExcel() {

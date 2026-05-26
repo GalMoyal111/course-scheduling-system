@@ -42,7 +42,7 @@ export function DataProvider({ children }) {
   const [semester, setSemester] = useState("");
   const [englishCourses, setEnglishCourses] = useState([]);
   const [virtualCourses, setVirtualCourses] = useState([]);
-  const [requiredCapacities, setRequiredCapacities] = useState({LECTURE: 60,TUTORIAL: 40,LAB: 20,PHYSICS_LAB: 15,NETWORKING_LAB: 12});
+  const [requiredCapacities, setRequiredCapacities] = useState({LECTURE: 60,TUTORIAL: 40,LAB: 20,PHYSICS_LAB: 15,NETWORKING_LAB: 12, ELECTIVE_COURSE: 25});
 
 
   // Cache timestamps
@@ -298,7 +298,8 @@ export function DataProvider({ children }) {
         TUTORIAL: data.tutorialSize,
         LAB: data.labSize,
         PHYSICS_LAB: data.physicsLabSize,
-        NETWORKING_LAB: data.networkingLabSize
+        NETWORKING_LAB: data.networkingLabSize,
+        ELECTIVE_COURSE: data.electiveCourseSize
       });
 
       setElectiveCapacity(data.electiveCourseSize);

@@ -159,12 +159,17 @@ public class FileUploadController {
         }
     }
 
-    @PostMapping("/courses")
-    public String addCourse(@RequestBody Course course) {
-
-        courseService.saveSingleCourse(course);
-
-        return "Course added successfully";
+    @PostMapping("/courses/add")
+    public ResponseEntity<?> addCourse(@RequestBody Course course) {
+        try {
+            courseService.saveSingleCourse(course);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity
+                    .status(500)
+                    .body("Failed to add course");
+        }
     }
 
     @GetMapping("/getAllCourses")

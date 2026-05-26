@@ -38,6 +38,7 @@ export default function UploadCoursesPage() {
     savedCount: 0,
     invalidCourses: [],
     adjustedCourses: [],
+    electiveStudentCountAdjustedCourses: [],
   });
   const [modalContext, setModalContext] = useState("upload"); // "upload" or "add"
   const [pendingCourse, setPendingCourse] = useState(null);
@@ -110,6 +111,7 @@ export default function UploadCoursesPage() {
         savedCount: result.savedCount || 0,
         invalidCourses: result.invalidCourses || [],
         adjustedCourses: result.adjustedCourses || [],
+        electiveStudentCountAdjustedCourses: result.electiveStudentCountAdjustedCourses || [],
       });
       setModalContext("upload");
       setInvalidCoursesModalOpen(true);
@@ -175,14 +177,8 @@ export default function UploadCoursesPage() {
           newCourse: newCoursePayload,
         });
 
-        setCourses((prevCourses) =>
-          prevCourses.map((c) =>
-            c.courseId === oldCoursePayload.courseId &&
-            c.cluster === oldCoursePayload.cluster
-              ? newCoursePayload
-              : c,
-          ),
-        );
+        invalidateCoursesCache();
+        await fetchCoursesIfNeeded("UploadCoursesPage", true);
 
         showSuccess("Course updated successfully");
       } else {
@@ -209,7 +205,9 @@ export default function UploadCoursesPage() {
                 courseName: course.courseName,
                 removedPrerequisites: invalidPrereqs,
               },
+            
             ],
+            electiveStudentCountAdjustedCourses: [],
           });
           setPendingCourse(course);
           setInvalidCoursesModalOpen(true);
@@ -217,7 +215,10 @@ export default function UploadCoursesPage() {
         }
 
         await addCourse(course);
-        setCourses((prevCourses) => [...prevCourses, formattedCourse]);
+
+        invalidateCoursesCache();
+        await fetchCoursesIfNeeded("UploadCoursesPage", true);
+
         showSuccess("Course added successfully");
       }
 
@@ -535,6 +536,7 @@ export default function UploadCoursesPage() {
         isOpen={invalidCoursesModalOpen}
         invalidCourses={uploadSummary.invalidCourses}
         adjustedCourses={uploadSummary.adjustedCourses}
+        electiveStudentCountAdjustedCourses={uploadSummary.electiveStudentCountAdjustedCourses}
         savedCount={uploadSummary.savedCount}
         context={modalContext}
         onClose={() => {
@@ -543,6 +545,7 @@ export default function UploadCoursesPage() {
             savedCount: 0,
             invalidCourses: [],
             adjustedCourses: [],
+            electiveStudentCountAdjustedCourses: [],
           });
           setPendingCourse(null);
         }}
@@ -577,6 +580,7 @@ export default function UploadCoursesPage() {
               savedCount: 0,
               invalidCourses: [],
               adjustedCourses: [],
+              electiveStudentCountAdjustedCourses: [],
             });
             setPendingCourse(null);
           }
@@ -592,6 +596,7 @@ function InvalidCoursesModal({
   isOpen,
   invalidCourses,
   adjustedCourses,
+  electiveStudentCountAdjustedCourses,
   savedCount,
   context = "upload",
   onClose,
@@ -601,6 +606,7 @@ function InvalidCoursesModal({
 
   const hasInvalidCourses = invalidCourses && invalidCourses.length > 0;
   const hasAdjustedCourses = adjustedCourses && adjustedCourses.length > 0;
+  const hasElectiveStudentCountAdjustedCourses = electiveStudentCountAdjustedCourses && electiveStudentCountAdjustedCourses.length > 0;
   const isAddContext = context === "add";
 
   const modalTitle = isAddContext
@@ -778,6 +784,82 @@ function InvalidCoursesModal({
                   >
                     Missing Prerequisites:{" "}
                     {course.removedPrerequisites.join(", ")}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {hasElectiveStudentCountAdjustedCourses && !isAddContext && (
+          <div style={{ marginTop: "24px" }}>
+            <p
+              style={{
+                color: "#f59e0b",
+                fontWeight: "600",
+                marginBottom: "12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <span className="material-icons">info</span>
+              {electiveStudentCountAdjustedCourses.length} elective course(s) had
+              tutorial/lab student counts ignored:
+            </p>
+
+            <div
+              className="invalid-courses-list"
+              style={{
+                maxHeight: "200px",
+                overflowY: "auto",
+                paddingRight: "8px",
+              }}
+            >
+              {electiveStudentCountAdjustedCourses.map((course, index) => (
+                <div
+                  key={index}
+                  className="invalid-course-item"
+                  style={{
+                    background: "#eff6ff",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    marginBottom: "8px",
+                    border: "1px solid #93c5fd",
+                  }}
+                >
+                  <div style={{ fontWeight: "bold", color: "#1d4ed8" }}>
+                    {course.courseName || "(No name)"}
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: "0.9em",
+                      color: "#2563eb",
+                      marginTop: "4px",
+                    }}
+                  >
+                    Course Code: {course.courseId}
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: "0.9em",
+                      color: "#2563eb",
+                      marginTop: "4px",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Ignored Fields: {course.ignoredFields.join(", ")}
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: "0.85em",
+                      color: "#1e40af",
+                      marginTop: "4px",
+                    }}
+                  >
+                    For elective courses, only Lecture Number Students is used.
                   </div>
                 </div>
               ))}
