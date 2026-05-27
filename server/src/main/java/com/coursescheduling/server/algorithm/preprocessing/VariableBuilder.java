@@ -17,6 +17,10 @@ import com.coursescheduling.server.model.Lesson;
 import com.coursescheduling.server.model.LessonType;
 import com.coursescheduling.server.model.Semester;
 import com.coursescheduling.server.service.LessonService;
+import com.coursescheduling.server.model.Course;
+import com.coursescheduling.server.service.CourseService;
+import com.coursescheduling.server.model.ClassroomSizeSettings;
+import com.coursescheduling.server.service.ClassroomSizeSettingsService;
 
 
 
@@ -26,15 +30,30 @@ public class VariableBuilder {
 	@Autowired
     private LessonService lessonService;
 	
+	@Autowired
+    private CourseService courseService;
+
+	@Autowired
+    private ClassroomSizeSettingsService classroomSizeSettingsService;
+
 	public List<Variable> createVariables(Semester semester, Map<LessonType, Integer> requiredCapacitiesMap, List<String> hardCourseIds , List<String> englishCourseIds, List<String> virtualCourseIds, Integer electiveCapacity){		
 		
 		List<Lesson> lessons = getSupportedLessonsFromDB(semester);
-		List <Variable> variables = new ArrayList<>();
-		
+		List<Variable> variables = new ArrayList<>();
+		ClassroomSizeSettings settings;
+
+		try {
+			settings = classroomSizeSettingsService.getClassroomSizeSettings();
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to load classroom size settings", e);
+		}
+
+		Map<String, Course> coursesById = getCoursesById();
+
 		for (Lesson lesson : lessons) {
-			Variable v = mapLessonToVariable(lesson, requiredCapacitiesMap, hardCourseIds, englishCourseIds,virtualCourseIds, electiveCapacity);
-	        variables.add(v);
-	    }
+			Variable v = mapLessonToVariable(lesson,coursesById,settings,requiredCapacitiesMap,hardCourseIds,englishCourseIds,virtualCourseIds,electiveCapacity);
+			variables.add(v);
+		}
 		
 		Map<String, List<Variable>> byCourse = groupByCourse(variables);
 		
@@ -46,12 +65,8 @@ public class VariableBuilder {
 		return variables;
 		
 	}
-	
-	
-	
-	
 
-	private Variable mapLessonToVariable(Lesson lesson, Map<LessonType, Integer> requiredCapacitiesMap, List<String> hardCourseIds, List<String> englishCourseIds,List<String> virtualCourseIds,  Integer electiveCapacity) {		
+	private Variable mapLessonToVariable(Lesson lesson, Map<String, Course> coursesById, ClassroomSizeSettings settings, Map<LessonType, Integer> requiredCapacitiesMap, List<String> hardCourseIds, List<String> englishCourseIds,List<String> virtualCourseIds,  Integer electiveCapacity) {		
 		
 		Variable v = new Variable();
 
@@ -90,21 +105,34 @@ public class VariableBuilder {
 	        v.setVirtual(false);
 	    }
 		
-		if (lesson.getCluster() >= 9) {
-            v.setRequiredCapacity(electiveCapacity != null ? electiveCapacity : 25);
-        } else {
-            if (requiredCapacitiesMap != null && requiredCapacitiesMap.containsKey(lesson.getType())) {
-                v.setRequiredCapacity(requiredCapacitiesMap.get(lesson.getType()));
-            } else {
-                v.setRequiredCapacity(getDefaultCapacity(lesson.getType())); 
-            }
-        }
+		Course course = coursesById.get(lesson.getCourseId());
+
+		if (course != null) {
+			v.setRequiredCapacity(getRequiredCapacityFromCourse(course, lesson.getType(), settings));
+		} else {
+			System.out.println("⚠️ Course not found for lesson: " + lesson.getLessonId()
+					+ " | courseId: " + lesson.getCourseId()
+					+ ". Falling back to request/default capacity.");
+
+			if (lesson.getCluster() >= 9 && electiveCapacity != null) {
+				v.setRequiredCapacity(electiveCapacity);
+			} else if (requiredCapacitiesMap != null && requiredCapacitiesMap.containsKey(lesson.getType())) {
+				v.setRequiredCapacity(requiredCapacitiesMap.get(lesson.getType()));
+			} else {
+				throw new RuntimeException(
+					"Missing course and missing required capacity for lesson: "
+					+ lesson.getLessonId()
+					+ " | courseId: "
+					+ lesson.getCourseId()
+					+ " | type: "
+					+ lesson.getType()
+				);
+			}
+		}
 
 		
 		return v;
 	}
-	
-
 	
 	private Map<String, List<Variable>> groupByCourse(List<Variable> variables) {
 	    Map<String, List<Variable>> map = new HashMap<>();
@@ -115,8 +143,6 @@ public class VariableBuilder {
 
 	    return map;
 	}
-	
-	
 	
 	private void assignIndexesPerCourse(Map<String, List<Variable>> byCourse) {
 
@@ -131,7 +157,6 @@ public class VariableBuilder {
 	        }
 	    }
 	}
-	
 	
 	private void buildInitialDomains(List<Variable> variables) {
 
@@ -156,7 +181,6 @@ public class VariableBuilder {
 	    }
 	}
 	
-	
 	private List<Lesson> getSupportedLessonsFromDB(Semester semester) {
         List<Lesson> allLessons = lessonService.getLessonsBySemester(semester);
         
@@ -173,20 +197,63 @@ public class VariableBuilder {
         }
         return filtered;
     }
-	
-	
-	
-	private int getDefaultCapacity(LessonType type) {
-        if (type == null) return 0;
-        switch (type) {
-            case LECTURE: return 60;
-            case TUTORIAL: return 40;
-            case LAB: return 20;
-            case PHYSICS_LAB: return 15;
-            case NETWORKING_LAB: return 12;
-            default: return 0;
-        }
-    }
 
-	
+	private Map<String, Course> getCoursesById() {
+		Map<String, Course> coursesById = new HashMap<>();
+
+		try {
+			List<Course> courses = courseService.getAllCoursesRaw();
+
+			for (Course course : courses) {
+				coursesById.put(course.getCourseId(), course);
+			}
+
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to load courses for variable building", e);
+		}
+
+		return coursesById;
+	}
+
+	private int getRequiredCapacityFromCourse(Course course,LessonType type,ClassroomSizeSettings settings) {
+		if (course == null || type == null || settings == null) {
+			throw new RuntimeException("Course, LessonType, and ClassroomSizeSettings must not be null");
+		}
+		if (course.getCluster() >= 9) {
+			return course.getLectureNumberStudents() != null
+					? course.getLectureNumberStudents()
+					: settings.getElectiveCourseSize();
+						
+		}
+		switch (type) {
+			case LECTURE:
+				return course.getLectureNumberStudents() != null
+						? course.getLectureNumberStudents()
+						: settings.getLectureSize();
+
+			case TUTORIAL:
+				return course.getTutorialNumberStudents() != null
+						? course.getTutorialNumberStudents()
+						: settings.getTutorialSize();
+
+			case LAB:
+				return course.getLabNumberStudents() != null
+						? course.getLabNumberStudents()
+						: settings.getLabSize();
+
+			case PHYSICS_LAB:
+				return course.getLabNumberStudents() != null
+						? course.getLabNumberStudents()
+						: settings.getPhysicsLabSize();
+
+			case NETWORKING_LAB:
+				return course.getLabNumberStudents() != null
+						? course.getLabNumberStudents()
+						: settings.getNetworkingLabSize();
+
+			default:
+				throw new RuntimeException("Unsupported lesson type for capacity: " + type + " in course: " + course.getCourseId());
+		}
+	}
+
 }

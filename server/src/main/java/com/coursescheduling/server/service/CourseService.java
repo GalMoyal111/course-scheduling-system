@@ -224,7 +224,55 @@ public class CourseService {
         return new ArrayList<>(courses);
     }
 
+    public List<Course> getAllCoursesRaw() throws Exception {
 
+        Firestore db = FirestoreClient.getFirestore();
+
+        List<Course> courses = new ArrayList<>();
+
+        ApiFuture<QuerySnapshot> future = db.collection("courses").get();
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+        for (QueryDocumentSnapshot doc : documents) {
+
+            Map<String, Object> courseData = doc.getData();
+
+            int cluster = ((Number) courseData.get("cluster")).intValue();
+            String courseName = (String) courseData.get("courseName");
+            String prerequisiteCourseNumber = (String) courseData.get("prerequisiteCourseNumber");
+
+            int lectureHours = ((Number) courseData.get("lectureHours")).intValue();
+            int tutorialHours = ((Number) courseData.get("tutorialHours")).intValue();
+            int labHours = ((Number) courseData.get("labHours")).intValue();
+            int projectHours = ((Number) courseData.get("projectHours")).intValue();
+            float credits = ((Number) courseData.get("credits")).floatValue();
+
+            String clusterName = (String) courseData.get("clusterName");
+            Integer lectureNumberStudents = getIntegerValue(courseData, "lectureNumberStudents");
+            Integer tutorialNumberStudents = getIntegerValue(courseData, "tutorialNumberStudents");
+            Integer labNumberStudents = getIntegerValue(courseData, "labNumberStudents");
+
+            Course course = new Course();
+
+            course.setCourseId(doc.getId());
+            course.setCluster(cluster);
+            course.setCourseName(courseName);
+            course.setPrerequisiteCourseNumber(prerequisiteCourseNumber);
+            course.setLectureHours(lectureHours);
+            course.setTutorialHours(tutorialHours);
+            course.setLabHours(labHours);
+            course.setProjectHours(projectHours);
+            course.setCredits(credits);
+            course.setClusterName(normalizeClusterName(cluster, clusterName));
+            course.setLectureNumberStudents(lectureNumberStudents);
+            course.setTutorialNumberStudents(tutorialNumberStudents);
+            course.setLabNumberStudents(labNumberStudents);
+
+            courses.add(course);
+        }
+
+        return courses;
+    }
     
     public void updateCourse(Course oldCourse, Course newCourse) throws Exception {
     
