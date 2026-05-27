@@ -34,7 +34,7 @@
 /* Animated Background Elements */
 .welcome-section::before,
 .welcome-section::after {
-  content: '';
+  content: "";
   position: absolute;
   border-radius: 50%;
   opacity: 0.15;
@@ -67,11 +67,15 @@
 }
 
 .welcome-content::before {
-  content: '';
+  content: "";
   position: absolute;
   width: 150px;
   height: 150px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
   border-radius: 50%;
   top: 20%;
   left: 10%;
@@ -79,11 +83,15 @@
 }
 
 .welcome-content::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 100px;
   height: 100px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
   border-radius: 50%;
   bottom: 15%;
   right: 15%;
@@ -93,7 +101,8 @@
 
 /* Float Animation */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
   25% {

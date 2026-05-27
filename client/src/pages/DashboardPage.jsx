@@ -55,8 +55,8 @@ export default function DashboardPage({ user }) {
         <div className="about-content">
           <p>
             UniSched helps you create the perfect class schedule. Simply add
-            your courses, lessons, classrooms, and Lecturers, and the system will
-            automatically arrange them in the best possible way.
+            your courses, lessons, classrooms, and Lecturers, and the system
+            will automatically arrange them in the best possible way.
           </p>
         </div>
       </section>

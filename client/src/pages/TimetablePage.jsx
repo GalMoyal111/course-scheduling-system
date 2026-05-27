@@ -6,11 +6,20 @@ import { useData } from "../context/DataContext";
 import Toast, { useToast } from "../components/ui/Toast";
 import "./TimetablePage.css";
 import Modal from "../components/ui/Modal";
-import { saveTimetable, exportCurrentToExcel, removeLessonFromSavedTimetable } from "../services/api";
+import {
+  saveTimetable,
+  exportCurrentToExcel,
+  removeLessonFromSavedTimetable,
+} from "../services/api";
 
 export default function TimetablePage() {
-  const { schedule, clusters, invalidateHistoryCache, clusterMappings, currentTimetableMetadata } =
-    useData();
+  const {
+    schedule,
+    clusters,
+    invalidateHistoryCache,
+    clusterMappings,
+    currentTimetableMetadata,
+  } = useData();
   const { toast, showSuccess, showError, closeToast } = useToast();
   const [selectedCluster, setSelectedCluster] = useState("ALL");
   const [isExporting, setIsExporting] = useState(false);
@@ -69,6 +78,7 @@ export default function TimetablePage() {
     { range: "19:50-20:40", frame: 12, isBreak: false },
   ];
 
+  // Generate the list of cluster options for the cluster filter dropdown. This includes an "All clusters" option, followed by options for each regular semester cluster (those with numbers in the semesterRange), and an "Elective courses" option if there are any lessons with cluster numbers 9 or above.
   const clusterOptions = useMemo(() => {
     if (!Array.isArray(editableSchedule) || editableSchedule.length === 0) {
       return [{ value: "ALL", label: "All clusters" }];
@@ -158,7 +168,7 @@ export default function TimetablePage() {
     const timetableId = currentTimetableMetadata?.id;
 
     setEditableSchedule((prev) =>
-      prev.filter((lesson) => lesson.lessonId !== lessonId)
+      prev.filter((lesson) => lesson.lessonId !== lessonId),
     );
 
     setIsDeleteModalOpen(false);
@@ -341,57 +351,58 @@ export default function TimetablePage() {
                         {timeItem.isBreak ? (
                           <div className="break-text">הפסקה</div>
                         ) : (
-                        lessons.map((l, i) => {
-                          const isFirstFrame = timeItem.frame === l.startFrame;
+                          lessons.map((l, i) => {
+                            const isFirstFrame =
+                              timeItem.frame === l.startFrame;
 
-                          return (
-                            <div key={i} className="lesson-card">
-                              {isFirstFrame && (
-                                <button
-                                  type="button"
-                                  className="lesson-delete-btn"
-                                  title="Remove lesson"
-                                  onClick={() => handleDeleteClick(l)}
-                                >
-                                  ×
-                                </button>
-                              )}
+                            return (
+                              <div key={i} className="lesson-card">
+                                {isFirstFrame && (
+                                  <button
+                                    type="button"
+                                    className="lesson-delete-btn"
+                                    title="Remove lesson"
+                                    onClick={() => handleDeleteClick(l)}
+                                  >
+                                    ×
+                                  </button>
+                                )}
 
-                              <div className="lesson-header">
-                                <span
-                                  className="lesson-course"
-                                  title={l.courseName}
-                                >
-                                  {l.courseName || l.courseId}
-                                </span>
-                                <span className="lesson-type">
-                                  {translateType(l.type)}
-                                </span>
-                              </div>
-
-                              <div className="lesson-lecturer">
-                                <span
-                                  style={{
-                                    fontWeight: "bold",
-                                    marginLeft: "4px",
-                                  }}
-                                >
-                                  {l.courseId}
-                                </span>
-                                • {l.lecturer}
-                              </div>
-
-                              {l.room && (
-                                <div className="lesson-room">
-                                  <span className="material-icons">
-                                    location_on
+                                <div className="lesson-header">
+                                  <span
+                                    className="lesson-course"
+                                    title={l.courseName}
+                                  >
+                                    {l.courseName || l.courseId}
                                   </span>
-                                  {l.room.classroomName}
+                                  <span className="lesson-type">
+                                    {translateType(l.type)}
+                                  </span>
                                 </div>
-                              )}
-                            </div>
-                          );
-                        })
+
+                                <div className="lesson-lecturer">
+                                  <span
+                                    style={{
+                                      fontWeight: "bold",
+                                      marginLeft: "4px",
+                                    }}
+                                  >
+                                    {l.courseId}
+                                  </span>
+                                  • {l.lecturer}
+                                </div>
+
+                                {l.room && (
+                                  <div className="lesson-room">
+                                    <span className="material-icons">
+                                      location_on
+                                    </span>
+                                    {l.room.classroomName}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
                         )}
                       </td>
                     );
@@ -447,20 +458,20 @@ export default function TimetablePage() {
           </select>
         </div>
       </Modal>
-        <ConfirmModal
-          isOpen={isDeleteModalOpen}
-          title="Remove Lesson"
-          message="Are you sure you want to remove this lesson from the timetable? Once you confirm, it will be deleted and cannot be undone."
-          fileName={
-            lessonToDelete
-              ? `${lessonToDelete.courseName || lessonToDelete.courseId} - ${translateType(lessonToDelete.type)}`
-              : ""
-          }
-          onConfirm={handleConfirmDelete}
-          onCancel={() => setIsDeleteModalOpen(false)}
-          confirmLabel="Remove"
-          cancelLabel="Cancel"
-        />
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        title="Remove Lesson"
+        message="Are you sure you want to remove this lesson from the timetable? Once you confirm, it will be deleted and cannot be undone."
+        fileName={
+          lessonToDelete
+            ? `${lessonToDelete.courseName || lessonToDelete.courseId} - ${translateType(lessonToDelete.type)}`
+            : ""
+        }
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        confirmLabel="Remove"
+        cancelLabel="Cancel"
+      />
       <Toast toast={toast} onClose={closeToast} />
     </div>
   );

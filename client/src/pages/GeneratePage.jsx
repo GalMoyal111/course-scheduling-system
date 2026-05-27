@@ -189,15 +189,14 @@ export default function GeneratePage() {
       label: "Cluster Overlap Avoidance",
       desc: "Crucial: Prevents scheduling two courses from the same track or semester at the same time, ensuring students can attend both.",
     },
-    ClusterCompactness: { 
+    ClusterCompactness: {
       label: "Minimize Student Windows",
       desc: "Prevents annoying gaps (windows) between classes for students in the same semester, and aligns lessons to standard blocks.",
-    }
+    },
   };
 
   // Group constraints by category for better organization
   const constraintCategories = {
-    
     "Course Scheduling": {
       icon: "schedule",
       constraints: [
@@ -205,7 +204,7 @@ export default function GeneratePage() {
         "ElectiveEveningPreferred",
         "CourseComponentsOverlap",
         "EnglishCourseTiming",
-      ]
+      ],
     },
     "Room & Building": {
       icon: "domain",
@@ -214,15 +213,11 @@ export default function GeneratePage() {
         "ElectiveCourseInTheSameClassroom",
         "AvoidBuildingP",
         "LoadBalancing",
-
-      ]
+      ],
     },
     "Lecturer Constraints": {
       icon: "person",
-      constraints: [
-        "LecturerCompactSchedule",
-        "LecturerPreference",
-      ]
+      constraints: ["LecturerCompactSchedule", "LecturerPreference"],
     },
     "Student Experience": {
       icon: "groups",
@@ -231,7 +226,7 @@ export default function GeneratePage() {
         "InconvenientTiming",
         "ClusterOverlap",
         "ClusterCompactness",
-      ]
+      ],
     },
   };
 
@@ -733,7 +728,6 @@ export default function GeneratePage() {
         )}
       </div>
 
-
       {/* Step 2 */}
       <div className="generate-card">
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -785,78 +779,96 @@ export default function GeneratePage() {
         </div>
 
         <div className="constraints-grid">
-          {Object.entries(constraintCategories).map(([categoryName, categoryData]) => (
-            <div key={categoryName} className="constraint-category">
-              <h4 className="category-title">
-                <span className="material-icons category-icon">{categoryData.icon}</span>
-                {categoryName}
-              </h4>
-              <div className="constraints-in-category">
-                {categoryData.constraints.map((constraint) => (
-                  <div
-                    key={constraint}
-                    className="constraint-row"
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
+          {Object.entries(constraintCategories).map(
+            ([categoryName, categoryData]) => (
+              <div key={categoryName} className="constraint-category">
+                <h4 className="category-title">
+                  <span className="material-icons category-icon">
+                    {categoryData.icon}
+                  </span>
+                  {categoryName}
+                </h4>
+                <div className="constraints-in-category">
+                  {categoryData.constraints.map((constraint) => (
                     <div
-                      style={{ display: "flex", alignItems: "center", width: "100%" }}
+                      key={constraint}
+                      className="constraint-row"
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
                     >
-                      <div className="constraint-info">
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <span className="constraint-name">
-                            {constraintDetails[constraint].label}
-                          </span>
-                          <InfoButton
-                            title=""
-                            description={constraintDetails[constraint].desc}
-                          />
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          width: "100%",
+                        }}
+                      >
+                        <div className="constraint-info">
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                            }}
+                          >
+                            <span className="constraint-name">
+                              {constraintDetails[constraint].label}
+                            </span>
+                            <InfoButton
+                              title=""
+                              description={constraintDetails[constraint].desc}
+                            />
+                          </div>
+                        </div>
+
+                        <input
+                          type="range"
+                          className="weight-slider"
+                          min="0"
+                          max="10"
+                          step="1"
+                          value={weights[constraint]}
+                          onChange={(e) =>
+                            handleWeightChange(constraint, e.target.value)
+                          }
+                        />
+
+                        <div className="weight-badge">
+                          {weights[constraint]}
                         </div>
                       </div>
 
-                      <input
-                        type="range"
-                        className="weight-slider"
-                        min="0"
-                        max="10"
-                        step="1"
-                        value={weights[constraint]}
-                        onChange={(e) => handleWeightChange(constraint, e.target.value)}
-                      />
-
-                      <div className="weight-badge">{weights[constraint]}</div>
-                    </div>
-
-                    {weights[constraint] == 0 && (
-                      <div
-                        style={{
-                          color: "#ef4444",
-                          fontSize: "0.85rem",
-                          marginTop: "8px",
-                          fontWeight: "500",
-                        }}
-                      >
-                        <span
-                          className="material-icons"
+                      {weights[constraint] == 0 && (
+                        <div
                           style={{
-                            fontSize: "14px",
-                            verticalAlign: "middle",
-                            marginRight: "4px",
+                            color: "#ef4444",
+                            fontSize: "0.85rem",
+                            marginTop: "8px",
+                            fontWeight: "500",
                           }}
                         >
-                          warning
-                        </span>
-                        Note: Assigning a weight of 0 will cause this constraint to be
-                        completely ignored.
-                      </div>
-                    )}
-                  </div>
-                ))}
+                          <span
+                            className="material-icons"
+                            style={{
+                              fontSize: "14px",
+                              verticalAlign: "middle",
+                              marginRight: "4px",
+                            }}
+                          >
+                            warning
+                          </span>
+                          Note: Assigning a weight of 0 will cause this
+                          constraint to be completely ignored.
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ),
+          )}
         </div>
       </div>
 

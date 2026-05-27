@@ -179,12 +179,28 @@ export default function HelpPage() {
           {/* Classrooms */}
           <div className="step-box">
             <h4>
-              <span className="material-icons" style={{ fontSize: "20px", marginRight: "8px", verticalAlign: "middle", color: "#667eea" }}>meeting_room</span>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: "20px",
+                  marginRight: "8px",
+                  verticalAlign: "middle",
+                  color: "#667eea",
+                }}
+              >
+                meeting_room
+              </span>
               Classrooms
             </h4>
             <ul>
-              <li>Click the <strong>Add Room</strong> button to fill in classroom details.</li>
-              <li><strong>Note:</strong> In the "Room Name" field, include the building name (e.g., P101).</li>
+              <li>
+                Click the <strong>Add Room</strong> button to fill in classroom
+                details.
+              </li>
+              <li>
+                <strong>Note:</strong> In the "Room Name" field, include the
+                building name (e.g., P101).
+              </li>
               <li>Select the classroom type from the provided list.</li>
             </ul>
           </div>
@@ -192,52 +208,148 @@ export default function HelpPage() {
           {/* Courses */}
           <div className="step-box">
             <h4>
-              <span className="material-icons" style={{ fontSize: "20px", marginRight: "8px", verticalAlign: "middle", color: "#f093fb" }}>menu_book</span>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: "20px",
+                  marginRight: "8px",
+                  verticalAlign: "middle",
+                  color: "#f093fb",
+                }}
+              >
+                menu_book
+              </span>
               Courses
             </h4>
             <ul>
-              <li>Click <strong>Add Course</strong> and enter details (Code, Name, Hours).</li>
-              <li><strong>Semester/Cluster:</strong> The available options are taken from the values defined in the Settings page under Manage Clusters.</li>
-              <li><strong>Credit Calculation:</strong> The system automatically calculates credits based on the hours entered. To override this and enter credits manually, click the <strong>pencil icon</strong> next to the field and confirm the prompt.</li>
-              <li><strong>Prerequisites:</strong> This field is optional. If there are multiple prerequisites, enter the course code and click the small <strong>"+" icon</strong> to add it.</li>
-              <li><strong>Classroom Sizes:</strong> Default requirements are automatically loaded based on Settings. To override these values, click the pencil icon next to the field and confirm.</li>
+              <li>
+                Click <strong>Add Course</strong> and enter details (Code, Name,
+                Hours).
+              </li>
+              <li>
+                <strong>Semester/Cluster:</strong> The available options are
+                taken from the values defined in the Settings page under Manage
+                Clusters.
+              </li>
+              <li>
+                <strong>Credit Calculation:</strong> The system automatically
+                calculates credits based on the hours entered. To override this
+                and enter credits manually, click the{" "}
+                <strong>pencil icon</strong> next to the field and confirm the
+                prompt.
+              </li>
+              <li>
+                <strong>Prerequisites:</strong> This field is optional. If there
+                are multiple prerequisites, enter the course code and click the
+                small <strong>"+" icon</strong> to add it.
+              </li>
+              <li>
+                <strong>Classroom Sizes:</strong> Default requirements are
+                automatically loaded based on Settings. To override these
+                values, click the pencil icon next to the field and confirm.
+              </li>
             </ul>
           </div>
 
           {/* Lecturers */}
           <div className="step-box">
             <h4>
-              <span className="material-icons" style={{ fontSize: "20px", marginRight: "8px", verticalAlign: "middle", color: "#4facfe" }}>person</span>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: "20px",
+                  marginRight: "8px",
+                  verticalAlign: "middle",
+                  color: "#4facfe",
+                }}
+              >
+                person
+              </span>
               Lecturers
             </h4>
             <ul>
-              <li>Click <strong>Add Lecturer</strong> and enter the name. <em>Note: The system does not allow two lecturers with the exact same name.</em></li>
-              <li>To change the lecturer's name after it has been added, click the <strong>pencil icon</strong> located to the right of their name.</li>
-              <li><strong>Managing Availability:</strong> Select a lecturer from the list to view their grid. Click the slots to cycle through states:
+              <li>
+                Click <strong>Add Lecturer</strong> and enter the name.{" "}
+                <em>
+                  Note: The system does not allow two lecturers with the exact
+                  same name.
+                </em>
+              </li>
+              <li>
+                To change the lecturer's name after it has been added, click the{" "}
+                <strong>pencil icon</strong> located to the right of their name.
+              </li>
+              <li>
+                <strong>Managing Availability:</strong> Select a lecturer from
+                the list to view their grid. Click the slots to cycle through
+                states:
                 <ul>
-                  <li><strong style={{color: "#10b981"}}>Green:</strong> Available to teach.</li>
-                  <li><strong style={{color: "#f59e0b"}}>Orange:</strong> Prefers not to teach.</li>
-                  <li><strong style={{color: "#ef4444"}}>Red:</strong> Cannot teach at all.</li>
+                  <li>
+                    <strong style={{ color: "#10b981" }}>Green:</strong>{" "}
+                    Available to teach.
+                  </li>
+                  <li>
+                    <strong style={{ color: "#f59e0b" }}>Orange:</strong>{" "}
+                    Prefers not to teach.
+                  </li>
+                  <li>
+                    <strong style={{ color: "#ef4444" }}>Red:</strong> Cannot
+                    teach at all.
+                  </li>
                 </ul>
               </li>
-              <li><strong>Quick Action:</strong> Click the colored circles (Green/Orange/Red) at the top of each day to change all slots for that day to the selected color.</li>
+              <li>
+                <strong>Quick Action:</strong> Click the colored circles
+                (Green/Orange/Red) at the top of each day to change all slots
+                for that day to the selected color.
+              </li>
             </ul>
-            <p className="tip-box" style={{ borderLeftColor: "#ef4444", backgroundColor: "#fef2f2" }}>
-              <strong>⚠️ Critical:</strong> You must click the <strong>Save Changes</strong> button to apply updates. Otherwise, preferences will not be saved!
+            <p
+              className="tip-box"
+              style={{ borderLeftColor: "#ef4444", backgroundColor: "#fef2f2" }}
+            >
+              <strong>⚠️ Critical:</strong> You must click the{" "}
+              <strong>Save Changes</strong> button to apply updates. Otherwise,
+              preferences will not be saved!
             </p>
           </div>
 
           {/* Lessons */}
           <div className="step-box">
             <h4>
-              <span className="material-icons" style={{ fontSize: "20px", marginRight: "8px", verticalAlign: "middle", color: "#43e97b" }}>school</span>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: "20px",
+                  marginRight: "8px",
+                  verticalAlign: "middle",
+                  color: "#43e97b",
+                }}
+              >
+                school
+              </span>
               Lessons
             </h4>
             <ul>
-              <li>This page connects all previous data. <strong>All fields are mandatory.</strong></li>
-              <li><strong>Data Dependency:</strong> Dropdown menus only display data previously entered in the system (Clusters from Settings, Courses from Courses page, Lecturers from Lecturers page).</li>
-              <li><strong>Lesson Types:</strong> Available types for a course are derived directly from its definition on the Courses page.</li>
-              <li><strong>Automatic Splitting:</strong> The system does not allow single lesson blocks longer than 3 hours. If a 4-hour lesson is entered, it will be automatically split into two identical 2-hour blocks.</li>
+              <li>
+                This page connects all previous data.{" "}
+                <strong>All fields are mandatory.</strong>
+              </li>
+              <li>
+                <strong>Data Dependency:</strong> Dropdown menus only display
+                data previously entered in the system (Clusters from Settings,
+                Courses from Courses page, Lecturers from Lecturers page).
+              </li>
+              <li>
+                <strong>Lesson Types:</strong> Available types for a course are
+                derived directly from its definition on the Courses page.
+              </li>
+              <li>
+                <strong>Automatic Splitting:</strong> The system does not allow
+                single lesson blocks longer than 3 hours. If a 4-hour lesson is
+                entered, it will be automatically split into two identical
+                2-hour blocks.
+              </li>
             </ul>
           </div>
         </div>

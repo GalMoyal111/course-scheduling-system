@@ -8,7 +8,6 @@ function UploadForm({ onUpload }) {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
 
-
   // Handle form submission. Validates that a file is selected, then calls onUpload with the selected file.
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -16,6 +15,7 @@ function UploadForm({ onUpload }) {
     onUpload(file);
   };
 
+  // Handle file selection via the file input. Updates the file state with the selected file.
   const handleFileChange = (e) => {
     const f = e.target.files && e.target.files[0];
     if (f) setFile(f);
@@ -46,6 +46,7 @@ function UploadForm({ onUpload }) {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  // The form consists of a drag-and-drop area for file selection, which also supports clicking to open the file dialog. If a file is selected, it shows a preview with the file name and size, along with options to change or upload the file.
   return (
     <form className="upload-form" onSubmit={handleSubmit}>
       {!file ? (
@@ -74,10 +75,14 @@ function UploadForm({ onUpload }) {
       ) : (
         <div className="file-preview">
           <div className="file-preview-content">
-            <span className="material-icons file-preview-icon">description</span>
+            <span className="material-icons file-preview-icon">
+              description
+            </span>
             <div className="file-preview-info">
               <p className="file-preview-name">{file.name}</p>
-              <p className="file-preview-size">{(file.size / 1024).toFixed(2)} KB</p>
+              <p className="file-preview-size">
+                {(file.size / 1024).toFixed(2)} KB
+              </p>
             </div>
             <button
               type="button"

@@ -1,11 +1,6 @@
 import React from "react";
 
-export default function HelpSection({
-  title,
-  isExpanded,
-  onToggle,
-  children,
-}) {
+export default function HelpSection({ title, isExpanded, onToggle, children }) {
   return (
     <section className="help-section">
       <div
@@ -13,9 +8,7 @@ export default function HelpSection({
         onClick={onToggle}
       >
         <h2>{title}</h2>
-        <span className="expand-icon">
-          {isExpanded ? "▼" : "▶"}
-        </span>
+        <span className="expand-icon">{isExpanded ? "▼" : "▶"}</span>
       </div>
       {isExpanded && <div className="help-section-body">{children}</div>}
     </section>

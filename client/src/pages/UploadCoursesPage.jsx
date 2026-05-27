@@ -98,6 +98,7 @@ export default function UploadCoursesPage() {
     setConfirmOpen(true);
   };
 
+  // Perform the actual upload after the user confirms. This function calls the API to upload the selected file, then processes the response to update the state with the upload summary and show the appropriate modals. If there are invalid courses, it will show a modal with details about which courses were invalid and why. If the upload is successful, it will refresh the courses list to reflect any changes.
   const performUpload = async () => {
     if (!pendingFile) return;
     setConfirmOpen(false);
@@ -111,7 +112,8 @@ export default function UploadCoursesPage() {
         savedCount: result.savedCount || 0,
         invalidCourses: result.invalidCourses || [],
         adjustedCourses: result.adjustedCourses || [],
-        electiveStudentCountAdjustedCourses: result.electiveStudentCountAdjustedCourses || [],
+        electiveStudentCountAdjustedCourses:
+          result.electiveStudentCountAdjustedCourses || [],
       });
       setModalContext("upload");
       setInvalidCoursesModalOpen(true);
@@ -205,7 +207,6 @@ export default function UploadCoursesPage() {
                 courseName: course.courseName,
                 removedPrerequisites: invalidPrereqs,
               },
-            
             ],
             electiveStudentCountAdjustedCourses: [],
           });
@@ -274,6 +275,7 @@ export default function UploadCoursesPage() {
     }
   };
 
+  // Filter courses based on the search query. The filtering checks if the courseId, courseName, or cluster includes the query string (case-insensitive). If the query is empty, all courses are included.
   const filtered = courses.filter((c) => {
     if (!query) return true;
     const q = query.toLowerCase();
@@ -314,6 +316,7 @@ export default function UploadCoursesPage() {
     );
   });
 
+  // Handle showing the latest upload summary. This function calls the API to get the most recent course upload summary, which includes the total number of rows processed, how many courses were successfully saved, and any invalid courses that were found. If a summary is retrieved successfully, it updates the state with the summary data and opens a modal to display it. If there is an error or no summary is found, it shows an appropriate error message.
   const handleShowLatestSummary = async () => {
     try {
       const summary = await getLatestCourseUploadSummary();
@@ -323,7 +326,6 @@ export default function UploadCoursesPage() {
         return;
       }
 
-      
       setUploadSummary(summary);
       setInvalidCoursesModalOpen(true);
     } catch (error) {
@@ -536,7 +538,9 @@ export default function UploadCoursesPage() {
         isOpen={invalidCoursesModalOpen}
         invalidCourses={uploadSummary.invalidCourses}
         adjustedCourses={uploadSummary.adjustedCourses}
-        electiveStudentCountAdjustedCourses={uploadSummary.electiveStudentCountAdjustedCourses}
+        electiveStudentCountAdjustedCourses={
+          uploadSummary.electiveStudentCountAdjustedCourses
+        }
         savedCount={uploadSummary.savedCount}
         context={modalContext}
         onClose={() => {
@@ -592,6 +596,8 @@ export default function UploadCoursesPage() {
   );
 }
 
+
+// Modal component to display invalid courses after an upload or when adding a course with missing prerequisites. The modal shows a summary of how many courses were saved successfully, which courses were invalid and why, and which courses were adjusted due to missing prerequisites. In the context of adding a course, it also gives the user the option to continue adding the course anyway, even if it has invalid prerequisites.
 function InvalidCoursesModal({
   isOpen,
   invalidCourses,
@@ -606,7 +612,9 @@ function InvalidCoursesModal({
 
   const hasInvalidCourses = invalidCourses && invalidCourses.length > 0;
   const hasAdjustedCourses = adjustedCourses && adjustedCourses.length > 0;
-  const hasElectiveStudentCountAdjustedCourses = electiveStudentCountAdjustedCourses && electiveStudentCountAdjustedCourses.length > 0;
+  const hasElectiveStudentCountAdjustedCourses =
+    electiveStudentCountAdjustedCourses &&
+    electiveStudentCountAdjustedCourses.length > 0;
   const isAddContext = context === "add";
 
   const modalTitle = isAddContext
@@ -803,8 +811,8 @@ function InvalidCoursesModal({
               }}
             >
               <span className="material-icons">info</span>
-              {electiveStudentCountAdjustedCourses.length} elective course(s) had
-              tutorial/lab student counts ignored:
+              {electiveStudentCountAdjustedCourses.length} elective course(s)
+              had tutorial/lab student counts ignored:
             </p>
 
             <div

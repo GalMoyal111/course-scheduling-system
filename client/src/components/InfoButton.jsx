@@ -5,7 +5,7 @@ export default function InfoButton({ title, description }) {
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
-    <div 
+    <div
       className="info-button-wrapper"
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}

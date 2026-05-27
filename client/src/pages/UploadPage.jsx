@@ -245,6 +245,7 @@ function UploadPage() {
     }
   };
 
+  // Handle adding or editing a lesson. If oldLesson is provided, it means we are editing an existing lesson, so we first delete the old lesson before adding the new one. After the API calls to delete and add lessons, we carefully update the local state to reflect the changes. We also show success or error toasts based on the outcome of the operation.
   const handleAddLesson = async (oldLesson, newLesson) => {
     try {
       if (oldLesson) {
@@ -275,12 +276,12 @@ function UploadPage() {
     }
   };
 
-
+  // Handle exporting lessons to an Excel file. This function calls the API to generate the Excel file as a blob, creates a temporary URL for it, and programmatically clicks a link to trigger the download of the file named "lessons.xlsx". If there is an error during this process, it shows an error toast.
   const handleShowLatestSummary = async () => {
     try {
       const summary = await getLatestLessonUploadSummary();
       if (!summary) {
-        showError("No recent upload summary found."); 
+        showError("No recent upload summary found.");
         return;
       }
       setUploadSummary(summary);
@@ -289,7 +290,6 @@ function UploadPage() {
       showError("Failed to load summary.");
     }
   };
-
 
   return (
     <div>
@@ -367,10 +367,7 @@ function UploadPage() {
             Add Lesson
           </Button>
 
-          <Button
-            onClick={handleShowLatestSummary}
-            variant="secondary"
-          >
+          <Button onClick={handleShowLatestSummary} variant="secondary">
             <svg
               width="14"
               height="14"
@@ -389,7 +386,7 @@ function UploadPage() {
             </svg>
             Latest Summary
           </Button>
-          
+
           <Button
             onClick={async () => {
               try {

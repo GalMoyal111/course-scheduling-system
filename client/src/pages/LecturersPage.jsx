@@ -413,6 +413,7 @@ export default function LecturersPage() {
     setPendingFile(null);
   };
 
+  // Handle exporting lecturers' availability to an Excel file. This function calls the API to generate the Excel file as a blob, creates a temporary URL for it, and programmatically clicks a link to trigger the download of the file named "lecturers_availability.xlsx". If there is an error during this process, it shows an error toast.
   const handleExport = async () => {
     try {
       const blob = await exportLecturersExcel();
@@ -426,28 +427,23 @@ export default function LecturersPage() {
     }
   };
 
-
+  // Handle showing the latest upload summary. This function calls the API to get the most recent lecturer upload summary, which includes the total number of rows processed, how many lecturers were successfully saved, and any invalid time slots that were found. If a summary is retrieved successfully, it updates the state with the summary data and opens a modal to display it. If there is an error or no summary is found, it shows an appropriate error message.
   const handleShowLatestSummary = async () => {
+    try {
+      const summary = await getLatestLecturerUploadSummary();
 
-  try {
+      if (!summary) {
+        showError("No recent upload summary found.");
+        return;
+      }
 
-    const summary = await getLatestLecturerUploadSummary();
-
-    if (!summary) {
-      showError("No recent upload summary found.");
-      return;
+      setUploadSummary(summary);
+      setIsSummaryModalOpen(true);
+    } catch (error) {
+      console.error(error);
+      showError("Failed to load summary.");
     }
-
-    setUploadSummary(summary);
-    setIsSummaryModalOpen(true);
-
-  } catch (error) {
-    console.error(error);
-    showError("Failed to load summary.");
-  }
-};
-
-
+  };
 
   return (
     <div className="lecturers-page">
@@ -479,17 +475,13 @@ export default function LecturersPage() {
               Add a lecturer
             </Button>
 
-            <Button
-              onClick={handleShowLatestSummary}
-              variant="secondary"
-            >
+            <Button onClick={handleShowLatestSummary} variant="secondary">
               <span
                 className="material-icons"
                 style={{ fontSize: 18, marginRight: 8 }}
               >
                 history
               </span>
-
               Latest Summary
             </Button>
             <Button onClick={handleExport} variant="primary">

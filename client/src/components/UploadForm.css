@@ -165,7 +165,10 @@
   background: transparent;
   border: 1px solid rgba(15, 23, 36, 0.06);
   color: var(--muted, #6b7280);
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .btn.secondary:hover:not(:disabled) {

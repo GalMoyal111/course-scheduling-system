@@ -36,6 +36,7 @@ function UploadRoomsPage() {
     invalidateCoursesCache,
   } = useData();
 
+  // Handle exporting rooms to an Excel file. This function calls the API to generate the Excel file as a blob, creates a temporary URL for it, and programmatically clicks a link to trigger the download of the file named "rooms.xlsx". If there is an error during this process, it shows an error toast.
   const handleExport = async () => {
     try {
       setExporting(true);
@@ -176,6 +177,7 @@ function UploadRoomsPage() {
     }
   };
 
+  // Handle adding or editing a classroom. If editingClassroom is set, it means we are in edit mode, so we send both the old and new classroom data to the server to perform an update. If editingClassroom is null, we are in add mode, so we just send the new classroom data to be added. After the API call, we update the local state to reflect the changes and show a success or error toast based on the outcome.
   const handleAddRoom = async (classroom) => {
     try {
       if (editingClassroom) {
@@ -223,6 +225,7 @@ function UploadRoomsPage() {
     loadClassrooms();
   }, [loadClassrooms]);
 
+  // Filter and sort classrooms based on the search query. The filtering checks if the building, classroom name, or type includes the query string (case-insensitive). After filtering, the classrooms are sorted first by building name and then by classroom name, both in Hebrew locale order.
   const filteredClassrooms = useMemo(() => {
     let listToRender = classrooms;
 
@@ -252,6 +255,7 @@ function UploadRoomsPage() {
     });
   }, [classrooms, query]);
 
+  // Handle showing the latest upload summary. This function calls the API to get the most recent room upload summary, which includes the total number of rows processed, how many classrooms were successfully saved, and any invalid rows or warnings that were found. If a summary is retrieved successfully, it updates the state with the summary data and opens a modal to display it. If there is an error or no summary is found, it shows an appropriate error message.
   const handleShowLatestSummary = async () => {
     try {
       const summary = await getLatestRoomUploadSummary();
