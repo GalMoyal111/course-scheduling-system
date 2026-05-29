@@ -8,17 +8,21 @@
   min-height: 100vh;
 }
 
-.timetable-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.timetable-page-header {
   margin-bottom: 24px;
 }
 
-.timetable-header h1 {
-  font-size: 1.8rem;
-  color: #101828;
-  margin: 0;
+.timetable-page-header .page-header-subtitle {
+  max-width: 720px;
+}
+
+.timetable-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
 }
 
 .timetable-filter-bar {

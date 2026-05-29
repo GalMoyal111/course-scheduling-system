@@ -6,6 +6,7 @@ import Toast, { useToast } from "../components/ui/Toast";
 import ConfirmModal from "../components/ConfirmModal";
 import Modal from "../components/ui/Modal";
 import "./HistoryPage.css";
+import PageHeader from "../components/ui/PageHeader";
 
 export default function HistoryPage() {
   const { history, fetchHistoryIfNeeded, loadTimetableFromHistory } = useData();
@@ -108,10 +109,11 @@ export default function HistoryPage() {
 
   return (
     <div className="history-page">
-      <div className="history-header">
-        <h1>Saved Timetables</h1>
-        <p>View and load your previously saved schedules.</p>
-      </div>
+      <PageHeader
+        icon="history"
+        title="Saved Timetables"
+        subtitle="View and load your previously saved schedules."
+      />
 
       <div className="history-grid">
         {history.length === 0 ? (

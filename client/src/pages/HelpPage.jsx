@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./HelpPage.css";
 import HelpSection from "../components/HelpSection";
 import FAQAccordion from "../components/FAQAccordion";
+import PageHeader from "../components/ui/PageHeader";
 
 export default function HelpPage() {
   const [expandedSection, setExpandedSection] = useState(null);
@@ -12,26 +13,11 @@ export default function HelpPage() {
 
   return (
     <div className="help-page">
-      {/* Header */}
-      <section className="help-header">
-        <h1>
-          <span
-            className="material-icons"
-            style={{
-              fontSize: "48px",
-              color: "#6366f1",
-              marginRight: "12px",
-              verticalAlign: "middle",
-            }}
-          >
-            school
-          </span>
-          System User Guide
-        </h1>
-        <p className="help-subtitle">
-          Your quick reference to the Smart Scheduling System
-        </p>
-      </section>
+      <PageHeader
+        icon="school"
+        title="System User Guide"
+        subtitle="Your quick reference to the Smart Scheduling System"
+      />
 
       {/* Introduction & Roles */}
       <HelpSection

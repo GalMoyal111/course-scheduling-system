@@ -17,6 +17,7 @@ import ConfirmModal from "../components/ConfirmModal";
 import { useData } from "../context/DataContext";
 import Modal from "../components/ui/Modal";
 import Toast, { useToast } from "../components/ui/Toast";
+import PageHeader from "../components/ui/PageHeader";
 import "./LecturersPage.css";
 
 export default function SettingsPage({ user }) {
@@ -331,13 +332,11 @@ export default function SettingsPage({ user }) {
   return (
     <div className="settings-page">
       <div className="settings-container">
-        {/* Page Header */}
-        <div className="settings-header">
-          <h1 className="settings-title">Settings</h1>
-          <p className="settings-subtitle">
-            Manage your account and system preferences
-          </p>
-        </div>
+        <PageHeader
+          icon="settings"
+          title="Settings"
+          subtitle="Manage your account and system preferences"
+        />
 
         {/* Password Section */}
         <div className="settings-section">

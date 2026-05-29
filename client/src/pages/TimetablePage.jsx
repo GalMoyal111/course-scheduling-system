@@ -11,6 +11,7 @@ import {
   exportCurrentToExcel,
   removeLessonFromSavedTimetable,
 } from "../services/api";
+import PageHeader from "../components/ui/PageHeader";
 
 export default function TimetablePage() {
   const {
@@ -250,54 +251,58 @@ export default function TimetablePage() {
 
   return (
     <div className="timetable-page">
-      <div className="timetable-header">
-        <h1>Created time schedule</h1>
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <Button
-            onClick={handleExportExcel}
-            variant="secondary"
-            disabled={isExporting}
-            style={{ display: "flex", alignItems: "center", gap: "8px" }}
-          >
-            <span className="material-icons">table_view</span>
-            {isExporting ? "Exporting..." : "Excel Export"}
-          </Button>
+      <PageHeader
+        icon="calendar_month"
+        title="Created time schedule"
+        subtitle="Review the generated timetable, export it, or print it."
+        className="timetable-page-header"
+      />
 
-          <button
-            onClick={handleSaveClick}
-            title="Save system in history"
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid rgba(79, 70, 229, 0.2)",
-              backgroundColor: "transparent",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              transition: "all 0.2s ease",
-              color: "var(--text)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(79, 70, 229, 0.08)";
-              e.currentTarget.style.borderColor = "rgba(79, 70, 229, 0.4)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.borderColor = "rgba(79, 70, 229, 0.2)";
-            }}
-          >
-            <span className="material-icons" style={{ fontSize: "1.3rem" }}>
-              save
-            </span>
-          </button>
-          <Button onClick={() => window.print()} variant="secondary">
-            <span className="material-icons" style={{ marginRight: 8 }}>
-              print
-            </span>
-            Printing system
-          </Button>
-        </div>
+      <div className="timetable-actions">
+        <Button
+          onClick={handleExportExcel}
+          variant="secondary"
+          disabled={isExporting}
+          style={{ display: "flex", alignItems: "center", gap: "8px" }}
+        >
+          <span className="material-icons">table_view</span>
+          {isExporting ? "Exporting..." : "Excel Export"}
+        </Button>
+
+        <button
+          onClick={handleSaveClick}
+          title="Save system in history"
+          style={{
+            padding: "8px 12px",
+            borderRadius: "6px",
+            border: "1px solid rgba(79, 70, 229, 0.2)",
+            backgroundColor: "transparent",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            transition: "all 0.2s ease",
+            color: "var(--text)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(79, 70, 229, 0.08)";
+            e.currentTarget.style.borderColor = "rgba(79, 70, 229, 0.4)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+            e.currentTarget.style.borderColor = "rgba(79, 70, 229, 0.2)";
+          }}
+        >
+          <span className="material-icons" style={{ fontSize: "1.3rem" }}>
+            save
+          </span>
+        </button>
+        <Button onClick={() => window.print()} variant="secondary">
+          <span className="material-icons" style={{ marginRight: 8 }}>
+            print
+          </span>
+          Printing system
+        </Button>
       </div>
 
       <div className="timetable-filter-bar">
