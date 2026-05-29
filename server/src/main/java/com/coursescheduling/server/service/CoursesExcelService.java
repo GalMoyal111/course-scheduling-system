@@ -39,9 +39,12 @@ public class CoursesExcelService {
     private List<InvalidCourse> readErrors = new ArrayList<>();
 
     public static class InvalidCourse {
-        private final String courseId;
-        private final String courseName;
-        private final String reason;
+        private String courseId;
+        private String courseName;
+        private String reason;
+        
+        public InvalidCourse() {
+        }
         
         public InvalidCourse(String courseId, String courseName, String reason) {
             this.courseId = courseId;
@@ -53,20 +56,35 @@ public class CoursesExcelService {
             return courseId;
         }
 
+        public void setCourseId(String courseId) {
+            this.courseId = courseId;
+        }
+
         public String getCourseName() {
             return courseName;
+        }
+
+        public void setCourseName(String courseName) {
+            this.courseName = courseName;
         }
         
         public String getReason() {
             return reason;
         }
 
+        public void setReason(String reason) {
+            this.reason = reason;
+        }
     }
+    
 
     public static class ElectiveStudentCountAdjustedCourse {
-        private final String courseId;
-        private final String courseName;
-        private final List<String> ignoredFields;
+        private String courseId;
+        private String courseName;
+        private List<String> ignoredFields;
+
+        public ElectiveStudentCountAdjustedCourse() {
+        }
 
         public ElectiveStudentCountAdjustedCourse(String courseId, String courseName, List<String> ignoredFields) {
             this.courseId = courseId;
@@ -78,19 +96,34 @@ public class CoursesExcelService {
             return courseId;
         }
 
+        public void setCourseId(String courseId) {
+            this.courseId = courseId;
+        }
+
         public String getCourseName() {
             return courseName;
+        }
+
+        public void setCourseName(String courseName) {
+            this.courseName = courseName;
         }
 
         public List<String> getIgnoredFields() {
             return ignoredFields;
         }
+
+        public void setIgnoredFields(List<String> ignoredFields) {
+            this.ignoredFields = ignoredFields;
+        }
     }
 
     public static class AdjustedCourse {
-        private final String courseId;
-        private final String courseName;
-        private final List<String> removedPrerequisites;
+        private String courseId;
+        private String courseName;
+        private List<String> removedPrerequisites;
+
+        public AdjustedCourse() {
+        }
 
         public AdjustedCourse(String courseId, String courseName, List<String> removedPrerequisites) {
             this.courseId = courseId;
@@ -102,12 +135,24 @@ public class CoursesExcelService {
             return courseId;
         }
 
+        public void setCourseId(String courseId) {
+            this.courseId = courseId;
+        }
+
         public String getCourseName() {
             return courseName;
         }
 
+        public void setCourseName(String courseName) {
+            this.courseName = courseName;
+        }
+
         public List<String> getRemovedPrerequisites() {
             return removedPrerequisites;
+        }
+
+        public void setRemovedPrerequisites(List<String> removedPrerequisites) {
+            this.removedPrerequisites = removedPrerequisites;
         }
     }
 
