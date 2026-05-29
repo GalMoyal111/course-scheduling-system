@@ -83,9 +83,34 @@ export default function HelpPage() {
       >
         <div className="section-content">
           <p>
-            You must be logged in to view data or perform actions. Click the
-            User Icon in the top right corner to log in.
+            Welcome to the platform that intelligently manages your academic
+            resources and generates optimal timetables.
           </p>
+
+          <div
+            className="tip-box"
+            style={{
+              borderLeftColor: "#f59e0b",
+              backgroundColor: "#fffbeb",
+            }}
+          >
+            <span
+              className="material-icons"
+              style={{
+                fontSize: "20px",
+                color: "#f59e0b",
+                marginRight: "8px",
+                verticalAlign: "middle",
+              }}
+            >
+              hourglass_top
+            </span>
+            <strong>Important Note:</strong> The system is hosted on a free
+            server service, so the first login or first page load may take a
+            little time. If login does not work immediately, wait a few moments
+            and try again. Some pages may also take a few extra seconds to load
+            on first access.
+          </div>
 
           <div className="step-box">
             <h4>
@@ -95,21 +120,24 @@ export default function HelpPage() {
                   fontSize: "20px",
                   marginRight: "8px",
                   verticalAlign: "middle",
+                  color: "#6366f1",
                 }}
               >
-                password
+                manage_accounts
               </span>
-              Account Access
+              User Roles in the System
             </h4>
+
             <ul>
               <li>
-                <strong>Forgot Password:</strong> Click "Forgot Password" on the
-                login screen. A reset link will be sent to your email (check
-                Spam/Junk folders).
+                <strong>Standard User:</strong> Can view data, input
+                information, and generate timetables.
               </li>
+
               <li>
-                <strong>Security:</strong> You can change your password anytime
-                via the <strong>Settings</strong> page.
+                <strong>Administrator (Admin):</strong> Has extended
+                permissions. Can add/delete users, change permissions, and
+                manage advanced settings.
               </li>
             </ul>
           </div>
@@ -363,44 +391,63 @@ export default function HelpPage() {
       >
         <div className="section-content">
           <p>
-            Head to the <strong>Generate</strong> page to run the smart
-            scheduling algorithm based on 5 parameters:
+            Welcome to the platform that intelligently manages your academic
+            resources and generates optimal timetables.
           </p>
 
+          <div
+            className="tip-box"
+            style={{
+              borderLeftColor: "#f59e0b",
+              backgroundColor: "#fffbeb",
+            }}
+          >
+            <span
+              className="material-icons"
+              style={{
+                fontSize: "20px",
+                color: "#f59e0b",
+                marginRight: "8px",
+                verticalAlign: "middle",
+              }}
+            >
+              hourglass_top
+            </span>
+            <strong>Important Note:</strong> The system is hosted on a free
+            server service, so the first login or first page load may take a
+            little time. If login does not work immediately, wait a few moments
+            and try again. Some pages may also take a few extra seconds to load
+            on first access.
+          </div>
+
           <div className="step-box">
-            <ol>
+            <h4>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: "20px",
+                  marginRight: "8px",
+                  verticalAlign: "middle",
+                  color: "#6366f1",
+                }}
+              >
+                manage_accounts
+              </span>
+              User Roles in the System
+            </h4>
+
+            <ul>
               <li>
-                <strong>Select Semester:</strong> Filter for the specific
-                academic cluster.
+                <strong>Standard User:</strong> Can view data, input
+                information, and generate timetables.
               </li>
 
               <li>
-                <strong>Manual Assignments:</strong> Need a specific class at a
-                specific time? Pre-assign it, and the algorithm builds around
-                it.
+                <strong>Administrator (Admin):</strong> Has extended
+                permissions. Can add/delete users, change permissions, and
+                manage advanced settings.
               </li>
-
-              <li>
-                <strong>Hard Courses:</strong> Mark demanding courses to
-                prioritize them for early morning slots.
-              </li>
-
-              <li>
-                <strong>Capacity Requirements:</strong> Define expected student
-                counts so the system matches them with suitably sized
-                classrooms.
-              </li>
-
-              <li>
-                <strong>Algorithm Weights (Sliders):</strong> Tell the algorithm
-                what matters most. Set sliders from 0 (Ignore) to 10 (Highest
-                priority). E.g., avoid lecturer gaps or prefer morning cores.
-              </li>
-            </ol>
-
-            <p className="tip-box">
-              <strong>🚀 Launch:</strong> Click "Generate Optimal Schedule".
-            </p>
+            </ul>
           </div>
         </div>
       </HelpSection>
@@ -507,6 +554,299 @@ export default function HelpPage() {
               view the user list, or change their role (User/Admin).
             </li>
           </ul>
+        </div>
+      </HelpSection>
+
+      {/* Excel Templates */}
+      <HelpSection
+        title="8. Excel Templates & Bulk Upload"
+        isExpanded={expandedSection === "excel"}
+        onToggle={() => toggleSection("excel")}
+      >
+        <div className="section-content">
+          <p>
+            The system supports bulk data upload using structured Excel files.
+            Templates can be downloaded from the Dashboard using
+            <strong> Get Templates</strong>.
+          </p>
+
+          {/* General Rules */}
+
+          <div className="step-box">
+            <h4>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: "20px",
+                  marginRight: "8px",
+                  verticalAlign: "middle",
+                  color: "#22c55e",
+                }}
+              >
+                table_chart
+              </span>
+              General Upload Rules
+            </h4>
+
+            <ul>
+              <li>
+                Available templates:
+                <strong> Lecturers, Courses, Lessons, and Classrooms.</strong>
+              </li>
+
+              <li>
+                Download the desired template from
+                <strong> Dashboard → Get Templates</strong>.
+              </li>
+
+              <li>Uploaded files must follow the exact template structure.</li>
+
+              <li>
+                Uploading a file will <strong>replace all existing data</strong>
+                for that section.
+              </li>
+
+              <li>
+                After upload, the system displays a summary report showing
+                successful rows and validation errors.
+              </li>
+
+              <li>
+                You can reopen the report later using the
+                <strong> Latest Summary</strong> button.
+              </li>
+            </ul>
+          </div>
+
+          {/* Lecturers */}
+
+          <div className="step-box">
+            <h4>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: "20px",
+                  marginRight: "8px",
+                  verticalAlign: "middle",
+                  color: "#4facfe",
+                }}
+              >
+                person
+              </span>
+              Lecturers Template
+            </h4>
+
+            <p>
+              Columns:
+              <strong>
+                {" "}
+                Name | Hard Block Day | Hard Block Hour | Prefer Not Day |
+                Prefer Not Hour
+              </strong>
+            </p>
+
+            <ul>
+              <li>
+                <strong>Name:</strong> Lecturer name.
+              </li>
+
+              <li>
+                <strong>Hard Block Day / Hour:</strong> Slots in which the
+                lecturer cannot teach.
+              </li>
+
+              <li>
+                <strong>Prefer Not Day / Hour:</strong> Preferred unavailable
+                slots.
+              </li>
+
+              <li>
+                Days are represented numerically:
+                <strong> 1 = Sunday ... 6 = Friday</strong>.
+              </li>
+
+              <li>Hours are represented using the system time slot numbers.</li>
+            </ul>
+          </div>
+
+          {/* Courses */}
+
+          <div className="step-box">
+            <h4>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: "20px",
+                  marginRight: "8px",
+                  verticalAlign: "middle",
+                  color: "#f093fb",
+                }}
+              >
+                menu_book
+              </span>
+              Courses Template
+            </h4>
+
+            <p>Main Columns:</p>
+
+            <ul>
+              <li>
+                <strong>Course Code:</strong> Unique course identifier.
+              </li>
+
+              <li>
+                <strong>Course Name:</strong> Course name.
+              </li>
+
+              <li>
+                <strong>Prerequisites / Conditions:</strong> Optional
+                prerequisite courses.
+              </li>
+
+              <li>
+                <strong>Lecture / Tutorial / Lab / Project Hours:</strong>
+                Weekly teaching hours.
+              </li>
+
+              <li>
+                <strong>Credits:</strong> Course credits.
+              </li>
+
+              <li>
+                <strong>Cluster Name:</strong> Must match an existing cluster
+                defined in Settings.
+              </li>
+
+              <li>
+                <strong>Lecture / Tutorial / Lab Number Students:</strong>
+                Classroom size requirements.
+              </li>
+
+              <li>
+                Empty classroom size values use the default values from
+                Settings.
+              </li>
+            </ul>
+          </div>
+
+          {/* Lessons */}
+
+          <div className="step-box">
+            <h4>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: "20px",
+                  marginRight: "8px",
+                  verticalAlign: "middle",
+                  color: "#43e97b",
+                }}
+              >
+                school
+              </span>
+              Lessons Template
+            </h4>
+
+            <p>
+              Columns:
+              <strong>
+                {" "}
+                Course Number | Course Name | Type | Lecturer | Semester |
+                Department | Hours
+              </strong>
+            </p>
+
+            <ul>
+              <li>
+                <strong>Course Number / Course Name:</strong>
+                Must match existing courses.
+              </li>
+
+              <li>
+                <strong>Type:</strong> Lesson type in Hebrew: הרצאה / תרגול /
+                מעבדה.
+              </li>
+
+              <li>
+                <strong>Lecturer:</strong>
+                Must match an existing lecturer.
+              </li>
+
+              <li>
+                <strong>Semester:</strong>
+                סמסטר א / סמסטר ב
+              </li>
+
+              <li>Department and Hours are optional compatibility fields.</li>
+            </ul>
+          </div>
+
+          {/* Classrooms */}
+
+          <div className="step-box">
+            <h4>
+              <span
+                className="material-icons"
+                style={{
+                  fontSize: "20px",
+                  marginRight: "8px",
+                  verticalAlign: "middle",
+                  color: "#667eea",
+                }}
+              >
+                meeting_room
+              </span>
+              Classrooms Template
+            </h4>
+
+            <p>
+              Columns:
+              <strong> Building | Classroom | Capacity | Type</strong>
+            </p>
+
+            <ul>
+              <li>
+                <strong>Building:</strong> Building name.
+              </li>
+
+              <li>
+                <strong>Classroom:</strong> Classroom number or room name
+                (include building identifier, e.g. M100).
+              </li>
+
+              <li>
+                <strong>Capacity:</strong> Maximum number of students.
+              </li>
+
+              <li>
+                <strong>Type:</strong> Classroom type: Normal, Laboratory,
+                Auditorium, Networking Lab, Physics Lab.
+              </li>
+            </ul>
+          </div>
+
+          <div
+            className="tip-box"
+            style={{
+              borderLeftColor: "#ef4444",
+              backgroundColor: "#fef2f2",
+            }}
+          >
+            <span
+              className="material-icons"
+              style={{
+                fontSize: "20px",
+                color: "#ef4444",
+                marginRight: "8px",
+                verticalAlign: "middle",
+              }}
+            >
+              warning
+            </span>
+            <strong>Important:</strong> If referenced data does not already
+            exist in the system (such as clusters, lecturers, or courses), the
+            upload may fail.
+          </div>
         </div>
       </HelpSection>
 
