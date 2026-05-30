@@ -354,9 +354,9 @@ public class LessonService {
 	    try (Workbook workbook = new XSSFWorkbook()) {
 
 	        Sheet sheet = workbook.createSheet("Lessons");
-
 	        List<Lesson> lessons = getAllLessons();
 
+	        // 1. Group lessons by splitGroupId to merge split lessons back into a single row
 	        Map<String, List<Lesson>> grouped = new HashMap<>();
 	        List<Lesson> singles = new ArrayList<>();
 
@@ -370,12 +370,10 @@ public class LessonService {
 	        }
 
 	        List<Lesson> finalLessons = new ArrayList<>();
-
 	        finalLessons.addAll(singles);
 
 	        for (List<Lesson> group : grouped.values()) {
 	            Lesson base = group.get(0);
-
 	            int totalDuration = group.stream().mapToInt(Lesson::getDuration).sum();
 
 	            Lesson merged = new Lesson();
@@ -384,11 +382,45 @@ public class LessonService {
 	            merged.setLecturer(base.getLecturer());
 	            merged.setType(base.getType());
 	            merged.setSemester(base.getSemester());
+	            
+	            // Crucial: copy cluster and credits so sorting works on merged rows
+	            merged.setCluster(base.getCluster());
+	            merged.setCredits(base.getCredits());
 	            merged.setDuration(totalDuration);
 
 	            finalLessons.add(merged);
 	        }
 
+	        // 2. Sort the final list exactly like the frontend (Semester A -> Semester B -> Cluster -> Credits -> ID -> Type)
+	        finalLessons.sort((a, b) -> {
+	            // a. Semester priority (A before B)
+	            int semA = getSemesterPriority(a.getSemester());
+	            int semB = getSemesterPriority(b.getSemester());
+	            if (semA != semB) return Integer.compare(semA, semB);
+
+	            // b. Cluster (Ascending)
+	            int clusterA = a.getCluster();
+	            int clusterB = b.getCluster();
+	            if (clusterA != clusterB) return Integer.compare(clusterA, clusterB);
+
+	            // c. Credits (Descending order)
+	            double credA = a.getCredits();
+	            double credB = b.getCredits();
+	            if (Double.compare(credB, credA) != 0) return Double.compare(credB, credA);
+
+	            // d. Course ID (Alphanumeric/Numeric)
+	            String idA = a.getCourseId() != null ? a.getCourseId() : "";
+	            String idB = b.getCourseId() != null ? b.getCourseId() : "";
+	            int idCompare = compareIdsNumeric(idA, idB);
+	            if (idCompare != 0) return idCompare;
+
+	            // e. Lesson Type Priority
+	            int typeA = getTypePriority(a.getType());
+	            int typeB = getTypePriority(b.getType());
+	            return Integer.compare(typeA, typeB);
+	        });
+
+	        // 3. Create Excel headers and rows
 	        Row header = sheet.createRow(0);
 	        header.createCell(0).setCellValue("מס' קורס");
 	        header.createCell(1).setCellValue("שם הקורס");
@@ -398,7 +430,6 @@ public class LessonService {
 	        header.createCell(5).setCellValue("סמסטר");
 	        header.createCell(6).setCellValue("מחלקה");
 	        header.createCell(7).setCellValue("שע'");
-
 
 	        int rowNum = 1;
 
@@ -415,6 +446,7 @@ public class LessonService {
 	            row.createCell(7).setCellValue(lesson.getDuration());           
 	        }
 
+	        // Auto-size columns for better readability
 	        for (int i = 0; i < 8; i++) {
 	            sheet.autoSizeColumn(i);
 	        }
@@ -428,6 +460,52 @@ public class LessonService {
 	        throw new RuntimeException("Failed to export lessons", e);
 	    }
 	}
+
+	// Sorting Helper Methods
+	private int getSemesterPriority(Object semester) {
+	    if (semester == null) return 99;
+	    String semStr = semester.toString().toUpperCase();
+	    if (semStr.equals("A")) return 1;
+	    if (semStr.equals("B")) return 2;
+	    return 99;
+	}
+
+	private int parseCluster(String cluster) {
+	    if (cluster == null || cluster.trim().isEmpty()) return 999;
+	    try {
+	        return Integer.parseInt(cluster.trim());
+	    } catch (NumberFormatException e) {
+	        return 999;
+	    }
+	}
+
+	private int compareIdsNumeric(String idA, String idB) {
+	    try {
+	        double numA = Double.parseDouble(idA);
+	        double numB = Double.parseDouble(idB);
+	        return Double.compare(numA, numB);
+	    } catch (NumberFormatException e) {
+	        return idA.compareTo(idB);
+	    }
+	}
+
+	private int getTypePriority(Object type) {
+	    if (type == null) return 99;
+	    String t = type.toString().toUpperCase();
+	    switch (t) {
+	        case "LECTURE": return 1;
+	        case "TUTORIAL": return 2;
+	        case "LAB": 
+	        case "PHYSICS_LAB": 
+	        case "NETWORKING_LAB": return 3;
+	        case "PBL": return 4;
+	        case "PROJECT": return 5;
+	        default: return 99;
+	    }
+	}
+	
+	
+	
 	
 	
 	private String formatSemester(Semester semester) {
