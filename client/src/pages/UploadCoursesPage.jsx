@@ -139,7 +139,7 @@ export default function UploadCoursesPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "courses.xlsx";
+      a.download = `courses-${new Date().toISOString().split("T")[0]}.xlsx`;
       document.body.appendChild(a);
       a.click();
       a.remove();

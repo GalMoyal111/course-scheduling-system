@@ -420,7 +420,7 @@ export default function LecturersPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "lecturers_availability.xlsx";
+      a.download = `lecturers-${new Date().toISOString().split("T")[0]}.xlsx`;
       a.click();
     } catch (err) {
       showError("Error exporting file");

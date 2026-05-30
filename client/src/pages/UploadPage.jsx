@@ -395,7 +395,7 @@ function UploadPage() {
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = "lessons.xlsx";
+                a.download = `lessons-${new Date().toISOString().split("T")[0]}.xlsx`;
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
