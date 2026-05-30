@@ -485,12 +485,36 @@ export default function LecturersPage() {
               Latest Summary
             </Button>
             <Button onClick={handleExport} variant="primary">
-              <span
-                className="material-icons"
-                style={{ fontSize: 18, marginRight: 8 }}
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden
+                style={{ marginRight: 8 }}
               >
-                download
-              </span>
+                <path
+                  d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M7 10l5-5 5 5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M12 5v12"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
               Export
             </Button>
           </div>
