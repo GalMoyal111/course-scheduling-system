@@ -328,7 +328,9 @@ public class ExcelProcessingService {
 	    example.createCell(6).setCellValue("");
 	    example.createCell(7).setCellValue("");
 
-	    
+	    for (int i = 0; i < 8; i++) {
+            sheet.autoSizeColumn(i);
+        }
 
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
 	    workbook.write(out);

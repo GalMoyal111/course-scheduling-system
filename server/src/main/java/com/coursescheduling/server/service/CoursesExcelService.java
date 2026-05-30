@@ -473,7 +473,6 @@ public class CoursesExcelService {
 
         courseService.saveCourseToFirebase(validCourses);
 
-        // הדפסה ללוג (שרת) של השגיאות
         if (!invalidCourseDetails.isEmpty()) {
             System.out.println("Invalid courses found:");
             for (InvalidCourse invalidCourse : invalidCourseDetails) {
@@ -537,6 +536,10 @@ public class CoursesExcelService {
                 row.createCell(11).setCellValue(asDouble(data.get("labNumberStudents")));
             }
 
+            for (int i = 0; i < 12; i++) {
+                sheet.autoSizeColumn(i);
+            }
+            
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
             workbook.close();
@@ -647,6 +650,9 @@ public class CoursesExcelService {
         example2.createCell(10).setCellValue("");
         example2.createCell(11).setCellValue("");
 
+        for (int i = 0; i < 12; i++) {
+            sheet.autoSizeColumn(i);
+        }
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         workbook.write(out);

@@ -52,7 +52,6 @@ public class LecturerExcelService {
                 Row currentRow = rows.next();
                 if (currentRow == null) continue;
 
-                // קריאת התאים כטקסט
                 String name = formatter.formatCellValue(currentRow.getCell(0)).trim();
                 String hardDayStr = formatter.formatCellValue(currentRow.getCell(1)).trim();
                 String hardFrameStr = formatter.formatCellValue(currentRow.getCell(2)).trim();
@@ -223,6 +222,9 @@ public class LecturerExcelService {
                     }
                 }
             }
+            for (int i = 0; i < 5; i++) {
+	            sheet.autoSizeColumn(i);
+	        }
             workbook.write(out);
             return out.toByteArray();
         }
@@ -252,6 +254,10 @@ public class LecturerExcelService {
 	    example2.createCell(2).setCellValue("");
 	    example2.createCell(3).setCellValue("2");
 	    example2.createCell(4).setCellValue("1");
+	    
+	    for (int i = 0; i < 5; i++) {
+            sheet.autoSizeColumn(i);
+        }
 
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
 	    workbook.write(out);

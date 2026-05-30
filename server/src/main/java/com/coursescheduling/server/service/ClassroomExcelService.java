@@ -20,256 +20,277 @@ import java.io.ByteArrayOutputStream;
 
 @Service
 public class ClassroomExcelService {
-	
-	@Autowired
-    private ClassroomService classroomService;
 
-	
+	@Autowired
+	private ClassroomService classroomService;
+
 	public static class ClassroomUploadSummary {
-	    public int totalRows = 0;
-	    public int savedClassrooms = 0;
-	    public List<String> invalidRows = new ArrayList<>();
-	    public List<String> warningRows = new ArrayList<>();
-	    
-	    public int getTotalRows() { return totalRows; }
-	    public int getSavedClassrooms() { return savedClassrooms; }
-	    public List<String> getInvalidRows() { return invalidRows; }
-	    public List<String> getWarningRows() { return warningRows; }
+		public int totalRows = 0;
+		public int savedClassrooms = 0;
+		public List<String> invalidRows = new ArrayList<>();
+		public List<String> warningRows = new ArrayList<>();
+
+		public int getTotalRows() {
+			return totalRows;
+		}
+
+		public int getSavedClassrooms() {
+			return savedClassrooms;
+		}
+
+		public List<String> getInvalidRows() {
+			return invalidRows;
+		}
+
+		public List<String> getWarningRows() {
+			return warningRows;
+		}
 	}
-	
+
 	public ClassroomUploadSummary process(MultipartFile file) {
 		ClassroomUploadSummary summary = new ClassroomUploadSummary();
 		java.util.Set<String> seenClassrooms = new java.util.HashSet<>();
 
-	    try (InputStream is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
-	        Sheet sheet = workbook.getSheetAt(0);
-	        List<Classroom> classrooms = new ArrayList<>();
+		try (InputStream is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
+			Sheet sheet = workbook.getSheetAt(0);
+			List<Classroom> classrooms = new ArrayList<>();
 
-	        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-	            Row row = sheet.getRow(i);
-	            if (row == null) continue;
-	            
-	            summary.totalRows++;
+			for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+				Row row = sheet.getRow(i);
+				if (row == null)
+					continue;
 
-	            try {
-	                String building = row.getCell(0) != null ? row.getCell(0).getStringCellValue().trim() : "";
-	                String classroomName = row.getCell(1) != null ? row.getCell(1).getStringCellValue().trim() : "";
-	                String rowLabel = "Row " + (i + 1) + " (Building: " + safeValue(building) + ", Classroom: " + safeValue(classroomName) + ")";
+				summary.totalRows++;
 
-	                if (building.isEmpty() || classroomName.isEmpty()) {
-	                    summary.invalidRows.add(rowLabel + ": Missing building name or classroom name");
-	                    continue;
-	                }
+				try {
+					String building = row.getCell(0) != null ? row.getCell(0).getStringCellValue().trim() : "";
+					String classroomName = row.getCell(1) != null ? row.getCell(1).getStringCellValue().trim() : "";
+					String rowLabel = "Row " + (i + 1) + " (Building: " + safeValue(building) + ", Classroom: "
+							+ safeValue(classroomName) + ")";
 
-	                String classPrefix = extractBuildingPrefix(classroomName);
-	                if (classPrefix == null || !classPrefix.equalsIgnoreCase(building)) {
-	                    summary.invalidRows.add(
-	                        rowLabel + ": Building does not match classroom name prefix"
-	                    );
-	                    continue;
-	                }
+					if (building.isEmpty() || classroomName.isEmpty()) {
+						summary.invalidRows.add(rowLabel + ": Missing building name or classroom name");
+						continue;
+					}
 
-	                int capacity = 0;
-	                if (row.getCell(2) != null) {
-	                    capacity = (int) row.getCell(2).getNumericCellValue();
-	                } else {
-	                	summary.invalidRows.add(rowLabel + ": Lack of capacity");
-	                	continue;
-	                }
-	                
-	                // Validate that capacity is positive
-	                if (capacity <= 0) {
-	                	summary.warningRows.add(rowLabel + ": Capacity must be greater than 0. Row skipped.");
-	                	continue;
-	                }
+					String classPrefix = extractBuildingPrefix(classroomName);
+					if (classPrefix == null || !classPrefix.equalsIgnoreCase(building)) {
+						summary.invalidRows.add(rowLabel + ": Building does not match classroom name prefix");
+						continue;
+					}
 
-	                Cell typeCell = row.getCell(3);
-	                String typeStr = (typeCell != null) ? typeCell.getStringCellValue() : "NORMAL";
-	                
-	                // Check if the provided type is valid; if not, reject this row
-	                if (!isValidRoomType(typeStr)) {
-	                    summary.invalidRows.add(
-	                        rowLabel + ": Invalid room type '" + typeStr + "'. Must be one of: NORMAL, LAB, PHYSICS_LAB, NETWORKING_LAB, PBL, PROJECT, AUDITORIUM"
-	                    );
-	                    continue;
-	                }
-	                
-	                RoomType type = parseRoomType(typeStr);
+					int capacity = 0;
+					if (row.getCell(2) != null) {
+						capacity = (int) row.getCell(2).getNumericCellValue();
+					} else {
+						summary.invalidRows.add(rowLabel + ": Lack of capacity");
+						continue;
+					}
 
-	                String classroomKey = (building + "||" + classroomName).toLowerCase();
-	                if (seenClassrooms.contains(classroomKey)) {
-	                    summary.warningRows.add(
-	                        rowLabel + ": Duplicate classroom found in the uploaded file. Only the first occurrence was saved."
-	                    );
-	                    continue;
-	                }
-	                seenClassrooms.add(classroomKey);
+					// Validate that capacity is positive
+					if (capacity <= 0) {
+						summary.warningRows.add(rowLabel + ": Capacity must be greater than 0. Row skipped.");
+						continue;
+					}
 
-	                Classroom classroom = new Classroom(building, classroomName, capacity, type);
-	                classrooms.add(classroom);
-	                
-	            } catch (Exception e) {
-	                summary.invalidRows.add("Row " + (i + 1) + ": Invalid data format (building/classroom/capacity could not be read)");
-	            }
-	        }
+					Cell typeCell = row.getCell(3);
+					String typeStr = (typeCell != null) ? typeCell.getStringCellValue() : "NORMAL";
 
-	        summary.savedClassrooms = classrooms.size();
+					// Check if the provided type is valid; if not, reject this row
+					if (!isValidRoomType(typeStr)) {
+						summary.invalidRows.add(rowLabel + ": Invalid room type '" + typeStr
+								+ "'. Must be one of: NORMAL, LAB, PHYSICS_LAB, NETWORKING_LAB, PBL, PROJECT, AUDITORIUM");
+						continue;
+					}
 
-	        if (!classrooms.isEmpty()) {
-	            classroomService.saveClassroomsToFirebase(classrooms);
-	        }
+					RoomType type = parseRoomType(typeStr);
 
-	        classroomService.saveSummary(summary);
-	        return summary;
-	        
-	    } catch (Exception e) {
-	        throw new RuntimeException("Failed to process classrooms file", e);
-	    }
+					String classroomKey = (building + "||" + classroomName).toLowerCase();
+					if (seenClassrooms.contains(classroomKey)) {
+						summary.warningRows.add(rowLabel
+								+ ": Duplicate classroom found in the uploaded file. Only the first occurrence was saved.");
+						continue;
+					}
+					seenClassrooms.add(classroomKey);
+
+					Classroom classroom = new Classroom(building, classroomName, capacity, type);
+					classrooms.add(classroom);
+
+				} catch (Exception e) {
+					summary.invalidRows.add(
+							"Row " + (i + 1) + ": Invalid data format (building/classroom/capacity could not be read)");
+				}
+			}
+
+			summary.savedClassrooms = classrooms.size();
+
+			if (!classrooms.isEmpty()) {
+				classroomService.saveClassroomsToFirebase(classrooms);
+			}
+
+			classroomService.saveSummary(summary);
+			return summary;
+
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to process classrooms file", e);
+		}
 	}
-	
+
 	public List<Classroom> readClassroomsFromExcel(InputStream inputStream) throws Exception {
 
-	    List<Classroom> classrooms = new ArrayList<>();
+		List<Classroom> classrooms = new ArrayList<>();
 
-	    Workbook workbook = new XSSFWorkbook(inputStream);
-	    Sheet sheet = workbook.getSheetAt(0);
+		Workbook workbook = new XSSFWorkbook(inputStream);
+		Sheet sheet = workbook.getSheetAt(0);
 
-	    for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+		for (int i = 1; i <= sheet.getLastRowNum(); i++) {
 
-	        Row row = sheet.getRow(i);
-	        if (row == null) continue;
+			Row row = sheet.getRow(i);
+			if (row == null)
+				continue;
 
-	        String building = row.getCell(0).getStringCellValue();
-	        String classroomName = row.getCell(1).getStringCellValue();
-	        int capacity = (int) row.getCell(2).getNumericCellValue();
-	        Cell typeCell = row.getCell(3);
-	        
-	        String typeStr = (typeCell != null) ? typeCell.getStringCellValue() : "NORMAL";
-	        
-	        RoomType type = parseRoomType(typeStr);
-	        
-	        Classroom classroom = new Classroom(building, classroomName, capacity, type);
+			String building = row.getCell(0).getStringCellValue();
+			String classroomName = row.getCell(1).getStringCellValue();
+			int capacity = (int) row.getCell(2).getNumericCellValue();
+			Cell typeCell = row.getCell(3);
 
-	        classrooms.add(classroom);
-	    }
+			String typeStr = (typeCell != null) ? typeCell.getStringCellValue() : "NORMAL";
 
-	    workbook.close();
+			RoomType type = parseRoomType(typeStr);
 
-	    return classrooms;
+			Classroom classroom = new Classroom(building, classroomName, capacity, type);
+
+			classrooms.add(classroom);
+		}
+
+		workbook.close();
+
+		return classrooms;
 	}
-	
+
 	public byte[] exportClassroomsToExcel() throws Exception {
 
-	    Firestore db = FirestoreClient.getFirestore();
+		Firestore db = FirestoreClient.getFirestore();
 
-	    List<QueryDocumentSnapshot> documents =
-	            db.collection("classrooms").get().get().getDocuments();
+		List<QueryDocumentSnapshot> documents = db.collection("classrooms").get().get().getDocuments();
 
-	    Workbook workbook = new XSSFWorkbook();
-	    Sheet sheet = workbook.createSheet("Classrooms");
+		Workbook workbook = new XSSFWorkbook();
+		Sheet sheet = workbook.createSheet("Classrooms");
 
-	    Row header = sheet.createRow(0);
-	    header.createCell(0).setCellValue("Building");
-	    header.createCell(1).setCellValue("Classroom");
-	    header.createCell(2).setCellValue("Capacity");
-	    header.createCell(3).setCellValue("Type");
+		Row header = sheet.createRow(0);
+		header.createCell(0).setCellValue("Building");
+		header.createCell(1).setCellValue("Classroom");
+		header.createCell(2).setCellValue("Capacity");
+		header.createCell(3).setCellValue("Type");
 
-	    int rowIndex = 1;
+		int rowIndex = 1;
 
-	    for (QueryDocumentSnapshot doc : documents) {
+		for (QueryDocumentSnapshot doc : documents) {
 
-	        String building = doc.getId();
-	        Map<String, Object> classrooms = doc.getData();
+			String building = doc.getId();
+			Map<String, Object> classrooms = doc.getData();
 
-	        for (String classroomName : classrooms.keySet()) {
+			for (String classroomName : classrooms.keySet()) {
 
-	            Map<String, Object> data = (Map<String, Object>) classrooms.get(classroomName);
+				Map<String, Object> data = (Map<String, Object>) classrooms.get(classroomName);
 
-	            Row row = sheet.createRow(rowIndex++);
+				Row row = sheet.createRow(rowIndex++);
 
-	            row.createCell(0).setCellValue(building);
-	            row.createCell(1).setCellValue(classroomName);
-	            row.createCell(2).setCellValue((Long) data.get("capacity"));
-	            row.createCell(3).setCellValue((String) data.get("type"));
-	        }
+				row.createCell(0).setCellValue(building);
+				row.createCell(1).setCellValue(classroomName);
+				row.createCell(2).setCellValue((Long) data.get("capacity"));
+				row.createCell(3).setCellValue((String) data.get("type"));
+			}
+		}
+		
+		for (int i = 0; i < 4; i++) {
+	        sheet.autoSizeColumn(i);
 	    }
 
-	    ByteArrayOutputStream out = new ByteArrayOutputStream();
-	    workbook.write(out);
-	    workbook.close();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		workbook.write(out);
+		workbook.close();
 
-	    return out.toByteArray();
+		return out.toByteArray();
 	}
 
 	private RoomType parseRoomType(String text) {
-		
-	    if (text == null) return RoomType.NORMAL;
-	    String normalized = text.trim().toUpperCase();
-	    
-	    try {
-	        return RoomType.valueOf(normalized);
-	    } catch (IllegalArgumentException e) {
-	        
-	        if (normalized.contains("PBL")) return RoomType.PBL;
-	        
-	        return RoomType.NORMAL; 
-	    }
+
+		if (text == null)
+			return RoomType.NORMAL;
+		String normalized = text.trim().toUpperCase();
+
+		try {
+			return RoomType.valueOf(normalized);
+		} catch (IllegalArgumentException e) {
+
+			if (normalized.contains("PBL"))
+				return RoomType.PBL;
+
+			return RoomType.NORMAL;
+		}
 	}
 
 	private String extractBuildingPrefix(String classroomName) {
-	    if (classroomName == null) return null;
+		if (classroomName == null)
+			return null;
 
-	    String trimmed = classroomName.trim();
-	    if (trimmed.isEmpty()) return null;
+		String trimmed = classroomName.trim();
+		if (trimmed.isEmpty())
+			return null;
 
-	    java.util.regex.Matcher matcher = java.util.regex.Pattern
-	        .compile("^([^0-9]+)(?=\\d)")
-	        .matcher(trimmed);
+		java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("^([^0-9]+)(?=\\d)").matcher(trimmed);
 
-	    if (!matcher.find()) return null;
+		if (!matcher.find())
+			return null;
 
-	    return matcher.group(1).trim();
+		return matcher.group(1).trim();
 	}
 
 	private String safeValue(String value) {
-	    return (value == null || value.isBlank()) ? "<empty>" : value;
+		return (value == null || value.isBlank()) ? "<empty>" : value;
 	}
 
 	private boolean isValidRoomType(String typeStr) {
-	    if (typeStr == null || typeStr.isBlank()) return true;
-	    
-	    String normalized = typeStr.trim().toUpperCase().replace(" ", "_");
-	    
-	    try {
-	        RoomType.valueOf(normalized);
-	        return true;
-	    } catch (IllegalArgumentException e) {
-	        return false;
-	    }
-	}	
+		if (typeStr == null || typeStr.isBlank())
+			return true;
 
-		public byte[] exportClassroomsTemplate() throws Exception {
+		String normalized = typeStr.trim().toUpperCase().replace(" ", "_");
 
-	    Workbook workbook = new XSSFWorkbook();
-	    Sheet sheet = workbook.createSheet("Classrooms");
-
-	    Row header = sheet.createRow(0);
-	    header.createCell(0).setCellValue("Building");
-	    header.createCell(1).setCellValue("Classroom");
-	    header.createCell(2).setCellValue("Capacity");
-	    header.createCell(3).setCellValue("Type");
-	    
-	    Row example = sheet.createRow(1);
-	    example.createCell(0).setCellValue("A");
-	    example.createCell(1).setCellValue("A100");
-	    example.createCell(2).setCellValue("50");
-	    example.createCell(3).setCellValue("NORMAL");
-
-	    ByteArrayOutputStream out = new ByteArrayOutputStream();
-	    workbook.write(out);
-	    workbook.close();
-
-	    return out.toByteArray();
+		try {
+			RoomType.valueOf(normalized);
+			return true;
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
 	}
-	
+
+	public byte[] exportClassroomsTemplate() throws Exception {
+
+		Workbook workbook = new XSSFWorkbook();
+		Sheet sheet = workbook.createSheet("Classrooms");
+
+		Row header = sheet.createRow(0);
+		header.createCell(0).setCellValue("Building");
+		header.createCell(1).setCellValue("Classroom");
+		header.createCell(2).setCellValue("Capacity");
+		header.createCell(3).setCellValue("Type");
+
+		Row example = sheet.createRow(1);
+		example.createCell(0).setCellValue("A");
+		example.createCell(1).setCellValue("A100");
+		example.createCell(2).setCellValue("50");
+		example.createCell(3).setCellValue("NORMAL");
+
+		for (int i = 0; i < 4; i++) {
+	        sheet.autoSizeColumn(i);
+	    }
+		
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		workbook.write(out);
+		workbook.close();
+
+		return out.toByteArray();
+	}
+
 }

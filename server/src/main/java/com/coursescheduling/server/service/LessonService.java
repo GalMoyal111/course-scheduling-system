@@ -408,20 +408,14 @@ public class LessonService {
 	            row.createCell(0).setCellValue(lesson.getCourseId());
 	            row.createCell(1).setCellValue(lesson.getCourseName());
 	            row.createCell(2).setCellValue(formatType(lesson.getType()));
-	            row.createCell(3).setCellValue(lesson.getLecturer());
-	            row.createCell(4).setCellValue(formatSemester(lesson.getSemester()));
-	            
+	            row.createCell(3).setCellValue(lesson.getLecturer());	            
 	            row.createCell(4).setCellValue(""); 
-	            row.createCell(6).setCellValue(""); 
-	            row.createCell(8).setCellValue("");  
-	            row.createCell(9).setCellValue(""); 
-	            row.createCell(10).setCellValue(""); 
-
 	            row.createCell(5).setCellValue(formatSemester(lesson.getSemester()));
-	            row.createCell(7).setCellValue(lesson.getDuration());
+	            row.createCell(6).setCellValue("");
+	            row.createCell(7).setCellValue(lesson.getDuration());           
 	        }
 
-	        for (int i = 0; i < 6; i++) {
+	        for (int i = 0; i < 8; i++) {
 	            sheet.autoSizeColumn(i);
 	        }
 
