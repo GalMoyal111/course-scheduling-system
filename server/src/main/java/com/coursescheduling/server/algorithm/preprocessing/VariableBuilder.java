@@ -242,14 +242,10 @@ public class VariableBuilder {
 						: settings.getLabSize();
 
 			case PHYSICS_LAB:
-				return course.getLabNumberStudents() != null
-						? course.getLabNumberStudents()
-						: settings.getPhysicsLabSize();
+				return settings.getPhysicsLabSize();
 
 			case NETWORKING_LAB:
-				return course.getLabNumberStudents() != null
-						? course.getLabNumberStudents()
-						: settings.getNetworkingLabSize();
+				return settings.getNetworkingLabSize();
 
 			default:
 				throw new RuntimeException("Unsupported lesson type for capacity: " + type + " in course: " + course.getCourseId());

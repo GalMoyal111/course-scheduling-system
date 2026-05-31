@@ -66,7 +66,6 @@ export function DataProvider({ children }) {
     LAB: 20,
     PHYSICS_LAB: 15,
     NETWORKING_LAB: 12,
-    ELECTIVE_COURSE: 25,
   });
 
   // Cache timestamps
@@ -359,7 +358,6 @@ export function DataProvider({ children }) {
           LAB: data.labSize,
           PHYSICS_LAB: data.physicsLabSize,
           NETWORKING_LAB: data.networkingLabSize,
-          ELECTIVE_COURSE: data.electiveCourseSize,
         });
 
         setElectiveCapacity(data.electiveCourseSize);
