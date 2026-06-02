@@ -588,6 +588,39 @@ export default function SettingsPage({ user }) {
             </div>
           </div>
           <div className="settings-section-content">
+            <div
+              style={{
+                backgroundColor: "#fffbeb",
+                borderLeft: "4px solid #f59e0b",
+                padding: "12px 16px",
+                marginBottom: "20px",
+                borderRadius: "4px",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "12px",
+              }}
+            >
+              <span
+                className="material-icons"
+                style={{ color: "#d97706", fontSize: "20px", marginTop: "2px" }}
+              >
+                info
+              </span>
+              <p
+                style={{
+                  margin: 0,
+                  color: "#92400e",
+                  fontSize: "0.9rem",
+                  lineHeight: "1.4",
+                }}
+              >
+                <strong>Important Note:</strong> The first 8 clusters added
+                represent regular semesters (1-8). Any subsequent clusters added
+                will be treated as elective clusters.{" "}
+                <strong>Insertion order matters!</strong>
+              </p>
+            </div>
+
             <div style={{ marginBottom: "20px" }}>
               <button
                 onClick={() => setIsClusterModalOpen(true)}
@@ -1016,9 +1049,44 @@ export default function SettingsPage({ user }) {
       >
         <div className="form-field">
           <label className="form-label">Cluster/Semester Name</label>
+          <div
+            style={{
+              backgroundColor: "#fffbeb",
+              borderLeft: "4px solid #f59e0b",
+              padding: "10px 14px",
+              marginBottom: "16px",
+              borderRadius: "4px",
+              display: "flex",
+              alignItems: "#f59e0b",
+              alignItems: "flex-start",
+              gap: "10px",
+            }}
+          >
+            <span
+              className="material-icons"
+              style={{ color: "#d97706", fontSize: "18px", marginTop: "2px" }}
+            >
+              warning
+            </span>
+            <p
+              style={{
+                margin: 0,
+                color: "#92400e",
+                fontSize: "0.85rem",
+                lineHeight: "1.4",
+                textAlign: "left",
+              }}
+            >
+              <strong>Reminder:</strong> The first 8 clusters added are
+              automatically designated as Semesters 1-8. Subsequent clusters
+              will be categorized as Elective Clusters. Please mind the
+              insertion order!
+            </p>
+          </div>
+
           <input
             type="text"
-            placeholder="e.g. סמסטר 1, מגמת סייבר..."
+            placeholder="e.g. סמסטר 1, אלגוריתמים..."
             value={newClusterName}
             onChange={(e) => setNewClusterName(e.target.value)}
             className="ui-input"
