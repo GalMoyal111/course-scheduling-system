@@ -56,6 +56,7 @@ export default function GeneratePage() {
   const {
     setSchedule,
     setCurrentTimetableMetadata,
+    setOpenedSavedTimetableInfo,
     fetchLessonsIfNeeded,
     fetchLecturersIfNeeded,
     fetchClassroomsIfNeeded,
@@ -293,6 +294,7 @@ export default function GeneratePage() {
       const generatedSchedule = await generateTimetable(requestData);
       setSchedule(generatedSchedule);
       setCurrentTimetableMetadata(null);
+      setOpenedSavedTimetableInfo(null);
       navigate("/timetable");
     } catch (err) {
       console.error("Full Error Object:", err);

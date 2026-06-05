@@ -20,6 +20,9 @@ export default function TimetablePage() {
     invalidateHistoryCache,
     clusterMappings,
     currentTimetableMetadata,
+    openedSavedTimetableInfo,
+    setOpenedSavedTimetableInfo,
+    setCurrentTimetableMetadata,
   } = useData();
   const { toast, showSuccess, showError, closeToast } = useToast();
   const [selectedCluster, setSelectedCluster] = useState("ALL");
@@ -27,7 +30,7 @@ export default function TimetablePage() {
   const [editableSchedule, setEditableSchedule] = useState([]);
   const [lessonToDelete, setLessonToDelete] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
+  const isOpenedFromHistory = !!openedSavedTimetableInfo;
   const clusterMapping = clusterMappings.numToName;
 
   // Determine the range of semester numbers (typically 1-8)
@@ -154,6 +157,11 @@ export default function TimetablePage() {
   };
 
   const handleSaveClick = () => {
+    if (isOpenedFromHistory) {
+      showError("This timetable is already saved and cannot be saved again.");
+      return;
+    }
+
     setIsSaveModalOpen(true);
   };
 
@@ -190,6 +198,11 @@ export default function TimetablePage() {
 
   // Handles the confirmation of saving the timetable. Validates that a name is entered, then sends the save request to the backend. Shows success or error messages based on the result, and invalidates the history cache to ensure the new timetable appears in the history page.
   const handleConfirmSave = async () => {
+    if (isOpenedFromHistory) {
+      showError("This timetable is already saved and cannot be saved again.");
+      setIsSaveModalOpen(false);
+      return;
+    }
     if (!saveName.trim()) {
       showError("Please enter a name for the timetable.");
       return;
@@ -204,9 +217,18 @@ export default function TimetablePage() {
         schedule: editableSchedule,
       };
 
-      await saveTimetable(requestData);
+      const savedMetadata = await saveTimetable(requestData);
 
       invalidateHistoryCache();
+
+      const newSavedInfo = {
+        id: savedMetadata?.id || null,
+        name: saveName.trim(),
+        semester: saveSemester,
+      };
+
+      setOpenedSavedTimetableInfo(newSavedInfo);
+      setCurrentTimetableMetadata(newSavedInfo);
 
       setIsSaveModalOpen(false);
       setSaveName("");
@@ -258,6 +280,19 @@ export default function TimetablePage() {
         className="timetable-page-header"
       />
 
+      {isOpenedFromHistory && (
+        <div className="saved-timetable-info-banner">
+          <span className="material-icons">history</span>
+          <div>
+            <strong>Viewing saved timetable</strong>
+            <div>
+              {openedSavedTimetableInfo.name || "Unnamed timetable"} | Semester{" "}
+              {openedSavedTimetableInfo.semester || "Unknown"}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="timetable-actions">
         <Button
           onClick={handleExportExcel}
@@ -271,13 +306,19 @@ export default function TimetablePage() {
 
         <button
           onClick={handleSaveClick}
-          title="Save system in history"
+          disabled={isOpenedFromHistory}
+          title={
+            isOpenedFromHistory
+              ? "This timetable is already saved"
+              : "Save system in history"
+          }
           style={{
             padding: "8px 12px",
             borderRadius: "6px",
             border: "1px solid rgba(79, 70, 229, 0.2)",
             backgroundColor: "transparent",
-            cursor: "pointer",
+            cursor: isOpenedFromHistory ? "not-allowed" : "pointer",
+            opacity: isOpenedFromHistory ? 0.45 : 1,
             display: "flex",
             alignItems: "center",
             gap: "8px",
@@ -285,10 +326,14 @@ export default function TimetablePage() {
             color: "var(--text)",
           }}
           onMouseEnter={(e) => {
+            if (isOpenedFromHistory) return;
+
             e.currentTarget.style.backgroundColor = "rgba(79, 70, 229, 0.08)";
             e.currentTarget.style.borderColor = "rgba(79, 70, 229, 0.4)";
           }}
           onMouseLeave={(e) => {
+            if (isOpenedFromHistory) return;
+
             e.currentTarget.style.backgroundColor = "transparent";
             e.currentTarget.style.borderColor = "rgba(79, 70, 229, 0.2)";
           }}

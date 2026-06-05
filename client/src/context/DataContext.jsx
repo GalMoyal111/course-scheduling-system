@@ -34,10 +34,9 @@ export function DataProvider({ children }) {
   const [clusters, setClusters] = useState([]);
   const [electiveCapacity, setElectiveCapacity] = useState(25);
   const [systemBlockedSlots, setSystemBlockedSlots] = useState([]);
-  const [systemBlockedSlotsTimestamp, setSystemBlockedSlotsTimestamp] =
-    useState(null);
-  const [classroomSizeSettingsTimestamp, setClassroomSizeSettingsTimestamp] =
-    useState(null);
+  const [systemBlockedSlotsTimestamp, setSystemBlockedSlotsTimestamp] =useState(null);
+  const [classroomSizeSettingsTimestamp, setClassroomSizeSettingsTimestamp] =useState(null);
+  const [openedSavedTimetableInfo, setOpenedSavedTimetableInfo] = useState(null);
 
   const [generatorWeights, setGeneratorWeights] = useState({
     RoomSizeEfficiency: 5.0,
@@ -384,13 +383,14 @@ export function DataProvider({ children }) {
 
         setSchedule(fullSchedule);
         setCurrentTimetableMetadata(metadata || null);
+        setOpenedSavedTimetableInfo(metadata ? {id: metadata.id, name: metadata.name, semester: metadata.semester} : null);
         return true;
       } catch (err) {
         console.error("Failed to load full timetable:", err);
         return false;
       }
     },
-    [history],
+    [history, setSchedule, setCurrentTimetableMetadata, setOpenedSavedTimetableInfo],
   );
 
   // Create mappings for cluster number to name and vice versa. This is used to easily look up cluster names based on their numbers and vice versa when displaying schedules and cluster information.
@@ -421,6 +421,8 @@ export function DataProvider({ children }) {
       setSchedule,
       currentTimetableMetadata,
       setCurrentTimetableMetadata,
+      openedSavedTimetableInfo,
+      setOpenedSavedTimetableInfo,
       history,
       setHistory,
       loadTimetableFromHistory,
@@ -538,6 +540,8 @@ export function DataProvider({ children }) {
       setSemester,
       virtualCourses,
       setVirtualCourses,
+      openedSavedTimetableInfo,
+      setOpenedSavedTimetableInfo,
     ],
   );
 
