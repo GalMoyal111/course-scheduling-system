@@ -96,15 +96,21 @@ export default function HistoryPage() {
     setRenameValue("");
   };
 
-  // Helper function to format the timestamp of when the timetable was created. It converts the timestamp to a localized string in Hebrew format, showing the date and time in a readable way.
+  // Helper function to format the timestamp of when the timetable was created. 
+  // It converts the timestamp to a localized string in Hebrew format (DD/MM/YYYY בשעה HH:MM).
   const formatDate = (timestamp) => {
-    return new Date(timestamp).toLocaleString("he-IL", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const date = new Date(timestamp);
+    
+    // Format the date components with leading zeros if necessary
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); 
+    const year = date.getFullYear();
+    
+    // Format the time components with leading zeros if necessary
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${day}/${month}/${year} בשעה ${hours}:${minutes}`;
   };
 
   return (
