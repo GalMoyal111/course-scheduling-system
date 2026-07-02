@@ -1057,7 +1057,6 @@ export default function SettingsPage({ user }) {
               marginBottom: "16px",
               borderRadius: "4px",
               display: "flex",
-              alignItems: "#f59e0b",
               alignItems: "flex-start",
               gap: "10px",
             }}
