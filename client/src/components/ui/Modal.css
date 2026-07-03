@@ -1,23 +1,23 @@
 :root {
-    --modal-radius: 24px; /* פינות מעוגלות יותר למראה מודרני */
+    --modal-radius: 24px; /* More rounded corners for a modern look */
     --modal-shadow-deep: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
     
-    /* הגדרת פלטת צבעים למודאלים */
-    --modal-primary-base: #4f46e5;    /* כחול אינדיגו */
-    --modal-primary-tint: #f5f3ff;    /* כחול בהיר מאוד לרקע */
+    /* Modal color palette */
+    --modal-primary-base: #4f46e5;    /* Indigo blue */
+    --modal-primary-tint: #f5f3ff;    /* Very light blue background */
     
-    --modal-warning-base: #f59e0b;    /* כתום ענבר */
-    --modal-warning-tint: #fffbeb;    /* כתום בהיר מאוד לרקע */
+    --modal-warning-base: #f59e0b;    /* Amber orange */
+    --modal-warning-tint: #fffbeb;    /* Very light orange background */
     
-    --modal-danger-base: #ef4444;     /* אדום סכנה */
-    --modal-danger-tint: #fef2f2;     /* אדום בהיר מאוד לרקע */
+    --modal-danger-base: #ef4444;     /* Danger red */
+    --modal-danger-tint: #fef2f2;     /* Very light red background */
 }
 
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.5); /* כהות בינונית */
-    backdrop-filter: blur(8px);       /* טשטוש חזק */
+    background: rgba(15, 23, 42, 0.5); /* Medium dark overlay */
+    backdrop-filter: blur(8px);       /* Strong blur */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -37,7 +37,7 @@
     overflow: hidden;
     position: relative;
     
-    /* הגדרת המסגרת הבסיסית */
+    /* Base border definition */
     border: 1px solid #e2e8f0; 
     
     animation: modal-appear 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -102,7 +102,7 @@
 
 /* coloring the header text based on the variant */
 .modal-header--primary h3 { color: var(--modal-primary-base); }
-.modal-header--warning h3 { color: #b45309; } /* כתום כהה יותר לקריאות */
+.modal-header--warning h3 { color: #b45309; } /* Darker orange for readability */
 .modal-header--danger h3 { color: var(--modal-danger-base); }
 
 .modal-close {

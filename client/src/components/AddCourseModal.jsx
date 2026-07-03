@@ -386,7 +386,7 @@ export default function AddCourseModal({
         labNumberStudents: isElectiveCourse? null: toPositiveIntOrNull(labNumberStudents,"lab number of students"),
         projectHours: toNonNegativeInt(projectHours, "project hours"),
         credits: toNonNegativeFloat(credits, "credits"),
-        clusterName: clusterName.trim(), // <--- השם של האשכול (סמסטר 1, מדעים וכו')
+        clusterName: clusterName.trim(), // <--- The cluster name shown to the user, such as semester or subject group.
       };
 
       // When saving, check if a course with the same code already exists. If we're editing an existing course, allow saving if the code is unchanged or if it doesn't belong to another course. But if the code belongs to a different existing course, show a warning before allowing the user to replace it.

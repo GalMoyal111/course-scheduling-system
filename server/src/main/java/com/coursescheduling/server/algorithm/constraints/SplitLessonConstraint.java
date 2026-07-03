@@ -19,7 +19,7 @@ public class SplitLessonConstraint {
 	    String currentSplitId = var.getSplitGroupId();
 	    boolean isEnglish = var.isEnglishCourse();
 
-	    // 1. מחסום ה-ID המעודכן: עוצרים רק אם זה לא פיצול רגיל וגם לא אנגלית
+	    // 1. Updated ID guard: stop only when this is neither a regular split nor an English course.
 	    if ((currentSplitId == null || currentSplitId.isEmpty()) && !isEnglish) {
 	        return false;
 	    }
@@ -28,7 +28,7 @@ public class SplitLessonConstraint {
 	        Variable assignedVar = entry.getKey();
 	        AssignedValue assignedVal = entry.getValue();
 
-	        // 2. זיהוי שותף: לפי splitGroupId זהה או לפי קורס אנגלית עם אותו ID
+	        // 2. Partner detection: same splitGroupId, or an English course with the same ID.
 	        boolean isPartner = (currentSplitId != null && !currentSplitId.isEmpty() && currentSplitId.equals(assignedVar.getSplitGroupId())) ||
 	                            (isEnglish && assignedVar.isEnglishCourse() && var.getCourseId().equals(assignedVar.getCourseId()));
 
@@ -36,27 +36,27 @@ public class SplitLessonConstraint {
 	            int dayA = value.getDay();
 	            int dayB = assignedVal.getDay();
 
-	            // --- חוק קורסי אנגלית ---
+	            // --- English course rule ---
 	            if (isEnglish) {
-	                // אם לפחות אחד מהם ביום שישי
+	                // If at least one part is on Friday.
 	                if (dayA == 6 || dayB == 6) {
-	                    // הם חייבים להיות באותו יום (שניהם בשישי) וגם צמודים
+	                    // They must be on the same day (both Friday) and consecutive.
 	                    boolean consecutive = (dayA == dayB) && (
 	                        (value.getStartFrame() == assignedVal.getStartFrame() + assignedVar.getDuration()) ||
 	                        (value.getStartFrame() + var.getDuration() == assignedVal.getStartFrame())
 	                    );
 	                    
-	                    if (!consecutive) return true; // קונפליקט! (או ימים שונים או לא צמודים)
+	                    if (!consecutive) return true; // Conflict: different days or non-consecutive slots.
 	                } 
-	                // אם שניהם בימי חול (1-5)
+	                // If both are on weekdays (1-5).
 	                else if (dayA == dayB) {
-	                    return true; // קונפליקט! (אנגלית בימי חול חייבת ימים נפרדים)
+	                    return true; // Conflict: weekday English sessions must be on separate days.
 	                }
 	            } 
 	            
-	            // --- חוק קורס מפוצל רגיל (לא אנגלית) ---
+	            // --- Regular split-course rule (not English) ---
 	            else {
-	                if (dayA == dayB) return true; // קונפליקט! (חייבים ימים נפרדים)
+	                if (dayA == dayB) return true; // Conflict: parts must be on separate days.
 	            }
 	        }
 	    }

@@ -220,7 +220,7 @@
   font-size: 0.85rem;
 }
 
-/* שכבת חסימת מסך להעלאה כבדה */
+/* Full-screen blocking layer for heavy uploads */
 .uploading-overlay {
   position: fixed;
   top: 0;
@@ -235,7 +235,7 @@
   justify-content: center;
 }
 
-/* אנימציית הספינר */
+/* Spinner animation */
 .spinner {
   border: 6px solid rgba(255, 255, 255, 0.2);
   border-top: 6px solid #3b82f6;

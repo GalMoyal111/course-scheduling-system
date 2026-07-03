@@ -13,7 +13,7 @@
   grid-template-columns: 240px 1fr;
   gap: 1.5rem;
   height: 100%;
-  /* שינוי קריטי 1: כדי למנוע גלישה, אנחנו נותנים לקונטיינר להגביל את הילדים */
+  /* Critical adjustment 1: prevent overflow by letting the container constrain its children */
   overflow: hidden;
 }
 
@@ -113,7 +113,7 @@
   gap: 1.5rem;
   height: 100%;
   border: 1px solid #f2f4f7;
-  /* שינוי קריטי 2: לאפשר לפאנל הפנימי להיגלל אם הטבלה גדולה מדי */
+  /* Critical adjustment 2: allow the inner panel to scroll when the table is too large */
   overflow-y: auto;
 }
 
@@ -123,7 +123,7 @@
   margin: 0;
 }
 
-/* عيצוב כפתור העריכה החדש (אייקון בלבד) */
+/* New edit button styling (icon only) */
 .edit-icon-btn {
   background: transparent;
   border: 1px solid transparent;
@@ -157,7 +157,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  /* שינוי קריטי 3: מונע גלישה בלתי נשלטת של Flexbox */
+  /* Critical adjustment 3: prevent uncontrolled Flexbox overflow */
   min-height: 0;
 }
 
@@ -182,7 +182,7 @@
 /* Availability Table Styles */
 .availability-table-wrapper {
   flex: 1;
-  overflow: auto; /* מאפשר לטבלה להיגלל לצדדים ולמטה בלי לדחוף את השאר */
+  overflow: auto; /* Let the table scroll sideways and downward without pushing other content */
   border-radius: 12px;
   border: 1px solid #eaecf0;
   background: #ffffff;

@@ -239,7 +239,7 @@ public class SavedTimetableService {
         Map<String, List<ScheduledLessonDTO>> sheetsMap = new TreeMap<>();
 
         for (ScheduledLessonDTO lesson : schedule) {
-            int clusterNum = lesson.getCluster(); // מזהה האשכול/סמסטר
+            int clusterNum = lesson.getCluster(); // Cluster or semester identifier.
             String sheetName;
 
             if (clusterNum >= 1 && clusterNum <= 8) {
@@ -255,16 +255,16 @@ public class SavedTimetableService {
 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             
-            // עיצובים בסיסיים
+            // Basic styles.
             CellStyle headerStyle = createHeaderStyle(workbook);
             CellStyle cellStyle = createBodyStyle(workbook);
 
-            // --- שלב 2: יצירת הגיליונות בפועל לפי הסדר ---
+            // --- Step 2: create the sheets in the desired order. ---
             for (String sheetName : sheetsMap.keySet()) {
                 Sheet sheet = workbook.createSheet(sheetName);
-                sheet.setRightToLeft(true); // עברית
+                sheet.setRightToLeft(true); // Hebrew layout.
 
-                // יצירת שורת כותרת (ימים)
+                // Create the header row with days.
                 Row headerRow = sheet.createRow(0);
                 headerRow.createCell(0).setCellValue("שעה / יום");
                 headerRow.getCell(0).setCellStyle(headerStyle);
@@ -301,14 +301,14 @@ public class SavedTimetableService {
                         if (!lessonsInSlot.isEmpty()) {
                             Cell contentCell = row.createCell(dayNum);
                             
-                            // שימוש בלולאה פשוטה במקום Stream כדי למנוע שגיאות קומפילציה
+                            // Use a simple loop instead of a Stream to avoid compilation issues.
                             List<String> lessonLines = new ArrayList<>();
                             
                             for (ScheduledLessonDTO l : lessonsInSlot) {
                                 String cName = (l.getCourseName() != null) ? l.getCourseName() : "Unknown";
                                 String lName = (l.getLecturer() != null) ? l.getLecturer() : "TBD";
                                 
-                                // גישה לפי ה-DTO שלך: getRoom() ואז getClassroomName()
+                                // Access room data through the DTO: getRoom(), then getClassroomName().
                                 String rName = "No Room";
                                 if (l.getRoom() != null && l.getRoom().getClassroomName() != null) {
                                     rName = l.getRoom().getClassroomName();
@@ -324,7 +324,7 @@ public class SavedTimetableService {
                                 );
                             }
                             
-                            // חיבור כל השיעורים שנמצאו למשבצת אחת עם קו מפריד
+                            // Join all lessons found for this slot into one cell with a separator.
                             String finalValue = String.join("\n---\n", lessonLines);
                             
                             contentCell.setCellValue(finalValue);
@@ -333,7 +333,7 @@ public class SavedTimetableService {
                     }
                 }
 
-                // הגדרת רוחב עמודות קבוע שיהיה נוח לקרוא
+                // Set a fixed column width for readability.
                 for (int i = 0; i <= 6; i++) {
                     sheet.setColumnWidth(i, 22 * 256);
                 }
@@ -344,7 +344,7 @@ public class SavedTimetableService {
         }
     }
 
-    // פונקציות עזר לעיצוב
+    // Styling helper functions.
     private CellStyle createHeaderStyle(Workbook wb) {
         CellStyle style = wb.createCellStyle();
         Font font = wb.createFont();
@@ -362,7 +362,7 @@ public class SavedTimetableService {
 
     private CellStyle createBodyStyle(Workbook wb) {
         CellStyle style = wb.createCellStyle();
-        style.setWrapText(true); // מאפשר ירידת שורה בתוך התא
+        style.setWrapText(true); // Allow line breaks inside the cell.
         style.setVerticalAlignment(VerticalAlignment.CENTER);
         style.setAlignment(HorizontalAlignment.CENTER);
         style.setBorderBottom(BorderStyle.THIN);

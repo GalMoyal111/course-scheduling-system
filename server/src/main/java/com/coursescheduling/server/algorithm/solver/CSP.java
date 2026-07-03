@@ -162,7 +162,6 @@ public class CSP {
             orderedValues.addAll(buildAssignedValues(var, value, assignment, variables, roomManager));
         }
         
-        // לא בטוחה שזה נותן את התוצאות שאנחנו רוצות - צריך לראות
         Collections.shuffle(orderedValues, random);
         
         orderedValues.sort((av1, av2) -> {
@@ -175,72 +174,6 @@ public class CSP {
         return orderedValues;
     }
 
-
-    
-    
-    // // Placeholder for consistency check: In a real implementation, this would check the constraints of the problem
-    // private Classroom isConsistent(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment , RoomManager roomManager) {
-    	
-    // 	int start1 = value.getStartFrame();
-    //     int end1 = start1 + var.getDuration() - 1;
-        
-        
-    //     for (Map.Entry<Variable, AssignedValue> entry : assignment.entrySet()) {
-    //         Variable assignedVar = entry.getKey();
-    //         AssignedValue assignedTime = entry.getValue();
-
-    //         if (assignedVar.getLecturer().equals(var.getLecturer()) && assignedTime.getDay() == value.getDay()) {
-                
-    //             int start2 = assignedTime.getStartFrame();
-    //             int end2 = start2 + assignedVar.getDuration() - 1; 
-                
-    //             if (Math.max(start1, start2) <= Math.min(end1, end2)) {
-    //                 return null; 
-    //             }
-    //         }
-    //     }
-        
-        
-    //     if (splitLessonConstraint.isSplitPartAlreadyScheduledToday(var, value, assignment)) {
-    //         // System.out.println("⚠️ Split lesson part for " + var.getCourseId() + " already scheduled today.");
-    //         return null;
-    //     }
-        
-        
-    //     if (lecturerConstraint.isConsecutiveLimitExceeded(var, value, assignment)) {
-    //         System.out.println("⚠️ Lecturer " + var.getLecturer() + " exceeded max consecutive hours. Skipping slot.");
-    //         return null;
-    //     }
-        
-    //     if (lecturerConstraint.isDailyLimitExceeded(var, value, assignment)) {
-    //         System.out.println("⚠️ Lecturer " + var.getLecturer() + " exceeded total daily hours (8). Skipping slot.");
-    //         return null;
-    //     }
-        
-        
-
-    //     Set<Classroom> availableRooms = new HashSet<>(roomManager.getAvailableRooms(value.getDay(), start1));
-        
-    //     availableRooms.removeIf(room -> !roomConstraint.isRoomSuitable(var, room));
-        
-    //     for (int t = 1; t < var.getDuration(); t++) {
-    //         Set<Classroom> nextFrameRooms = roomManager.getAvailableRooms(value.getDay(), start1 + t);
-    //         if (nextFrameRooms != null) {
-    //             availableRooms.retainAll(nextFrameRooms); 
-    //         } else {
-    //             availableRooms.clear();
-    //         }
-    //     }
-        
-    //     if (!availableRooms.isEmpty()) {
-    //         return availableRooms.iterator().next(); 
-    //     }
-
-    //     return null; 
-    // }
-
-
-    
     
     private Map<Variable, List<DomainValue>> forwardCheck(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment, List<Variable> variables, RoomManager roomManager) {
         Map<Variable, List<DomainValue>> removedValues = new HashMap<>();

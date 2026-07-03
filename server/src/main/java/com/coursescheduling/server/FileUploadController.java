@@ -290,7 +290,7 @@ public class FileUploadController {
     public ResponseEntity<byte[]> exportLecturers() {
 
         try {
-            // כאן קוראים לסרוויס שיודע לייצר את קובץ האקסל של המרצים
+            // Call the service that generates the lecturers Excel file.
             byte[] excelData = lecturerExcelService.exportLecturersToExcel();
 
             return ResponseEntity.ok()

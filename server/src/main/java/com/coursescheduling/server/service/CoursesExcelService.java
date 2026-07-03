@@ -362,7 +362,7 @@ public class CoursesExcelService {
     // Invalid course ID -> do not save the course.
     // Invalid/non-existing prerequisite -> remove it, save the course, and report it in the summary.
     public CourseUploadSummary validateAndSaveCourses(List<Course> courses) throws Exception {
-        // רשימה אחת מסודרת שתכיל רק את השגיאות ותישלח לפרונט
+        // Ordered list containing only the errors that will be sent to the frontend.
         List<InvalidCourse> invalidCourseDetails = new ArrayList<>();
         
         // Add read errors first (rows that couldn't be parsed)

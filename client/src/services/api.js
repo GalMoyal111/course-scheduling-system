@@ -1,4 +1,4 @@
-// מושך את הכתובת ממשתנה הסביבה, ואם אין כזה - משתמש בלוקאלהוסט כברירת מחדל
+// Read the API domain from the environment variable, falling back to localhost by default.
 const API_DOMAIN = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 const BASE_URL = `${API_DOMAIN}/api`;
 
@@ -395,7 +395,7 @@ export async function deleteUser(uid, token) {
 
 export async function generateTimetable(requestData) {
   const res = await fetch(`${BASE_URL}/timetable/generate`, {
-    method: "POST", // זה חייב להיות POST
+    method: "POST", // This must be POST.
     headers: {
       "Content-Type": "application/json",
       "Accept": "application/json",

@@ -9,13 +9,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // מחיל את החוקים על כל הראוטים בשרת שלנו (למשל /api/courses)
+        registry.addMapping("/**") // Apply these rules to all server routes, such as /api/courses.
                 .allowedOriginPatterns(
-                        "http://localhost:*",    // מאפשר גישה מהמחשב שלך (מכל פורט לוקאלי)
-                        "https://*.vercel.app"   // מאפשר גישה מהאתר שנעלה ל-Vercel
+                        "http://localhost:*",    // Allow access from any local development port.
+                        "https://*.vercel.app"   // Allow access from the deployed Vercel site.
                 )
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // הפעולות המותרות
-                .allowedHeaders("*") // מאפשר את כל ההדרים (כולל טוקנים של פיירבייס)
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allowed HTTP methods.
+                .allowedHeaders("*") // Allow all headers, including Firebase tokens.
                 .allowCredentials(true);
     }
 }

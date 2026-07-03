@@ -3,7 +3,7 @@ package com.coursescheduling.server.algorithm.constraints;
 import com.coursescheduling.server.algorithm.model.AssignedValue;
 import com.coursescheduling.server.algorithm.model.DomainValue;
 import com.coursescheduling.server.algorithm.model.Variable;
-import com.coursescheduling.server.model.LessonType; // בהנחה שזה ה-Enum שלך
+import com.coursescheduling.server.model.LessonType; // Project enum for lesson types.
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

@@ -84,28 +84,28 @@ export default function ManualAssignmentModal({
   const availableClusters = useMemo(() => {
     const clusters = new Set();
     semesterLessons.forEach((l) => {
-      // שינוי כאן
+      // Use the filtered semester lessons here.
       if (l.cluster) clusters.add(l.cluster);
     });
     return Array.from(clusters).sort((a, b) => a - b);
-  }, [semesterLessons]); // שינוי כאן
+  }, [semesterLessons]); // Recompute when semester lessons change.
 
   // Get unique course names for the selected cluster to populate the course dropdown. Again, we use a Set for uniqueness and sort the results.
   const filteredCourseNames = useMemo(() => {
     if (!selectedCluster) return [];
     const courseNames = new Set();
-    semesterLessons // שינוי כאן
+    semesterLessons // Use the filtered semester lessons here.
       .filter((l) => l.cluster.toString() === selectedCluster.toString())
       .forEach((l) => courseNames.add(l.courseName));
     return Array.from(courseNames).sort();
-  }, [semesterLessons, selectedCluster]); // שינוי כאן
+  }, [semesterLessons, selectedCluster]); // Recompute when semester lessons or selected cluster changes.
 
   // Filter lessons based on the selected cluster and course to populate the specific lesson dropdown. This allows the user to select a specific lesson (with its type and lecturer) after choosing the cluster and course.
   const filteredLessons = useMemo(() => {
     if (!selectedCluster || !selectedCourseName) return [];
     return semesterLessons.filter(
       (
-        l, // שינוי כאן
+        l, // Use each filtered semester lesson.
       ) =>
         l.cluster.toString() === selectedCluster.toString() &&
         l.courseName === selectedCourseName,

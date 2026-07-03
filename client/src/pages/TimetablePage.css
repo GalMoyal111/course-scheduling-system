@@ -61,7 +61,7 @@
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
-/* עיצוב הטבלה בדומה לדף המרצים */
+/* Table styling similar to the lecturers page */
 .timetable-container {
   background: white;
   border-radius: 16px;
@@ -76,7 +76,7 @@
   border-collapse: separate;
   border-spacing: 6px;
   min-width: 900px;
-  direction: ltr; /* השעות והימים משמאל לימין */
+  direction: ltr; /* Hours and days flow left to right */
 }
 
 .timetable-table th {
@@ -231,21 +231,21 @@
 }
 
 /* =========================================
-   הגדרות הדפסה - תצוגת טבלה בלבד!
+   Print settings - table-only view!
    ========================================= */
 @media print {
-  /* 1. מעלים את כל האלמנטים באתר לחלוטין */
+  /* 1. Hide all site elements completely */
   body * {
     visibility: hidden !important;
   }
 
-  /* 2. אומר לדפדפן: תציג אך ורק את הקונטיינר של הטבלה ואת מה שבתוכו */
+  /* 2. Show only the table container and its contents */
   .timetable-container,
   .timetable-container * {
     visibility: visible !important;
   }
 
-  /* 3. שולף את הטבלה ומדביק אותה בדיוק בפינה העליונה של נייר ההדפסה */
+  /* 3. Position the table at the top-left corner of the printed page */
   .timetable-container {
     position: absolute !important;
     left: 0 !important;
@@ -255,16 +255,16 @@
     padding: 0 !important;
     border: none !important;
     box-shadow: none !important;
-    overflow: visible !important; /* מונע חיתוך של הטבלה */
+    overflow: visible !important; /* Prevent table clipping */
   }
 
-  /* 4. ביטול רוחב מינימלי כדי שהטבלה תתאים לדף */
+  /* 4. Remove the minimum width so the table fits the page */
   .timetable-table {
     min-width: 100% !important;
     width: 100% !important;
   }
 
-  /* 5. מניעת חיתוך שורות באמצע בעת מעבר לעמוד הבא בהדפסה */
+  /* 5. Prevent rows from being split across printed pages */
   .timetable-table tr {
     page-break-inside: avoid !important;
   }
