@@ -11,6 +11,7 @@ import com.coursescheduling.server.service.LecturerService;
 import com.coursescheduling.server.service.LessonService;
 import com.coursescheduling.server.model.ClassroomDeleteRequest;
 import com.coursescheduling.server.model.ClassroomUpdateRequest;
+import com.coursescheduling.server.model.ClusterCoursesList;
 import com.coursescheduling.server.model.CourseDeleteRequest;
 import com.coursescheduling.server.model.CourseUpdateRequest;
 import com.coursescheduling.server.model.Lecturer;
