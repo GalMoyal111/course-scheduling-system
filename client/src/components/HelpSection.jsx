@@ -1,5 +1,6 @@
 import React from "react";
 
+// Renders the HelpSection component.
 export default function HelpSection({ title, isExpanded, onToggle, children }) {
   return (
     <section className="help-section">

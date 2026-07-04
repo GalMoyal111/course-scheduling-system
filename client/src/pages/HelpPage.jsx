@@ -4,9 +4,11 @@ import HelpSection from "../components/HelpSection";
 import FAQAccordion from "../components/FAQAccordion";
 import PageHeader from "../components/ui/PageHeader";
 
+// Renders the HelpPage component.
 export default function HelpPage() {
   const [expandedSection, setExpandedSection] = useState(null);
 
+  // Toggles the section.
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? null : section);
   };

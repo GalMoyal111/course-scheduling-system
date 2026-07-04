@@ -22,6 +22,7 @@ const DataContext = createContext();
 // Cache duration in milliseconds (30 minutes)
 const CACHE_DURATION = 60 * 60 * 1000;
 
+// Handles the data provider logic.
 export function DataProvider({ children }) {
   const [lessons, setLessons] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -550,6 +551,7 @@ export function DataProvider({ children }) {
   );
 }
 
+// Handles the use data logic.
 export function useData() {
   return useContext(DataContext);
 }

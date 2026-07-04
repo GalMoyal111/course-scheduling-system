@@ -20,6 +20,7 @@ import Toast, { useToast } from "../components/ui/Toast";
 import PageHeader from "../components/ui/PageHeader";
 import "./LecturersPage.css";
 
+// Renders the SettingsPage component.
 export default function SettingsPage({ user }) {
   const [newPassword, setNewPassword] = useState("");
   const [users, setUsers] = useState([]);
@@ -67,6 +68,7 @@ export default function SettingsPage({ user }) {
 
   // Fetch users if admin, and always fetch clusters and system blocked slots on mount
   useEffect(() => {
+    // Fetches the users.
     const fetchUsers = async () => {
       try {
         if (!auth.currentUser) return;
@@ -209,6 +211,7 @@ export default function SettingsPage({ user }) {
     }
   };
 
+  // Handles the delete user action.
   const handleDeleteUser = async (uid) => {
     try {
       const token = await auth.currentUser.getIdToken();
@@ -284,6 +287,7 @@ export default function SettingsPage({ user }) {
     setHasSlotsChanges(true);
   };
 
+  // Handles the save system slots action.
   const handleSaveSystemSlots = async () => {
     setIsSavingSlots(true);
     try {
@@ -300,6 +304,7 @@ export default function SettingsPage({ user }) {
     }
   };
 
+  // Handles the save classroom sizes action.
   const handleSaveClassroomSizes = async () => {
     setIsSavingCapacities(true);
 

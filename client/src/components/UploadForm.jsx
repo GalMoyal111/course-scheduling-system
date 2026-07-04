@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import Toast, { useToast } from "./ui/Toast";
 import "./UploadForm.css";
 
+// Renders the UploadForm component.
 function UploadForm({ onUpload }) {
   const { showError } = useToast();
   const [file, setFile] = useState(null);
@@ -21,18 +22,21 @@ function UploadForm({ onUpload }) {
     if (f) setFile(f);
   };
 
+  // Handles the drag over action.
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(true);
   };
 
+  // Handles the drag leave action.
   const handleDragLeave = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
   };
 
+  // Handles the drop action.
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -41,6 +45,7 @@ function UploadForm({ onUpload }) {
     if (f) setFile(f);
   };
 
+  // Removes the file.
   const removeFile = () => {
     setFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";

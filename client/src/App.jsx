@@ -23,6 +23,7 @@ import "./styles/global.css";
 import Layout from "./components/ui/Layout";
 import Footer from "./components/ui/Footer";
 
+// Renders the App component.
 function App() {
   const [user, setUser] = useState(null);
   const location = useLocation();

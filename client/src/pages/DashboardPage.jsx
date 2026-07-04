@@ -6,6 +6,7 @@ import Modal from "../components/ui/Modal";
 import "./DashboardPage.css";
 import LoginRequiredModal from "../components/LoginRequiredModal";
 
+// Renders the DashboardPage component.
 export default function DashboardPage({ user }) {
   const navigate = useNavigate();
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -29,6 +30,7 @@ export default function DashboardPage({ user }) {
     }
   };
 
+  // Handles the navigate action.
   const handleNavigate = (path) => {
     if (!user) {
       setShowLoginModal(true);

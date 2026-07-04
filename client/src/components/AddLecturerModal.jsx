@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Button from "./ui/Button";
 import Modal from "./ui/Modal";
 
+// Renders the AddLecturerModal component.
 export default function AddLecturerModal({
   isOpen,
   onClose,
@@ -20,6 +21,7 @@ export default function AddLecturerModal({
     }
   }, [initialLecturer, isOpen]);
 
+  // Handles the reset form logic.
   const resetForm = () => {
     setName("");
     setErrors({});

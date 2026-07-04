@@ -6,6 +6,7 @@ import "./ui.css";
 import LoginRequiredModal from "../LoginRequiredModal";
 import { useNavigate, useLocation } from "react-router-dom";
 
+// Renders the Sidebar component.
 export default function Sidebar({ user }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,6 +25,7 @@ export default function Sidebar({ user }) {
     { path: "/settings", label: "Settings", icon: "settings" },
   ];
 
+  // Handles the navigate action.
   const handleNavigate = (path) => {
     // Dashboard is always accessible
     if (path === "/") {

@@ -43,6 +43,7 @@ export default function AddRoomModal({
 
   const isEditing = Boolean(initialClassroom);
 
+  // Handles the submit action.
   const handleSubmit = (e) => {
     e.preventDefault();
     setValidationError("");

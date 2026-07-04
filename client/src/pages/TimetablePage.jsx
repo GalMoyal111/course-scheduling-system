@@ -13,6 +13,7 @@ import {
 } from "../services/api";
 import PageHeader from "../components/ui/PageHeader";
 
+// Renders the TimetablePage component.
 export default function TimetablePage() {
   const {
     schedule,
@@ -146,6 +147,7 @@ export default function TimetablePage() {
     );
   }, [editableSchedule, selectedCluster]);
 
+  // Returns the visible lessons for slot.
   const getVisibleLessonsForSlot = (day, frame) => {
     if (!frame) return [];
 
@@ -156,6 +158,7 @@ export default function TimetablePage() {
     });
   };
 
+  // Handles the save click action.
   const handleSaveClick = () => {
     if (isOpenedFromHistory) {
       showError("This timetable is already saved and cannot be saved again.");
@@ -165,11 +168,13 @@ export default function TimetablePage() {
     setIsSaveModalOpen(true);
   };
 
+  // Handles the delete click action.
   const handleDeleteClick = (lesson) => {
     setLessonToDelete(lesson);
     setIsDeleteModalOpen(true);
   };
 
+  // Handles the confirm delete action.
   const handleConfirmDelete = async () => {
     if (!lessonToDelete?.lessonId) return;
 
@@ -196,7 +201,7 @@ export default function TimetablePage() {
     }
   };
 
-  // Handles the confirmation of saving the timetable. Validates that a name is entered, then sends the save request to the backend. Shows success or error messages based on the result, and invalidates the history cache to ensure the new timetable appears in the history page.
+  // Handles the confirm save action.
   const handleConfirmSave = async () => {
     if (isOpenedFromHistory) {
       showError("This timetable is already saved and cannot be saved again.");
@@ -241,7 +246,7 @@ export default function TimetablePage() {
     }
   };
 
-  // Handles exporting the current timetable to an Excel file. Validates that there is a schedule to export, then calls the export API and triggers a download of the generated file. Shows success or error messages based on the result.
+  // Handles the export excel action.
   const handleExportExcel = async () => {
     if (!editableSchedule || editableSchedule.length === 0) return;
 

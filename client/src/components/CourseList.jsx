@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import "./ui/ui.css";
 
+// Renders the CourseList component.
 export default function CourseList({
   courses = [],
   onEdit,
@@ -13,7 +14,7 @@ export default function CourseList({
   const [isSemestersDropdownOpen, setIsSemestersDropdownOpen] = useState(false);
   const [isCreditsDropdownOpen, setIsCreditsDropdownOpen] = useState(false);
   // Extract unique semesters (cluster names) from courses
-  // This includes both named clusters (מדעים, etc.) and semester labels (סמסטר 1-8)
+  // This includes both named clusters and semester labels.
   const uniqueSemesters = useMemo(() => {
     const semesters = new Set();
     courses.forEach((c) => {
@@ -24,7 +25,7 @@ export default function CourseList({
 
     // Convert to array and sort: semesters first (1-8), then named clusters (alphabetically)
     return Array.from(semesters).sort((a, b) => {
-      // Extract semester numbers if present (e.g., "סמסטר 1" -> 1)
+      // Extract semester numbers if present.
       const aSemesterMatch = a.match(/\d+/);
       const bSemesterMatch = b.match(/\d+/);
       const aSemesterNum = aSemesterMatch ? parseInt(aSemesterMatch[0]) : null;
@@ -98,19 +99,21 @@ export default function CourseList({
     ? filteredCourses.length
     : courses.length;
 
-  /* Helper functions to generate the text for the filter buttons based on the current selection.*/
+  // Builds the filter button labels.
   const getSelectedSemestersText = () => {
     if (selectedSemesters.length === 0) return "All Semesters";
     if (selectedSemesters.length === 1) return selectedSemesters[0];
     return `${selectedSemesters.length} Semesters selected`;
   };
 
+  // Returns the selected credits text.
   const getSelectedCreditsText = () => {
     if (selectedCredits.length === 0) return "All Credits";
     if (selectedCredits.length === 1) return `${selectedCredits[0]} Credits`;
     return `${selectedCredits.length} Credits selected`;
   };
 
+  // Toggles the semester.
   const toggleSemester = (semester) => {
     setSelectedSemesters((current) =>
       current.includes(semester)
@@ -119,6 +122,7 @@ export default function CourseList({
     );
   };
 
+  // Toggles the credits.
   const toggleCredits = (credits) => {
     setSelectedCredits((current) =>
       current.includes(credits)
@@ -438,6 +442,7 @@ export default function CourseList({
 function SelectableTable({ courses, onEdit, onDelete, onSelectionChange }) {
   const [selectedMap, setSelectedMap] = useState({});
 
+  // Handles the key for logic.
   const keyFor = (course) =>
     `${course.courseId || ""}||${course.cluster || ""}`;
   const stableKey = courses.map(keyFor).join("|");
@@ -447,6 +452,7 @@ function SelectableTable({ courses, onEdit, onDelete, onSelectionChange }) {
     onSelectionChange && onSelectionChange([]);
   }, [stableKey]);
 
+  // Toggles the row.
   const toggleRow = (course) => {
     const key = keyFor(course);
     const next = { ...selectedMap };

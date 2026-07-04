@@ -15,6 +15,7 @@ const TYPE_TO_HOUR_FIELD = {
   pbl: "projectHours",
 };
 
+// Renders the AddLessonModal component.
 export default function AddLessonModal({
   isOpen,
   onClose,
@@ -35,7 +36,7 @@ export default function AddLessonModal({
   const [type, setType] = useState("lecture");
   const [semester, setSemester] = useState("");
 
-  // Group courses by their cluster for easier selection in the form. Courses without a cluster are grouped under "אחר" (Other).
+  // Group courses by their cluster for easier selection in the form.
   const groupedCourses = useMemo(() => {
     const groups = {};
     courses.forEach((course) => {
@@ -147,8 +148,9 @@ export default function AddLessonModal({
     }
   }, [selectedCourse, isEdit]);
 
-  // Generate the list of cluster options for the "Cluster" dropdown. This is derived from the grouped courses, and sorted in a way that tries to order semester clusters numerically (e.g. "סמסטר 1", "סמסטר 2", etc.) before other clusters, and then alphabetically.
+  // Builds cluster dropdown options with semester clusters sorted before other clusters.
   const clusterOptions = useMemo(() => {
+    // Returns the semester num.
     const getSemesterNum = (str) => {
       if (!str) return 999;
       const cleanStr = String(str).replace("סמסטר", "").trim();
@@ -204,6 +206,7 @@ export default function AddLessonModal({
     return type === "lecture" ? durationNum : durationNum * 0.5;
   }, [computedDuration, type]);
 
+  // Handles the submit action.
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!selectedCourse || !lecturer || !semester || !type) {

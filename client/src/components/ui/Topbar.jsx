@@ -8,6 +8,7 @@ import LoginModal from "../LoginModal";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase";
 
+// Renders the Topbar component.
 export default function Topbar({ user, onLogin, onLogout }) {
   const location = useLocation();
   const [isLoginOpen, setIsLoginOpen] = useState(false);

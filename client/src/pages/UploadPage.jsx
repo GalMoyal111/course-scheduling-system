@@ -17,6 +17,7 @@ import Modal from "../components/ui/Modal";
 import { useLocation } from "react-router-dom";
 
 import "./UploadPage.css";
+// Renders the UploadPage component.
 function UploadPage() {
   const { toast, showSuccess, showError, closeToast } = useToast();
   // confirmation state for uploads
@@ -109,12 +110,14 @@ function UploadPage() {
     loadInitialData();
   }, [loadInitialData]);
 
+  // Handles the upload action.
   const handleUpload = async (file) => {
     // show confirmation before performing destructive upload
     setPendingFile(file);
     setConfirmOpen(true);
   };
 
+  // Handles the perform upload logic.
   const performUpload = async () => {
     if (!pendingFile) return;
     setConfirmOpen(false);
@@ -144,6 +147,7 @@ function UploadPage() {
     }
   };
 
+  // Cancels the upload action.
   const cancelUpload = () => {
     setConfirmOpen(false);
     setPendingFile(null);
@@ -195,22 +199,26 @@ function UploadPage() {
       return (typePriority[a.type] || 99) - (typePriority[b.type] || 99);
     });
 
+  // Handles the edit lesson action.
   const handleEditLesson = (lesson) => {
     setEditingLesson(lesson || null);
     setIsModalOpen(true);
   };
 
+  // Handles the delete lesson action.
   const handleDeleteLesson = (lesson) => {
     setPendingDelete(lesson || null);
     setDeleteConfirmOpen(true);
   };
 
+  // Handles the perform delete lesson logic.
   const performDeleteLesson = async () => {
     if (!pendingDelete) return;
     const toDelete = Array.isArray(pendingDelete)
       ? pendingDelete
       : [pendingDelete];
 
+    // Handles the key for logic.
     const keyFor = (l) => l.lessonId;
 
     const splitGroupIds = new Set(
@@ -553,9 +561,11 @@ function UploadPage() {
 
 export default UploadPage;
 
+// Renders the LessonUploadSummaryModal component.
 function LessonUploadSummaryModal({ isOpen, summary, onClose }) {
   if (!isOpen) return null;
 
+  // Handles the render issue section logic.
   const renderIssueSection = (title, issues) => {
     if (!issues || issues.length === 0) return null;
 

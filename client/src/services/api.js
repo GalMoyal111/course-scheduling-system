@@ -2,11 +2,13 @@
 const API_DOMAIN = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 const BASE_URL = `${API_DOMAIN}/api`;
 
+// Handles the ping logic.
 export async function ping() {
   const res = await fetch(`${BASE_URL}/ping`);
   return res.text();
 }
 
+// Uploads the lessons.
 export async function uploadLessons(file) {
   const formData = new FormData();
   formData.append("file", file);
@@ -24,6 +26,7 @@ export async function uploadLessons(file) {
   return res.json(); // Assuming the server returns JSON with details about the upload
 }
 
+// Uploads the courses.
 export async function uploadCourses(file) {
   const formData = new FormData();
   formData.append("file", file);
@@ -58,6 +61,7 @@ export async function exportCourses() {
   return res.blob();
 }
 
+// Adds the course.
 export async function addCourse(course) {
   const res = await fetch(`${BASE_URL}/courses/add`, {
     method: "POST",
@@ -75,6 +79,7 @@ export async function addCourse(course) {
   return res.text();
 }
 
+// Returns the all courses.
 export async function getAllCourses(caller = "Unknown") {
   console.warn(`%c [API GET] getAllCourses | Called by: ${caller}`, "color: white; background: #4f46e5; padding: 4px; border-radius: 4px;");
   const res = await fetch(`${BASE_URL}/getAllCourses`, {
@@ -92,6 +97,7 @@ export async function getAllCourses(caller = "Unknown") {
   return res.json();
 }
 
+// Returns the all courses grouped.
 export async function getAllCoursesGrouped(caller = "Unknown") {
   console.warn(`%c [API GET] getAllCoursesGrouped | Called by: ${caller}`, "color: white; background: #6366f1; padding: 4px; border-radius: 4px;");
   const res = await fetch(`${BASE_URL}/getAllCoursesGrouped`, {
@@ -109,6 +115,7 @@ export async function getAllCoursesGrouped(caller = "Unknown") {
   return res.json();
 }
 
+// Deletes the courses.
 export async function deleteCourses(courses) {
   const res = await fetch(`${BASE_URL}/deleteCourses`, {
     method: "DELETE",
@@ -124,6 +131,7 @@ export async function deleteCourses(courses) {
   return res.text();
 }
 
+// Updates the course.
 export async function updateCourse(request) {
   const res = await fetch(`${BASE_URL}/courses/update`, {
     method: "POST",
@@ -141,6 +149,7 @@ export async function updateCourse(request) {
   return res.text();
 }
 
+// Uploads the rooms.
 export async function uploadRooms(file) {
   const formData = new FormData();
   formData.append("file", file);
@@ -195,6 +204,7 @@ export async function exportLessons() {
 }
 
 
+// Adds the room.
 export async function addRoom(classroom) {
   const res = await fetch(`${BASE_URL}/rooms`, {
     method: "POST",
@@ -212,6 +222,7 @@ export async function addRoom(classroom) {
   return res.text();
 }
 
+// Returns the all classrooms.
 export async function getAllClassrooms(caller = "Unknown") {
   console.warn(`%c [API GET] getAllClassrooms | Called by: ${caller}`, "color: white; background: #059669; padding: 4px; border-radius: 4px;");
   const res = await fetch(`${BASE_URL}/getAllClassrooms`, {
@@ -229,6 +240,7 @@ export async function getAllClassrooms(caller = "Unknown") {
   return res.json();
 }
 
+// Deletes the classrooms.
 export async function deleteClassrooms(classrooms) {
   const res = await fetch(`${BASE_URL}/classrooms/delete`, {
     method: "POST",
@@ -244,6 +256,7 @@ export async function deleteClassrooms(classrooms) {
   return res.text();
 }
 
+// Updates the classroom.
 export async function updateClassroom(request) {
   const res = await fetch(`${BASE_URL}/classrooms/update`, {
     method: "POST",
@@ -261,6 +274,7 @@ export async function updateClassroom(request) {
   return res.text();
 }
 
+// Returns the all lessons.
 export async function getAllLessons(caller = "Unknown") {
   console.warn(`%c [API GET] getAllLessons | Called by: ${caller}`, "color: white; background: #0891b2; padding: 4px; border-radius: 4px;");
   const res = await fetch(`${BASE_URL}/getAlllessons`, {
@@ -278,6 +292,7 @@ export async function getAllLessons(caller = "Unknown") {
   return res.json();
 }
 
+// Adds the lesson.
 export async function addLesson(lesson) {
   const res = await fetch(`${BASE_URL}/addSingleLesson`, {
     method: "POST",
@@ -293,6 +308,7 @@ export async function addLesson(lesson) {
   return res.json();
 }
 
+// Deletes the lessons.
 export async function deleteLessons(lessons) {
   const res = await fetch(`${BASE_URL}/deleteLessons`, {
     method: "DELETE",
@@ -310,6 +326,7 @@ export async function deleteLessons(lessons) {
 
 
 
+// Returns the user role.
 export async function getUserRole(token) {
   const res = await fetch(`${BASE_URL}/auth/me`, {
     method: "GET",
@@ -327,6 +344,7 @@ export async function getUserRole(token) {
 
 
 
+// Returns the all users.
 export async function getAllUsers(token) {
   const res = await fetch(`${BASE_URL}/auth/users`, {
     method: "GET",
@@ -342,6 +360,7 @@ export async function getAllUsers(token) {
   return res.json();
 }
 
+// Updates the user role.
 export async function updateUserRole(uid, role, token) {
   const res = await fetch(
     `${BASE_URL}/auth/users/${uid}/role?role=${role}`,
@@ -359,6 +378,7 @@ export async function updateUserRole(uid, role, token) {
 }
 
 
+// Creates the user.
 export async function createUser(email, password, role, token) {
   const res = await fetch(
     `${BASE_URL}/auth/users?email=${email}&password=${password}&role=${role}`,
@@ -377,6 +397,7 @@ export async function createUser(email, password, role, token) {
   return res.text(); 
 }
 
+// Deletes the user.
 export async function deleteUser(uid, token) {
   const res = await fetch(
     `${BASE_URL}/auth/users/${uid}`,
@@ -393,6 +414,7 @@ export async function deleteUser(uid, token) {
   }
 }
 
+// Handles the generate timetable logic.
 export async function generateTimetable(requestData) {
   const res = await fetch(`${BASE_URL}/timetable/generate`, {
     method: "POST", // This must be POST.
@@ -411,6 +433,7 @@ export async function generateTimetable(requestData) {
 }
 
 
+// Returns the all lecturers.
 export async function getAllLecturers(caller = "Unknown") {
   console.warn(`%c [API GET] getAllLecturers | Called by: ${caller}`, "color: white; background: #d97706; padding: 4px; border-radius: 4px;");
   const res = await fetch(`${BASE_URL}/getAllLecturers`, {
@@ -428,6 +451,7 @@ export async function getAllLecturers(caller = "Unknown") {
   return res.json();
 }
 
+// Adds the lecturer.
 export async function addLecturer(lecturer) {
   const res = await fetch(`${BASE_URL}/addSingleLecturer`, {
     method: "POST",
@@ -445,6 +469,7 @@ export async function addLecturer(lecturer) {
   return res.json();
 }
 
+// Updates the lecturer.
 export async function updateLecturer(lecturer) {
   const res = await fetch(`${BASE_URL}/updateLecturer`, {
     method: "POST",
@@ -462,6 +487,7 @@ export async function updateLecturer(lecturer) {
   return res.text();
 }
 
+// Deletes the lecturers.
 export async function deleteLecturers(lecturers) {
   const res = await fetch(`${BASE_URL}/deleteLecturers`, {
     method: "DELETE",
@@ -480,6 +506,7 @@ export async function deleteLecturers(lecturers) {
 }
 
 
+// Uploads the lecturers excel.
 export async function uploadLecturersExcel(file) {
   const formData = new FormData();
   formData.append("file", file);
@@ -491,6 +518,7 @@ export async function uploadLecturersExcel(file) {
   return res.json();
 }
 
+// Exports the lecturers excel.
 export async function exportLecturersExcel() {
   const res = await fetch(`${BASE_URL}/lecturers/export`, {
     method: "GET",
@@ -501,6 +529,7 @@ export async function exportLecturersExcel() {
 }
 
 
+// Saves the timetable.
 export async function saveTimetable(saveRequest) {
   console.warn(`[API POST] saveTimetable | Saving: ${saveRequest.name}`);
   const res = await fetch(`${BASE_URL}/timetable/save`, {
@@ -520,6 +549,7 @@ export async function saveTimetable(saveRequest) {
   return res.json(); 
 }
 
+// Returns the timetable history.
 export async function getTimetableHistory(caller = "Unknown") {
   console.warn(`%c [API GET] getTimetableHistory | Called by: ${caller}`, "color: white; background: #8b5cf6; padding: 4px; border-radius: 4px;");
   const res = await fetch(`${BASE_URL}/timetable/history`, {
@@ -537,6 +567,7 @@ export async function getTimetableHistory(caller = "Unknown") {
   return res.json();
 }
 
+// Returns the timetable by id.
 export async function getTimetableById(id, caller = "Unknown") {
   console.warn(`%c [API GET] getTimetableById (${id}) | Called by: ${caller}`, "color: white; background: #ec4899; padding: 4px; border-radius: 4px;");
   const res = await fetch(`${BASE_URL}/timetable/history/${id}`, {
@@ -555,12 +586,14 @@ export async function getTimetableById(id, caller = "Unknown") {
 }
 
 
+// Returns the all clusters.
 export async function getAllClusters() {
   const res = await fetch(`${BASE_URL}/getAllClusters`);
   if (!res.ok) throw new Error("Failed to fetch clusters");
   return res.json();
 }
 
+// Adds the cluster.
 export async function addCluster(cluster) {
   const res = await fetch(`${BASE_URL}/addSingleCluster`, {
     method: "POST",
@@ -571,6 +604,7 @@ export async function addCluster(cluster) {
   return res.json();
 }
 
+// Updates the cluster.
 export async function updateCluster(cluster) {
   const res = await fetch(`${BASE_URL}/updateCluster`, {
     method: "POST",
@@ -581,6 +615,7 @@ export async function updateCluster(cluster) {
   return res.text();
 }
 
+// Deletes the clusters.
 export async function deleteClusters(clusters) {
   const res = await fetch(`${BASE_URL}/deleteClusters`, {
     method: "DELETE",
@@ -590,6 +625,7 @@ export async function deleteClusters(clusters) {
   if (!res.ok) throw new Error("Failed to delete clusters");
 }
 
+// Exports the rooms template.
 export async function exportRoomsTemplate() {
   const res = await fetch(`${BASE_URL}/rooms/template`, {
     method: "GET",
@@ -599,6 +635,7 @@ export async function exportRoomsTemplate() {
   return res.blob();
 }
 
+// Exports the courses template.
 export async function exportCoursesTemplate() {
   const res = await fetch(`${BASE_URL}/courses/template`, {
     method: "GET",
@@ -608,6 +645,7 @@ export async function exportCoursesTemplate() {
   return res.blob();
 }
 
+// Exports the lessons template.
 export async function exportLessonsTemplate() {
   const res = await fetch(`${BASE_URL}/lessons/template`, {
     method: "GET",
@@ -617,6 +655,7 @@ export async function exportLessonsTemplate() {
   return res.blob();
 }
 
+// Exports the lecturers template.
 export async function exportLecturersTemplate() {
   const res = await fetch(`${BASE_URL}/lecturers/template`, {
     method: "GET",
@@ -626,6 +665,7 @@ export async function exportLecturersTemplate() {
   return res.blob();
 }
 
+// Deletes the timetable.
 export async function deleteTimetable(id) {
   const res = await fetch(`${BASE_URL}/timetable/history/${id}`, {
     method: "DELETE",
@@ -639,6 +679,7 @@ export async function deleteTimetable(id) {
   return res.text();
 }
 
+// Removes the lesson from saved timetable.
 export async function removeLessonFromSavedTimetable(timetableId, lessonId) {
   const res = await fetch(
     `${BASE_URL}/timetable/history/${timetableId}/remove-lesson`,
@@ -660,6 +701,7 @@ export async function removeLessonFromSavedTimetable(timetableId, lessonId) {
   return res.json();
 }
 
+// Handles the rename timetable logic.
 export async function renameTimetable(id, newName) {
   const res = await fetch(`${BASE_URL}/timetable/history/${id}/rename`, {
     method: "POST",
@@ -676,6 +718,7 @@ export async function renameTimetable(id, newName) {
 }
 
 
+// Cancels the generation action.
 export async function cancelGeneration() {
   const res = await fetch(`${BASE_URL}/timetable/cancel`, {
     method: "POST",
@@ -688,6 +731,7 @@ export async function cancelGeneration() {
 }
 
 
+// Exports the current to excel.
 export async function exportCurrentToExcel(scheduleData) {
   const res = await fetch(`${BASE_URL}/timetable/export/current`, {
     method: "POST",
@@ -707,6 +751,7 @@ export async function exportCurrentToExcel(scheduleData) {
   return await res.blob();
 }
 
+// Exports the saved to excel.
 export async function exportSavedToExcel(timetableId) {
   const res = await fetch(
     `${BASE_URL}/timetable/history/${timetableId}/export`,
@@ -727,6 +772,7 @@ export async function exportSavedToExcel(timetableId) {
   return await res.blob();
 }
 
+// Returns the system availability.
 export async function getSystemAvailability(caller = "Unknown") {
   const res = await fetch(`${BASE_URL}/settings/availability`, {
     method: "GET",
@@ -744,6 +790,7 @@ export async function getSystemAvailability(caller = "Unknown") {
   return res.json();
 }
 
+// Updates the system availability.
 export async function updateSystemAvailability(blockedSlots) {
   const res = await fetch(`${BASE_URL}/settings/availability`, {
     method: "POST",
@@ -761,6 +808,7 @@ export async function updateSystemAvailability(blockedSlots) {
   return res.text();
 }
 
+// Returns the classroom size settings.
 export async function getClassroomSizeSettings(caller = "Unknown") {
   const res = await fetch(`${BASE_URL}/settings/classroom-sizes`, {
     method: "GET",
@@ -778,6 +826,7 @@ export async function getClassroomSizeSettings(caller = "Unknown") {
   return res.json();
 }
 
+// Updates the classroom size settings.
 export async function updateClassroomSizeSettings(settings) {
   const res = await fetch(`${BASE_URL}/settings/classroom-sizes`, {
     method: "POST",
@@ -795,6 +844,7 @@ export async function updateClassroomSizeSettings(settings) {
   return res.text();
 }
 
+// Returns the latest lesson upload summary.
 export async function getLatestLessonUploadSummary() {
   const res = await fetch(`${BASE_URL}/lessons/upload-summary`, {
     method: "GET",
@@ -815,6 +865,7 @@ export async function getLatestLessonUploadSummary() {
   return res.json();
 }
 
+// Returns the latest lecturer upload summary.
 export async function getLatestLecturerUploadSummary() {
 
   const res = await fetch(`${BASE_URL}/lecturers/upload-summary`, {
@@ -837,6 +888,7 @@ export async function getLatestLecturerUploadSummary() {
 }
 
 
+// Returns the latest room upload summary.
 export async function getLatestRoomUploadSummary() {
 
   const res = await fetch(`${BASE_URL}/rooms/upload-summary`, {
@@ -858,6 +910,7 @@ export async function getLatestRoomUploadSummary() {
   return res.json();
 }
 
+// Returns the latest course upload summary.
 export async function getLatestCourseUploadSummary() {
 
   const res = await fetch(`${BASE_URL}/courses/upload-summary`, {

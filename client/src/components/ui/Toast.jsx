@@ -3,9 +3,11 @@ import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
 import "./Toast.css";
 
+// Handles the use toast logic.
 export function useToast() {
   const [toast, setToast] = useState(null);
 
+  // Handles the show success logic.
   const showSuccess = (message) => {
     setToast({
       type: "success",

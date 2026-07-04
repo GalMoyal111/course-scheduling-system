@@ -17,6 +17,7 @@ import ConfirmModal from "../components/ConfirmModal";
 import Modal from "../components/ui/Modal";
 import { useLocation } from "react-router-dom";
 
+// Renders the LecturersPage component.
 export default function LecturersPage() {
   const {
     lecturers,
@@ -54,6 +55,7 @@ export default function LecturersPage() {
   const [isHighlightUpload, setIsHighlightUpload] = useState(false);
   const lecturerPanelRef = useRef(null);
 
+  // Handles the key for logic.
   const keyFor = (lecturer) => lecturer.id || lecturer.name;
 
   const loadLecturers = useCallback(async () => {
@@ -181,6 +183,7 @@ export default function LecturersPage() {
     setIsDeleteModalOpen(true);
   };
 
+  // Handles the perform delete logic.
   const performDelete = async () => {
     if (!lecturerToPendingDelete) return;
 
@@ -332,6 +335,7 @@ export default function LecturersPage() {
     );
   };
 
+  // Saves the availability changes.
   const saveAvailabilityChanges = async () => {
     if (!selectedLecturer) return;
     setIsSaving(true);
@@ -348,6 +352,7 @@ export default function LecturersPage() {
     }
   };
 
+  // Handles the select lecturer action.
   const handleSelectLecturer = (id) => {
     if (hasUnsavedChanges) {
       const confirmLeave = window.confirm(
@@ -368,6 +373,7 @@ export default function LecturersPage() {
     }, 0);
   };
 
+  // Toggles the lecturer selection.
   const toggleLecturerSelection = (e, lecturer) => {
     e.stopPropagation();
     const key = keyFor(lecturer);
@@ -382,6 +388,7 @@ export default function LecturersPage() {
     });
   };
 
+  // Handles the upload action.
   const handleUpload = async (file) => {
     // Show confirmation before performing an upload that overwrites data
     if (!file) return;
@@ -389,6 +396,7 @@ export default function LecturersPage() {
     setConfirmOpen(true);
   };
 
+  // Handles the perform upload logic.
   const performUpload = async () => {
     if (!pendingFile) return;
     setConfirmOpen(false);
@@ -408,6 +416,7 @@ export default function LecturersPage() {
     }
   };
 
+  // Cancels the upload action.
   const cancelUpload = () => {
     setConfirmOpen(false);
     setPendingFile(null);
@@ -944,6 +953,7 @@ function LecturerUploadSummaryModal({ isOpen, summary, onClose }) {
   );
 }
 
+// Renders the AvailabilityTable component.
 function AvailabilityTable({ lecturer, onToggle, onSetWholeDay }) {
   // Define the days of the week in Hebrew along with their corresponding indices. This array is used to render the table headers and to identify which day is being interacted with when toggling availability or setting whole day states.
   const hebrewDays = [

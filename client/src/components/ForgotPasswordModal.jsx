@@ -6,6 +6,7 @@ import "./ui/ui.css";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebase";
 
+// Renders the ForgotPasswordModal component.
 export default function ForgotPasswordModal({ isOpen, onClose }) {
   const { showError } = useToast();
   const [email, setEmail] = useState("");

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 
+// Renders the FAQAccordion component.
 export default function FAQAccordion() {
   const [expandedFAQ, setExpandedFAQ] = useState(null);
 
@@ -54,6 +55,7 @@ export default function FAQAccordion() {
     }
   ];
 
+  // Toggles the faq.
   const toggleFAQ = (id) => {
     setExpandedFAQ(expandedFAQ === id ? null : id);
   };

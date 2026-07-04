@@ -26,6 +26,7 @@ const capacityRanges = [
   { label: "More than 60", min: 61, max: Infinity },
 ];
 
+// Renders the ClassroomList component.
 export default function ClassroomList({
   classrooms = [],
   onEdit,
@@ -112,18 +113,21 @@ export default function ClassroomList({
     ? filteredClassrooms.length
     : classrooms.length;
 
+  // Returns the selected buildings text.
   const getSelectedBuildingsText = () => {
     if (selectedBuildings.length === 0) return "All Buildings";
     if (selectedBuildings.length === 1) return selectedBuildings[0];
     return `${selectedBuildings.length} Buildings selected`;
   };
 
+  // Returns the selected types text.
   const getSelectedTypesText = () => {
     if (selectedTypes.length === 0) return "All Types";
     if (selectedTypes.length === 1) return getTypeLabel(selectedTypes[0]);
     return `${selectedTypes.length} Types selected`;
   };
 
+  // Returns the selected capacity text.
   const getSelectedCapacityText = () => {
     if (selectedCapacityRanges.length === 0) return "All Capacities";
     if (selectedCapacityRanges.length === 1) return selectedCapacityRanges[0];
@@ -557,11 +561,12 @@ export default function ClassroomList({
   );
 }
 
-/* SelectableTable is a memoized table component that manages selection state internally. It accepts the list of classrooms and handler functions as props, and provides callbacks when selection changes. The table header includes a "select all" checkbox, and each row has its own checkbox for individual selection. The component uses stable keys to avoid resetting selection when the parent re-renders with a new array reference but the same classroom data.*/
+// Renders a selectable classroom table.
 
 function SelectableTable({ classrooms, onEdit, onDelete, onSelectionChange }) {
   const [selectedMap, setSelectedMap] = useState({});
 
+  // Handles the key for logic.
   const keyFor = (c) => `${c.building}||${c.classroomName}`;
 
   // Create a stable key representing the set/order of classrooms so we don't
@@ -589,6 +594,7 @@ function SelectableTable({ classrooms, onEdit, onDelete, onSelectionChange }) {
     onDeleteRef.current = onDelete;
   }, [onEdit, onDelete]);
 
+  // Toggles the row.
   const toggleRow = (c) => {
     const k = keyFor(c);
     const next = { ...selectedMap };
@@ -677,6 +683,7 @@ function SelectableTable({ classrooms, onEdit, onDelete, onSelectionChange }) {
 // one row's selection state changes. The comparator only checks the fields we
 // display and the `checked` state.
 const ClassroomRow = React.memo(
+  // Renders the ClassroomRow component.
   function ClassroomRow({ c, checked, onToggleRef, onEditRef, onDeleteRef }) {
     const k = `${c.building}||${c.classroomName}`;
 

@@ -3,10 +3,7 @@ import Button from "./Button";
 import logo from "../../assets/logo.png";
 import "./ui.css";
 
-/**
- * Header with app title and simple navigation.
- * Keeps responsibilities small: display server message and emit navigation events.
- */
+// Renders the app header with navigation actions.
 export default function Header({ page, onNavigate, serverMsg }) {
   return (
     <header className="ui-header">

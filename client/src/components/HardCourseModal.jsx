@@ -3,6 +3,7 @@ import { useData } from "../context/DataContext";
 import Button from "./ui/Button";
 import Modal from "./ui/Modal";
 
+// Renders the HardCourseModal component.
 export default function HardCourseModal({
   isOpen,
   onClose,
@@ -48,6 +49,7 @@ export default function HardCourseModal({
     }
   }, [isOpen]);
 
+  // Handles the save action.
   const handleSave = () => {
     if (!selectedCourseId) return;
     const course = filteredCourses.find((c) => c.id === selectedCourseId);

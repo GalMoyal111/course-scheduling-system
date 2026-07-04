@@ -35,6 +35,7 @@ const PAGE_ROUTES = {
   lecturers: "/lecturers",
 };
 
+// Renders the ImportExportModal component.
 export default function ImportExportModal({
   isOpen,
   onClose,
@@ -170,6 +171,7 @@ export default function ImportExportModal({
         ? "Export Information"
         : "Download Excel Template";
 
+  // Returns the action details.
   const getActionDetails = () => {
     if (type === "import") return { label: "Upload", action: handleUpload };
     if (type === "export") return { label: "Export", action: handleExport };

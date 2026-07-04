@@ -18,6 +18,7 @@ function getTypeLabel(type) {
   return typeMap[type] || type;
 }
 
+// Renders the LessonList component.
 export default function LessonList({
   lessons = [],
   clusters = [],
@@ -187,6 +188,7 @@ export default function LessonList({
     ? filteredLessons.length
     : lessons.length;
 
+  // Handles the clear all filters logic.
   const clearAllFilters = () => {
     setSelectedCourseNames([]);
     setSelectedLecturers([]);
@@ -197,6 +199,7 @@ export default function LessonList({
     setOpenFilter(null);
   };
 
+  // Toggles the value.
   const toggleValue = (value, setter) => {
     setter((current) =>
       current.includes(value)
@@ -409,6 +412,7 @@ function DropdownFilter({
 }) {
   const isOpen = openFilter === filterKey;
 
+  // Returns the button text.
   const getButtonText = () => {
     if (selectedValues.length === 0) return `All ${label}`;
     if (selectedValues.length === 1) return getOptionLabel(selectedValues[0]);
@@ -507,9 +511,11 @@ function DropdownFilter({
   );
 }
 
+// Renders the SelectableTable component.
 function SelectableTable({ lessons, onEdit, onDelete, onSelectionChange }) {
   const [selectedMap, setSelectedMap] = useState({});
 
+  // Handles the key for logic.
   const keyFor = (l) => l.lessonId;
 
   const stableKey = lessons.map(keyFor).join("|");
@@ -519,6 +525,7 @@ function SelectableTable({ lessons, onEdit, onDelete, onSelectionChange }) {
     onSelectionChange && onSelectionChange([]);
   }, [stableKey]);
 
+  // Toggles the row.
   const toggleRow = (l) => {
     const k = keyFor(l);
     const next = { ...selectedMap };
@@ -531,6 +538,7 @@ function SelectableTable({ lessons, onEdit, onDelete, onSelectionChange }) {
   const allSelected =
     lessons.length > 0 && lessons.every((c) => selectedMap[keyFor(c)]);
 
+  // Toggles the select all.
   const toggleSelectAll = () => {
     if (allSelected) {
       setSelectedMap({});

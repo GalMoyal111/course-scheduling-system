@@ -19,9 +19,7 @@ import Modal from "../components/ui/Modal";
 
 import "./UploadPage.css"; // reuse the Upload page styles
 
-/**
- * Minimal page for uploading course files (similar to lessons upload).
- */
+// Renders the course upload page.
 export default function UploadCoursesPage() {
   const { toast, showSuccess, showError, closeToast } = useToast();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -93,6 +91,7 @@ export default function UploadCoursesPage() {
     fetchCoursesIfNeeded("UploadCoursesPage");
   }, []);
 
+  // Handles the upload action.
   const handleUpload = async (file) => {
     setPendingFile(file);
     setConfirmOpen(true);
@@ -126,11 +125,13 @@ export default function UploadCoursesPage() {
     }
   };
 
+  // Cancels the upload action.
   const cancelUpload = () => {
     setConfirmOpen(false);
     setPendingFile(null);
   };
 
+  // Handles the export action.
   const handleExport = async () => {
     try {
       setExporting(true);
@@ -234,17 +235,19 @@ export default function UploadCoursesPage() {
     }
   };
 
-  /* When editing a course, we set the editingCourse state to the course being edited and open the AddCourseModal. The AddCourseModal will detect that editingCourse is set and pre-fill the form with the course data. When the user saves the changes, handleAddCourse will check if editingCourse is set and perform an update instead of an add. After updating, it will refresh the courses list and show a success message. */
+  // Opens the course modal in edit mode.
   const handleEditCourse = (course) => {
     setEditingCourse(course || null);
     setIsModalOpen(true);
   };
 
+  // Handles the delete course action.
   const handleDeleteCourse = (course) => {
     setPendingDelete(course || null);
     setDeleteConfirmOpen(true);
   };
 
+  // Handles the perform delete courses logic.
   const performDeleteCourses = async () => {
     if (!pendingDelete) return;
     const toDelete = Array.isArray(pendingDelete)

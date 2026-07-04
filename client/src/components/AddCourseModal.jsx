@@ -221,6 +221,7 @@ export default function AddCourseModal({
     return parsed;
   };
 
+  // Handles the to positive int or null logic.
   const toPositiveIntOrNull = (value, fieldName) => {
     const trimmed = String(value ?? "").trim();
 
@@ -239,7 +240,9 @@ export default function AddCourseModal({
 
   // Validates that the code consists of exactly 5 or 6 digits
   const validatePrerequisiteCode = (code) => /^\d{5,6}$/.test(code);
+  // Validates the course code.
   const validateCourseCode = (code) => /^\d{5,6}$/.test(code);
+  // Handles the keep digits only logic.
   const keepDigitsOnly = (value) => value.replace(/\D/g, "");
 
   // Handler for adding a prerequisite course code
@@ -302,25 +305,29 @@ export default function AddCourseModal({
     setPendingCourse(null);
   };
 
-  /* Handler for enabling manual credits editing. Shows a warning modal before allowing the user to edit credits manually, since it will turn off automatic credits calculation based on hours. */
+  // Shows a warning before enabling manual credits editing.
   const enableManualCreditsEdit = () => {
     setCreditsEditWarningOpen(true);
   };
 
+  // Confirms the manual credits edit action.
   const confirmManualCreditsEdit = () => {
     setIsCreditsEditable(true);
     setCreditsEditWarningOpen(false);
   };
 
+  // Cancels the manual credits edit action.
   const cancelManualCreditsEdit = () => {
     setCreditsEditWarningOpen(false);
   };
 
+  // Handles the enable students edit logic.
   const enableStudentsEdit = (field) => {
   setPendingStudentsField(field);
   setStudentsEditWarningOpen(true);
 };
 
+  // Confirms the students edit action.
   const confirmStudentsEdit = () => {
     if (pendingStudentsField === "lecture") {
       setIsLectureStudentsEditable(true);
@@ -334,17 +341,20 @@ export default function AddCourseModal({
     setPendingStudentsField(null);
   };
 
+  // Cancels the students edit action.
   const cancelStudentsEdit = () => {
     setStudentsEditWarningOpen(false);
     setPendingStudentsField(null);
   };
 
+  // Handles the remove prerequisite action.
   const handleRemovePrerequisite = (codeToRemove) => {
     setPrerequisiteCourseNumbers((prev) =>
       prev.filter((code) => code !== codeToRemove),
     );
   };
 
+  // Handles the submit action.
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -412,6 +422,7 @@ export default function AddCourseModal({
     }
   };
 
+  // Handles the close action.
   const handleClose = () => {
     resetForm();
     onClose();

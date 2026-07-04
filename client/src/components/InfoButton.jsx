@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./InfoButton.css";
 
+// Renders the InfoButton component.
 export default function InfoButton({ title, description }) {
   const [showTooltip, setShowTooltip] = useState(false);
 

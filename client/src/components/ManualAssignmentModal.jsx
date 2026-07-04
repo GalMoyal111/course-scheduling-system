@@ -38,6 +38,7 @@ const getStartTimeByFrame = (frame) => {
   return times[frame] || "Unknown";
 };
 
+// Renders the ManualAssignmentModal component.
 export default function ManualAssignmentModal({
   isOpen,
   onClose,

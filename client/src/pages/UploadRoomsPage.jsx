@@ -17,9 +17,11 @@ import { useData } from "../context/DataContext";
 import Modal from "../components/ui/Modal";
 import { useLocation } from "react-router-dom";
 
+// Renders the UploadRoomsPage component.
 function UploadRoomsPage() {
   const { toast, showSuccess, showError, closeToast } = useToast();
 
+  // Handles the upload action.
   const handleUpload = async (file) => {
     // show confirmation before performing destructive upload
     setPendingFile(file);
@@ -94,6 +96,7 @@ function UploadRoomsPage() {
     }
   }, [location]);
 
+  // Handles the perform upload logic.
   const performUpload = async () => {
     if (!pendingFile) return;
     setConfirmOpen(false);
@@ -114,6 +117,7 @@ function UploadRoomsPage() {
     }
   };
 
+  // Cancels the upload action.
   const cancelUpload = () => {
     setConfirmOpen(false);
     setPendingFile(null);
@@ -123,22 +127,26 @@ function UploadRoomsPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
 
+  // Handles the edit room action.
   const handleEditRoom = (classroom) => {
     setEditingClassroom(classroom);
     setIsModalOpen(true);
   };
 
+  // Handles the delete room action.
   const handleDeleteRoom = (classroom) => {
     setPendingDelete(classroom);
     setDeleteConfirmOpen(true);
   };
 
+  // Handles the bulk delete action.
   const handleBulkDelete = (classrooms) => {
     if (!classrooms || classrooms.length === 0) return;
     setPendingDelete(classrooms);
     setDeleteConfirmOpen(true);
   };
 
+  // Handles the perform delete logic.
   const performDelete = async () => {
     if (!pendingDelete) return;
 
@@ -494,6 +502,7 @@ function UploadRoomsPage() {
 
 export default UploadRoomsPage;
 
+// Renders the RoomUploadSummaryModal component.
 function RoomUploadSummaryModal({ isOpen, summary, onClose }) {
   if (!isOpen) return null;
 

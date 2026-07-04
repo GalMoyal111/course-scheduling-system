@@ -8,6 +8,7 @@ import { auth } from "../firebase.js";
 import { getUserRole } from "../services/api";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 
+// Renders the LoginModal component.
 export default function LoginModal({ isOpen, onClose, onLogin }) {
   const { showError } = useToast();
   const [email, setEmail] = useState("");
@@ -31,6 +32,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
   // Close the modal when the user presses the Escape key
   useEffect(() => {
     if (!isOpen) return;
+    // Handles the on key logic.
     const onKey = (e) => {
       if (e.key === "Escape") {
         e.preventDefault();

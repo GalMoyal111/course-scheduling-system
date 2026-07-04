@@ -2,16 +2,7 @@
 import React, { useEffect } from "react";
 import "./Modal.css";
 
-/**
- * @param {boolean} isOpen 
- * @param {function} onClose 
- * @param {string} title
- * @param {string} size - 'normal' | 'wide'
- * @param {string} variant - 'primary' | 'warning' | 'danger'
- * @param {boolean} centerContent
- * @param {ReactNode} children 
- * @param {ReactNode} footer
- */
+// Renders a reusable modal dialog.
 export default function Modal({ 
     isOpen, 
     onClose, 
@@ -24,6 +15,7 @@ export default function Modal({
 }) {
     useEffect(() => {
         if (!isOpen) return;
+        // Handles the esc action.
         const handleEsc = (e) => {
             if (e.key === "Escape") onClose();
         };
@@ -33,6 +25,7 @@ export default function Modal({
 
     if (!isOpen) return null;
 
+    // Handles the card click action.
     const handleCardClick = (e) => e.stopPropagation();
 
     return (

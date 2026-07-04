@@ -44,6 +44,7 @@ const getStartTimeByFrame = (frame) => {
   return times[frame] || "Unknown";
 };
 
+// Renders the GeneratePage component.
 export default function GeneratePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -92,6 +93,7 @@ export default function GeneratePage() {
     setManualAssignments((prev) => [...prev, newAssignment]);
   };
 
+  // Handles the remove manual assignment action.
   const handleRemoveManualAssignment = (indexToRemove) => {
     setManualAssignments((prev) =>
       prev.filter((_, index) => index !== indexToRemove),
@@ -113,6 +115,7 @@ export default function GeneratePage() {
 
   // Load initial data when the component mounts. This ensures that all necessary data (lessons, lecturers, classrooms, courses) is available before the user starts configuring their schedule. If any of the data fails to load, an error is logged to the console.
   React.useEffect(() => {
+    // Handles the load initial data logic.
     const loadInitialData = async () => {
       try {
         await Promise.all([
@@ -231,6 +234,7 @@ export default function GeneratePage() {
     },
   };
 
+  // Handles the semester change action.
   const handleSemesterChange = (e) => {
     const selectedSem = e.target.value;
     setSemester(selectedSem);
@@ -262,10 +266,12 @@ export default function GeneratePage() {
     }
   };
 
+  // Handles the weight change action.
   const handleWeightChange = (constraintName, value) => {
     setWeights((prev) => ({ ...prev, [constraintName]: parseFloat(value) }));
   };
 
+  // Handles the generate click action.
   const handleGenerateClick = () => {
     if (!semester) {
       setShowSemesterValidation(true);
@@ -274,6 +280,7 @@ export default function GeneratePage() {
     }
   };
 
+  // Handles the generate action.
   const handleGenerate = async () => {
     setLoading(true);
     setError("");

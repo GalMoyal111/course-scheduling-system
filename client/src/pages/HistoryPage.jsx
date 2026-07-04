@@ -8,6 +8,7 @@ import Modal from "../components/ui/Modal";
 import "./HistoryPage.css";
 import PageHeader from "../components/ui/PageHeader";
 
+// Renders the HistoryPage component.
 export default function HistoryPage() {
   const { history, fetchHistoryIfNeeded, loadTimetableFromHistory } = useData();
   const { toast, showError, showSuccess, closeToast } = useToast();
@@ -26,6 +27,7 @@ export default function HistoryPage() {
     fetchHistoryIfNeeded("HistoryPage");
   }, [fetchHistoryIfNeeded]);
 
+  // Handles the load timetable action.
   const handleLoadTimetable = async (id) => {
     setLoadingId(id);
     const success = await loadTimetableFromHistory(id, "HistoryPage");
@@ -71,6 +73,7 @@ export default function HistoryPage() {
     setTimeout(() => renameInputRef.current?.focus(), 80);
   };
 
+  // Confirms the rename action.
   const confirmRename = async () => {
     const newName = renameValue?.trim();
     if (!newName || newName === renameTarget.name) {
@@ -90,6 +93,7 @@ export default function HistoryPage() {
     }
   };
 
+  // Cancels the rename action.
   const cancelRename = () => {
     setRenameOpen(false);
     setRenameTarget({ id: null, name: "" });
@@ -97,7 +101,7 @@ export default function HistoryPage() {
   };
 
   // Helper function to format the timestamp of when the timetable was created. 
-  // It converts the timestamp to a localized string in Hebrew format (DD/MM/YYYY בשעה HH:MM).
+  // It converts the timestamp to a localized Hebrew-style string.
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
     

@@ -1,6 +1,7 @@
 import React from "react";
 import "./PageHeader.css";
 
+// Renders the PageHeader component.
 export default function PageHeader({ icon, title, subtitle, className = "" }) {
   return (
     <header className={`page-header ${className}`.trim()}>
