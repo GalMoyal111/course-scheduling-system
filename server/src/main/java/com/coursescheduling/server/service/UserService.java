@@ -27,10 +27,12 @@ public class UserService {
 	
     private final Firestore firestore;
 
+    // Creates a UserService instance.
     public UserService(Firestore firestore) {
         this.firestore = firestore;
     }
 
+    // Returns the user role.
     public String getUserRole(String uid) throws Exception {
     	
     	long currentTime = System.currentTimeMillis();
@@ -58,6 +60,7 @@ public class UserService {
     
     
     
+    // Returns the all users.
     public List<Map<String, String>> getAllUsers(String currentUid) throws Exception {
     	
     	if (cachedUsers != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) { 
@@ -87,6 +90,7 @@ public class UserService {
     }
     
     
+    // Updates the user role.
     public void updateUserRole(String uid, String role) throws Exception {
     	
         Firestore db = FirestoreClient.getFirestore();
@@ -100,6 +104,7 @@ public class UserService {
     }
     
     
+    // Creates the user.
     public String createUser(String email, String password, String role) throws Exception {
     	
     	email = email.toLowerCase();
@@ -155,6 +160,7 @@ public class UserService {
     
     
     
+    // Deletes the user.
     public void deleteUser(String uid) throws Exception {
 
     	

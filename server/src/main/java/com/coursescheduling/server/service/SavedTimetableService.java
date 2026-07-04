@@ -55,6 +55,7 @@ public class SavedTimetableService {
     
     private final Map<String, List<ScheduledLessonDTO>> timetableDataCache = new ConcurrentHashMap<>();
 
+    // Saves the timetable.
     public SavedTimetableMetadata saveTimetable(SaveTimetableRequest request) throws Exception {
     	this.cachedMetadata = null;
     	Firestore db = FirestoreClient.getFirestore();
@@ -85,6 +86,7 @@ public class SavedTimetableService {
         return metadata; 
     }
 
+    // Deletes the timetable.
     public void deleteTimetable(String timetableId) throws Exception {
         Firestore db = FirestoreClient.getFirestore();
         DocumentReference mainDocRef = db.collection(MAIN_COLLECTION).document(timetableId);
@@ -100,6 +102,7 @@ public class SavedTimetableService {
         this.timetableDataCache.remove(timetableId);
     }
 
+    // Updates the timetable name.
     public SavedTimetableMetadata updateTimetableName(String timetableId, String newName) throws Exception {
         Firestore db = FirestoreClient.getFirestore();
         DocumentReference mainDocRef = db.collection(MAIN_COLLECTION).document(timetableId);
@@ -123,6 +126,7 @@ public class SavedTimetableService {
         return mainDocRef.get().get().toObject(SavedTimetableMetadata.class);
     }
 
+    // Removes the lesson from timetable.
     public SavedTimetableMetadata removeLessonFromTimetable(String timetableId, String lessonId) throws Exception {
         Firestore db = FirestoreClient.getFirestore();
 
@@ -146,6 +150,7 @@ public class SavedTimetableService {
         return mainDocRef.get().get().toObject(SavedTimetableMetadata.class);
     }
 
+    // Returns the all saved metadata.
     public List<SavedTimetableMetadata> getAllSavedMetadata() throws Exception {
     	
     	if (cachedMetadata != null && (System.currentTimeMillis() - lastFetchTimeMetadata < CACHE_DURATION)) {
@@ -169,6 +174,7 @@ public class SavedTimetableService {
         return metadataList;
     }
 
+    // Returns the timetable data by id.
     public List<ScheduledLessonDTO> getTimetableDataById(String timetableId) throws Exception {
        
     	if (timetableDataCache.containsKey(timetableId)) {
@@ -211,29 +217,35 @@ public class SavedTimetableService {
 
         public ScheduleWrapper() {} 
 
+        // Handles the schedule wrapper logic.
         public ScheduleWrapper(List<ScheduledLessonDTO> lessons) {
             this.lessons = lessons;
             this.removedLessonIds = new ArrayList<>();
         }
 
+        // Returns the lessons.
         public List<ScheduledLessonDTO> getLessons() {
             return lessons;
         }
 
+        // Sets the lessons.
         public void setLessons(List<ScheduledLessonDTO> lessons) {
             this.lessons = lessons;
         }
 
+        // Returns the removed lesson ids.
         public List<String> getRemovedLessonIds() {
             return removedLessonIds;
         }
 
+        // Sets the removed lesson ids.
         public void setRemovedLessonIds(List<String> removedLessonIds) {
             this.removedLessonIds = removedLessonIds;
         }
     }
 
 
+    // Exports the timetable to excel.
     public byte[] exportTimetableToExcel(List<ScheduledLessonDTO> schedule) throws Exception {
         
         Map<String, List<ScheduledLessonDTO>> sheetsMap = new TreeMap<>();
@@ -360,6 +372,7 @@ public class SavedTimetableService {
         return style;
     }
 
+    // Creates the body style.
     private CellStyle createBodyStyle(Workbook wb) {
         CellStyle style = wb.createCellStyle();
         style.setWrapText(true); // Allow line breaks inside the cell.
@@ -371,6 +384,7 @@ public class SavedTimetableService {
         return style;
     }
     
+    // Handles the translate lesson type logic.
     private String translateLessonType(String type) {
         switch (type) {
             case "LECTURE":

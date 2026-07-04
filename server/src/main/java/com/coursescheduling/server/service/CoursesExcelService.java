@@ -43,35 +43,43 @@ public class CoursesExcelService {
         private String courseName;
         private String reason;
         
+        // Handles the invalid course logic.
         public InvalidCourse() {
         }
         
+        // Handles the invalid course logic.
         public InvalidCourse(String courseId, String courseName, String reason) {
             this.courseId = courseId;
             this.courseName = courseName;
             this.reason = reason;
         }
 
+        // Returns the course id.
         public String getCourseId() {
             return courseId;
         }
 
+        // Sets the course id.
         public void setCourseId(String courseId) {
             this.courseId = courseId;
         }
 
+        // Returns the course name.
         public String getCourseName() {
             return courseName;
         }
 
+        // Sets the course name.
         public void setCourseName(String courseName) {
             this.courseName = courseName;
         }
         
+        // Returns the reason.
         public String getReason() {
             return reason;
         }
 
+        // Sets the reason.
         public void setReason(String reason) {
             this.reason = reason;
         }
@@ -83,35 +91,43 @@ public class CoursesExcelService {
         private String courseName;
         private List<String> ignoredFields;
 
+        // Handles the elective student count adjusted course logic.
         public ElectiveStudentCountAdjustedCourse() {
         }
 
+        // Handles the elective student count adjusted course logic.
         public ElectiveStudentCountAdjustedCourse(String courseId, String courseName, List<String> ignoredFields) {
             this.courseId = courseId;
             this.courseName = courseName;
             this.ignoredFields = ignoredFields;
         }
 
+        // Returns the course id.
         public String getCourseId() {
             return courseId;
         }
 
+        // Sets the course id.
         public void setCourseId(String courseId) {
             this.courseId = courseId;
         }
 
+        // Returns the course name.
         public String getCourseName() {
             return courseName;
         }
 
+        // Sets the course name.
         public void setCourseName(String courseName) {
             this.courseName = courseName;
         }
 
+        // Returns the ignored fields.
         public List<String> getIgnoredFields() {
             return ignoredFields;
         }
 
+        // Sets the ignored fields.
         public void setIgnoredFields(List<String> ignoredFields) {
             this.ignoredFields = ignoredFields;
         }
@@ -122,35 +138,43 @@ public class CoursesExcelService {
         private String courseName;
         private List<String> removedPrerequisites;
 
+        // Handles the adjusted course logic.
         public AdjustedCourse() {
         }
 
+        // Handles the adjusted course logic.
         public AdjustedCourse(String courseId, String courseName, List<String> removedPrerequisites) {
             this.courseId = courseId;
             this.courseName = courseName;
             this.removedPrerequisites = removedPrerequisites;
         }
 
+        // Returns the course id.
         public String getCourseId() {
             return courseId;
         }
 
+        // Sets the course id.
         public void setCourseId(String courseId) {
             this.courseId = courseId;
         }
 
+        // Returns the course name.
         public String getCourseName() {
             return courseName;
         }
 
+        // Sets the course name.
         public void setCourseName(String courseName) {
             this.courseName = courseName;
         }
 
+        // Returns the removed prerequisites.
         public List<String> getRemovedPrerequisites() {
             return removedPrerequisites;
         }
 
+        // Sets the removed prerequisites.
         public void setRemovedPrerequisites(List<String> removedPrerequisites) {
             this.removedPrerequisites = removedPrerequisites;
         }
@@ -163,9 +187,11 @@ public class CoursesExcelService {
         private List<AdjustedCourse> adjustedCourses;
         private List<ElectiveStudentCountAdjustedCourse> electiveStudentCountAdjustedCourses;
 
+        // Handles the course upload summary logic.
         public CourseUploadSummary() {
         }
         
+        // Handles the course upload summary logic.
         public CourseUploadSummary(int savedCount, List<InvalidCourse> invalidCourses, List<AdjustedCourse> adjustedCourses, List<ElectiveStudentCountAdjustedCourse> electiveStudentCountAdjustedCourses) {
             this.savedCount = savedCount;
             this.invalidCourses = invalidCourses;
@@ -173,23 +199,28 @@ public class CoursesExcelService {
             this.electiveStudentCountAdjustedCourses = electiveStudentCountAdjustedCourses;
         }
 
+        // Returns the saved count.
         public int getSavedCount() {
             return savedCount;
         }
 
+        // Returns the invalid courses.
         public List<InvalidCourse> getInvalidCourses() {
             return invalidCourses;
         }
 
+        // Returns the adjusted courses.
         public List<AdjustedCourse> getAdjustedCourses() {
             return adjustedCourses;
         }
 
+        // Returns the elective student count adjusted courses.
         public List<ElectiveStudentCountAdjustedCourse> getElectiveStudentCountAdjustedCourses() {
             return electiveStudentCountAdjustedCourses;
         }
     }
 
+    // Handles the process logic.
     public CourseUploadSummary process(MultipartFile file) {
         try {
             // Before attempting to read the uploaded Excel file, ensure clusters exist.
@@ -214,6 +245,7 @@ public class CoursesExcelService {
         }
     }
 
+    // Handles the read courses from excel logic.
     public List<Course> readCoursesFromExcel(InputStream inputStream) {
         List<Course> courses = new ArrayList<>();
         DataFormatter formatter = new DataFormatter();
@@ -289,6 +321,7 @@ public class CoursesExcelService {
         return courses;
     }
 
+    // Checks whether row empty.
     private boolean isRowEmpty(Row row, DataFormatter formatter) {
         for (int cellIndex = 0; cellIndex <= 11; cellIndex++) {
             String cellValue = formatter.formatCellValue(row.getCell(cellIndex)).trim();
@@ -299,6 +332,7 @@ public class CoursesExcelService {
         return true;
     }
 
+    // Parses the int cell.
     private int parseIntCell(Cell cell, DataFormatter formatter) {
         if (cell == null) return 0;
 
@@ -312,6 +346,7 @@ public class CoursesExcelService {
         }
     }
 
+    // Parses the student count cell.
     private Integer parseStudentCountCell(Cell cell, DataFormatter formatter, String fieldName) {
         if (cell == null) {
             return null;
@@ -336,6 +371,7 @@ public class CoursesExcelService {
         }
     }
 
+    // Parses the prerequisite ids.
     private List<String> parsePrerequisiteIds(String prerequisiteText) {
         List<String> ids = new ArrayList<>();
 
@@ -355,6 +391,7 @@ public class CoursesExcelService {
         return ids;
     }
 
+    // Builds the prerequisite text.
     private String buildPrerequisiteText(List<String> prerequisiteIds) {
         return String.join(", ", prerequisiteIds);
     }
@@ -491,6 +528,7 @@ public class CoursesExcelService {
         return new CourseUploadSummary(validCourses.size(), invalidCourseDetails, adjustedCourses, electiveStudentCountAdjustedCourses);
     }
 
+    // Exports the courses to excel.
     public byte[] exportCoursesToExcel() {
         Firestore db = FirestoreClient.getFirestore();
 
@@ -553,10 +591,12 @@ public class CoursesExcelService {
         }
     }
 
+    // Handles the as string logic.
     private String asString(Object value) {
         return value == null ? "" : String.valueOf(value);
     }
 
+    // Handles the as double logic.
     private double asDouble(Object value) {
         if (value instanceof Number) {
             return ((Number) value).doubleValue();
@@ -573,6 +613,7 @@ public class CoursesExcelService {
         }
     }
 
+    // Returns the hours validation error.
     private String getHoursValidationError(Course course) {
         List<String> invalidFields = new ArrayList<>();
 
@@ -603,6 +644,7 @@ public class CoursesExcelService {
         return "Hours and credits must be 0 or greater for: " + String.join(", ", invalidFields);
     }
     
+    // Exports the courses template.
     public byte[] exportCoursesTemplate() throws Exception {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Courses");

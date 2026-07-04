@@ -34,6 +34,7 @@ public class LecturerExcelService {
 
 	
 
+	// Handles the process logic.
 	public LecturerUploadSummary process(MultipartFile file) {
         LecturerUploadSummary summary = new LecturerUploadSummary();
 
@@ -184,6 +185,7 @@ public class LecturerExcelService {
 	
 	
 
+	// Exports the lecturers to excel.
 	public byte[] exportLecturersToExcel() throws Exception {
         List<Lecturer> lecturers = lecturerService.getAllLecturers();
 
@@ -230,6 +232,7 @@ public class LecturerExcelService {
         }
     }
 	
+	// Exports the lecturers template.
 	public byte[] exportLecturersTemplate() throws Exception {
 	    Workbook workbook = new XSSFWorkbook();
 	    Sheet sheet = workbook.createSheet("Lecturers");

@@ -30,23 +30,28 @@ public class ClassroomExcelService {
 		public List<String> invalidRows = new ArrayList<>();
 		public List<String> warningRows = new ArrayList<>();
 
+		// Returns the total rows.
 		public int getTotalRows() {
 			return totalRows;
 		}
 
+		// Returns the saved classrooms.
 		public int getSavedClassrooms() {
 			return savedClassrooms;
 		}
 
+		// Returns the invalid rows.
 		public List<String> getInvalidRows() {
 			return invalidRows;
 		}
 
+		// Returns the warning rows.
 		public List<String> getWarningRows() {
 			return warningRows;
 		}
 	}
 
+	// Handles the process logic.
 	public ClassroomUploadSummary process(MultipartFile file) {
 		ClassroomUploadSummary summary = new ClassroomUploadSummary();
 		java.util.Set<String> seenClassrooms = new java.util.HashSet<>();
@@ -136,6 +141,7 @@ public class ClassroomExcelService {
 		}
 	}
 
+	// Handles the read classrooms from excel logic.
 	public List<Classroom> readClassroomsFromExcel(InputStream inputStream) throws Exception {
 
 		List<Classroom> classrooms = new ArrayList<>();
@@ -168,6 +174,7 @@ public class ClassroomExcelService {
 		return classrooms;
 	}
 
+	// Exports the classrooms to excel.
 	public byte[] exportClassroomsToExcel() throws Exception {
 
 		Firestore db = FirestoreClient.getFirestore();
@@ -214,6 +221,7 @@ public class ClassroomExcelService {
 		return out.toByteArray();
 	}
 
+	// Parses the room type.
 	private RoomType parseRoomType(String text) {
 
 		if (text == null)
@@ -231,6 +239,7 @@ public class ClassroomExcelService {
 		}
 	}
 
+	// Handles the extract building prefix logic.
 	private String extractBuildingPrefix(String classroomName) {
 		if (classroomName == null)
 			return null;
@@ -247,10 +256,12 @@ public class ClassroomExcelService {
 		return matcher.group(1).trim();
 	}
 
+	// Handles the safe value logic.
 	private String safeValue(String value) {
 		return (value == null || value.isBlank()) ? "<empty>" : value;
 	}
 
+	// Checks whether valid room type.
 	private boolean isValidRoomType(String typeStr) {
 		if (typeStr == null || typeStr.isBlank())
 			return true;
@@ -265,6 +276,7 @@ public class ClassroomExcelService {
 		}
 	}
 
+	// Exports the classrooms template.
 	public byte[] exportClassroomsTemplate() throws Exception {
 
 		Workbook workbook = new XSSFWorkbook();

@@ -17,6 +17,7 @@ public class ClassroomSizeSettingsService {
     private static final long CACHE_DURATION = 60 * 60 * 1000;
 
 
+    // Returns the classroom size settings.
     public ClassroomSizeSettings getClassroomSizeSettings() throws Exception {
 
             if (cachedSettings != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
@@ -43,6 +44,7 @@ public class ClassroomSizeSettingsService {
         }
     
 
+    // Updates the classroom size settings.
     public void updateClassroomSizeSettings(ClassroomSizeSettings settings) throws Exception {
         this.cachedSettings = null;
         Firestore db = FirestoreClient.getFirestore();

@@ -35,6 +35,7 @@ public class CourseService {
     
     
 
+    // Handles the normalize and validate course id logic.
     private String normalizeAndValidateCourseId(String rawCourseId) {
         String normalized = rawCourseId == null ? "" : rawCourseId.trim();
         if (!normalized.matches(COURSE_ID_PATTERN)) {
@@ -43,6 +44,7 @@ public class CourseService {
         return normalized;
     }
 
+    // Handles the normalize cluster name logic.
     private String normalizeClusterName(int cluster, String clusterName) {
         if (clusterName != null && !clusterName.isBlank()) {
             return clusterName.trim();
@@ -57,6 +59,7 @@ public class CourseService {
 
 
     
+    // Saves the course to firebase.
     public void saveCourseToFirebase(List<Course> courses) throws Exception {	
     	if (lessonService != null) 
     	    lessonService.invalidateGroupedCache();
@@ -103,6 +106,7 @@ public class CourseService {
     }
 
 
+    // Saves the single course.
     public void saveSingleCourse(Course course) throws Exception {
     	
     	if (lessonService != null) 
@@ -140,6 +144,7 @@ public class CourseService {
     }
     
 
+    // Deletes the courses.
     public void deleteCourses(List<CourseDeleteRequest> courses) throws Exception {
     	
     	if (lessonService != null) 
@@ -161,6 +166,7 @@ public class CourseService {
     
     
 
+    // Returns the all courses.
     public List<Course> getAllCourses() throws Exception {
     	
     	if (cachedCourses != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
@@ -224,6 +230,7 @@ public class CourseService {
         return new ArrayList<>(courses);
     }
 
+    // Returns the all courses raw.
     public List<Course> getAllCoursesRaw() throws Exception {
 
         Firestore db = FirestoreClient.getFirestore();
@@ -274,6 +281,7 @@ public class CourseService {
         return courses;
     }
     
+    // Updates the course.
     public void updateCourse(Course oldCourse, Course newCourse) throws Exception {
     
     	if (lessonService != null) 
@@ -327,6 +335,7 @@ public class CourseService {
     
     
     
+    // Returns the course by id.
     public Course getCourseById(String courseId) {
     	
     	if (cachedCourses != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
@@ -351,6 +360,7 @@ public class CourseService {
     }
     
     
+    // Saves the summary.
     public void saveSummary(CoursesExcelService.CourseUploadSummary summary) {
 
         this.cachedSummary = summary;
@@ -402,6 +412,7 @@ public class CourseService {
         return null;
     }
 
+    // Returns the integer value.
     private Integer getIntegerValue(Map<String, Object> data, String key) {
         Object value = data.get(key);
 
@@ -412,14 +423,17 @@ public class CourseService {
         return ((Number) value).intValue();
     }
 
+    // Checks whether elective course.
     private boolean isElectiveCourse(Course course) {
         return course.getCluster() > 8;
     }
 
+    // Checks whether missing student number.
     private boolean isMissingStudentNumber(Integer value) {
         return value == null || value <= 0;
     }
 
+    // Handles the normalize student numbers logic.
     private void normalizeStudentNumbers(Course course, ClassroomSizeSettings settings) {
         if (course == null || settings == null) {
             return;

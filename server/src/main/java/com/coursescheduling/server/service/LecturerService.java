@@ -24,6 +24,7 @@ public class LecturerService {
     private static final long CACHE_DURATION = 60 * 60 * 1000;
     private LecturerExcelService.LecturerUploadSummary cachedSummary = null;
     
+    // Returns the all lecturers.
     public List<Lecturer> getAllLecturers() throws Exception {
         if (cachedLecturers != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
             System.out.println("Returning Lecturers from Server Cache");
@@ -47,6 +48,7 @@ public class LecturerService {
         return new ArrayList<>(lecturers);
     }
 
+    // Adds the lecturer.
     public Lecturer addLecturer(Lecturer lecturer) throws Exception {
         
         Firestore db = FirestoreClient.getFirestore();
@@ -68,6 +70,7 @@ public class LecturerService {
         return lecturer;
     }
 
+    // Updates the lecturer.
     public void updateLecturer(Lecturer lecturer) throws Exception {
         
         Firestore db = FirestoreClient.getFirestore();
@@ -81,6 +84,7 @@ public class LecturerService {
         }
     }
 
+    // Deletes the lecturers.
     public void deleteLecturers(List<Lecturer> lecturers) throws Exception {
         Firestore db = FirestoreClient.getFirestore();
         WriteBatch batch = db.batch();
@@ -97,6 +101,7 @@ public class LecturerService {
 
     }
 
+    // Saves the lecturers batch.
     public void saveLecturersBatch(List<Lecturer> lecturers) throws Exception {
         Firestore db = FirestoreClient.getFirestore();
         WriteBatch batch = db.batch();
@@ -116,6 +121,7 @@ public class LecturerService {
 
     }
 
+    // Deletes the all lecturers.
     public void deleteAllLecturers() throws Exception {
         Firestore db = FirestoreClient.getFirestore();
         Iterable<DocumentReference> docRefs = db.collection(COLLECTION_NAME).listDocuments();
@@ -135,6 +141,7 @@ public class LecturerService {
         }
     }
     
+    // Saves the summary.
     public void saveSummary(LecturerExcelService.LecturerUploadSummary summary) {
 
         this.cachedSummary = summary;

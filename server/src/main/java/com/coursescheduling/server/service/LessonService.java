@@ -44,10 +44,12 @@ public class LessonService {
 	private long lastGroupedFetchTime = 0;
 	private LessonUploadSummary cachedSummary = null;
 
+    // Creates a LessonService instance.
     public LessonService(CourseService courseService) {
         this.courseService = courseService;
     }
 	
+    // Deletes the all lessons.
     public void deleteAllLessons() {
     	
     	
@@ -75,6 +77,7 @@ public class LessonService {
     }
 	
 	
+	// Saves the lessons.
 	public void saveLessons(List<Lesson> lessons) {
 
 	    Firestore db = FirestoreClient.getFirestore();
@@ -124,6 +127,7 @@ public class LessonService {
 	
 	
 	
+	// Returns the all lessons.
 	public List<Lesson> getAllLessons() {
 		
 		if (cachedLessons != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
@@ -155,6 +159,7 @@ public class LessonService {
 	}
 	
 	
+	// Handles the copy lesson logic.
 	private Lesson copyLesson(Lesson original) {
 				
 	    Lesson l = new Lesson();
@@ -170,6 +175,7 @@ public class LessonService {
 	    return l;
 	}
 	
+	// Adds the lesson.
 	public List<Lesson> addLesson(Lesson lesson) {
 	
 	    Firestore db = FirestoreClient.getFirestore();
@@ -252,6 +258,7 @@ public class LessonService {
 	}
 	
 	
+	// Handles the convert lesson to map logic.
 	private Map<String, Object> convertLessonToMap(Lesson lesson) {
 	    Map<String, Object> map = new HashMap<>();
 
@@ -271,6 +278,7 @@ public class LessonService {
 	}
 	
 	
+	// Deletes the lessons.
 	public void deleteLessons(List<Lesson> lessons) throws Exception {
 		
 		
@@ -308,6 +316,7 @@ public class LessonService {
 	
 	
 	
+	// Returns the all courses grouped by cluster.
 	public List<ClusterCoursesList> getAllCoursesGroupedByCluster() {
 		
 		if (cachedGroupedCourses != null && (System.currentTimeMillis() - lastGroupedFetchTime < CACHE_DURATION)) {
@@ -350,6 +359,7 @@ public class LessonService {
 	}
 	
 	
+	// Exports the lessons to excel.
 	public byte[] exportLessonsToExcel() {
 	    try (Workbook workbook = new XSSFWorkbook()) {
 
@@ -470,6 +480,7 @@ public class LessonService {
 	    return 99;
 	}
 
+	// Parses the cluster.
 	private int parseCluster(String cluster) {
 	    if (cluster == null || cluster.trim().isEmpty()) return 999;
 	    try {
@@ -479,6 +490,7 @@ public class LessonService {
 	    }
 	}
 
+	// Handles the compare ids numeric logic.
 	private int compareIdsNumeric(String idA, String idB) {
 	    try {
 	        double numA = Double.parseDouble(idA);
@@ -489,6 +501,7 @@ public class LessonService {
 	    }
 	}
 
+	// Returns the type priority.
 	private int getTypePriority(Object type) {
 	    if (type == null) return 99;
 	    String t = type.toString().toUpperCase();
@@ -508,6 +521,7 @@ public class LessonService {
 	
 	
 	
+	// Formats the semester.
 	private String formatSemester(Semester semester) {
 	    switch (semester) {
 	        case A:
@@ -519,6 +533,7 @@ public class LessonService {
 	    }
 	}
 	
+	// Formats the type.
 	private String formatType(LessonType type) {
 	    switch (type) {
 	        case LECTURE:
@@ -542,6 +557,7 @@ public class LessonService {
 	
 	
 	
+	// Returns the lessons by semester.
 	public List<Lesson> getLessonsBySemester(Semester semester) {
 
 	    Firestore db = FirestoreClient.getFirestore();
@@ -566,6 +582,7 @@ public class LessonService {
 	}
 	
 	
+	// Handles the invalidate grouped cache logic.
 	public void invalidateGroupedCache() {
 	    this.cachedGroupedCourses = null;
 	    this.lastGroupedFetchTime = 0;
@@ -574,6 +591,7 @@ public class LessonService {
 	
 	
 	
+	// Saves the summary.
 	public void saveSummary(LessonUploadSummary summary) {
 		this.cachedSummary = summary;
 		
@@ -585,6 +603,7 @@ public class LessonService {
 	}
 	
 	
+	// Returns the latest summary.
 	public LessonUploadSummary getLatestSummary() {
 	    if (this.cachedSummary != null) {
 	        return this.cachedSummary;

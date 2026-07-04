@@ -18,6 +18,7 @@ public class ClassroomService {
 	private static final long CACHE_DURATION = 60 * 60 * 1000;
 	private ClassroomExcelService.ClassroomUploadSummary cachedSummary = null;
 
+    // Saves the classrooms to firebase.
     public void saveClassroomsToFirebase(List<Classroom> classrooms) throws Exception {
  	
         Firestore db = FirestoreClient.getFirestore();
@@ -59,6 +60,7 @@ public class ClassroomService {
     }
 
 
+    // Saves the single classroom.
     public void saveSingleClassroom(Classroom classroom) {	
         Firestore db = FirestoreClient.getFirestore();
 
@@ -75,6 +77,7 @@ public class ClassroomService {
     }
 
 
+    // Deletes the classrooms.
     public void deleteClassrooms(List<ClassroomDeleteRequest> classrooms) throws Exception {
     	
         Firestore db = FirestoreClient.getFirestore();
@@ -101,6 +104,7 @@ public class ClassroomService {
     
     
     
+    // Returns the all classrooms.
     public List<Classroom> getAllClassrooms() throws Exception {
     	
     	if (cachedClassrooms != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
@@ -164,6 +168,7 @@ public class ClassroomService {
     }
     
     
+    // Updates the classroom.
     public void updateClassroom(Classroom oldClassroom, Classroom newClassroom) throws Exception {
 
     	
@@ -201,6 +206,7 @@ public class ClassroomService {
     }
     
     
+    // Saves the summary.
     public void saveSummary(ClassroomExcelService.ClassroomUploadSummary summary) {
 
         this.cachedSummary = summary;

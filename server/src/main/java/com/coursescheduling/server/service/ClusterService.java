@@ -26,6 +26,7 @@ public class ClusterService {
     private static final String AVAILABILITY_DOC = "global_availability";
     
     
+    // Returns the all clusters.
     public List<Cluster> getAllClusters() throws Exception {
     	
     	if (cachedClusters != null && (System.currentTimeMillis() - lastFetchTime < CACHE_DURATION)) {
@@ -50,6 +51,7 @@ public class ClusterService {
         return clusters;
     }
 
+    // Adds the cluster.
     public Cluster addCluster(Cluster cluster) throws Exception {
     	this.cachedClusters = null;
         Firestore db = FirestoreClient.getFirestore();
@@ -78,6 +80,7 @@ public class ClusterService {
         return cluster;
     }
 
+    // Updates the cluster.
     public void updateCluster(Cluster cluster) throws Exception {
     	this.cachedClusters = null;
         Firestore db = FirestoreClient.getFirestore();
@@ -87,6 +90,7 @@ public class ClusterService {
         db.collection(COLLECTION_NAME).document(cluster.getId()).set(cluster).get();
     }
 
+    // Deletes the clusters.
     public void deleteClusters(List<Cluster> clusters) throws Exception {
     	this.cachedClusters = null;
         Firestore db = FirestoreClient.getFirestore();
@@ -103,6 +107,7 @@ public class ClusterService {
     
     
     
+    // Returns the system availability.
     public List<Map<String, Integer>> getSystemAvailability() throws Exception {
         if (cachedSystemSlots != null && (System.currentTimeMillis() - lastSystemSlotsFetchTime < CACHE_DURATION)) {
             System.out.println("Returning System Availability from Server Cache");
@@ -137,6 +142,7 @@ public class ClusterService {
         return cachedSystemSlots;
     }
 
+    // Updates the system availability.
     public void updateSystemAvailability(List<Map<String, Integer>> blockedSlots) throws Exception {
         
         Firestore db = FirestoreClient.getFirestore();

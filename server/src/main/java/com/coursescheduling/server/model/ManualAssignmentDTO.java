@@ -11,6 +11,7 @@ public class ManualAssignmentDTO {
     // Constructors
     public ManualAssignmentDTO() {}
 
+    // Creates a ManualAssignmentDTO instance.
     public ManualAssignmentDTO(String lessonId, int day, int startFrame, String building, String classroomName) {
         this.lessonId = lessonId;
         this.day = day;

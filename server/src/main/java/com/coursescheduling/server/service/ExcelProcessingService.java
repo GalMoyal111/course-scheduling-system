@@ -25,10 +25,7 @@ import com.coursescheduling.server.model.Semester;
 
 
 @Service 
-/**
- * Service responsible for reading an uploaded Excel file and converting rows
- * into Lesson objects. Provides small helpers to parse and normalize values.
- */
+// Reads uploaded Excel files and converts rows into lessons.
 public class ExcelProcessingService {
 	private final Firestore firestore;
 	
@@ -36,6 +33,7 @@ public class ExcelProcessingService {
 	private final CourseService courseService;
 	private final LecturerService lecturerService;
 		
+	// Creates a ExcelProcessingService instance.
 	public ExcelProcessingService(Firestore firestore, LessonService lessonService, CourseService courseService, LecturerService lecturerService) {
 	    this.firestore = firestore;
 	    this.lessonService = lessonService;
@@ -50,6 +48,7 @@ public class ExcelProcessingService {
 
 	    public ValidationIssue() {}
 	    
+	    // Handles the validation issue logic.
 	    public ValidationIssue(String identifier, int row) {
 	        this.identifier = identifier;
 	        this.rows.add(row);
@@ -68,6 +67,7 @@ public class ExcelProcessingService {
 	}
 	
 	
+	// Handles the process logic.
 	public LessonUploadSummary process(MultipartFile file) {
 	    LessonUploadSummary summary = new LessonUploadSummary();
 	    Set<String> existingLecturers = new HashSet<>();
@@ -191,6 +191,7 @@ public class ExcelProcessingService {
 	
 	
 	
+	// Returns the safe cell string.
 	private String getSafeCellString(Row row, int cellIndex) {
 	    org.apache.poi.ss.usermodel.Cell cell = row.getCell(cellIndex);
 	    if (cell == null || cell.getCellType() == org.apache.poi.ss.usermodel.CellType.BLANK) {
@@ -203,6 +204,7 @@ public class ExcelProcessingService {
 	
 	
 	
+	// Adds the lesson to list.
 	private void addLessonToList(String courseId, String courseName, LessonType type, String lecturer, Semester semester, int duration, List<Lesson> lessons, Map<String, Course> courseMap) {
 	    
 	    if (type == LessonType.LAB) {
@@ -225,6 +227,7 @@ public class ExcelProcessingService {
 	    }
 	}
 
+	// Creates the lesson.
 	private Lesson createLesson(String courseId, String courseName, LessonType type, String lecturer, Semester semester, int duration, String splitGroupId, Map<String, Course> courseMap) {
 	    Lesson lesson = new Lesson();
 	    lesson.setLessonId(UUID.randomUUID().toString());
@@ -247,6 +250,7 @@ public class ExcelProcessingService {
 	
 	
 	
+	// Returns the course id from cell.
 	private String getCourseIdFromCell(org.apache.poi.ss.usermodel.Cell cell) {
 	    if (cell == null) return "";
 	    if (cell.getCellType() == org.apache.poi.ss.usermodel.CellType.NUMERIC) {
@@ -255,6 +259,7 @@ public class ExcelProcessingService {
 	    return cell.toString().trim();
 	}
 
+	// Checks whether row empty.
 	private boolean isRowEmpty(Row row) {
 	    if (row == null) return true;
 	    org.apache.poi.ss.usermodel.Cell cell = row.getCell(0);
@@ -280,6 +285,7 @@ public class ExcelProcessingService {
 	    return null;
 	}
 	
+	// Adds the validation issue.
 	private void addValidationIssue(List<ValidationIssue> issues, String identifier, int row) {
 	    ValidationIssue existing = issues.stream().filter(i -> i.identifier.equals(identifier)).findFirst().orElse(null);
 
@@ -304,6 +310,7 @@ public class ExcelProcessingService {
 	
 	
 	
+	// Exports the lessons template.
 	public byte[] exportLessonsTemplate() throws Exception {
 	    Workbook workbook = new XSSFWorkbook();
 	    Sheet sheet = workbook.createSheet("Lessons");
@@ -338,113 +345,4 @@ public class ExcelProcessingService {
 
 	    return out.toByteArray();
 	}
-	
-	
-	
-	/*
-	// Convert a single sheet row into one or more Lesson objects.
-	private void addLessonFromRow(Row row, List<Lesson> lessons, Map<String, Course> courseMap) {
-
-		String courseId = getCourseIdFromCell(row.getCell(0));
-		
-		if (courseId == null || courseId.trim().isEmpty()) {
-	        System.out.println("DEBUG: Skipping row - empty courseId");
-	        return;
-	    }
-
-		
-		if (courseId.contains("/")) {
-		    System.out.println("Skipping row: invalid courseId " + courseId);
-		    return;
-		}
-		
-
-		if (courseId == null || courseId.trim().isEmpty()) {
-		    System.out.println("Skipping row: missing courseId");
-		    return;
-		}
-		
-	    String courseName = row.getCell(1).toString();
-	    String typeText = row.getCell(2).toString();
-	    LessonType type = parseType(typeText);
-	     
-	    if (type == LessonType.LAB) {
-	        if (courseId.equals("61181")) {
-	            type = LessonType.PHYSICS_LAB;
-	        } else if (courseId.equals("61765")) {
-	            type = LessonType.NETWORKING_LAB;
-	        }
-	    }
-	    
-	    if (type == null) {
-	        System.out.println("Skipping row: unknown type " + typeText);
-	        return;
-	    }
-	    
-	    if (type != LessonType.LECTURE && type != LessonType.TUTORIAL && type != LessonType.LAB && type != LessonType.PHYSICS_LAB && type != LessonType.NETWORKING_LAB && type != LessonType.PBL && type != LessonType.PROJECT) {
-	        System.out.println("Skipping row: unsupported type " + typeText);
-	        return;
-	    }
-	    
-	    
-	    
-	    String lecturer = row.getCell(3).toString();
-
-	    String semesterText = row.getCell(5).toString();
-	    Semester semester = parseSemester(semesterText);
-
-	    int duration = (int) row.getCell(7).getNumericCellValue();
-	    
-	    if (lecturer == null || lecturer.trim().isEmpty()) {
-	        System.out.println("Skipping row: missing lecturer for course " + courseId);
-	        return;
-	    }
-
-	    if (duration <= 0) {
-	        System.out.println("Skipping row: invalid duration for course " + courseId);
-	        return;
-	    }
-
-	    if (duration == 4) {
-	    	
-	    	String splitGroupId = UUID.randomUUID().toString();
-	        Lesson lesson1 = createLesson(courseId, courseName, type, lecturer, semester, 2, splitGroupId, courseMap);
-	        Lesson lesson2 = createLesson(courseId, courseName, type, lecturer, semester, 2, splitGroupId , courseMap);
-
-	        if (lesson1 != null) lessons.add(lesson1);
-	        if (lesson2 != null) lessons.add(lesson2);
-
-	    } else {
-
-	        Lesson lesson = createLesson(courseId, courseName, type, lecturer, semester, duration, null , courseMap);
-	        if (lesson != null) {
-	            lessons.add(lesson);
-	        }
-	    }
-	}
-	
-
-	
-	// Sort lessons by courseId, semester and type priority.
-	private void sortLessons(List<Lesson> lessons) {
-	    lessons.sort((l1, l2) -> {
-
-	        int courseCompare = l1.getCourseId().compareTo(l2.getCourseId());
-	        if (courseCompare != 0)
-	            return courseCompare;
-
-	        int semesterCompare = l1.getSemester().compareTo(l2.getSemester());
-	        if (semesterCompare != 0)
-	            return semesterCompare;
-
-	        return Integer.compare(l1.getType().getPriority(), l2.getType().getPriority());
-	    });
-	}
-	
-*/
-	
-	
-	
-	
-	
 }

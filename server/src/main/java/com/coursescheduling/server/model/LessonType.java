@@ -15,6 +15,7 @@ public enum LessonType {
         this.priority = priority;
     }
 
+    // Returns the priority.
     public int getPriority() {
         return priority;
     }
