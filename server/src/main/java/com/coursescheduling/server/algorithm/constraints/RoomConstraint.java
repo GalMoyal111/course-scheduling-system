@@ -27,7 +27,7 @@ public class RoomConstraint {
 	
 	
 	
-	// returns true if the room type matches the lesson type requirements
+	// Checks whether the room type matches the lesson type requirements.
 	private boolean isTypeMatch(LessonType lessonType, RoomType roomType) {
         if (roomType == null) return false;
 

@@ -125,25 +125,6 @@ export default function LecturersPage() {
     }
   };
 
-  // const handleEditLecturer = async (updatedLecturer) => {
-  //   try {
-  //     await updateLecturer(updatedLecturer);
-  //     showSuccess("Lecturer updated successfully!");
-
-  //     setLecturers(prev =>
-  //       prev.map(l => l.id === updatedLecturer.id ? updatedLecturer : l)
-  //     );
-
-  //     setIsModalOpen(false);
-  //     setEditingLecturer(null);
-  //     setLecturersTimestamp(Date.now());
-
-  //   } catch (err) {
-  //     console.error(err);
-  //     showError("Error updating lecturer");
-  //   }
-  // };
-
   // Handle editing an existing lecturer. First checks for duplicates by comparing the trimmed name against existing lecturers, excluding the lecturer being edited. If a duplicate is found, shows an error toast and aborts. If not, calls the API to update the lecturer, then updates the local state with the modified lecturer, shows a success toast, and closes the modal.
   const handleEditLecturer = async (updatedLecturer) => {
     const isDuplicate = lecturers.some(

@@ -7,10 +7,10 @@ import java.util.Map;
 
 public interface SoftConstraint {
 
-    //function to calculate how much penalty is incurred if the variable is assigned this value, given the current assignment of other variables
+    // Calculates the penalty for assigning this value with the current assignment.
     double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment);
 
-    //function to get the name of the soft constraint for identification purposes
+    // Returns the soft constraint name.
     String getName();
 
     
