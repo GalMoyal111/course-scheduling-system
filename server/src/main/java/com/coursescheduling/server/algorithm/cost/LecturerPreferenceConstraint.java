@@ -10,6 +10,7 @@ import java.util.Map;
 public class LecturerPreferenceConstraint implements SoftConstraint {
 
     @Override
+    // Calculates the penalty.
     public double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
         List<DomainValue> nonPreferred = variable.getNonPreferredSlots();
         
@@ -37,11 +38,13 @@ public class LecturerPreferenceConstraint implements SoftConstraint {
     }
 
     @Override
+    // Returns the max penalty.
     public double getMaxPenalty() {
         return 3.0;
     }
 
     @Override
+    // Returns the name.
     public String getName() {
         return "LecturerPreference";
     }

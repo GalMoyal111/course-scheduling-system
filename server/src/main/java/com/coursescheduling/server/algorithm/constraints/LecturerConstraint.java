@@ -16,9 +16,7 @@ public class LecturerConstraint {
 	private static final int MAX_DAILY_FRAMES = 8;
 
 
-	/*
-    Checks if assigning the given value to the variable would exceed the consecutive frame limit for the lecturer.
-     */
+	// Checks whether the assignment exceeds the lecturer consecutive frame limit.
 	public boolean isConsecutiveLimitExceeded(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment) {
         
         // Get the lecturer and day from the variable and value
@@ -51,9 +49,7 @@ public class LecturerConstraint {
     }
 
 
-    /* 
-    Helper method to check if the set of occupied frames exceeds the maximum allowed consecutive frames.
-    */
+    // Checks whether occupied frames exceed the consecutive limit.
     private boolean hasExceededLimit(Set<Integer> frames) {
         
     	if (frames.isEmpty()) return false;
@@ -75,9 +71,7 @@ public class LecturerConstraint {
     }
     
     
-    /*
-    Checks if assigning the given value to the variable would exceed the daily frame limit for the lecturer.
-    */
+    // Checks whether the assignment exceeds the lecturer daily frame limit.
     public boolean isDailyLimitExceeded(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment) {
         String lecturer = var.getLecturer();
         int day = value.getDay();

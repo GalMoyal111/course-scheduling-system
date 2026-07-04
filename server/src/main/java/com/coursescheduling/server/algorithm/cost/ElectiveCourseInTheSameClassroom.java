@@ -51,6 +51,7 @@ public class ElectiveCourseInTheSameClassroom implements SoftConstraint {
         return penalty;
     }
 
+    // Checks whether same room.
     private boolean isSameRoom(Classroom room1, Classroom room2) {
         if (room1 == null || room2 == null) {
             return false;
@@ -61,11 +62,13 @@ public class ElectiveCourseInTheSameClassroom implements SoftConstraint {
     }
 
     @Override
+    // Returns the name.
     public String getName() {
         return "electiveCourseInTheSameClassroom";
     }
 
     @Override
+    // Returns the max penalty.
     public double getMaxPenalty() {
         return 3.0;
     }

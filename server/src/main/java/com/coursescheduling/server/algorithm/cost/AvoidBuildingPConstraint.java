@@ -7,6 +7,7 @@ import java.util.Map;
 public class AvoidBuildingPConstraint implements SoftConstraint {
 
     @Override
+    // Calculates the penalty.
     public double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
         
     	if (variable.isVirtual()) {
@@ -22,11 +23,13 @@ public class AvoidBuildingPConstraint implements SoftConstraint {
     }
 
     @Override
+    // Returns the name.
     public String getName() {
         return "AvoidBuildingP"; 
     }
 
     @Override
+    // Returns the max penalty.
     public double getMaxPenalty() {
         return 10.0; 
     }

@@ -13,6 +13,7 @@ import java.util.List;
 @Component
 public class ElectiveLectureLabSameRoomConstraint {
 
+    // Checks whether valid.
     public boolean isValid(Variable var, Classroom candidateRoom,Map<Variable, AssignedValue> assignment,List<Variable> allVariables){
         
     	if (var.isVirtual()) {
@@ -40,14 +41,17 @@ public class ElectiveLectureLabSameRoomConstraint {
         return candidateRoom.equals(existingRoom);
     }
 
+    // Checks whether elective course.
     private boolean isElectiveCourse(Variable var) {
         return var.getCluster() >= 9;
     }
     
+    // Checks whether lab type.
     private boolean isLabType(LessonType type) {
         return type == LessonType.LAB || type == LessonType.PHYSICS_LAB || type == LessonType.NETWORKING_LAB;
     }
 
+    // Handles the find lab type for course logic.
     private LessonType findLabTypeForCourse(String courseId, List<Variable> allVariables) {
         for (Variable variable : allVariables) {
             if (variable.getCourseId().equals(courseId) && isLabType(variable.getType())) {
@@ -57,6 +61,7 @@ public class ElectiveLectureLabSameRoomConstraint {
         return null; 
     }
 
+    // Handles the find assigned lecture room or lab room logic.
     private Classroom findAssignedLectureRoomOrLabRoom(String courseId,Map<Variable, AssignedValue> assignment) {
         for(Map.Entry<Variable, AssignedValue> entry : assignment.entrySet()) {
             Variable assignedVar = entry.getKey();

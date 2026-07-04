@@ -33,12 +33,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CancellationException;
 
-/*
-    * This service orchestrates the entire timetable generation process. It:
-    * 1. Builds variables based on the semester data.
-    * 2. Applies global and specific constraints to the variables.
-    * 3. Invokes the CSP solver to find a valid timetable
-*/
+// Orchestrates the timetable generation process.
 @Service
 public class TimetableAlgorithmService {
 
@@ -62,6 +57,7 @@ public class TimetableAlgorithmService {
     
     private final Random random = new Random();
     
+    // Returns the global blocked slots.
     private List<DomainValue> getGlobalBlockedSlots() {
         try {
             List<Map<String, Integer>> blockedSlots = clusterService.getSystemAvailability();
@@ -83,6 +79,7 @@ public class TimetableAlgorithmService {
     }
     
     
+    // Returns the real classrooms from db.
     private List<Classroom> getRealClassroomsFromDB() {
         try {
             return classroomService.getAllClassrooms();
@@ -283,6 +280,7 @@ public class TimetableAlgorithmService {
     }
     
     
+    // Handles the sort variables for csp logic.
     public void sortVariablesForCSP(List<Variable> variables) {
         variables.sort(
             Comparator.comparingInt(Variable::getCluster)
@@ -316,6 +314,7 @@ public class TimetableAlgorithmService {
     }
     
     
+    // Cancels the algorithm action.
     public void cancelAlgorithm() {
         if (csp != null) {
             csp.cancel();

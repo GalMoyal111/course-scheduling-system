@@ -175,6 +175,7 @@ public class CSP {
     }
 
     
+    // Handles the forward check logic.
     private Map<Variable, List<DomainValue>> forwardCheck(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment, List<Variable> variables, RoomManager roomManager) {
         Map<Variable, List<DomainValue>> removedValues = new HashMap<>();
         
@@ -303,6 +304,7 @@ public class CSP {
     }
 
 
+    // Checks whether time assignment consistent.
     private boolean isTimeAssignmentConsistent(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment) {
         int start1 = value.getStartFrame();
         int end1 = start1 + var.getDuration() - 1;
@@ -350,6 +352,7 @@ public class CSP {
         return true;
     }
 
+    // Returns the available suitable rooms.
     private Set<Classroom> getAvailableSuitableRooms(Variable var, DomainValue value, List<Variable> variables, RoomManager roomManager) {
         int startFrame = value.getStartFrame();
 
@@ -372,6 +375,7 @@ public class CSP {
         return availableRooms;
     }
 
+    // Builds the assigned values.
     private List<AssignedValue> buildAssignedValues(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment, List<Variable> variables, RoomManager roomManager) {
         List<AssignedValue> assignedValues = new ArrayList<>();
 
@@ -401,22 +405,16 @@ public class CSP {
         return assignedValues;
     }
 
-    // private AssignedValue buildAssignedValue(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment , RoomManager roomManager) {
-    //         Classroom bookedRoom = isConsistent(var, value, assignment , roomManager);
-    //         if (bookedRoom != null) {
-    //             return new AssignedValue(value.getDay(), value.getStartFrame(), bookedRoom);
-    //         }
-    //         return null;
-    // }
-
     public void cancel() {
         this.isCancelled.set(true); 
     }
     
+    // Handles the reset cancel flag logic.
     public void resetCancelFlag() {
         this.isCancelled.set(false);
     }
 
+    // Checks whether cancelled.
     public boolean isCancelled() {
         return this.isCancelled.get();
     }

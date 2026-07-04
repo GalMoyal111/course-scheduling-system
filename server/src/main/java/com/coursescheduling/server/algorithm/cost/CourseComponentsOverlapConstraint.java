@@ -11,11 +11,13 @@ public class CourseComponentsOverlapConstraint implements SoftConstraint {
     private static final String CONSTRAINT_NAME = "CourseComponentsOverlap";
 
     @Override
+    // Returns the name.
     public String getName() {
         return CONSTRAINT_NAME;
     }
 
     @Override
+    // Calculates the penalty.
     public double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
         double penalty = 0.0;
 
@@ -59,6 +61,7 @@ public class CourseComponentsOverlapConstraint implements SoftConstraint {
     }
 
     @Override
+    // Returns the max penalty.
     public double getMaxPenalty() {
         return 40.0; 
     }

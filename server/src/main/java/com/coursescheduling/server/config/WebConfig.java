@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     @Override
+    // Adds the cors mappings.
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // Apply these rules to all server routes, such as /api/courses.
                 .allowedOriginPatterns(

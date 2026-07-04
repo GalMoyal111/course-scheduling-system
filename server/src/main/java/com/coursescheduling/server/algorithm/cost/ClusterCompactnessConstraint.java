@@ -10,6 +10,7 @@ public class ClusterCompactnessConstraint implements SoftConstraint {
     private static final double PENALTY_PER_GAP_HOUR = 5.0; 
 
     @Override
+    // Calculates the penalty.
     public double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
         double totalPenalty = 0.0;
 
@@ -56,11 +57,13 @@ public class ClusterCompactnessConstraint implements SoftConstraint {
     }
 
     @Override
+    // Returns the name.
     public String getName() {
         return CONSTRAINT_NAME;
     }
 
     @Override
+    // Returns the max penalty.
     public double getMaxPenalty() {
         return 50.0; 
     }

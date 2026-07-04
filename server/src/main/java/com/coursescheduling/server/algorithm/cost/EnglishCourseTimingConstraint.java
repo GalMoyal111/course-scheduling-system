@@ -11,6 +11,7 @@ public class EnglishCourseTimingConstraint implements SoftConstraint {
 
 
     @Override
+    // Calculates the penalty.
     public double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
         
         if (!variable.isEnglishCourse()) {
@@ -35,11 +36,13 @@ public class EnglishCourseTimingConstraint implements SoftConstraint {
     }
 
     @Override
+    // Returns the name.
     public String getName() {
         return "EnglishCourseTiming";
     }
 
     @Override
+    // Returns the max penalty.
     public double getMaxPenalty() {
         return 50.0; 
     }

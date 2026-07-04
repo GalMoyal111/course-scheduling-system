@@ -12,6 +12,7 @@ import java.util.Map;
 public class ElectiveCourseSequenceConstraint {
 
 
+    // Checks whether elective sequence valid.
     public boolean isElectiveSequenceValid(Variable variable, DomainValue value, Map<Variable, AssignedValue> assignment) {
         
         if (variable.getCluster() < 9) {
@@ -54,6 +55,7 @@ public class ElectiveCourseSequenceConstraint {
         return true;
     }
 
+    // Handles the find variable by course and type logic.
     private Variable findVariableByCourseAndType(String courseId, LessonType type, Map<Variable, AssignedValue> assignment) {
         for (Variable var : assignment.keySet()) {
             if (var.getCourseId().equals(courseId) && var.getType() == type) {
@@ -63,6 +65,7 @@ public class ElectiveCourseSequenceConstraint {
         return null;
     }
 
+    // Checks whether directly after.
     private boolean isDirectlyAfter(AssignedValue previousAssignment, int previousDuration, DomainValue currentValue) {
         if (previousAssignment.getDay() != currentValue.getDay()) {
             return false;

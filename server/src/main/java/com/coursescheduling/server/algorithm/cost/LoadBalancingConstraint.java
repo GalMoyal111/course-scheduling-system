@@ -14,11 +14,13 @@ public class LoadBalancingConstraint implements SoftConstraint {
     private static final double PENALTY_PER_EXTRA_LESSON = 5.0;
 
     @Override
+    // Returns the name.
     public String getName() {
         return CONSTRAINT_NAME;
     }
 
     @Override
+    // Calculates the penalty.
     public double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
         double totalPenalty = 0.0;
         int day = value.getDay();
@@ -53,6 +55,7 @@ public class LoadBalancingConstraint implements SoftConstraint {
     }
 
     @Override
+    // Returns the max penalty.
     public double getMaxPenalty() {
         return 50.0; 
     }

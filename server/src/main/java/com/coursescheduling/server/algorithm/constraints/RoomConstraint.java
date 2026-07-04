@@ -12,6 +12,7 @@ import java.util.List;
 @Component
 public class RoomConstraint {
 	
+	// Checks whether room suitable.
 	public boolean isRoomSuitable(Variable var, Classroom room, List<Variable> allVariables) {
 		
 		Variable labVar = findLabVariableForCourse(var.getCourseId(), allVariables);
@@ -45,10 +46,12 @@ public class RoomConstraint {
     }
 	
     
+    // Checks whether elective course.
     private boolean isElectiveCourse(Variable var) {
         return var.getCluster() >= 9;
     }
 	
+    // Handles the find lab variable for course logic.
     private Variable findLabVariableForCourse(String courseId, List<Variable> allVariables) {
     	for (Variable v : allVariables) {
             if (v.getCourseId().equals(courseId) && (v.getType() == LessonType.LAB)) {
@@ -59,6 +62,7 @@ public class RoomConstraint {
     }
 	
 	
+    // Returns the room type for lab.
     private RoomType getRoomTypeForLab(LessonType labType) {
         switch (labType) {
             case PHYSICS_LAB:

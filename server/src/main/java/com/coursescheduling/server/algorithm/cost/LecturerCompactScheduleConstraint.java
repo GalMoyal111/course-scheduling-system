@@ -16,6 +16,7 @@ public class LecturerCompactScheduleConstraint implements SoftConstraint {
     private static final double EVEN_FRAME_START_PENALTY = 1.0;
 
     @Override
+    // Calculates the penalty.
     public double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
         String lecturer = variable.getLecturer();
         
@@ -126,11 +127,13 @@ public class LecturerCompactScheduleConstraint implements SoftConstraint {
     }
 
     @Override
+    // Returns the name.
     public String getName() {
         return "LecturerCompactSchedule";
     }
 
 	@Override
+	// Returns the max penalty.
 	public double getMaxPenalty() {
 		// 8 ^2 (max hours in a day) 
         // + 4 for 4 hours gap

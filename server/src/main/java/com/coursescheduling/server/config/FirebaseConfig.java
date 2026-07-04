@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 public class FirebaseConfig {
 
     @PostConstruct
+    // Handles the initialize logic.
     public void initialize() {
         try {
             // Check if Firebase app is already initialized
@@ -58,6 +59,7 @@ public class FirebaseConfig {
     }
 
     @Bean
+    // Returns the firestore.
     public Firestore getFirestore() {
         return FirestoreClient.getFirestore();
     }

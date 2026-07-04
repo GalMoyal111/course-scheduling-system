@@ -6,18 +6,22 @@ public class CourseDeleteRequest {
 
     public CourseDeleteRequest() {}
 
+    // Returns the semester number.
     public String getSemesterNumber() {
         return semesterNumber;
     }
 
+    // Sets the semester number.
     public void setSemesterNumber(String semesterNumber) {
         this.semesterNumber = semesterNumber;
     }
 
+    // Returns the course id.
     public String getCourseId() {
         return courseId;
     }
 
+    // Sets the course id.
     public void setCourseId(String courseId) {
         this.courseId = courseId;
     }

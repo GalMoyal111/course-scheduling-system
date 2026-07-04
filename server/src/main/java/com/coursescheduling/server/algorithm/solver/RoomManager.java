@@ -7,6 +7,7 @@ public class RoomManager {
 
     private Map<String, Set<Classroom>> roomAvailability;
 
+    // Creates a RoomManager instance.
     public RoomManager(List<Classroom> rooms) {
         this.roomAvailability = initRoomAvailability(rooms);
     }

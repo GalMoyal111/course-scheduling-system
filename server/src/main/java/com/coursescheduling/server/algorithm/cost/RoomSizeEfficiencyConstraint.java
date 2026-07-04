@@ -10,6 +10,7 @@ import java.util.Map;
 public class RoomSizeEfficiencyConstraint implements SoftConstraint {
 
     @Override
+    // Calculates the penalty.
     public double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
     	
     	if (variable.isVirtual()) {
@@ -38,12 +39,14 @@ public class RoomSizeEfficiencyConstraint implements SoftConstraint {
     }
 
     @Override
+    // Returns the name.
     public String getName() {
         return "RoomSizeEfficiency";    
     }
 
 
 	@Override
+	// Returns the max penalty.
 	public double getMaxPenalty() {
 		return 3;
 	}

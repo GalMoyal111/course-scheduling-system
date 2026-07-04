@@ -15,6 +15,7 @@ public class SplitLessonConstraint {
 	
 	
 
+	// Checks whether split part already scheduled today.
 	public boolean isSplitPartAlreadyScheduledToday(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment) {
 	    String currentSplitId = var.getSplitGroupId();
 	    boolean isEnglish = var.isEnglishCourse();

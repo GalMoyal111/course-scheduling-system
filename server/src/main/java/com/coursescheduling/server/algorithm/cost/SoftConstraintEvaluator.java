@@ -12,11 +12,13 @@ public class SoftConstraintEvaluator {
     private final List<SoftConstraint> softConstraints;
     private final Map<String, Double> userWeights;
 
+    // Creates a SoftConstraintEvaluator instance.
     public SoftConstraintEvaluator(List<SoftConstraint> softConstraints, Map<String, Double> userWeights) {
         this.softConstraints = softConstraints;
         this.userWeights = userWeights != null ? userWeights : new HashMap<>();
     }
 
+    // Calculates the total penalty.
     public double calculateTotalPenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
         double totalPenalty = 0.0;
         

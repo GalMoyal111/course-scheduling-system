@@ -13,11 +13,13 @@ public class InconvenientTimingConstraint implements SoftConstraint {
 
     
     @Override
+    // Returns the name.
     public String getName() {
         return CONSTRAINT_NAME;
     }
 
     @Override
+    // Calculates the penalty.
     public double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
         double penalty = 0.0;
         int day = value.getDay();
@@ -40,6 +42,7 @@ public class InconvenientTimingConstraint implements SoftConstraint {
     }
 
     @Override
+    // Returns the max penalty.
     public double getMaxPenalty() {
 
         return 15.0; 

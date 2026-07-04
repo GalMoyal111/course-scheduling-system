@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class SoftConstraintFactory {
 
+    // Creates the soft constraints.
     public static List<SoftConstraint> createSoftConstraints() {
         List<SoftConstraint> softConstraints = new ArrayList<>();
         softConstraints.add(new RoomSizeEfficiencyConstraint());
@@ -39,6 +40,7 @@ public class SoftConstraintFactory {
         return softConstraints;
     }
 
+    // Returns the default user weights.
     public static Map<String, Double> getDefaultUserWeights() {
         Map<String, Double> defaultWeights = new HashMap<>();
         defaultWeights.put("RoomSizeEfficiency", 5.0);

@@ -13,10 +13,12 @@ import java.util.Map;
 @Component
 public class NetworkingLabPairConstraint {
 
+    // Checks whether networking lab.
     private boolean isNetworkingLab(Variable var) {
         return (var.getCourseId().equals("61765") && var.getType() == LessonType.NETWORKING_LAB);
     }
 
+    // Checks whether valid.
     public boolean isValid(Variable var, DomainValue value, Map<Variable, AssignedValue> assignment) {
         
         if (!isNetworkingLab(var)) {
@@ -53,6 +55,7 @@ public class NetworkingLabPairConstraint {
         }
     }
 
+    // Handles the find unpaired lab logic.
     private AssignedValue findUnpairedLab(List<AssignedValue> labs) {
         for (AssignedValue lab : labs) {
             if (lab.getStartFrame() % 2 != 0) { 

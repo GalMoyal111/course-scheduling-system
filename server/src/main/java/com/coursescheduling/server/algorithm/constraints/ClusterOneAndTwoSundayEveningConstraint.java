@@ -13,6 +13,7 @@ public class ClusterOneAndTwoSundayEveningConstraint {
     private static final int SUNDAY = 1;
     private static final int FIRST_BLOCKED_FRAME = 9; 
 
+    // Checks whether valid.
     public boolean isValid(Variable variable, DomainValue value) {
         if (variable.getCluster() != CLUSTER_ONE && variable.getCluster() != CLUSTER_TWO) {
             return true; 

@@ -10,11 +10,13 @@ public class MandatoryMorningPreferredConstraint implements SoftConstraint {
     private static final String CONSTRAINT_NAME = "MandatoryMorningPreferred";
 
     @Override
+    // Returns the name.
     public String getName() {
         return CONSTRAINT_NAME;
     }
 
     @Override
+    // Calculates the penalty.
     public double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
         double penalty = 0.0;
         int cluster = variable.getCluster();
@@ -35,6 +37,7 @@ public class MandatoryMorningPreferredConstraint implements SoftConstraint {
     }
 
     @Override
+    // Returns the max penalty.
     public double getMaxPenalty() {
         return 30.0; 
     }

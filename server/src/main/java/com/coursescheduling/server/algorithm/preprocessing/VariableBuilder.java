@@ -36,6 +36,7 @@ public class VariableBuilder {
 	@Autowired
     private ClassroomSizeSettingsService classroomSizeSettingsService;
 
+	// Creates the variables.
 	public List<Variable> createVariables(Semester semester, Map<LessonType, Integer> requiredCapacitiesMap, List<String> hardCourseIds , List<String> englishCourseIds, List<String> virtualCourseIds, Integer electiveCapacity){		
 		
 		List<Lesson> lessons = getSupportedLessonsFromDB(semester);
@@ -66,6 +67,7 @@ public class VariableBuilder {
 		
 	}
 
+	// Handles the map lesson to variable logic.
 	private Variable mapLessonToVariable(Lesson lesson, Map<String, Course> coursesById, ClassroomSizeSettings settings, Map<LessonType, Integer> requiredCapacitiesMap, List<String> hardCourseIds, List<String> englishCourseIds,List<String> virtualCourseIds,  Integer electiveCapacity) {		
 		
 		Variable v = new Variable();
@@ -134,6 +136,7 @@ public class VariableBuilder {
 		return v;
 	}
 	
+	// Handles the group by course logic.
 	private Map<String, List<Variable>> groupByCourse(List<Variable> variables) {
 	    Map<String, List<Variable>> map = new HashMap<>();
 
@@ -144,6 +147,7 @@ public class VariableBuilder {
 	    return map;
 	}
 	
+	// Handles the assign indexes per course logic.
 	private void assignIndexesPerCourse(Map<String, List<Variable>> byCourse) {
 
 	    for (List<Variable> courseVars : byCourse.values()) {
@@ -158,6 +162,7 @@ public class VariableBuilder {
 	    }
 	}
 	
+	// Builds the initial domains.
 	private void buildInitialDomains(List<Variable> variables) {
 
 	    for (Variable v : variables) {
@@ -181,6 +186,7 @@ public class VariableBuilder {
 	    }
 	}
 	
+	// Returns the supported lessons from db.
 	private List<Lesson> getSupportedLessonsFromDB(Semester semester) {
         List<Lesson> allLessons = lessonService.getLessonsBySemester(semester);
         
@@ -198,6 +204,7 @@ public class VariableBuilder {
         return filtered;
     }
 
+	// Returns the courses by id.
 	private Map<String, Course> getCoursesById() {
 		Map<String, Course> coursesById = new HashMap<>();
 
@@ -215,6 +222,7 @@ public class VariableBuilder {
 		return coursesById;
 	}
 
+	// Returns the required capacity from course.
 	private int getRequiredCapacityFromCourse(Course course,LessonType type,ClassroomSizeSettings settings) {
 		if (course == null || type == null || settings == null) {
 			throw new RuntimeException("Course, LessonType, and ClassroomSizeSettings must not be null");

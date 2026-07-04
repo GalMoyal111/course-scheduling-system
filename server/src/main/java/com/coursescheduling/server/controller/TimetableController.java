@@ -31,32 +31,38 @@ public class TimetableController {
     private SavedTimetableService savedTimetableService;
 
 	@PostMapping("/generate")
+    // Handles the generate timetable logic.
     public List<ScheduledLessonDTO> generateTimetable(@RequestBody GenerateTimetableRequest request) {
         return algorithmService.run(request);
     }
 	
 	
 	@PostMapping("/save")
+    // Saves the timetable.
     public SavedTimetableMetadata saveTimetable(@RequestBody SaveTimetableRequest request) throws Exception {
         return savedTimetableService.saveTimetable(request);
     }
 
     @GetMapping("/history")
+    // Returns the history.
     public List<SavedTimetableMetadata> getHistory() throws Exception {
         return savedTimetableService.getAllSavedMetadata();
     }
 
     @GetMapping("/history/{id}")
+    // Returns the saved timetable.
     public List<ScheduledLessonDTO> getSavedTimetable(@PathVariable String id) throws Exception {
         return savedTimetableService.getTimetableDataById(id);
     }
 
     @DeleteMapping("/history/{id}")
+    // Deletes the saved timetable.
     public void deleteSavedTimetable(@PathVariable String id) throws Exception {
         savedTimetableService.deleteTimetable(id);
     }
 
     @PostMapping("/history/{id}/rename")
+    // Handles the rename saved timetable logic.
     public SavedTimetableMetadata renameSavedTimetable(@PathVariable String id, @RequestBody Map<String, String> body) throws Exception {
         String newName = body.getOrDefault("name", "");
         return savedTimetableService.updateTimetableName(id, newName);
@@ -78,6 +84,7 @@ public class TimetableController {
     
     
     @PostMapping("/export/current")
+    // Exports the current.
     public ResponseEntity<byte[]> exportCurrent(@RequestBody List<ScheduledLessonDTO> schedule) {
         try {
             byte[] excelContent = savedTimetableService.exportTimetableToExcel(schedule);
@@ -89,6 +96,7 @@ public class TimetableController {
 
 
     @GetMapping("/history/{id}/export")
+    // Exports the saved.
     public ResponseEntity<byte[]> exportSaved(@PathVariable String id) {
         try {
             List<ScheduledLessonDTO> schedule = savedTimetableService.getTimetableDataById(id);
@@ -105,6 +113,7 @@ public class TimetableController {
     }
 
 
+    // Creates the excel response.
     private ResponseEntity<byte[]> createExcelResponse(byte[] content, String fileName) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
@@ -113,6 +122,7 @@ public class TimetableController {
     }
     
     @PostMapping("/cancel")
+	// Cancels the generation action.
 	public ResponseEntity<String> cancelGeneration() {
 	    algorithmService.cancelAlgorithm();
 	    return ResponseEntity.ok("Algorithm cancelled successfully");

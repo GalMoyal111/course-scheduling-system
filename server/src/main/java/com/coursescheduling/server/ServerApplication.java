@@ -10,6 +10,7 @@ import com.coursescheduling.server.model.Semester;
 @SpringBootApplication
 public class ServerApplication {
 
+    // Handles the main logic.
     public static void main(String[] args) {
     	SpringApplication.run(ServerApplication.class, args);
     	

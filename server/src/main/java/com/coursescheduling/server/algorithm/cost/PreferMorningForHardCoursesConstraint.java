@@ -10,6 +10,7 @@ import org.checkerframework.checker.units.qual.s;
 public class PreferMorningForHardCoursesConstraint implements SoftConstraint {
 
     @Override
+    // Calculates the penalty.
     public double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
         if (variable.getIsHardCourse() == null || !variable.getIsHardCourse()) {
             return 0.0; // No penalty for non-hard courses
@@ -23,11 +24,13 @@ public class PreferMorningForHardCoursesConstraint implements SoftConstraint {
     }
 
     @Override
+    // Returns the name.
     public String getName() {
         return "PreferMorningForHardCourses";    
     }
 
 	@Override
+	// Returns the max penalty.
 	public double getMaxPenalty() {
 		return 5;
 	}

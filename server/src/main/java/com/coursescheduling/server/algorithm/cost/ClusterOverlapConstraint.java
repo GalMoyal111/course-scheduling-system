@@ -9,6 +9,7 @@ import java.util.Map;
 public class ClusterOverlapConstraint implements SoftConstraint {
 
     @Override
+    // Calculates the penalty.
     public double calculatePenalty(Variable variable, AssignedValue value, Map<Variable, AssignedValue> currentAssignment) {
         double totalPenalty = 0;
 
@@ -39,11 +40,13 @@ public class ClusterOverlapConstraint implements SoftConstraint {
     }
 
     @Override
+    // Returns the name.
     public String getName() {
         return "ClusterOverlap";
     }
 
     @Override
+    // Returns the max penalty.
     public double getMaxPenalty() {
         return 100.0;
     }

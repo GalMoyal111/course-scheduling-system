@@ -26,12 +26,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 	private final UserService userService;
 
+	// Creates a AuthController instance.
 	public AuthController(UserService userService) {
 	    this.userService = userService;
 	}
 	
 
 	@GetMapping("/me")
+	// Handles the me logic.
 	public Map<String, String> me(@RequestHeader("Authorization") String authHeader) throws Exception {
 
 	    String token = authHeader.replace("Bearer ", "");

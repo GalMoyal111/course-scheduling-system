@@ -115,6 +115,7 @@ public class FileUploadController {
     
     
     @GetMapping("/rooms/export")
+    // Exports the rooms.
     public ResponseEntity<byte[]> exportRooms() {
 
         try {
@@ -134,6 +135,7 @@ public class FileUploadController {
     
     
     @PostMapping("/rooms")
+    // Adds the room.
     public String addRoom(@RequestBody Classroom classroom) {
 
     	classroomService.saveSingleClassroom(classroom);
@@ -142,6 +144,7 @@ public class FileUploadController {
     }
 
     @GetMapping("/courses/export")
+    // Exports the courses.
     public ResponseEntity<byte[]> exportCourses() {
 
         try {
@@ -160,6 +163,7 @@ public class FileUploadController {
     }
 
     @PostMapping("/courses/add")
+    // Adds the course.
     public ResponseEntity<?> addCourse(@RequestBody Course course) {
         try {
             courseService.saveSingleCourse(course);
@@ -173,18 +177,21 @@ public class FileUploadController {
     }
 
     @GetMapping("/getAllCourses")
+    // Returns the all courses.
     public List<Course> getAllCourses() throws Exception {
 
         return courseService.getAllCourses();
     }
 
     @DeleteMapping("/deleteCourses")
+    // Deletes the courses.
     public void deleteCourses(@RequestBody List<CourseDeleteRequest> courses) throws Exception {
 
         courseService.deleteCourses(courses);
     }
 
     @PostMapping("/courses/update")
+    // Updates the course.
     public void updateCourse(@RequestBody CourseUpdateRequest request) throws Exception {
 
         courseService.updateCourse(request.getOldCourse(), request.getNewCourse());
@@ -192,6 +199,7 @@ public class FileUploadController {
     
     
     @PostMapping("/classrooms/delete")
+    // Deletes the classrooms.
     public void deleteClassrooms(@RequestBody List<ClassroomDeleteRequest> classrooms) throws Exception {
 
         classroomService.deleteClassrooms(classrooms);
@@ -200,6 +208,7 @@ public class FileUploadController {
     
     
     @GetMapping("/getAllClassrooms")
+    // Returns the all classrooms.
     public List<Classroom> getAllClassrooms() throws Exception {
 
         return classroomService.getAllClassrooms();
@@ -207,6 +216,7 @@ public class FileUploadController {
     
     
     @PostMapping("/classrooms/update")
+    // Updates the classroom.
     public void updateClassroom(@RequestBody ClassroomUpdateRequest request) throws Exception {
         classroomService.updateClassroom(
                 request.getOldClassroom(),
@@ -215,29 +225,34 @@ public class FileUploadController {
     }
     
     @GetMapping("/getAlllessons")
+    // Returns the all lessons.
     public List<Lesson> getAllLessons() {
         return lessonService.getAllLessons();
     }
     
     @PostMapping("/addSingleLesson")
+    // Adds the lesson.
     public List<Lesson> addLesson(@RequestBody Lesson lesson) throws Exception {
     	System.out.println("test");
         return lessonService.addLesson(lesson);
     }
     
     @DeleteMapping("/deleteLessons")
+    // Deletes the lessons.
     public void deleteLessons(@RequestBody List<Lesson> lessons) throws Exception {
         lessonService.deleteLessons(lessons);
     }
     
     
     @GetMapping("/getAllCoursesGrouped")
+    // Returns the all courses grouped.
     public List<ClusterCoursesList> getAllCoursesGrouped() {
         return lessonService.getAllCoursesGroupedByCluster();
     }
     
     
     @GetMapping("/lessons/export")
+    // Exports the lessons.
     public ResponseEntity<byte[]> exportLessons() {
 
         try {
@@ -256,22 +271,26 @@ public class FileUploadController {
     }
     
     @GetMapping("/getAllLecturers")
+    // Returns the all lecturers.
     public List<Lecturer> getAllLecturers() throws Exception {
         return lecturerService.getAllLecturers();
     }
 
     @PostMapping("/addSingleLecturer")
+    // Adds the lecturer.
     public Lecturer addLecturer(@RequestBody Lecturer lecturer) throws Exception {
     	return lecturerService.addLecturer(lecturer);
     }
 
     @PostMapping("/updateLecturer")
+    // Updates the lecturer.
     public String updateLecturer(@RequestBody Lecturer lecturer) throws Exception {
         lecturerService.updateLecturer(lecturer);
         return "Lecturer updated successfully";
     }
 
     @DeleteMapping("/deleteLecturers")
+    // Deletes the lecturers.
     public void deleteLecturers(@RequestBody List<Lecturer> lecturers) throws Exception {
         lecturerService.deleteLecturers(lecturers);
     }
@@ -287,6 +306,7 @@ public class FileUploadController {
     }
 
     @GetMapping("/lecturers/export")
+    // Exports the lecturers.
     public ResponseEntity<byte[]> exportLecturers() {
 
         try {
@@ -306,28 +326,33 @@ public class FileUploadController {
 
     
     @GetMapping("/getAllClusters")
+    // Returns the all clusters.
     public List<Cluster> getAllClusters() throws Exception {
         return clusterService.getAllClusters();
     }
 
     @PostMapping("/addSingleCluster")
+    // Adds the cluster.
     public Cluster addCluster(@RequestBody Cluster cluster) throws Exception {
         return clusterService.addCluster(cluster);
     }
 
     @PostMapping("/updateCluster")
+    // Updates the cluster.
     public String updateCluster(@RequestBody Cluster cluster) throws Exception {
         clusterService.updateCluster(cluster);
         return "Cluster updated successfully";
     }
 
     @DeleteMapping("/deleteClusters")
+    // Deletes the clusters.
     public void deleteClusters(@RequestBody List<Cluster> clusters) throws Exception {
         clusterService.deleteClusters(clusters);
     }
     
     
     @GetMapping("/rooms/template")
+    // Exports the rooms template.
     public ResponseEntity<byte[]> exportRoomsTemplate() {
         try {
             byte[] excelData = classroomExcelService.exportClassroomsTemplate();
@@ -342,6 +367,7 @@ public class FileUploadController {
     }
 
     @GetMapping("/courses/template")
+    // Exports the courses template.
     public ResponseEntity<byte[]> exportCoursesTemplate() {
         try {
             byte[] excelData = coursesExcelService.exportCoursesTemplate();
@@ -356,6 +382,7 @@ public class FileUploadController {
     }
 
     @GetMapping("/lessons/template")
+    // Exports the lessons template.
     public ResponseEntity<byte[]> exportLessonsTemplate() {
         try {
             byte[] excelData = excelProcessingService.exportLessonsTemplate();
@@ -370,6 +397,7 @@ public class FileUploadController {
     }
 
     @GetMapping("/lecturers/template")
+    // Exports the lecturers template.
     public ResponseEntity<byte[]> exportLecturersTemplate() {
         try {
             byte[] excelData = lecturerExcelService.exportLecturersTemplate();
@@ -384,22 +412,26 @@ public class FileUploadController {
     }
     
     @GetMapping("/settings/availability")
+    // Returns the system availability.
     public List<Map<String, Integer>> getSystemAvailability() throws Exception {
         return clusterService.getSystemAvailability();
     }
 
     @PostMapping("/settings/availability")
+    // Updates the system availability.
     public String updateSystemAvailability(@RequestBody List<Map<String, Integer>> blockedSlots) throws Exception {
         clusterService.updateSystemAvailability(blockedSlots);
         return "System availability updated successfully";
     }
 
     @GetMapping("/settings/classroom-sizes")
+    // Returns the classroom size settings.
     public ClassroomSizeSettings getClassroomSizeSettings() throws Exception {
         return classroomSizeSettingsService.getClassroomSizeSettings();
     }
 
     @PostMapping("/settings/classroom-sizes")
+    // Updates the classroom size settings.
     public String updateClassroomSizeSettings(@RequestBody ClassroomSizeSettings settings) throws Exception {
         classroomSizeSettingsService.updateClassroomSizeSettings(settings);
         return "Classroom size settings updated successfully";
