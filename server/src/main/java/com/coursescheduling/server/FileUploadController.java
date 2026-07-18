@@ -228,7 +228,6 @@ public class FileUploadController {
     @PostMapping("/addSingleLesson")
     // Adds the lesson.
     public List<Lesson> addLesson(@RequestBody Lesson lesson) throws Exception {
-    	System.out.println("test");
         return lessonService.addLesson(lesson);
     }
     

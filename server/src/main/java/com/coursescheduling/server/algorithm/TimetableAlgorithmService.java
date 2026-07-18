@@ -106,14 +106,10 @@ public class TimetableAlgorithmService {
     	List<String> virtualCourseIds = request.getVirtualCourseIds();
     	
     	Map<LessonType, Integer> capacities = request.getRequiredCapacities();
-    	for (Map.Entry<LessonType, Integer> entry : capacities.entrySet()) {
-    	    System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
-    	}
     	
         List<String> hardCourseIds = request.getHardCourseIds();
         
         Integer electiveCapacity = request.getElectiveCapacity();
-        System.out.println("electiveCapacity:" + electiveCapacity);
         System.out.println("🚀 Starting algorithm...");
 
 
@@ -147,20 +143,6 @@ public class TimetableAlgorithmService {
         // Additional constraints can be applied here (e.g., course-specific, room-specific)
         
         sortVariablesForCSP(variables);
-        
-        System.out.println("📋 Variables Order After Sorting:");
-        System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s%n", "Cluster", "Course ID", "Credits", "Type", "Lecturer");
-        System.out.println("-".repeat(75));
-        for (Variable v : variables) {
-            System.out.printf("%-10d | %-20s | %-10.1f | %-15s | %-10s%n",
-                    v.getCluster(),
-                    v.getCourseId(),
-                    v.getCredits(),
-                    v.getType(),
-                    v.getLecturer() != null ? v.getLecturer() : "TBD");
-        }
-        System.out.println("-".repeat(75));
-     
         
         Map<Variable, AssignedValue> initialAssignment = new HashMap<>();
         List<ManualAssignmentDTO> manualAssignments = request.getManualAssignments();

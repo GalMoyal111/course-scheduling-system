@@ -81,12 +81,6 @@ public class VariableBuilder {
 		v.setSplitGroupId(lesson.getSplitGroupId());
 		v.setCredits(lesson.getCredits());
 		
-		if (v.isEnglishCourse()) {
-		    System.out.println("🔍 English Var Created: " + v.getCourseId() + 
-		                       " | LessonID: " + v.getLessonId() + 
-		                       " | SplitID: " + v.getSplitGroupId());
-		}
-		
 		
 
 		if (hardCourseIds != null && hardCourseIds.contains(lesson.getCourseId()) && lesson.getType() == LessonType.LECTURE) {
